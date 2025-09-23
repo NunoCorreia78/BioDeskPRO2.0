@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # BioDeskPro 2.0 - Gate A: Layout Review
 
 ## Resumo do Projeto
@@ -163,3 +164,7 @@ Implementar UAT checklist para validação das funcionalidades:
 **Status:** ✅ **GATE A APROVADO** - Ready for Gate B (UAT)
 **Data:** 23 de Setembro de 2025
 **Versão:** Fase 1 - Fundação Sólida
+=======
+# BioDeskPRO2.0
+🏥 BioDesk PRO - Sistema de Gestão Clínica em WPF .NET 8 com MVVM e SQLite
+>>>>>>> bde6e93c99154a67f6f9a56d608c73dbd479d211
