@@ -166,10 +166,18 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
         _logger.LogInformation("Edição cancelada");
     }
 
+    private bool CanVoltar() => true;
+
     [RelayCommand]
     private void VoltarDashboard()
     {
         _navigationService.NavigateTo("Dashboard");
+    }
+
+    [RelayCommand(CanExecute = nameof(CanVoltar))]
+    private void Voltar()
+    {
+        VoltarDashboard();
     }
 
     [RelayCommand]

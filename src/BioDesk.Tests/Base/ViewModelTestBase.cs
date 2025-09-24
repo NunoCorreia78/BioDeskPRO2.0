@@ -10,6 +10,8 @@ using BioDesk.Services.Notifications;
 using BioDesk.Services.AutoSave;
 using BioDesk.Services.Pacientes;
 using BioDesk.Services.Navigation;
+using BioDesk.Services.Dashboard;
+using BioDesk.Services.Activity;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -73,6 +75,10 @@ public abstract class ViewModelTestBase : IDisposable
         services.AddSingleton(typeof(IAutoSaveService<>), typeof(AutoSaveService<>));
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddScoped<IPacienteService, PacienteService>();
+        
+        // Dashboard services
+        services.AddSingleton<IDashboardStatsService, DashboardStatsService>();
+        services.AddScoped<IActivityService, ActivityService>();
     }
 
     /// <summary>

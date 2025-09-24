@@ -1,14 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using OxyPlot;
 using BioDesk.ViewModels.Base;
 using BioDesk.Services.Navigation;
 using BioDesk.Services.Pacientes;
+using BioDesk.Services.Dashboard;
+using BioDesk.Services.Activity;
 using BioDesk.Domain.Entities;
 
 namespace BioDesk.ViewModels;
@@ -21,6 +26,9 @@ namespace BioDesk.ViewModels;
 public partial class DashboardViewModel : NavigationViewModelBase
 {
     private readonly ILogger<DashboardViewModel> _logger;
+    private readonly IDashboardStatsService _dashboardStatsService;
+    private readonly IActivityService _activityService;
+    private readonly Timer _relogio;
 
     [ObservableProperty]
     private string _pesquisarTexto = string.Empty;
@@ -40,6 +48,35 @@ public partial class DashboardViewModel : NavigationViewModelBase
     [ObservableProperty]
     private DateTime _horaAtual = DateTime.Now;
 
+    // 📊 Propriedades dos Gráficos OxyPlot
+    [ObservableProperty]
+    private PlotModel? _pacientesPorMesChart;
+
+    [ObservableProperty]
+    private PlotModel? _distribuicaoIdadeChart;
+
+    [ObservableProperty]
+    private DashboardStats? _dashboardStats;
+
+    [ObservableProperty]
+    private bool _carregandoGraficos;
+
+    // 🔔 Propriedades de Atividade Recente
+    [ObservableProperty]
+    private ObservableCollection<PacienteRecenteItem> _pacientesRecentesItems = new();
+
+    [ObservableProperty]
+    private ObservableCollection<AtividadeItem> _atividadeRecente = new();
+
+    [ObservableProperty]
+    private EmailStats? _emailStats;
+
+    [ObservableProperty]
+    private bool _carregandoAtividade;
+
+    [ObservableProperty]
+    private int _selectedTabIndex = 0; // Aba selecionada (0=Atividade, 1=Gráficos, 2=Estatísticas)
+
     /// <summary>
     /// Data formatada em português europeu
     /// </summary>
@@ -48,13 +85,21 @@ public partial class DashboardViewModel : NavigationViewModelBase
     public DashboardViewModel(
         INavigationService navigationService,
         IPacienteService pacienteService,
+        IDashboardStatsService dashboardStatsService,
+        IActivityService activityService,
         ILogger<DashboardViewModel> logger)
         : base(navigationService, pacienteService)
     {
         _logger = logger;
+        _dashboardStatsService = dashboardStatsService;
+        _activityService = activityService;
 
         // Inicia o relógio
+        _relogio = new Timer(1000); // Atualiza a cada segundo
         IniciarRelogio();
+
+        // Carrega dados iniciais
+        _ = Task.Run(CarregarDashboardAsync);
     }
 
     /// <summary>
@@ -167,5 +212,69 @@ public partial class DashboardViewModel : NavigationViewModelBase
             OnPropertyChanged(nameof(DataFormatadaPT));
         };
         timer.Start();
+    }
+
+    /// <summary>
+    /// Carregar dados do dashboard incluindo gráficos e estatísticas
+    /// </summary>
+    public async Task CarregarDashboardAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            _logger.LogInformation("Iniciando carregamento do dashboard com gráficos e atividade");
+            
+            CarregandoGraficos = true;
+            CarregandoAtividade = true;
+
+            try
+            {
+                // Carregar dados básicos do dashboard
+                var todosPacientes = await PacienteService.SearchAsync(string.Empty);
+                PacientesRecentes = todosPacientes.Take(5).ToList();
+
+                // Carregar estatísticas
+                DashboardStats = await _dashboardStatsService.GetDashboardStatsAsync();
+
+                // Carregar gráficos em paralelo
+                var taskPacientesPorMes = _dashboardStatsService.GeneratePacientesPorMesChartAsync();
+                var taskDistribuicaoIdade = _dashboardStatsService.GenerateDistribuicaoIdadeChartAsync();
+
+                // Carregar atividade recente em paralelo
+                var taskPacientesRecentesItems = _activityService.GetPacientesRecentesAsync();
+                var taskAtividadeRecente = _activityService.GetAtividadeRecenteAsync();
+                var taskEmailStats = _activityService.GetEmailStatsAsync();
+
+                // Aguardar todos os tasks
+                PacientesPorMesChart = await taskPacientesPorMes;
+                DistribuicaoIdadeChart = await taskDistribuicaoIdade;
+
+                // Atualizar atividade
+                var pacientesRecentesItems = await taskPacientesRecentesItems;
+                var atividadeRecente = await taskAtividadeRecente;
+                EmailStats = await taskEmailStats;
+
+                // Atualizar ObservableCollections na UI thread
+                PacientesRecentesItems.Clear();
+                foreach (var item in pacientesRecentesItems)
+                {
+                    PacientesRecentesItems.Add(item);
+                }
+
+                AtividadeRecente.Clear();
+                foreach (var item in atividadeRecente)
+                {
+                    AtividadeRecente.Add(item);
+                }
+
+                _logger.LogInformation("Dashboard carregado com {Pacientes} pacientes, 2 gráficos, {PacientesRecentes} pacientes recentes e {Atividades} atividades", 
+                    PacientesRecentes.Count, PacientesRecentesItems.Count, AtividadeRecente.Count);
+            }
+            finally
+            {
+                CarregandoGraficos = false;
+                CarregandoAtividade = false;
+            }
+            
+        }, "ao carregar dashboard completo com gráficos", _logger);
     }
 }
