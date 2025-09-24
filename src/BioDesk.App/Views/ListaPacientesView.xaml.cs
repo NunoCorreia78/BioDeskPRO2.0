@@ -18,12 +18,11 @@ public partial class ListaPacientesView : UserControl
 
     private void VoltarDashboard_Click(object sender, RoutedEventArgs e)
     {
-        // Obter o serviço de navegação através da janela principal
-        var mainWindow = Application.Current.MainWindow as MainWindow;
-        if (mainWindow != null)
+        // Obter o serviço de navegação através do App.ServiceProvider
+        var app = Application.Current as App;
+        if (app?.ServiceProvider != null)
         {
-            var serviceProvider = (IServiceProvider)mainWindow.Tag;
-            var navigationService = serviceProvider?.GetService<INavigationService>();
+            var navigationService = app.ServiceProvider.GetService<INavigationService>();
             navigationService?.NavigateTo("Dashboard");
         }
     }

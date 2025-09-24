@@ -76,3 +76,26 @@ public class InverseBooleanConverter : IValueConverter
         return false;
     }
 }
+
+/// <summary>
+/// Conversor que converte null/string vazio para Visibility
+/// </summary>
+public class NullToVisibilityConverter : IValueConverter
+{
+    public static NullToVisibilityConverter Collapsed { get; } = new() { NullValue = Visibility.Collapsed, NotNullValue = Visibility.Visible };
+    public static NullToVisibilityConverter Visible { get; } = new() { NullValue = Visibility.Visible, NotNullValue = Visibility.Collapsed };
+
+    public Visibility NullValue { get; set; } = Visibility.Collapsed;
+    public Visibility NotNullValue { get; set; } = Visibility.Visible;
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        bool isNullOrEmpty = value == null || (value is string str && string.IsNullOrWhiteSpace(str));
+        return isNullOrEmpty ? NullValue : NotNullValue;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

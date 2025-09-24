@@ -7,6 +7,9 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverterCollapsed" 
+                                              NullValue="Collapsed" NotNullValue="Visible"/>
         <!-- Paleta de cores terroso pastel -->
         <SolidColorBrush x:Key="FundoPrimario">#FCFDFB</SolidColorBrush>
         <SolidColorBrush x:Key="FundoSecundario">#F2F5F0</SolidColorBrush>

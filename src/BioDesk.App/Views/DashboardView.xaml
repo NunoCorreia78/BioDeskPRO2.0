@@ -4,11 +4,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
-             d:DataContext="{d:DesignInstance vm:DashboardViewModel}"
-             mc:Ignorable="d">
+             mc:Ignorable="d"
+             d:DesignHeight="700" 
+             d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel, IsDesignTimeCreatable=False}">
 
     <Grid>
-        <!-- Fundo gradiente -->
+        <!-- Fundo gradiente nativo -->
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Color="#FCFDFB" Offset="0"/>
@@ -18,296 +20,239 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Header -->
-            <RowDefinition Height="Auto"/> <!-- Pesquisa -->
-            <RowDefinition Height="*"/>    <!-- Conteúdo principal -->
+            <RowDefinition Height="Auto"/> <!-- Ações Principais -->
+            <RowDefinition Height="*"/>    <!-- Conteúdo -->
         </Grid.RowDefinitions>
 
-        <!-- Header com status e relógio -->
-        <Border Grid.Row="0" Style="{StaticResource CartaoStyle}" Margin="16,16,16,8">
+        <!-- Header com Status -->
+        <Border Grid.Row="0" Background="White" 
+                BorderBrush="#E3E9DE" BorderThickness="0,0,0,1" 
+                Padding="24,16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Status dos dispositivos -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="BioDesk" FontSize="24" FontWeight="Bold" 
-                              Foreground="{StaticResource TextoPrincipal}" 
-                              VerticalAlignment="Center" Margin="0,0,32,0"/>
+                <!-- Título e Status -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Dashboard" FontSize="28" FontWeight="Bold" 
+                              Foreground="#3F4A3D" Margin="0,0,32,0"/>
                     
-                    <!-- Status Online/Offline -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
-                        <Ellipse Width="12" Height="12" Fill="{StaticResource StatusOnline}" 
-                                VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <TextBlock Text="{Binding StatusConexao}" 
-                                  Foreground="{StaticResource TextoSecundario}" 
-                                  VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <!-- Status Iridoscópio -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
-                        <Ellipse Width="12" Height="12" Fill="{StaticResource StatusNaoDetectado}" 
-                                VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <TextBlock Text="Iridoscópio" 
-                                  Foreground="{StaticResource TextoSecundario}" 
-                                  VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <!-- Status Osciloscópio -->
+                    <!-- Status Devices com bordas nativas -->
                     <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="12" Height="12" Fill="{StaticResource StatusNaoDetectado}" 
-                                VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <TextBlock Text="Osciloscópio" 
-                                  Foreground="{StaticResource TextoSecundario}" 
-                                  VerticalAlignment="Center"/>
+                        <Border Background="#E8F5E8" Padding="8,4" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="8" Height="8" Fill="#4CAF50" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="{Binding StatusConexao}" FontSize="12" Foreground="#2E7D32"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#FFF3E0" Padding="8,4" Margin="0,0,8,0">
+                            <TextBlock Text="Dispositivos: Offline" FontSize="12" Foreground="#F57C00"/>
+                        </Border>
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Relógio e Data -->
-                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                <!-- Relógio -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Text="{Binding HoraAtual, StringFormat='{}{0:HH:mm:ss}'}" 
-                              FontSize="18" FontWeight="Medium"
-                              Foreground="{StaticResource TextoPrincipal}" 
+                              FontSize="20" FontWeight="Medium" Foreground="#3F4A3D" 
                               HorizontalAlignment="Right"/>
-                    <TextBlock Text="{Binding HoraAtual, StringFormat='{}{0:dddd, dd/MM/yyyy}'}" 
-                              FontSize="12"
-                              Foreground="{StaticResource TextoSecundario}" 
+                    <TextBlock Text="{Binding DataFormatadaPT}" 
+                              FontSize="12" Foreground="#5A6558" 
                               HorizontalAlignment="Right"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Pesquisa global -->
-        <Border Grid.Row="1" Style="{StaticResource CartaoStyle}" Margin="16,8,16,8">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <!-- Ações Principais com botões nativos WPF -->
+        <Grid Grid.Row="1" Margin="24,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0" 
-                         Text="{Binding PesquisarTexto, UpdateSourceTrigger=PropertyChanged}"
-                         FontSize="16" Padding="12,8"
-                         Background="White"
-                         BorderBrush="{StaticResource CorBorda}"
-                         BorderThickness="1">
-                    <TextBox.Style>
-                        <Style TargetType="TextBox">
-                            <Style.Triggers>
-                                <Trigger Property="Text" Value="">
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <VisualBrush Opacity="0.5" Stretch="None" AlignmentX="Left">
-                                                <VisualBrush.Visual>
-                                                    <TextBlock Text="Pesquisar paciente..." 
-                                                              FontSize="16" 
-                                                              Foreground="{StaticResource TextoSecundario}"
-                                                              Margin="12,8"/>
-                                                </VisualBrush.Visual>
-                                            </VisualBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
-                    <TextBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding PesquisarCommand}"/>
-                    </TextBox.InputBindings>
-                </TextBox>
+            <!-- Novo Paciente - Estilo nativo -->
+            <Button Grid.Column="0" Command="{Binding NovoPacienteCommand}"
+                    Style="{StaticResource BotaoPrincipalStyle}"
+                    Background="White" BorderBrush="#E3E9DE" BorderThickness="2"
+                    Padding="20" Height="120">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="👤" FontSize="32" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Novo Paciente" FontSize="16" FontWeight="SemiBold" 
+                              Foreground="#3F4A3D" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Criar nova ficha" FontSize="12" 
+                              Foreground="#5A6558" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Button>
 
-                <Button Grid.Column="1" 
-                        Command="{Binding PesquisarCommand}"
-                        Style="{StaticResource BotaoPrincipalStyle}"
-                        Margin="8,0,0,0" Padding="16,8">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🔍" FontSize="14" Margin="0,0,4,0"/>
-                        <TextBlock Text="Pesquisar"/>
-                    </StackPanel>
-                </Button>
-            </Grid>
-        </Border>
+            <!-- Lista Pacientes - Estilo nativo -->
+            <Button Grid.Column="2" Command="{Binding AbrirListaPacientesCommand}"
+                    Style="{StaticResource BotaoPrincipalStyle}"
+                    Background="White" BorderBrush="#E3E9DE" BorderThickness="2"
+                    Padding="20" Height="120">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="📋" FontSize="32" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Lista Pacientes" FontSize="16" FontWeight="SemiBold" 
+                              Foreground="#3F4A3D" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Ver todos os registos" FontSize="12" 
+                              Foreground="#5A6558" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                </StackPanel>
+            </Button>
 
-        <!-- Conteúdo principal em grid -->
-        <Grid Grid.Row="2" Margin="16,8,16,16">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- Cards de navegação -->
-            <Grid Grid.Row="0" Margin="0,0,0,16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Novo Paciente -->
-                <Border Grid.Column="0" Style="{StaticResource CartaoStyle}" Margin="0,0,8,0">
-                    <StackPanel>
-                        <TextBlock Text="Novo Paciente" Style="{StaticResource TituloStyle}"/>
-                        <TextBlock Text="Cria uma ficha e começa o registo clínico." 
-                                  Style="{StaticResource SubtituloStyle}"/>
-                        <Button Command="{Binding NovoPacienteCommand}"
-                                Style="{StaticResource BotaoPrincipalStyle}"
-                                HorizontalAlignment="Left">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="👤" FontSize="14" Margin="0,0,8,0"/>
-                                <TextBlock Text="Novo"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Border>
-
-                <!-- Lista de Pacientes -->
-                <Border Grid.Column="1" Style="{StaticResource CartaoStyle}" Margin="8,0,0,0">
-                    <StackPanel>
-                        <TextBlock Text="Lista de Pacientes" Style="{StaticResource TituloStyle}"/>
-                        <TextBlock Text="Consulta e pesquisa registos." 
-                                  Style="{StaticResource SubtituloStyle}"/>
-                        <Button Command="{Binding AbrirListaPacientesCommand}"
-                                Style="{StaticResource BotaoPrincipalStyle}"
-                                HorizontalAlignment="Left">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="📋" FontSize="14" Margin="0,0,8,0"/>
-                                <TextBlock Text="Abrir"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Border>
-            </Grid>
-
-            <!-- Área inferior -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Pacientes Recentes -->
-                <Border Grid.Column="0" Style="{StaticResource CartaoStyle}" Margin="0,0,8,0">
-                    <StackPanel>
-                        <TextBlock Text="Pacientes Recentes" Style="{StaticResource TituloStyle}"/>
+            <!-- Pesquisa Rápida - Cartão nativo -->
+            <Border Grid.Column="4" Style="{StaticResource CartaoStyle}">
+                <StackPanel>
+                    <TextBlock Text="🔍 Pesquisa Rápida" FontSize="16" FontWeight="SemiBold" 
+                              Foreground="#3F4A3D" Margin="0,0,0,12"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         
-                        <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding PacientesRecentes}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Command="{Binding DataContext.SelecionarPacienteRecenteCommand, 
-                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                CommandParameter="{Binding}"
-                                                Background="Transparent"
-                                                BorderThickness="0"
-                                                Padding="8"
-                                                Margin="0,2"
-                                                HorizontalAlignment="Stretch"
-                                                HorizontalContentAlignment="Left"
-                                                Cursor="Hand">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="{StaticResource CorBorda}"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding NomeCompleto}" 
-                                                          FontWeight="Medium"
-                                                          Foreground="{StaticResource TextoPrincipal}"/>
-                                                <TextBlock Text="{Binding DataUltimaAtualizacao, StringFormat='Última atualização: {0:dd/MM/yyyy HH:mm}'}" 
-                                                          FontSize="11"
-                                                          Foreground="{StaticResource TextoSecundario}"/>
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </StackPanel>
-                </Border>
-
-                <!-- Histórico de Envios -->
-                <Border Grid.Column="1" Style="{StaticResource CartaoStyle}" Margin="8,0,0,0">
-                    <StackPanel>
-                        <TextBlock Text="📧 Histórico de Envios" Style="{StaticResource TituloStyle}"/>
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding PesquisarTexto, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="14" Padding="12,8" Height="36"
+                                 Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1"
+                                 ToolTip="Digite nome, email ou telefone..."/>
                         
-                        <StackPanel Margin="0,8">
-                            <Button Background="Transparent" BorderThickness="0" 
-                                   HorizontalAlignment="Left" Padding="0,4"
-                                   Cursor="Hand">
-                                <TextBlock Text="Consentimento assinado" 
-                                          Foreground="{StaticResource TextoSecundario}"
-                                          TextDecorations="Underline"/>
-                            </Button>
-                            
-                            <Button Background="Transparent" BorderThickness="0" 
-                                   HorizontalAlignment="Left" Padding="0,4"
-                                   Cursor="Hand">
-                                <TextBlock Text="Relatório enviado" 
-                                          Foreground="{StaticResource TextoSecundario}"
-                                          TextDecorations="Underline"/>
-                            </Button>
-                            
-                            <Button Background="Transparent" BorderThickness="0" 
-                                   HorizontalAlignment="Left" Padding="0,4"
-                                   Cursor="Hand">
-                                <TextBlock Text="Plano terapêutico" 
-                                          Foreground="{StaticResource TextoSecundario}"
-                                          TextDecorations="Underline"/>
-                            </Button>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                        <Button Grid.Column="1" Command="{Binding PesquisarCommand}"
+                                Style="{StaticResource BotaoPrincipalStyle}"
+                                Background="#9CAF97" Foreground="White" BorderThickness="0"
+                                Padding="12,8" Margin="8,0,0,0" Height="36">
+                            <TextBlock Text="Buscar" FontWeight="SemiBold"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
         </Grid>
 
-        <!-- Loading overlay -->
-        <Border Grid.RowSpan="3" 
-                Background="#80000000">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
+        <!-- Conteúdo Principal com cartões nativos -->
+        <Grid Grid.Row="2" Margin="24,0,24,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Pacientes Recentes -->
+            <Border Grid.Column="0" Style="{StaticResource CartaoStyle}">
+                <StackPanel>
+                    <TextBlock Text="📝 Pacientes Recentes" FontSize="18" FontWeight="SemiBold" 
+                              Foreground="#3F4A3D" Margin="0,0,0,16"/>
+                    
+                    <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding PacientesRecentes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.SelecionarPacienteRecenteCommand, 
+                                                     RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0"
+                                            Padding="12,8" Margin="0,0,0,4"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                            Cursor="Hand">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#F7F9F6"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Avatar simples com Border nativo -->
+                                            <Border Grid.Column="0" Background="#9CAF97" 
+                                                    Width="32" Height="32" 
+                                                    Margin="0,0,12,0">
+                                                <TextBlock Text="👤" FontSize="14" 
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" 
+                                                          Foreground="#3F4A3D"/>
+                                                <TextBlock Text="{Binding DataUltimaAtualizacao, StringFormat='Última atualização: {0:dd/MM/yyyy HH:mm}'}" 
+                                                          FontSize="11" Foreground="#5A6558"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!-- Atividade & Links -->
+            <Border Grid.Column="2" Style="{StaticResource CartaoStyle}">
+                <StackPanel>
+                    <TextBlock Text="⚡ Atividade Recente" FontSize="18" FontWeight="SemiBold" 
+                              Foreground="#3F4A3D" Margin="0,0,0,16"/>
+                    
+                    <!-- Links Rápidos com botões nativos -->
+                    <StackPanel>
+                        <Button Background="Transparent" BorderThickness="0" 
+                               HorizontalAlignment="Left" Padding="0,6" Margin="0,4" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📄" FontSize="14" Margin="0,0,8,0"/>
+                                <TextBlock Text="Relatórios pendentes" Foreground="#5A6558" 
+                                          TextDecorations="Underline"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Background="Transparent" BorderThickness="0" 
+                               HorizontalAlignment="Left" Padding="0,6" Margin="0,4" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📧" FontSize="14" Margin="0,0,8,0"/>
+                                <TextBlock Text="Documentos enviados" Foreground="#5A6558" 
+                                          TextDecorations="Underline"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Background="Transparent" BorderThickness="0" 
+                               HorizontalAlignment="Left" Padding="0,6" Margin="0,4" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔧" FontSize="14" Margin="0,0,8,0"/>
+                                <TextBlock Text="Configurações do sistema" Foreground="#5A6558" 
+                                          TextDecorations="Underline"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Loading Overlay - simples e nativo -->
+        <Border Grid.RowSpan="3" Background="#80000000" 
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200" Height="4" 
-                            Foreground="{StaticResource BotaoPrincipal}"/>
-                <TextBlock Text="A carregar..." 
-                          Foreground="White" 
-                          HorizontalAlignment="Center" 
-                          Margin="0,8,0,0"/>
+                            Foreground="#9CAF97"/>
+                <TextBlock Text="A carregar dados..." Foreground="White" 
+                          HorizontalAlignment="Center" Margin="0,12,0,0"/>
             </StackPanel>
         </Border>
 
-        <!-- Error message -->
-        <Border Grid.RowSpan="3" 
-                Background="#80FF0000">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ErrorMessage}" Value="">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
+        <!-- Error Overlay - simples e nativo -->
+        <Border Grid.RowSpan="3" Background="#80FF4444" 
+                Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverterCollapsed}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="{Binding ErrorMessage}" 
-                          Foreground="White" 
-                          FontWeight="Bold"
-                          HorizontalAlignment="Center"/>
+                <TextBlock Text="❌ Erro" FontSize="18" FontWeight="Bold" 
+                          Foreground="White" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="White" 
+                          HorizontalAlignment="Center" Margin="0,8,0,0" TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
     </Grid>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -40,6 +41,11 @@ public partial class DashboardViewModel : ViewModelBase
 
     [ObservableProperty]
     private DateTime _horaAtual = DateTime.Now;
+
+    /// <summary>
+    /// Data formatada em português europeu
+    /// </summary>
+    public string DataFormatadaPT => HoraAtual.ToString("dddd, dd/MM/yyyy", new CultureInfo("pt-PT"));
 
     public DashboardViewModel(
         INavigationService navigationService,
@@ -158,7 +164,11 @@ public partial class DashboardViewModel : ViewModelBase
     private void IniciarRelogio()
     {
         var timer = new System.Timers.Timer(1000); // 1 segundo
-        timer.Elapsed += (s, e) => HoraAtual = DateTime.Now;
+        timer.Elapsed += (s, e) => 
+        {
+            HoraAtual = DateTime.Now;
+            OnPropertyChanged(nameof(DataFormatadaPT));
+        };
         timer.Start();
     }
 }

@@ -20,6 +20,11 @@ public partial class App : Application
 {
     private IHost? _host;
 
+    /// <summary>
+    /// ServiceProvider público para acesso aos serviços registrados
+    /// </summary>
+    public IServiceProvider? ServiceProvider => _host?.Services;
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         try
