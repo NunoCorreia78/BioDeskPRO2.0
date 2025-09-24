@@ -11,6 +11,7 @@ using BioDesk.Services.Pacientes;
 using BioDesk.Services.Notifications;
 using BioDesk.Services.AutoSave;
 using BioDesk.Services.Cache;
+using BioDesk.Services.FuzzySearch;
 using BioDesk.ViewModels;
 
 namespace BioDesk.App;
@@ -86,6 +87,7 @@ public partial class App : Application
         services.AddSingleton(typeof(IAutoSaveService<>), typeof(AutoSaveService<>));
         services.AddMemoryCache(); // Para IMemoryCache
         services.AddSingleton<ICacheService, CacheService>();
+        services.AddSingleton<IFuzzySearchService, FuzzySearchService>(); // 🔍 Fuzzy Search
 
         // ViewModels
         services.AddTransient<DashboardViewModel>();

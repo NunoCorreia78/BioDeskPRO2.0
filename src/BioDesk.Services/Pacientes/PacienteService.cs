@@ -7,12 +7,14 @@ using Microsoft.Extensions.Logging;
 using BioDesk.Domain.Entities;
 using BioDesk.Data;
 using BioDesk.Services.Cache;
+using BioDesk.Services.FuzzySearch;
 
 namespace BioDesk.Services.Pacientes;
 
 /// <summary>
 /// Implementação do serviço de pacientes usando Entity Framework Core
 /// Otimizado com sistema de cache para melhor performance
+/// Integrado com FuzzySearch para pesquisa tolerante a erros
 /// Guardas anti-erro: try/catch + ILogger, validação robusta
 /// </summary>
 public class PacienteService : IPacienteService
@@ -20,15 +22,21 @@ public class PacienteService : IPacienteService
     private readonly BioDeskContext _context;
     private readonly ILogger<PacienteService> _logger;
     private readonly ICacheService _cacheService;
+    private readonly IFuzzySearchService _fuzzySearchService;
     private Paciente? _pacienteAtivo;
 
     public event EventHandler<Paciente?>? PacienteAtivoChanged;
 
-    public PacienteService(BioDeskContext context, ILogger<PacienteService> logger, ICacheService cacheService)
+    public PacienteService(
+        BioDeskContext context, 
+        ILogger<PacienteService> logger, 
+        ICacheService cacheService,
+        IFuzzySearchService fuzzySearchService)
     {
         _context = context;
         _logger = logger;
         _cacheService = cacheService;
+        _fuzzySearchService = fuzzySearchService;
     }
 
     public void SetPacienteAtivo(Paciente paciente)
@@ -58,18 +66,34 @@ public class PacienteService : IPacienteService
             var cacheKey = CacheKeys.GetSearchKey(termo);
             return await _cacheService.GetOrSetAsync(cacheKey, async () =>
             {
-                var termoLower = termo.ToLower();
+                // Buscar todos os pacientes e aplicar fuzzy search
+                var todosPacientes = await _context.Pacientes.ToListAsync();
+                
+                // Aplicar fuzzy search com score mínimo 65  
+                var resultadosFuzzy = _fuzzySearchService.SearchPacientes(todosPacientes, termo, limiteScore: 65);
+                
+                // Se fuzzy search não encontrou nada, tentar busca tradicional (backup)
+                if (!resultadosFuzzy.Any())
+                {
+                    var termoLower = termo.ToLower();
+                    resultadosFuzzy = todosPacientes
+                        .Where(p => p.Nome.ToLower().Contains(termoLower) ||
+                                   (p.Email != null && p.Email.ToLower().Contains(termoLower)))
+                        .OrderBy(p => p.Nome)
+                        .ToList();
+                        
+                    _logger.LogInformation(
+                        "Fuzzy search sem resultados para '{Termo}', usando busca tradicional: {Quantidade} resultados", 
+                        termo, resultadosFuzzy.Count);
+                }
+                else
+                {
+                    _logger.LogInformation(
+                        "Fuzzy search para '{Termo}' retornou {Quantidade} resultados (não cachado)", 
+                        termo, resultadosFuzzy.Count);
+                }
 
-                var resultado = await _context.Pacientes
-                    .Where(p => p.Nome.ToLower().Contains(termoLower) ||
-                               (p.Email != null && p.Email.ToLower().Contains(termoLower)))
-                    .OrderBy(p => p.Nome)
-                    .ToListAsync();
-
-                _logger.LogInformation("Pesquisa por '{Termo}' retornou {Quantidade} resultados (não cachado)", 
-                    termo, resultado.Count);
-
-                return resultado;
+                return resultadosFuzzy;
             });
         }
         catch (Exception ex)
