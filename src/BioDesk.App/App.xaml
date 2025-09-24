@@ -1,0 +1,75 @@
+<Application x:Class="BioDesk.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:BioDesk.App.Converters">
+    <Application.Resources>
+        <!-- Conversores globais -->
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <!-- Paleta de cores terroso pastel -->
+        <SolidColorBrush x:Key="FundoPrimario">#FCFDFB</SolidColorBrush>
+        <SolidColorBrush x:Key="FundoSecundario">#F2F5F0</SolidColorBrush>
+        <SolidColorBrush x:Key="FundoCartao">#F7F9F6</SolidColorBrush>
+        <SolidColorBrush x:Key="CorBorda">#E3E9DE</SolidColorBrush>
+        <SolidColorBrush x:Key="TextoPrincipal">#3F4A3D</SolidColorBrush>
+        <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
+        <SolidColorBrush x:Key="BotaoPrincipal">#9CAF97</SolidColorBrush>
+        <SolidColorBrush x:Key="BotaoPrincipalHover">#879B83</SolidColorBrush>
+        
+        <!-- Estados dos dispositivos -->
+        <SolidColorBrush x:Key="StatusOnline">#2E7D32</SolidColorBrush>
+        <SolidColorBrush x:Key="StatusEspera">#EF6C00</SolidColorBrush>
+        <SolidColorBrush x:Key="StatusOffline">#C62828</SolidColorBrush>
+        <SolidColorBrush x:Key="StatusNaoDetectado">#9E9E9E</SolidColorBrush>
+
+        <!-- Estilos base -->
+        <Style x:Key="CartaoStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource FundoCartao}" />
+            <Setter Property="BorderBrush" Value="{StaticResource CorBorda}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Margin" Value="8" />
+        </Style>
+
+        <Style x:Key="BotaoPrincipalStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource BotaoPrincipal}" />
+            <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BotaoPrincipalHover}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TituloStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="SubtituloStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+    </Application.Resources>
+</Application>

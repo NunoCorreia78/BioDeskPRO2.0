@@ -1,0 +1,43 @@
+<UserControl x:Class="BioDesk.App.Views.ListaPacientesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <Grid>
+        <!-- Fundo gradiente -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FCFDFB" Offset="0"/>
+                <GradientStop Color="#F2F5F0" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- Conteúdo da view Lista de Pacientes -->
+        <Border Style="{StaticResource CartaoStyle}" 
+                MaxWidth="800" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center">
+            <StackPanel>
+                <TextBlock Text="Lista de Pacientes" 
+                          FontSize="32" 
+                          FontWeight="Bold" 
+                          Foreground="{StaticResource TextoPrincipal}"
+                          HorizontalAlignment="Center" 
+                          Margin="0,0,0,32"/>
+                
+                <TextBlock Text="📋 Esta view mostrará a lista completa de pacientes..." 
+                          FontSize="18" 
+                          Foreground="{StaticResource TextoSecundario}"
+                          HorizontalAlignment="Center" 
+                          Margin="0,0,0,24"/>
+                
+                <Button Content="← Voltar ao Dashboard" 
+                        Style="{StaticResource BotaoPrincipalStyle}"
+                        HorizontalAlignment="Center"
+                        Click="VoltarDashboard_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
