@@ -31,5 +31,13 @@
         <ContentControl Grid.Row="1" 
                        x:Name="ContentArea"
                        Margin="20"/>
+
+        <!-- Toast Notifications Container -->
+        <StackPanel Grid.Row="0" Grid.RowSpan="2"
+                   x:Name="ToastContainer"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Right"
+                   Margin="0,80,20,0"
+                   Panel.ZIndex="1000"/>
     </Grid>
 </Window>

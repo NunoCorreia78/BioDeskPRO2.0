@@ -20,8 +20,10 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 
 ### 3. MVVM com CommunityToolkit.Mvvm
 - ViewModelBase : ObservableObject
+- NavigationViewModelBase para ViewModels com navegação
 - [ObservableProperty] para propriedades
 - [RelayCommand] para comandos
+- FluentValidation para validação robusta
 
 ### 4. Navegação Única e Consistente
 - INavigationService com Register("Dashboard"|"NovoPaciente"|"FichaPaciente"|"ListaPacientes")
@@ -41,8 +43,15 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 
 ### 8. Guardas Anti-Erro Padronizados
 - IsDirty com diálogos
-- Validação robusta
-- try/catch + ILogger
+- Validação robusta com FluentValidation
+- ExecuteWithErrorHandlingAsync obrigatório
+- try/catch + ILogger em operações críticas
+
+### 8.1. Padrões de Error Handling ⭐ NOVO
+- **SEMPRE** usar `ExecuteWithErrorHandlingAsync` para operações assíncronas
+- **NUNCA** fazer try/catch simples sem logging
+- **SEMPRE** validar com FluentValidation antes de gravar
+- **SEMPRE** mostrar feedback visual (IsLoading, ErrorMessage)
 
 ### 9. Testes Âncora
 - Contratos definidos por testes
@@ -64,10 +73,12 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 ## Regras de Desenvolvimento
 - SEMPRE verificar erros e debug
 - SEMPRE consultar logs e diagnostics
-- SEMPRE evitar duplicações
+- SEMPRE evitar duplicações (usar NavigationViewModelBase)
 - SEMPRE apagar código obsoleto ao criar novos arquivos
-- SEMPRE validar antes de gravar
+- SEMPRE validar com FluentValidation antes de gravar
 - SEMPRE usar SetPacienteAtivo antes de navegar para ficha
+- SEMPRE usar ExecuteWithErrorHandlingAsync para operações async
+- SEMPRE implementar loading states visuais (IsLoading binding)
 
 ## Regra Crítica Anti-Erro ✅ RESOLVIDA
 - ✅ **Todos os erros de compilação e runtime foram corrigidos**
@@ -89,3 +100,66 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 - **ViewModels**: PacienteViewModel wrapper para WPF binding seguro
 - **Serviços**: PacienteService e NavigationService completamente funcionais
 - **Views**: Todas as views registadas e funcionais no DI container
+
+---
+
+## 🚨 REGRAS CRÍTICAS DE VERIFICAÇÃO - COPILOT
+
+### ⚠️ VERIFICAÇÕES OBRIGATÓRIAS (NUNCA SALTAR)
+
+#### 🔴 PROIBIÇÕES ABSOLUTAS
+1. **NUNCA** dizer "problema resolvido" sem testar
+2. **NUNCA** adaptar testes para esconder erros  
+3. **NUNCA** ignorar erros do IntelliSense no VS Code
+4. **NUNCA** usar try-catch para silenciar problemas
+
+#### ✅ PROCESSO DE VERIFICAÇÃO OBRIGATÓRIO
+```bash
+# SEMPRE executar antes de confirmar sucesso:
+dotnet clean
+dotnet restore  
+dotnet build --no-incremental
+# Se build OK → dotnet test
+```
+
+#### 🔍 CHECKLIST INTELLISENSE VS CODE
+- **Squiggles vermelhos**: Corrigir TODOS imediatamente
+- **Squiggles amarelos**: Revisar warnings importantes
+- **Using statements**: Verificar todos resolvidos
+- **Project references**: Confirmar todos adicionados
+
+#### 🐛 METODOLOGIA DE RESOLUÇÃO
+1. **DETECTAR**: `dotnet build --verbosity detailed`
+2. **ANALISAR**: Ler cada erro completamente
+3. **CORRIGIR**: Um erro de cada vez
+4. **VERIFICAR**: `dotnet build` até 0 erros
+5. **TESTAR**: Só depois de build limpo
+
+#### ❌ ANTI-PATTERNS PROIBIDOS
+```csharp
+// ERRADO: Esconder erros
+try { /* código quebrado */ } catch { }
+
+// ERRADO: Testes sem sentido
+Assert.IsTrue(true);
+
+// ERRADO: Comentar código quebrado
+// var result = BrokenMethod();
+
+// CERTO: Corrigir o erro real
+if (service == null) 
+    throw new ArgumentNullException(nameof(service));
+```
+
+#### 📋 CHECKLIST FINAL
+Antes de afirmar qualquer correção:
+- [ ] `dotnet build` = 0 Errors, 0 Warnings
+- [ ] VS Code sem squiggles vermelhos
+- [ ] Aplicação executa sem exceções
+- [ ] Funcionalidades testadas manualmente
+
+#### 🛑 QUANDO PARAR E PEDIR AJUDA
+Após 3 tentativas falhadas do mesmo erro, admitir:
+"Este problema requer investigação adicional. O erro sugere [problema específico]. Para corrigir adequadamente, precisamos [ação específica]."
+
+**LEMBRETE FINAL**: Código funcional > Código "corrigido" que não funciona

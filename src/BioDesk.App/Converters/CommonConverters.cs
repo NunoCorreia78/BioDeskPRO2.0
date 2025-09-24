@@ -6,6 +6,29 @@ using System.Windows.Data;
 namespace BioDesk.App.Converters;
 
 /// <summary>
+/// Converte string para Visibility (null/empty = Collapsed, valor = Visible)
+/// Para mensagens de erro e loading states
+/// </summary>
+public class StringToVisibilityConverter : IValueConverter
+{
+    public static readonly StringToVisibilityConverter Instance = new();
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is string str)
+        {
+            return string.IsNullOrWhiteSpace(str) ? Visibility.Collapsed : Visibility.Visible;
+        }
+        return Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+/// <summary>
 /// Converte bool para Visibility (true = Visible, false = Collapsed)
 /// </summary>
 public class BooleanToVisibilityConverter : IValueConverter

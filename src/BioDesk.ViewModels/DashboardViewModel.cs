@@ -18,10 +18,8 @@ namespace BioDesk.ViewModels;
 /// Caminho de ouro: Dashboard → NovoPaciente(Salvar) → Ficha OU Dashboard → Pesquisa → Lista → SelecionarPaciente → Ficha
 /// Comportamentos: SetPacienteAtivo + NavigateTo("FichaPaciente") sempre que confirma seleção/criação
 /// </summary>
-public partial class DashboardViewModel : ViewModelBase
+public partial class DashboardViewModel : NavigationViewModelBase
 {
-    private readonly INavigationService _navigationService;
-    private readonly IPacienteService _pacienteService;
     private readonly ILogger<DashboardViewModel> _logger;
 
     [ObservableProperty]
@@ -51,9 +49,8 @@ public partial class DashboardViewModel : ViewModelBase
         INavigationService navigationService,
         IPacienteService pacienteService,
         ILogger<DashboardViewModel> logger)
+        : base(navigationService, pacienteService)
     {
-        _navigationService = navigationService;
-        _pacienteService = pacienteService;
         _logger = logger;
 
         // Inicia o relógio
@@ -76,8 +73,8 @@ public partial class DashboardViewModel : ViewModelBase
             DataNascimento = DateTime.Today.AddYears(-30)
         };
 
-        _pacienteService.SetPacienteAtivo(novoPaciente);
-        _navigationService.NavigateTo("FichaPaciente");
+        PacienteService.SetPacienteAtivo(novoPaciente);
+        NavigationService.NavigateTo("FichaPaciente");
     }
 
     /// <summary>
@@ -87,7 +84,7 @@ public partial class DashboardViewModel : ViewModelBase
     private void AbrirListaPacientes()
     {
         _logger.LogInformation("Navegando para lista de pacientes");
-        _navigationService.NavigateTo("ListaPacientes");
+        NavigationService.NavigateTo("ListaPacientes");
     }
 
     /// <summary>
@@ -103,23 +100,23 @@ public partial class DashboardViewModel : ViewModelBase
             return;
         }
 
-        await ExecuteSafelyAsync(async () =>
+        await ExecuteWithErrorHandlingAsync(async () =>
         {
             _logger.LogInformation("Pesquisando pacientes com termo: {Termo}", PesquisarTexto);
             
-            var resultados = await _pacienteService.SearchAsync(PesquisarTexto);
+            var resultados = await PacienteService.SearchAsync(PesquisarTexto);
             
             if (resultados.Count == 1)
             {
                 // Se só há um resultado, navegar diretamente para a ficha
                 var paciente = resultados.First();
-                _pacienteService.SetPacienteAtivo(paciente);
-                _navigationService.NavigateTo("FichaPaciente");
+                PacienteService.SetPacienteAtivo(paciente);
+                NavigationService.NavigateTo("FichaPaciente");
             }
             else
             {
                 // Múltiplos resultados ou nenhum → navegar para lista com filtro
-                _navigationService.NavigateTo("ListaPacientes");
+                NavigationService.NavigateTo("ListaPacientes");
             }
         }, "Erro ao pesquisar pacientes");
     }
@@ -135,8 +132,8 @@ public partial class DashboardViewModel : ViewModelBase
 
         _logger.LogInformation("Selecionando paciente recente: {Nome}", paciente.Nome);
         
-        _pacienteService.SetPacienteAtivo(paciente);
-        _navigationService.NavigateTo("FichaPaciente");
+        PacienteService.SetPacienteAtivo(paciente);
+        NavigationService.NavigateTo("FichaPaciente");
     }
 
     /// <summary>
@@ -144,18 +141,18 @@ public partial class DashboardViewModel : ViewModelBase
     /// </summary>
     public async Task CarregarDadosAsync()
     {
-        await ExecuteSafelyAsync(async () =>
+        await ExecuteWithErrorHandlingAsync(async () =>
         {
             _logger.LogInformation("Carregando dados do dashboard");
             
-            PacientesRecentes = await _pacienteService.GetRecentesAsync(5);
+            PacientesRecentes = await PacienteService.GetRecentesAsync(5);
             
             _logger.LogInformation("Dashboard carregado - {Quantidade} pacientes recentes", 
                 PacientesRecentes.Count);
 
             // Dashboard fica no dashboard - utilizador escolhe quando navegar
             
-        }, "Erro ao carregar dados do dashboard");
+        }, "ao carregar dados do dashboard", _logger);
     }
 
     /// <summary>

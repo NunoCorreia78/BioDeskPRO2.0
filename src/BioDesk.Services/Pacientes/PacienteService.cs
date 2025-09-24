@@ -6,25 +6,29 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using BioDesk.Domain.Entities;
 using BioDesk.Data;
+using BioDesk.Services.Cache;
 
 namespace BioDesk.Services.Pacientes;
 
 /// <summary>
 /// Implementação do serviço de pacientes usando Entity Framework Core
+/// Otimizado com sistema de cache para melhor performance
 /// Guardas anti-erro: try/catch + ILogger, validação robusta
 /// </summary>
 public class PacienteService : IPacienteService
 {
     private readonly BioDeskContext _context;
     private readonly ILogger<PacienteService> _logger;
+    private readonly ICacheService _cacheService;
     private Paciente? _pacienteAtivo;
 
     public event EventHandler<Paciente?>? PacienteAtivoChanged;
 
-    public PacienteService(BioDeskContext context, ILogger<PacienteService> logger)
+    public PacienteService(BioDeskContext context, ILogger<PacienteService> logger, ICacheService cacheService)
     {
         _context = context;
         _logger = logger;
+        _cacheService = cacheService;
     }
 
     public void SetPacienteAtivo(Paciente paciente)
@@ -50,18 +54,23 @@ public class PacienteService : IPacienteService
                 return await GetTodosAsync();
             }
 
-            var termoLower = termo.ToLower();
+            // Tentar obter do cache primeiro
+            var cacheKey = CacheKeys.GetSearchKey(termo);
+            return await _cacheService.GetOrSetAsync(cacheKey, async () =>
+            {
+                var termoLower = termo.ToLower();
 
-            var resultado = await _context.Pacientes
-                .Where(p => p.Nome.ToLower().Contains(termoLower) ||
-                           (p.Email != null && p.Email.ToLower().Contains(termoLower)))
-                .OrderBy(p => p.Nome)
-                .ToListAsync();
+                var resultado = await _context.Pacientes
+                    .Where(p => p.Nome.ToLower().Contains(termoLower) ||
+                               (p.Email != null && p.Email.ToLower().Contains(termoLower)))
+                    .OrderBy(p => p.Nome)
+                    .ToListAsync();
 
-            _logger.LogInformation("Pesquisa por '{Termo}' retornou {Quantidade} resultados", 
-                termo, resultado.Count);
+                _logger.LogInformation("Pesquisa por '{Termo}' retornou {Quantidade} resultados (não cachado)", 
+                    termo, resultado.Count);
 
-            return resultado;
+                return resultado;
+            });
         }
         catch (Exception ex)
         {
@@ -74,9 +83,15 @@ public class PacienteService : IPacienteService
     {
         try
         {
-            return await _context.Pacientes
-                .OrderBy(p => p.Nome)
-                .ToListAsync();
+            return await _cacheService.GetOrSetAsync(CacheKeys.PACIENTES_ALL, async () =>
+            {
+                var resultado = await _context.Pacientes
+                    .OrderBy(p => p.Nome)
+                    .ToListAsync();
+
+                _logger.LogInformation("Lista completa de pacientes obtida da BD: {Quantidade} registos", resultado.Count);
+                return resultado;
+            });
         }
         catch (Exception ex)
         {
@@ -89,10 +104,17 @@ public class PacienteService : IPacienteService
     {
         try
         {
-            return await _context.Pacientes
-                .OrderByDescending(p => p.AtualizadoEm)
-                .Take(quantidade)
-                .ToListAsync();
+            var cacheKey = CacheKeys.GetRecentKey(quantidade);
+            return await _cacheService.GetOrSetAsync(cacheKey, async () =>
+            {
+                var resultado = await _context.Pacientes
+                    .OrderByDescending(p => p.AtualizadoEm)
+                    .Take(quantidade)
+                    .ToListAsync();
+
+                _logger.LogInformation("Pacientes recentes obtidos da BD: {Quantidade} registos", resultado.Count);
+                return resultado;
+            });
         }
         catch (Exception ex)
         {
@@ -123,6 +145,9 @@ public class PacienteService : IPacienteService
 
             await _context.SaveChangesAsync();
 
+            // Invalidar cache após gravação
+            InvalidarCacheAposGravacao(paciente);
+
             _logger.LogInformation("Paciente gravado com sucesso: {Nome} (ID: {Id})", 
                 paciente.Nome, paciente.Id);
 
@@ -139,12 +164,60 @@ public class PacienteService : IPacienteService
     {
         try
         {
-            return await _context.Pacientes.FindAsync(id);
+            var cacheKey = CacheKeys.GetPacienteKey(id);
+            var cachedPaciente = _cacheService.Get<Paciente>(cacheKey);
+            
+            if (cachedPaciente != null)
+            {
+                _logger.LogDebug("Paciente obtido do cache por ID: {Id}", id);
+                return cachedPaciente;
+            }
+
+            // Se não estiver no cache, buscar na BD
+            var resultado = await _context.Pacientes.FindAsync(id);
+            
+            if (resultado != null)
+            {
+                // Guardar no cache se encontrado
+                _cacheService.Set(cacheKey, resultado);
+                _logger.LogDebug("Paciente obtido da BD por ID: {Id}", id);
+            }
+            
+            return resultado;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao obter paciente com ID {Id}", id);
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Invalida cache após operações de gravação/atualização
+    /// </summary>
+    private void InvalidarCacheAposGravacao(Paciente paciente)
+    {
+        try
+        {
+            // Invalidar listas gerais
+            _cacheService.Remove(CacheKeys.PACIENTES_ALL);
+            _cacheService.RemoveByPattern(CacheKeys.PACIENTES_RECENT);
+            
+            // Invalidar pesquisas que possam incluir este paciente
+            _cacheService.RemoveByPattern(CacheKeys.SEARCH_PREFIX);
+            
+            // Invalidar cache individual se existir
+            if (paciente.Id > 0)
+            {
+                _cacheService.Remove(CacheKeys.GetPacienteKey(paciente.Id));
+            }
+            
+            _logger.LogDebug("Cache invalidado após gravação do paciente: {Nome} (ID: {Id})", 
+                paciente.Nome, paciente.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Erro ao invalidar cache após gravação - continuando...");
         }
     }
 }

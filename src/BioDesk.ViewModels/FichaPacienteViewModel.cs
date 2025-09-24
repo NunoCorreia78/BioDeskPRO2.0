@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using BioDesk.Domain.Entities;
 using BioDesk.Services.Pacientes;
 using BioDesk.Services.Navigation;
+using BioDesk.Services.AutoSave;
+using BioDesk.Services.Notifications;
 using BioDesk.ViewModels.Base;
 
 namespace BioDesk.ViewModels;
@@ -13,12 +15,24 @@ namespace BioDesk.ViewModels;
 /// <summary>
 /// ViewModel para a ficha básica do paciente
 /// Permite visualizar e editar dados básicos do paciente
+/// Com auto-save integrado usando debounce
 /// </summary>
-public partial class FichaPacienteViewModel : ViewModelBase
+public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
 {
     private readonly IPacienteService _pacienteService;
     private readonly INavigationService _navigationService;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<FichaPacienteViewModel> _logger;
+    private readonly IAutoSaveService<Paciente> _autoSaveService;
+
+    [ObservableProperty]
+    private bool _autoSaveEnabled = true;
+
+    [ObservableProperty]
+    private DateTime? _lastAutoSave;
+
+    [ObservableProperty]
+    private bool _isAutoSaving = false;
     
     [ObservableProperty]
     private Paciente? _pacienteAtual;
@@ -45,11 +59,18 @@ public partial class FichaPacienteViewModel : ViewModelBase
     public FichaPacienteViewModel(
         IPacienteService pacienteService,
         INavigationService navigationService,
+        INotificationService notificationService,
+        IAutoSaveService<Paciente> autoSaveService,
         ILogger<FichaPacienteViewModel> logger)
     {
         _pacienteService = pacienteService;
         _navigationService = navigationService;
+        _notificationService = notificationService;
+        _autoSaveService = autoSaveService;
         _logger = logger;
+
+        // Configurar auto-save
+        ConfigurarAutoSave();
         
         // Inicializar com paciente ativo se existir
         var pacienteAtivo = _pacienteService.GetPacienteAtivo();
@@ -262,12 +283,12 @@ public partial class FichaPacienteViewModel : ViewModelBase
     /// <summary>
     /// Marca o formulário como alterado quando propriedades mudam
     /// </summary>
-    partial void OnNomeChanged(string value) => MarkAsDirty();
-    partial void OnEmailChanged(string value) => MarkAsDirty();
-    partial void OnTelefoneChanged(string value) => MarkAsDirty();
+    partial void OnNomeChanged(string value) => MarkAsDirtyAndTriggerAutoSave();
+    partial void OnEmailChanged(string value) => MarkAsDirtyAndTriggerAutoSave();
+    partial void OnTelefoneChanged(string value) => MarkAsDirtyAndTriggerAutoSave();
     partial void OnDataNascimentoChanged(DateTime value) 
     {
-        MarkAsDirty();
+        MarkAsDirtyAndTriggerAutoSave();
         OnPropertyChanged(nameof(Idade));
     }
 
@@ -277,5 +298,89 @@ public partial class FichaPacienteViewModel : ViewModelBase
         {
             IsDirty = true;
         }
+    }
+
+    /// <summary>
+    /// Marca como dirty e dispara auto-save se habilitado
+    /// </summary>
+    private void MarkAsDirtyAndTriggerAutoSave()
+    {
+        MarkAsDirty();
+        
+        // Disparar auto-save se habilitado e em modo de edição
+        if (AutoSaveEnabled && IsEdicao && PacienteAtual != null)
+        {
+            var paciente = CriarPacienteFromFormulario();
+            _autoSaveService.TriggerAutoSave(paciente);
+        }
+    }
+
+    /// <summary>
+    /// Configura o sistema de auto-save com debounce
+    /// </summary>
+    private void ConfigurarAutoSave()
+    {
+        // Configurar função de save
+        _autoSaveService.SetSaveFunction(async paciente => await SalvarPacienteInternoAsync(paciente));
+        
+        // Configurar debounce de 2 segundos
+        _autoSaveService.SetDebounceTime(TimeSpan.FromSeconds(2.0));
+
+        // Subscrever aos eventos do auto-save
+        _autoSaveService.AutoSaveExecuted += OnAutoSaveExecuted;
+        _autoSaveService.AutoSaveError += OnAutoSaveError;
+
+        // Iniciar monitoramento
+        _autoSaveService.StartMonitoring();
+    }
+
+    /// <summary>
+    /// Método interno para salvar paciente (usado pelo auto-save)
+    /// </summary>
+    private async Task SalvarPacienteInternoAsync(Paciente paciente)
+    {
+        // Usar o método GravarAsync existente no IPacienteService
+        await _pacienteService.GravarAsync(paciente);
+        _logger.LogInformation("Auto-save executado para paciente {PacienteId}", paciente.Id);
+    }
+
+    /// <summary>
+    /// Handler para sucesso do auto-save
+    /// </summary>
+    private void OnAutoSaveExecuted(object? sender, AutoSaveEventArgs<Paciente> e)
+    {
+        // Mostrar notificação discreta de sucesso
+        _ = Task.Run(async () => await _notificationService.ShowSuccessAsync("Dados guardados automaticamente"));
+        IsDirty = false;
+    }
+
+    /// <summary>
+    /// Handler para falha do auto-save
+    /// </summary>
+    private void OnAutoSaveError(object? sender, AutoSaveErrorEventArgs<Paciente> e)
+    {
+        var errorMsg = e.Exception?.Message ?? "Erro desconhecido";
+        _ = Task.Run(async () => await _notificationService.ShowWarningAsync($"Falha no auto-save: {errorMsg}", durationMs: 0)); // Sem auto-close
+        _logger.LogError(e.Exception, "Erro no auto-save do paciente");
+    }
+
+    /// <summary>
+    /// Dispensa recursos quando o ViewModel é descartado
+    /// </summary>
+    public void Dispose()
+    {
+        // Fazer último save se necessário
+        if (IsDirty && AutoSaveEnabled && PacienteAtual != null)
+        {
+            var paciente = CriarPacienteFromFormulario();
+            _autoSaveService.TriggerAutoSave(paciente);
+        }
+
+        // Parar monitoramento
+        _autoSaveService.StopMonitoring();
+
+        // Desinscrever eventos
+        _autoSaveService.AutoSaveExecuted -= OnAutoSaveExecuted;
+        _autoSaveService.AutoSaveError -= OnAutoSaveError;
     }
 }

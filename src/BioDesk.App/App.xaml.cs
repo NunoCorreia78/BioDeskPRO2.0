@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using BioDesk.Data;
 using BioDesk.Services.Navigation;
 using BioDesk.Services.Pacientes;
+using BioDesk.Services.Notifications;
+using BioDesk.Services.AutoSave;
+using BioDesk.Services.Cache;
 using BioDesk.ViewModels;
 
 namespace BioDesk.App;
@@ -79,6 +82,10 @@ public partial class App : Application
         // Serviços
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddScoped<IPacienteService, PacienteService>();
+        services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton(typeof(IAutoSaveService<>), typeof(AutoSaveService<>));
+        services.AddMemoryCache(); // Para IMemoryCache
+        services.AddSingleton<ICacheService, CacheService>();
 
         // ViewModels
         services.AddTransient<DashboardViewModel>();
