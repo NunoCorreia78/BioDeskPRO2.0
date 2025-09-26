@@ -1,6 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Globalization;
 using System.Windows;
+using System.Windows.Markup;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -26,11 +29,6 @@ namespace BioDesk.App;
 public partial class App : Application
 {
     private IHost? _host;
-    
-    /// <summary>
-    /// Expõe o Host para acessar serviços DI 
-    /// </summary>
-    public IHost AppHost => _host ?? throw new InvalidOperationException("Host não inicializado");
 
     /// <summary>
     /// ServiceProvider público para acesso aos serviços registrados
@@ -41,6 +39,21 @@ public partial class App : Application
     {
         try
         {
+            // Configurar cultura portuguesa para toda a aplicação
+            var culture = new CultureInfo("pt-PT");
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+            
+            // Importante: definir para novos threads também
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            
+            // Forçar o WPF a usar a cultura definida
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(
+                    XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
+
             // Configurar o host com DI
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices(ConfigureServices)
@@ -96,24 +109,23 @@ public partial class App : Application
 
         // Serviços
         services.AddSingleton<INavigationService, NavigationService>();
-        services.AddScoped<IPacienteService, PacienteService>();
+        services.AddTransient<IPacienteService, PacienteService>(); // Mudado para Transient
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<BioDesk.Services.Settings.ISettingsService, BioDesk.Services.Settings.SettingsService>();
         services.AddSingleton(typeof(IAutoSaveService<>), typeof(AutoSaveService<>));
         services.AddMemoryCache(); // Para IMemoryCache
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IFuzzySearchService, FuzzySearchService>(); // 🔍 Fuzzy Search
-        services.AddScoped<IDashboardStatsService, DashboardStatsService>(); // 📊 Dashboard Charts
-        services.AddScoped<IActivityService, ActivityService>(); // 🔔 Activity Service
-        services.AddScoped<IConsultaService, ConsultaService>(); // 🩺 Consulta Service
+        services.AddTransient<IDashboardStatsService, DashboardStatsService>(); // 📊 Dashboard Charts - Transient
+        services.AddTransient<IActivityService, ActivityService>(); // 🔔 Activity Service - Transient
+        services.AddTransient<IConsultaService, ConsultaService>(); // 🩺 Consulta Service - Transient
 
-        // ViewModels
+        // ViewModels - Como Transient para evitar problemas de scoping
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<NovoPacienteViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
         services.AddTransient<ListaPacientesViewModel>();
-        services.AddTransient<AvaliacaoClinicaViewModel>();
-        services.AddTransient<AnamneseViewModelIntegrado>(); // 🚀 Sistema Integrado com 11 Expanders Médicos!
+        services.AddTransient<ConsultasViewModel>(); // 🩺 Gestão Consultas
 
         // Views
         services.AddSingleton<MainWindow>();
@@ -121,8 +133,7 @@ public partial class App : Application
         services.AddTransient<Views.NovoPacienteView>();
         services.AddTransient<Views.FichaPacienteView>();
         services.AddTransient<Views.ListaPacientesView>();
-        services.AddTransient<Views.AvaliacaoClinicaView>();
-        services.AddTransient<Views.AnamneseView>(); // 🚀 Sistema Integrado com 11 Expanders!
+        services.AddTransient<Views.ConsultasView>(); // 🩺 View Consultas
     }
 
     private async Task InicializarBaseDadosAsync()

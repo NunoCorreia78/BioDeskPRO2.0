@@ -31,6 +31,9 @@ public class Consulta
     [MaxLength(2000)]
     public string? Notas { get; set; }
 
+    [MaxLength(5000)]
+    public string? Prescricao { get; set; }
+
     [Column(TypeName = "decimal(10,2)")]
     public decimal? Valor { get; set; }
 

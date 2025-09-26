@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using BioDesk.Domain.Entities;
 
@@ -14,23 +13,6 @@ public class BioDeskContext : DbContext
 {
     public DbSet<Paciente> Pacientes { get; set; }
     public DbSet<Consulta> Consultas { get; set; }
-    
-    // DbSets para Avaliação Clínica (legado - manter compatibilidade)
-    public DbSet<AvaliacaoClinica> AvaliacoesClinicas { get; set; }
-    public DbSet<MotivoConsulta> MotivosConsulta { get; set; }
-    public DbSet<HistoriaClinica> HistoriaClinicas { get; set; }
-    public DbSet<RevisaoSistemas> RevisoesSistemas { get; set; }
-    public DbSet<EstiloVida> EstilosVida { get; set; }
-    public DbSet<HistoriaFamiliar> HistoriasFamiliares { get; set; }
-
-    // DbSets para Nova Arquitetura Clínica (MVP)
-    public DbSet<SessaoClinica> SessoesClinicas { get; set; }
-    public DbSet<SintomaSessao> SintomasSessao { get; set; }
-    public DbSet<SintomaAtivo> SintomasAtivos { get; set; }
-    public DbSet<AlteracaoMedicacao> AlteracoesMedicacao { get; set; }
-    public DbSet<MedicacaoAtual> MedicacaoAtual { get; set; }
-    public DbSet<RedFlag> RedFlags { get; set; }
-    public DbSet<DeclaracaoLegal> DeclaracoesLegais { get; set; }
 
     public BioDeskContext(DbContextOptions<BioDeskContext> options) : base(options)
     {
@@ -45,8 +27,8 @@ public class BioDeskContext : DbContext
         {
             entity.HasKey(p => p.Id);
             
-            // Índice único para evitar duplicações
-            entity.HasIndex(p => new { p.Nome, p.DataNascimento })
+            // Índice único para evitar duplicações (simplificado após remoção DataNascimento)
+            entity.HasIndex(p => p.Nome)
                   .IsUnique()
                   .HasDatabaseName("IX_Paciente_Unique");
 
@@ -69,137 +51,8 @@ public class BioDeskContext : DbContext
                   .IsRequired();
         });
 
-        // Configuração das entidades de Avaliação Clínica
-        ConfigurarAvaliacaoClinica(modelBuilder);
-
         // Seed de dados de exemplo
         SeedData(modelBuilder);
-    }
-
-    private static void ConfigurarAvaliacaoClinica(ModelBuilder modelBuilder)
-    {
-        // Configuração da AvaliacaoClinica
-        modelBuilder.Entity<AvaliacaoClinica>(entity =>
-        {
-            entity.HasKey(a => a.Id);
-            
-            // Relacionamento com Paciente (1:N)
-            entity.HasOne(a => a.Paciente)
-                  .WithMany()
-                  .HasForeignKey(a => a.PacienteId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            // Relacionamentos One-to-One opcionais
-            entity.HasOne(a => a.MotivoConsulta)
-                  .WithOne(m => m.AvaliacaoClinica)
-                  .HasForeignKey<MotivoConsulta>(m => m.AvaliacaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(a => a.HistoriaClinica)
-                  .WithOne(h => h.AvaliacaoClinica)
-                  .HasForeignKey<HistoriaClinica>(h => h.AvaliacaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(a => a.RevisaoSistemas)
-                  .WithOne(r => r.AvaliacaoClinica)
-                  .HasForeignKey<RevisaoSistemas>(r => r.AvaliacaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(a => a.EstiloVida)
-                  .WithOne(e => e.AvaliacaoClinica)
-                  .HasForeignKey<EstiloVida>(e => e.AvaliacaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(a => a.HistoriaFamiliar)
-                  .WithOne(h => h.AvaliacaoClinica)
-                  .HasForeignKey<HistoriaFamiliar>(h => h.AvaliacaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            // Índices para performance
-            entity.HasIndex(a => a.PacienteId)
-                  .HasDatabaseName("IX_AvaliacaoClinica_PacienteId");
-            
-            entity.HasIndex(a => a.DataCriacao)
-                  .HasDatabaseName("IX_AvaliacaoClinica_DataCriacao");
-        });
-
-        // Configuração do MotivoConsulta
-        modelBuilder.Entity<MotivoConsulta>(entity =>
-        {
-            entity.HasKey(m => m.Id);
-            entity.Property(m => m.MotivosJson).HasMaxLength(1000);
-            entity.Property(m => m.OutroMotivo).HasMaxLength(200);
-            entity.Property(m => m.Localizacao).HasMaxLength(100);
-            entity.Property(m => m.Lado).HasMaxLength(20);
-            entity.Property(m => m.Duracao).HasMaxLength(50);
-            entity.Property(m => m.Evolucao).HasMaxLength(20);
-            entity.Property(m => m.CaraterJson).HasMaxLength(500);
-            entity.Property(m => m.FatoresAgravantesJson).HasMaxLength(500);
-            entity.Property(m => m.FatoresAlivioJson).HasMaxLength(500);
-            entity.Property(m => m.Observacoes).HasMaxLength(1000);
-        });
-
-        // Configuração da HistoriaClinica
-        modelBuilder.Entity<HistoriaClinica>(entity =>
-        {
-            entity.HasKey(h => h.Id);
-            entity.Property(h => h.DoencasCronicasJson).HasMaxLength(1000);
-            entity.Property(h => h.CirurgiasJson).HasMaxLength(2000);
-            entity.Property(h => h.TiposAlergiasJson).HasMaxLength(500);
-            entity.Property(h => h.EspecificarAlergias).HasMaxLength(1000);
-            entity.Property(h => h.MedicacaoAtualJson).HasMaxLength(2000);
-            entity.Property(h => h.SuplementacaoJson).HasMaxLength(2000);
-            entity.Property(h => h.VacinacaoJson).HasMaxLength(500);
-            entity.Property(h => h.Observacoes).HasMaxLength(1000);
-        });
-
-        // Configuração da RevisaoSistemas
-        modelBuilder.Entity<RevisaoSistemas>(entity =>
-        {
-            entity.HasKey(r => r.Id);
-            entity.Property(r => r.CardiovascularJson).HasMaxLength(500);
-            entity.Property(r => r.CardiovascularObs).HasMaxLength(500);
-            entity.Property(r => r.RespiratorioJson).HasMaxLength(500);
-            entity.Property(r => r.RespiratorioObs).HasMaxLength(500);
-            entity.Property(r => r.DigestivoJson).HasMaxLength(500);
-            entity.Property(r => r.DigestivoObs).HasMaxLength(500);
-            entity.Property(r => r.RenalUrinarioJson).HasMaxLength(500);
-            entity.Property(r => r.RenalUrinarioObs).HasMaxLength(500);
-            entity.Property(r => r.EndocrinoMetabolicoJson).HasMaxLength(500);
-            entity.Property(r => r.EndocrinoMetabolicoObs).HasMaxLength(500);
-            entity.Property(r => r.MusculoEsqueleticoJson).HasMaxLength(500);
-            entity.Property(r => r.MusculoEsqueleticoObs).HasMaxLength(500);
-            entity.Property(r => r.NeurologicoJson).HasMaxLength(500);
-            entity.Property(r => r.NeurologicoObs).HasMaxLength(500);
-            entity.Property(r => r.PeleJson).HasMaxLength(500);
-            entity.Property(r => r.PeleObs).HasMaxLength(500);
-            entity.Property(r => r.HumorSonoEnergiaJson).HasMaxLength(500);
-            entity.Property(r => r.HumorSonoEnergiaObs).HasMaxLength(500);
-        });
-
-        // Configuração do EstiloVida
-        modelBuilder.Entity<EstiloVida>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.AlimentacaoJson).HasMaxLength(500);
-            entity.Property(e => e.Hidratacao).HasMaxLength(20);
-            entity.Property(e => e.ExercicioJson).HasMaxLength(500);
-            entity.Property(e => e.ExercicioFrequencia).HasMaxLength(50);
-            entity.Property(e => e.Tabaco).HasMaxLength(20);
-            entity.Property(e => e.Alcool).HasMaxLength(20);
-            entity.Property(e => e.Cafeina).HasMaxLength(20);
-            entity.Property(e => e.SonoJson).HasMaxLength(500);
-            entity.Property(e => e.Observacoes).HasMaxLength(1000);
-        });
-
-        // Configuração da HistoriaFamiliar
-        modelBuilder.Entity<HistoriaFamiliar>(entity =>
-        {
-            entity.HasKey(h => h.Id);
-            entity.Property(h => h.AntecedentesJson).HasMaxLength(1000);
-            entity.Property(h => h.ParentescoJson).HasMaxLength(500);
-            entity.Property(h => h.Observacoes).HasMaxLength(1000);
-        });
     }
 
     private static void SeedData(ModelBuilder modelBuilder)
@@ -222,7 +75,7 @@ public class BioDeskContext : DbContext
             {
                 Id = 2,
                 Nome = "João Ferreira",
-                DataNascimento = new DateTime(1978, 7, 22),
+                DataNascimento = new DateTime(1990, 7, 22),
                 Email = "joao.ferreira@email.com",
                 Telefone = "925678912",
                 CriadoEm = agora.AddDays(-25),
@@ -232,7 +85,7 @@ public class BioDeskContext : DbContext
             {
                 Id = 3,
                 Nome = "Maria Costa",
-                DataNascimento = new DateTime(1992, 11, 8),
+                DataNascimento = new DateTime(1988, 11, 10),
                 Email = "maria.costa@email.com",
                 Telefone = "934567823",
                 CriadoEm = agora.AddDays(-20),
@@ -329,101 +182,5 @@ public class BioDeskContext : DbContext
 
         modelBuilder.Entity<Paciente>().HasData(pacientes);
         modelBuilder.Entity<Consulta>().HasData(consultasExemplo);
-
-        // Configurações para Nova Arquitetura Clínica
-        ConfigurarArquiteturaClinica(modelBuilder);
-    }
-
-    /// <summary>
-    /// Configurações EF Core para a nova arquitetura clínica
-    /// </summary>
-    private static void ConfigurarArquiteturaClinica(ModelBuilder modelBuilder)
-    {
-        // SessaoClinica
-        modelBuilder.Entity<SessaoClinica>(entity =>
-        {
-            entity.HasKey(s => s.Id);
-            entity.HasIndex(s => new { s.PacienteId, s.DataSessao });
-            
-            entity.HasOne(s => s.Paciente)
-                  .WithMany()
-                  .HasForeignKey(s => s.PacienteId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // SintomaSessao
-        modelBuilder.Entity<SintomaSessao>(entity =>
-        {
-            entity.HasKey(s => s.Id);
-            entity.HasIndex(s => s.SessaoClinicaId);
-            
-            entity.HasOne(s => s.SessaoClinica)
-                  .WithMany(sc => sc.SintomasTrabalhados)
-                  .HasForeignKey(s => s.SessaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // SintomaAtivo
-        modelBuilder.Entity<SintomaAtivo>(entity =>
-        {
-            entity.HasKey(s => s.Id);
-            entity.HasIndex(s => new { s.PacienteId, s.Nome }).IsUnique(); // Evitar duplicação
-            entity.HasIndex(s => new { s.PacienteId, s.Prioridade });
-            
-            entity.HasOne(s => s.Paciente)
-                  .WithMany()
-                  .HasForeignKey(s => s.PacienteId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // AlteracaoMedicacao
-        modelBuilder.Entity<AlteracaoMedicacao>(entity =>
-        {
-            entity.HasKey(a => a.Id);
-            entity.HasIndex(a => a.SessaoClinicaId);
-            
-            entity.HasOne(a => a.SessaoClinica)
-                  .WithMany(sc => sc.AlteracoesMedicacao)
-                  .HasForeignKey(a => a.SessaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // MedicacaoAtual
-        modelBuilder.Entity<MedicacaoAtual>(entity =>
-        {
-            entity.HasKey(m => m.Id);
-            entity.HasIndex(m => new { m.PacienteId, m.Nome, m.Dose }).IsUnique(); // Evitar duplicação
-            entity.HasIndex(m => new { m.PacienteId, m.Estado });
-            
-            entity.HasOne(m => m.Paciente)
-                  .WithMany()
-                  .HasForeignKey(m => m.PacienteId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // RedFlag
-        modelBuilder.Entity<RedFlag>(entity =>
-        {
-            entity.HasKey(r => r.Id);
-            entity.HasIndex(r => r.SessaoClinicaId);
-            entity.HasIndex(r => new { r.Estado, r.NivelRisco });
-            
-            entity.HasOne(r => r.SessaoClinica)
-                  .WithMany(sc => sc.RedFlags)
-                  .HasForeignKey(r => r.SessaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // DeclaracaoLegal (relação 1:1 com SessaoClinica)
-        modelBuilder.Entity<DeclaracaoLegal>(entity =>
-        {
-            entity.HasKey(d => d.Id);
-            entity.HasIndex(d => d.SessaoClinicaId).IsUnique();
-            
-            entity.HasOne(d => d.SessaoClinica)
-                  .WithOne(sc => sc.Declaracao)
-                  .HasForeignKey<DeclaracaoLegal>(d => d.SessaoClinicaId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
     }
 }

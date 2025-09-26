@@ -26,7 +26,7 @@ public class TestBioDeskContext : DbContext
             entity.HasKey(p => p.Id);
             
             // Índice único para evitar duplicações
-            entity.HasIndex(p => new { p.Nome, p.DataNascimento })
+            entity.HasIndex(p => p.Nome)
                   .IsUnique()
                   .HasDatabaseName("IX_Paciente_Unique");
 
@@ -41,6 +41,9 @@ public class TestBioDeskContext : DbContext
 
             entity.Property(p => p.Telefone)
                   .HasMaxLength(20);
+
+            entity.Property(p => p.DataNascimento)
+                  .IsRequired();
 
             entity.Property(p => p.CriadoEm)
                   .IsRequired();

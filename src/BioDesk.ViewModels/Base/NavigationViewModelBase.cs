@@ -59,7 +59,7 @@ public abstract partial class NavigationViewModelBase : ViewModelBase
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            NavigationService.NavigateTo("NovoPaciente");
+            NavigationService.NavigateTo("FichaPaciente");
             await Task.CompletedTask;
         }, "ao navegar para Novo Paciente");
     }

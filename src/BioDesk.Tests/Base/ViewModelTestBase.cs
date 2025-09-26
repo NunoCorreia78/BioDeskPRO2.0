@@ -101,7 +101,7 @@ public abstract class ViewModelTestBase : IDisposable
                 Nome = "João Silva Santos",
                 Email = "joao.silva@teste.com",
                 Telefone = "11999888777",
-                DataNascimento = new DateTime(1985, 3, 15)
+                DataNascimento = new DateTime(1985, 6, 15)
             },
             new()
             {
@@ -109,7 +109,7 @@ public abstract class ViewModelTestBase : IDisposable
                 Nome = "Maria Oliveira Costa",
                 Email = "maria.oliveira@teste.com",
                 Telefone = "11888777666",
-                DataNascimento = new DateTime(1990, 7, 22)
+                DataNascimento = new DateTime(1990, 9, 22)
             },
             new()
             {
@@ -117,7 +117,7 @@ public abstract class ViewModelTestBase : IDisposable
                 Nome = "Pedro Souza Lima",
                 Email = "pedro.souza@teste.com", 
                 Telefone = "11777666555",
-                DataNascimento = new DateTime(1978, 12, 3)
+                DataNascimento = new DateTime(1988, 2, 8)
             }
         };
 
@@ -160,7 +160,7 @@ public abstract class ViewModelTestBase : IDisposable
             Nome = nome,
             Email = string.IsNullOrEmpty(email) ? $"{nome.ToLower().Replace(" ", ".")}@teste.com" : email,
             Telefone = "11999999999",
-            DataNascimento = DateTime.Now.AddYears(-30)
+            DataNascimento = new DateTime(1980, 1, 1), // Data padrão para testes
         };
 
         Context.Pacientes.Add(paciente);

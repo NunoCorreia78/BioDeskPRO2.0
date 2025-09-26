@@ -6,7 +6,9 @@ namespace BioDesk.Domain.Entities;
 
 /// <summary>
 /// Entidade que representa um paciente no sistema BioDeskPro2 para Naturopatia, Osteopatia e Medicina Quântica
-/// Caminho de ouro: Criação → Validação → Gravação → SetPacienteAtivo → NavigateTo("FichaPaciente")
+/// Caminho de ouro: Criação → Validação →    /// <summary>
+    /// Propriedade Idade removida conforme solicitado
+    /// </summary>etPacienteAtivo → NavigateTo("FichaPaciente")
 /// </summary>
 public class Paciente
 {
@@ -17,8 +19,11 @@ public class Paciente
     [MaxLength(200)]
     public string Nome { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Data de nascimento do paciente (obrigatória)
+    /// </summary>
     [Required(ErrorMessage = "Data de nascimento é obrigatória")]
-    public DateTime DataNascimento { get; set; }
+    public DateTime? DataNascimento { get; set; }
 
     [Required(ErrorMessage = "Email é obrigatório")]
     [EmailAddress(ErrorMessage = "Email inválido")]
@@ -306,18 +311,8 @@ public class Paciente
     }
 
     /// <summary>
-    /// Calcula idade baseada na data de nascimento
+    /// Propriedade Idade removida conforme solicitado
     /// </summary>
-    public int Idade 
-    { 
-        get 
-        { 
-            var today = DateTime.Today;
-            int age = today.Year - DataNascimento.Year;
-            if (DataNascimento.Date > today.AddYears(-age)) age--;
-            return age;
-        } 
-    }
 
     #region Navegação para Consultas
     /// <summary>

@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
              xmlns:views="clr-namespace:BioDesk.App.Views"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              d:DataContext="{d:DesignInstance Type=viewmodels:FichaPacienteViewModel}"
              mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1200">
 
@@ -159,13 +160,7 @@
             <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
         </Style>
 
-        <!-- Estilo para DatePicker -->
-        <Style x:Key="FieldDatePicker" TargetType="DatePicker">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8"/>
-        </Style>
+        <!-- DatePicker styles removidos conforme solicitado -->
         
         <!-- Estilos dos Separadores -->
         <Style x:Key="NaturoTabItem" TargetType="TabItem">
@@ -221,6 +216,15 @@
         </Style>
         
         <Style x:Key="FieldInput" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        
+        <!-- Estilo específico para DatePicker -->
+        <Style x:Key="FieldDatePicker" TargetType="DatePicker">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#E3E9DE"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -373,6 +377,112 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <!-- Estilo para TextBox Moderno -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="#9CAF97"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#9CAF97"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Estilo para ComboBox Moderno -->
+        <Style x:Key="ModernComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <Grid>
+                                <ToggleButton x:Name="ToggleButton"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                            Focusable="False"
+                                            ClickMode="Press">
+                                    <Grid>
+                                        <ContentPresenter x:Name="ContentSite"
+                                                        Content="{TemplateBinding SelectedItem}"
+                                                        ContentTemplate="{TemplateBinding ItemTemplate}"
+                                                        Margin="{TemplateBinding Padding}"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Left"/>
+                                        <Path x:Name="Arrow" HorizontalAlignment="Right"
+                                            VerticalAlignment="Center" Margin="0,0,12,0"
+                                            Data="M 0 0 L 4 4 L 8 0 Z" Fill="#5A6558"/>
+                                    </Grid>
+                                </ToggleButton>
+                                <Popup x:Name="Popup" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                     AllowsTransparency="True" Focusable="False"
+                                     PopupAnimation="Slide">
+                                    <Border Background="White" BorderBrush="#E3E9DE"
+                                          BorderThickness="1" CornerRadius="8"
+                                          MaxHeight="200" MinWidth="{TemplateBinding ActualWidth}">
+                                        <ScrollViewer>
+                                            <ItemsPresenter/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="#9CAF97"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- DatePicker styles removidos conforme solicitado -->
+        
+        <!-- Estilo para Section Header -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#3F4A3D"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        
+        <!-- Estilo para Field CheckBox -->
+        <Style x:Key="FieldCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#3F4A3D"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -390,12 +500,46 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <!-- Cabeçalho -->
+        <!-- Cabeçalho com Navegação -->
         <Border Grid.Row="0" Background="Transparent" Padding="20">
-            <TextBlock Text="Ficha do Paciente" 
-                     FontSize="24" FontWeight="Bold" 
-                     Foreground="#3F4A3D" 
-                     HorizontalAlignment="Center"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Botões de Navegação à Esquerda -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="← Dashboard" Command="{Binding VoltarDashboardCommand}" 
+                            Style="{StaticResource OutlineButton}" Margin="0,0,10,0"/>
+                    <Button Content="← Lista Pacientes" Command="{Binding VoltarListaCommand}" 
+                            Style="{StaticResource OutlineButton}"/>
+                </StackPanel>
+
+                <!-- Título Central -->
+                <TextBlock Grid.Column="1" Text="Ficha do Paciente" 
+                         FontSize="24" FontWeight="Bold" 
+                         Foreground="#3F4A3D" 
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"/>
+
+                <!-- Informações do Paciente à Direita -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding PacienteAtual.Nome}" 
+                             FontWeight="SemiBold" FontSize="16" 
+                             Foreground="#3F4A3D" 
+                             HorizontalAlignment="Right"/>
+                    <TextBlock Text="{Binding IdadeCalculada}" 
+                             FontSize="14" 
+                             Foreground="#5A6558"
+                             HorizontalAlignment="Right"/>
+                    <TextBlock Text="{Binding PacienteAtual.NumeroUtente, StringFormat='Nº {0}'}" 
+                             FontSize="12" 
+                             Foreground="#5A6558"
+                             HorizontalAlignment="Right"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- Conteúdo Principal -->
@@ -434,16 +578,22 @@
                                                    Style="{StaticResource FieldInput}" FontSize="14"/>
                                         </StackPanel>
                                         
-                                        <!-- Linha 2: Data Nascimento, Idade, Género -->
+                                        <!-- Linha 2: Data Nascimento e Género -->
                                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,20,15">
                                             <TextBlock Text="Data de Nascimento *" Style="{StaticResource FieldLabel}"/>
-                                            <StackPanel Orientation="Horizontal">
-                                                <DatePicker SelectedDate="{Binding PacienteAtual.DataNascimento, UpdateSourceTrigger=PropertyChanged}"
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <DatePicker SelectedDate="{Binding DataNascimento, UpdateSourceTrigger=PropertyChanged}" 
+                                                          SelectedDateFormat="Short"
+                                                          DisplayDateStart="1900-01-01"
+                                                          DisplayDateEnd="{x:Static system:DateTime.Now}"
+                                                          Width="150" 
+                                                          Style="{StaticResource FieldDatePicker}"
                                                           Margin="0,0,10,0"/>
-                                                <TextBlock Text="Idade:" VerticalAlignment="Center" Margin="8,0,3,0" 
-                                                         FontSize="12" Foreground="#5A6558"/>
-                                                <TextBlock Text="{Binding IdadeCalculada}" VerticalAlignment="Center" 
-                                                         FontWeight="SemiBold" FontSize="12" Foreground="#3F4A3D"/>
+                                                <TextBlock Text="{Binding IdadeCalculada}" 
+                                                         VerticalAlignment="Center" 
+                                                         Margin="10,0,0,0" 
+                                                         FontWeight="Medium"
+                                                         Foreground="#5A6558"/>
                                             </StackPanel>
                                         </StackPanel>
                                         
@@ -805,9 +955,7 @@
                                     <!-- Botões de Ação -->
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                                         <Button Content="💾 Guardar" Style="{StaticResource PrimaryButton}" 
-                                              Command="{Binding SalvarCommand}" Margin="0,0,10,0"/>
-                                        <Button Content="🔄 Auto-Save" Style="{StaticResource SecondaryButton}"
-                                              ToolTip="Guardamento automático ativado"/>
+                                              Command="{Binding GravarCommand}" Margin="0,0,0,0"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -876,8 +1024,7 @@
                                         </StackPanel>
                                         
                                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="10,0,0,15">
-                                            <TextBlock Text="Data Nascimento" Style="{StaticResource FieldLabel}"/>
-                                            <DatePicker SelectedDate="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Identificacao.DataNascimento}" Style="{StaticResource FieldDatePicker}"/>
+                                            <!-- Data de nascimento removida conforme solicitado -->
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -1211,6 +1358,48 @@
                                     </StackPanel>
                                 </Border>
                             </Expander>
+                            
+                            <!-- EXPANDER 10: CONSENTIMENTOS E RGPD -->
+                            <Expander Header="📋 10. CONSENTIMENTOS E PRIVACIDADE" Style="{StaticResource ModernExpander}" 
+                                    IsExpanded="False" Margin="0,0,0,10">
+                                <Border Background="#F7F9F6" CornerRadius="8" Padding="20" Margin="10">
+                                    <StackPanel>
+                                        <!-- Consentimento Informado -->
+                                        <TextBlock Text="🏥 Consentimento Informado" Style="{StaticResource SectionHeader}" Margin="0,0,0,10"/>
+                                        <CheckBox Content="Declaro que fui informado(a) sobre os tratamentos de Naturopatia e Medicina Complementar"
+                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
+                                        <CheckBox Content="Compreendo os benefícios e possíveis limitações dos tratamentos naturais"
+                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
+                                        <CheckBox Content="Autorizo a realização de tratamentos de medicina complementar"
+                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,15"/>
+                                        
+                                        <!-- RGPD -->
+                                        <TextBlock Text="🔒 Proteção de Dados (RGPD)" Style="{StaticResource SectionHeader}" Margin="0,0,0,10"/>
+                                        <CheckBox Content="Consinto o tratamento dos meus dados pessoais para fins de prestação de cuidados de saúde"
+                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
+                                        <CheckBox Content="Autorizo o contacto por telefone/email para agendamentos e informações clínicas"
+                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
+                                        <CheckBox Content="Aceito receber informações sobre tratamentos e promoções (opcional)"
+                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,15"/>
+                                        
+                                        <!-- Assinatura Digital -->
+                                        <TextBlock Text="✍️ Confirmação" Style="{StaticResource SectionHeader}" Margin="0,0,0,10"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                            <!-- Data de consentimento removida conforme solicitado -->
+                                        </StackPanel>
+                                        <CheckBox Content="Confirmo que li e aceito todos os consentimentos acima indicados"
+                                                Style="{StaticResource FieldCheckBox}" 
+                                                FontWeight="SemiBold" Foreground="#3F4A3D"/>
+                                    </StackPanel>
+                                </Border>
+                            </Expander>
+                            
+                            <!-- Botões de Ação da Declaração & Anamnese -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                <Button Content="💾 Guardar Declaração" Style="{StaticResource PrimaryButton}" 
+                                      Command="{Binding GravarCommand}"
+                                      ToolTip="Guardar todas as informações da declaração e anamnese"/>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -1313,6 +1502,234 @@
                         
                     </TabControl>
                 </TabItem>
+
+                <!-- TAB 4: CONSULTAS E SEGUIMENTO -->
+                <TabItem Header="🩺 Consultas" Style="{StaticResource NaturoTabItem}">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Header -->
+                            <RowDefinition Height="200"/>  <!-- Timeline Cards -->
+                            <RowDefinition Height="*"/>    <!-- Painel de Detalhes -->
+                        </Grid.RowDefinitions>
+
+                        <!-- Header com Nova Consulta -->
+                        <Border Grid.Row="0" Style="{StaticResource SectionCard}" Background="#7A9471" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <TextBlock Text="🎯" FontSize="24" Margin="0,0,10,0" Foreground="White"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Timeline de Consultas" FontWeight="Bold" 
+                                                  Foreground="White" FontSize="16"/>
+                                        <TextBlock Text="Histórico visual com detalhes dinâmicos" 
+                                                  Foreground="#E8F5E8" FontSize="12"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button Grid.Column="1" Content="🔄 Repetir Última" 
+                                       Background="#6B8563" Foreground="White" BorderThickness="0"
+                                       Padding="12,8" Margin="0,0,10,0"
+                                       Command="{Binding RepetirConsultaCommand}"/>
+                                       
+                                <Button Grid.Column="2" Content="➕ Nova Consulta" 
+                                       Background="#5A7A52" Foreground="White" BorderThickness="0"
+                                       Padding="15,8"
+                                       Command="{Binding NovaConsultaCommand}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Timeline Horizontal de Cards -->
+                        <Border Grid.Row="1" Style="{StaticResource SectionCard}" Padding="15">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <!-- Label da Timeline -->
+                                <TextBlock Grid.Row="0" Text="📅 Timeline de Consultas" FontWeight="SemiBold" 
+                                          Foreground="#3F4A3D" Margin="0,0,0,10" FontSize="14"/>
+                                
+                                <!-- Scroll Horizontal com Cards -->
+                                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                    <ItemsControl ItemsSource="{Binding ConsultasPaciente}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <!-- Card/Balão da Consulta -->
+                                                <Border Width="160" Height="120" Margin="0,0,15,0" CornerRadius="12"
+                                                       Cursor="Hand" Background="{Binding Status, Converter={StaticResource StatusToColorConverter}}"
+                                                       BorderBrush="#E3E9DE" BorderThickness="1">
+                                                    <Border.Effect>
+                                                        <DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="8" ShadowDepth="2"/>
+                                                    </Border.Effect>
+                                                    <Border.InputBindings>
+                                                        <MouseBinding MouseAction="LeftClick" 
+                                                                    Command="{Binding DataContext.SelecionarConsultaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}"/>
+                                                    </Border.InputBindings>
+                                                    
+                                                    <Grid Margin="12">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="*"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        
+                                                        <!-- Data e Tipo -->
+                                                        <StackPanel Grid.Row="0">
+                                                            <TextBlock Text="{Binding DataConsulta, StringFormat='{}{0:dd/MM/yyyy}'}" 
+                                                                      FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding DataConsulta, StringFormat='{}{0:HH:mm}'}" 
+                                                                      FontSize="10" Foreground="#EEEEEE" HorizontalAlignment="Center"/>
+                                                        </StackPanel>
+                                                        
+                                                        <!-- Tipo e Resumo -->
+                                                        <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding TipoConsulta}" FontWeight="SemiBold" 
+                                                                      FontSize="13" Foreground="White" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+                                                            <TextBlock Text="{Binding Notas}" FontSize="9" 
+                                                                      Foreground="#E8E8E8" HorizontalAlignment="Center" 
+                                                                      TextWrapping="Wrap" MaxHeight="30" TextTrimming="CharacterEllipsis"/>
+                                                        </StackPanel>
+                                                        
+                                                        <!-- Status Badge -->
+                                                        <Border Grid.Row="2" Background="#FFFFFF" CornerRadius="8" 
+                                                               Padding="6,2" HorizontalAlignment="Center" Opacity="0.9">
+                                                            <TextBlock Text="{Binding Status}" FontSize="9" 
+                                                                      Foreground="#333333" FontWeight="SemiBold"/>
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                
+                                <!-- Mensagem quando não há consultas -->
+                                <Border Grid.Row="1" Background="#F8F9FA" CornerRadius="8" Padding="20" 
+                                       Visibility="{Binding HasConsultas, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="🗓️" FontSize="32" HorizontalAlignment="Center" 
+                                                  Foreground="#9CAF97" Margin="0,0,0,8"/>
+                                        <TextBlock Text="Nenhuma consulta registrada" FontWeight="SemiBold" 
+                                                  HorizontalAlignment="Center" Foreground="#5A6558" FontSize="14"/>
+                                        <TextBlock Text="Clique em 'Nova Consulta' para começar" 
+                                                  HorizontalAlignment="Center" Foreground="#7A9471" 
+                                                  FontSize="11" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Painel de Detalhes Dinâmico -->
+                        <Border Grid.Row="2" Style="{StaticResource SectionCard}" Margin="0,15,0,0"
+                               Visibility="{Binding ConsultaSelecionada, Converter={StaticResource NullToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Painel Esquerdo: Detalhes e Notas -->
+                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                                    <!-- Header da Consulta Selecionada -->
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding ConsultaSelecionada.TipoConsulta}" FontSize="18" FontWeight="Bold" 
+                                                      Foreground="#3F4A3D"/>
+                                            <TextBlock Text="{Binding ConsultaSelecionada.DataConsulta, StringFormat='📅 {0:dd/MM/yyyy HH:mm}'}" 
+                                                      Foreground="#7A9471" FontSize="12" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                        
+                                        <Button Grid.Column="1" Content="✖️" Width="30" Height="30" 
+                                               Background="Transparent" BorderThickness="0" 
+                                               Command="{Binding FecharDetalhesCommand}"
+                                               ToolTip="Fechar detalhes"/>
+                                    </Grid>
+                                    
+                                    <!-- Resumo Automático -->
+                                    <Border Background="#F8F9FA" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                                        <StackPanel>
+                                            <TextBlock Text="📋 Resumo da Anamnese" FontWeight="SemiBold" 
+                                                      Foreground="#3F4A3D" FontSize="14" Margin="0,0,0,8"/>
+                                            <TextBlock Text="{Binding ResumoAnamnese}" TextWrapping="Wrap" 
+                                                      Foreground="#5A6558" FontSize="12" LineHeight="16"/>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <!-- Notas Editáveis -->
+                                    <StackPanel Margin="0,0,0,15">
+                                        <TextBlock Text="📝 Notas e Evolução Clínica" FontWeight="SemiBold" 
+                                                  Foreground="#3F4A3D" FontSize="14" Margin="0,0,0,8"/>
+                                        <TextBox Text="{Binding ConsultaSelecionada.Notas, UpdateSourceTrigger=PropertyChanged}" 
+                                                AcceptsReturn="True" Height="120" TextWrapping="Wrap"
+                                                Style="{StaticResource FieldInput}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                
+                                <!-- Painel Direito: Prescrição -->
+                                <Border Grid.Column="1" Background="#F8F9FA" CornerRadius="8" Padding="15">
+                                    <StackPanel>
+                                        <TextBlock Text="💊 Área de Prescrição" FontWeight="Bold" 
+                                                  Foreground="#3F4A3D" FontSize="14" Margin="0,0,0,15"/>
+                                        
+                                        <!-- Busca de Templates -->
+                                        <TextBlock Text="🔍 Buscar Template:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,5"/>
+                                        <TextBox x:Name="BuscaTemplate" Height="32" Margin="0,0,0,10"
+                                                Text="{Binding BuscaTemplate, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource FieldInput}"/>
+                                        
+                                        <!-- Sugestões de Templates -->
+                                        <ItemsControl ItemsSource="{Binding TemplatesSugeridos}" Margin="0,0,0,15">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="{Binding Nome}" Margin="0,2" HorizontalAlignment="Stretch"
+                                                           Background="#E8F5E8" BorderBrush="#9CAF97" Padding="8,4"
+                                                           Command="{Binding DataContext.SelecionarTemplateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                           CommandParameter="{Binding}"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        
+                                        <!-- Prescrição Atual -->
+                                        <TextBlock Text="📄 Prescrição:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,5"/>
+                                        <TextBox Text="{Binding ConsultaSelecionada.Prescricao, UpdateSourceTrigger=PropertyChanged}" 
+                                                AcceptsReturn="True" Height="150" TextWrapping="Wrap"
+                                                Style="{StaticResource FieldInput}" Margin="0,0,0,15"/>
+                                        
+                                        <!-- Botões de Ação -->
+                                        <StackPanel>
+                                            <Button Content="💾 Guardar Alterações" 
+                                                   Background="#9CAF97" Foreground="White" BorderThickness="0"
+                                                   Padding="10,6" Margin="0,0,0,8" HorizontalAlignment="Stretch"
+                                                   Command="{Binding GuardarConsultaCommand}"/>
+                                            
+                                            <Button Content="📄 Gerar PDF" 
+                                                   Background="#7A9471" Foreground="White" BorderThickness="0"
+                                                   Padding="10,6" HorizontalAlignment="Stretch"
+                                                   Command="{Binding GerarPdfConsultaCommand}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </TabItem>
                 
             </TabControl>
             
@@ -1321,11 +1738,8 @@
         <!-- Footer com Botões -->
         <Border Grid.Row="2" Background="Transparent" Padding="20">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Cancelar" Command="{Binding CancelarCommand}" 
+                <Button Content="← Voltar" Command="{Binding VoltarDashboardCommand}" 
                         Background="Transparent" Foreground="#5A6558" BorderBrush="#E3E9DE"
-                        Padding="20,10" Margin="0,0,10,0"/>
-                <Button Content="Guardar" Command="{Binding SalvarCommand}" 
-                        Background="#9CAF97" Foreground="White" BorderBrush="#9CAF97"
                         Padding="20,10"/>
             </StackPanel>
         </Border>
@@ -1341,6 +1755,154 @@
                          HorizontalAlignment="Center" 
                          Margin="0,10,0,0"/>
             </StackPanel>
+        </Border>
+
+        <!-- 🆕 Modal Nova Consulta Avançado (inspirado no React) -->
+        <Border Grid.RowSpan="3" Background="#B0000000" 
+                Visibility="{Binding MostrarModalNovaConsulta, Converter={StaticResource BoolToVisibilityConverter}}"
+                MouseLeftButtonDown="Modal_MouseLeftButtonDown">
+            <Border Background="White" MaxWidth="600" MaxHeight="500" 
+                    CornerRadius="15" Margin="50" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="30">
+                    <StackPanel>
+                        <!-- Header -->
+                        <Grid Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="🩺 Nova Consulta" FontSize="22" FontWeight="SemiBold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,5"/>
+                                <TextBlock Text="Preenche os dados para agendar uma nova consulta" 
+                                         FontSize="13" Foreground="#5A6558"/>
+                            </StackPanel>
+                            <Button HorizontalAlignment="Right" VerticalAlignment="Top" 
+                                    Command="{Binding FecharModalCommand}" 
+                                    Style="{StaticResource OutlineButton}"
+                                    Width="35" Height="35" Content="✕" 
+                                    Background="#F7F9F6" Foreground="#5A6558"/>
+                        </Grid>
+
+                        <!-- Form Grid -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Tipo de Consulta -->
+                            <StackPanel Grid.Column="0" Grid.Row="0">
+                                <TextBlock Text="Tipo de Consulta *" FontSize="11" Foreground="#5A6558" 
+                                         FontWeight="Medium" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding TiposConsultaDisponiveis}" 
+                                        SelectedItem="{Binding NovaConsultaTipo}" 
+                                        Style="{StaticResource ModernComboBox}"/>
+                            </StackPanel>
+
+                            <!-- Data -->
+                            <StackPanel Grid.Column="2" Grid.Row="0">
+                                <TextBlock Text="Data *" FontSize="11" Foreground="#5A6558" 
+                                         FontWeight="Medium" Margin="0,0,0,5"/>
+                                <!-- DatePicker removido conforme solicitado -->
+                                <TextBox Text="Data será gerada automaticamente" 
+                                        Style="{StaticResource ModernTextBox}" IsReadOnly="True"/>
+                            </StackPanel>
+
+                            <!-- Hora -->
+                            <StackPanel Grid.Column="0" Grid.Row="2">
+                                <TextBlock Text="Hora *" FontSize="11" Foreground="#5A6558" 
+                                         FontWeight="Medium" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding HorariosDisponiveis}" 
+                                        SelectedItem="{Binding NovaConsultaHora}" 
+                                        Style="{StaticResource ModernComboBox}"/>
+                            </StackPanel>
+
+                            <!-- Duração Estimada -->
+                            <StackPanel Grid.Column="2" Grid.Row="2">
+                                <TextBlock Text="Duração (min)" FontSize="11" Foreground="#5A6558" 
+                                         FontWeight="Medium" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding DuracoesDisponiveis}" 
+                                        SelectedItem="{Binding NovaConsultaDuracao}" 
+                                        Style="{StaticResource ModernComboBox}"/>
+                            </StackPanel>
+
+                            <!-- Valor -->
+                            <StackPanel Grid.Column="0" Grid.Row="4">
+                                <TextBlock Text="Valor (€)" FontSize="11" Foreground="#5A6558" 
+                                         FontWeight="Medium" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding NovaConsultaValor, StringFormat=N2}" 
+                                       Style="{StaticResource ModernTextBox}" 
+                                       HorizontalContentAlignment="Right"/>
+                            </StackPanel>
+
+                            <!-- Status -->
+                            <StackPanel Grid.Column="2" Grid.Row="4">
+                                <TextBlock Text="Estado Inicial" FontSize="11" Foreground="#5A6558" 
+                                         FontWeight="Medium" Margin="0,0,0,5"/>
+                                <ComboBox ItemsSource="{Binding StatusDisponiveis}" 
+                                        SelectedItem="{Binding NovaConsultaStatus}" 
+                                        Style="{StaticResource ModernComboBox}"/>
+                            </StackPanel>
+
+                            <!-- Notas/Motivo -->
+                            <StackPanel Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3">
+                                <TextBlock Text="Notas Iniciais / Motivo da Consulta" FontSize="11" Foreground="#5A6558" 
+                                         FontWeight="Medium" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding NovaConsultaNotas}" 
+                                       Style="{StaticResource ModernTextBox}" 
+                                       AcceptsReturn="True" TextWrapping="Wrap" 
+                                       MinHeight="80" MaxHeight="120"
+                                       VerticalScrollBarVisibility="Auto"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Resumo automático do paciente -->
+                        <Border Background="#F0F7EE" BorderBrush="#9CAF97" BorderThickness="1" 
+                                CornerRadius="8" Padding="15" Margin="0,20,0,0">
+                            <StackPanel>
+                                <TextBlock Text="📋 Dados do Paciente" FontSize="12" FontWeight="SemiBold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                                <TextBlock FontSize="11" Foreground="#5A6558" TextWrapping="Wrap">
+                                    <Run Text="Nome:"/> <Run Text="{Binding PacienteAtual.Nome}" FontWeight="Medium"/>
+                                    <LineBreak/>
+                                    <Run Text="Idade:"/> <Run Text="{Binding IdadeCalculada, Mode=OneWay}" FontWeight="Medium"/>
+                                    <LineBreak/>
+                                    <Run Text="Contacto:"/> <Run Text="{Binding PacienteAtual.Email}" FontWeight="Medium"/>
+                                    <Run Text=" | "/> <Run Text="{Binding PacienteAtual.Telefone}" FontWeight="Medium"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Botões de ação -->
+                        <Grid Margin="0,25,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Button Grid.Column="0" Content="❌ Cancelar" 
+                                    Command="{Binding FecharModalCommand}"
+                                    Style="{StaticResource SecondaryButton}" 
+                                    Background="#F7F9F6" Foreground="#5A6558" 
+                                    BorderBrush="#E3E9DE" Height="45"/>
+                            
+                            <Button Grid.Column="2" Content="✅ Confirmar Consulta" 
+                                    Command="{Binding CriarNovaConsultaCommand}"
+                                    Style="{StaticResource PrimaryButton}" Height="45" 
+                                    IsEnabled="{Binding PodeConfirmarNovaConsulta}"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
         </Border>
 
     </Grid>

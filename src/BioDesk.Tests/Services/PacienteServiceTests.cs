@@ -43,7 +43,7 @@ public class PacienteServiceTests : IDisposable
         var paciente = new Paciente
         {
             Nome = "João Silva",
-            DataNascimento = new DateTime(1980, 1, 1),
+            DataNascimento = new DateTime(1985, 5, 15),
             Email = "joao.silva@teste.com"
         };
         
@@ -74,7 +74,7 @@ public class PacienteServiceTests : IDisposable
         var paciente = new Paciente
         {
             Nome = "Maria Costa",
-            DataNascimento = new DateTime(1990, 5, 15),
+            DataNascimento = new DateTime(1990, 8, 20),
             Email = "maria.costa@teste.com"
         };
 
@@ -102,14 +102,14 @@ public class PacienteServiceTests : IDisposable
         var paciente1 = new Paciente
         {
             Nome = "Ana Silva",
-            DataNascimento = new DateTime(1985, 1, 1),
+            DataNascimento = new DateTime(1988, 3, 10),
             AtualizadoEm = DateTime.Now.AddDays(-2)
         };
 
         var paciente2 = new Paciente
         {
             Nome = "João Ferreira",
-            DataNascimento = new DateTime(1980, 1, 1),
+            DataNascimento = new DateTime(1992, 7, 25),
             AtualizadoEm = DateTime.Now.AddDays(-1)
         };
 
@@ -136,7 +136,7 @@ public class PacienteServiceTests : IDisposable
         var paciente = new Paciente
         {
             Nome = "Carlos Santos",
-            DataNascimento = new DateTime(1975, 1, 1)
+            DataNascimento = new DateTime(1987, 12, 5)
         };
 
         var pacienteGravado = await _service.GravarAsync(paciente);

@@ -37,8 +37,7 @@ namespace BioDesk.App
             _navigationService.Register("NovoPaciente", typeof(Views.NovoPacienteView));
             _navigationService.Register("ListaPacientes", typeof(Views.ListaPacientesView));
             _navigationService.Register("FichaPaciente", typeof(Views.FichaPacienteView));
-            _navigationService.Register("AvaliacaoClinica", typeof(Views.AvaliacaoClinicaView));
-            _navigationService.Register("Anamnese", typeof(Views.AnamneseView)); // 🚀 Sistema Integrado!
+            _navigationService.Register("Consultas", typeof(Views.ConsultasView)); // 🩺 Gestão Consultas
         }
 
         private void OnNavigationRequested(object? sender, string viewName)
@@ -63,7 +62,7 @@ namespace BioDesk.App
                     "NovoPaciente" => _serviceProvider.GetRequiredService<Views.NovoPacienteView>(),
                     "ListaPacientes" => _serviceProvider.GetRequiredService<Views.ListaPacientesView>(),
                     "FichaPaciente" => _serviceProvider.GetRequiredService<Views.FichaPacienteView>(),
-                    "AvaliacaoClinica" => _serviceProvider.GetRequiredService<Views.AvaliacaoClinicaView>(),
+                    "Consultas" => _serviceProvider.GetRequiredService<Views.ConsultasView>(), // 🩺 Consultas View
                     _ => null
                 };
 
@@ -83,7 +82,7 @@ namespace BioDesk.App
                         "NovoPaciente" => _serviceProvider.GetRequiredService<NovoPacienteViewModel>(),
                         "ListaPacientes" => _serviceProvider.GetRequiredService<ListaPacientesViewModel>(),
                         "FichaPaciente" => _serviceProvider.GetRequiredService<FichaPacienteViewModel>(),
-                        "AvaliacaoClinica" => _serviceProvider.GetRequiredService<AvaliacaoClinicaViewModel>(),
+                        "Consultas" => _serviceProvider.GetRequiredService<ConsultasViewModel>(), // 🩺 Consultas ViewModel
                         _ => null
                     };
 
@@ -98,6 +97,10 @@ namespace BioDesk.App
                     else if (fe.DataContext is ListaPacientesViewModel listaVm)
                     {
                         _ = listaVm.CarregarDadosAsync();
+                    }
+                    else if (fe.DataContext is ConsultasViewModel consultasVm) // 🩺 Carregar Consultas
+                    {
+                        _ = consultasVm.CarregarDadosAsync();
                     }
                 }
             }

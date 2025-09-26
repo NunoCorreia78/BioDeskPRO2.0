@@ -41,6 +41,12 @@ public class PacienteService : IPacienteService
 
     public void SetPacienteAtivo(Paciente paciente)
     {
+        if (paciente == null)
+        {
+            _logger.LogWarning("Tentativa de definir paciente ativo como null - ignorando");
+            return;
+        }
+        
         _logger.LogInformation("Definindo paciente ativo: {Nome} (ID: {Id})", 
             paciente.Nome, paciente.Id);
         

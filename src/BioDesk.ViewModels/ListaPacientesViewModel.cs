@@ -90,7 +90,7 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
     [RelayCommand]
     private void NovoPaciente()
     {
-        NavigationService.NavigateTo("NovoPaciente");
+        NavigationService.NavigateTo("FichaPaciente");
     }
 
     [RelayCommand]

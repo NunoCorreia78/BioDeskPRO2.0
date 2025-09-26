@@ -55,7 +55,7 @@
         </Grid.RowDefinitions>
 
         <!-- Navigation Cards Row -->
-                <Grid Grid.Row="0" Margin="20,20,20,10">
+        <Grid Grid.Row="0" Margin="20,20,20,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>

@@ -95,13 +95,14 @@
                                       FontWeight="SemiBold" 
                                       Foreground="{StaticResource TextoPrincipal}"
                                       Margin="0,0,0,8"/>
-                            <DatePicker SelectedDate="{Binding DataNascimento}" 
-                                       FontSize="16"
-                                       Padding="16,12"
-                                       Background="{StaticResource FundoCartao}"
-                                       BorderBrush="{StaticResource Borda}"
-                                       BorderThickness="1"
-                                       VerticalAlignment="Center"/>
+                            <!-- DatePicker removido conforme solicitado -->
+                            <TextBox Text="Data de nascimento será opcional" 
+                                    FontSize="16"
+                                    Padding="16,12"
+                                    Background="{StaticResource FundoCartao}"
+                                    BorderBrush="{StaticResource Borda}"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Center" IsReadOnly="True"/>
                         </StackPanel>
                         
                         <!-- Mensagem de Validação -->

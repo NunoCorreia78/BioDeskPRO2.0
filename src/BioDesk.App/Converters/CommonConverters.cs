@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace BioDesk.App.Converters;
 
@@ -38,55 +39,6 @@ public class BooleanToVisibilityConverter : IValueConverter
         if (value is bool boolValue)
         {
             return boolValue ? Visibility.Visible : Visibility.Collapsed;
-        }
-        return Visibility.Collapsed;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is Visibility visibility)
-        {
-            return visibility == Visibility.Visible;
-        }
-        return false;
-    }
-}
-
-/// <summary>
-/// Converte bool para string com parâmetros (true|false)
-/// Usado para alternar texto de botões baseado em estado
-/// </summary>
-public class BooleanToStringConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is bool boolValue && parameter is string paramStr)
-        {
-            var parts = paramStr.Split('|');
-            if (parts.Length == 2)
-            {
-                return boolValue ? parts[0] : parts[1];
-            }
-        }
-        return value?.ToString() ?? string.Empty;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-/// <summary>
-/// Converte valor para Visibility se igual ao parâmetro
-/// </summary>
-public class EqualToVisibilityConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value?.ToString() == parameter?.ToString())
-        {
-            return Visibility.Visible;
         }
         return Visibility.Collapsed;
     }
@@ -164,6 +116,33 @@ public class NullToVisibilityConverter : IValueConverter
     {
         bool isNullOrEmpty = value == null || (value is string str && string.IsNullOrWhiteSpace(str));
         return isNullOrEmpty ? NullValue : NotNullValue;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+/// <summary>
+/// Converte status da consulta para cor do card
+/// Verde = Realizada, Azul = Agendada, Cinzento = Cancelada
+/// </summary>
+public class StatusToColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is string status)
+        {
+            return status.ToLower() switch
+            {
+                "realizada" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50")), // Verde
+                "agendada" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2196F3")),   // Azul
+                "cancelada" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9E9E9E")),  // Cinzento
+                _ => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7A9471"))             // Default verde terroso
+            };
+        }
+        return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7A9471"));
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

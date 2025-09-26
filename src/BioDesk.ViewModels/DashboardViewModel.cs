@@ -15,6 +15,7 @@ using BioDesk.Services.Pacientes;
 using BioDesk.Services.Dashboard;
 using BioDesk.Services.Activity;
 using BioDesk.Services.Consultas;
+using BioDesk.Services.Notifications;
 using BioDesk.Domain.Entities;
 
 namespace BioDesk.ViewModels;
@@ -30,6 +31,9 @@ public partial class DashboardViewModel : NavigationViewModelBase
     private readonly IDashboardStatsService _dashboardStatsService;
     private readonly IActivityService _activityService;
     private readonly IConsultaService _consultaService;
+    private readonly IPacienteService _pacienteService;
+    private readonly INavigationService _navigationService;
+    private readonly INotificationService _notificationService;
     private readonly Timer _relogio;
 
     [ObservableProperty]
@@ -100,10 +104,14 @@ public partial class DashboardViewModel : NavigationViewModelBase
         IDashboardStatsService dashboardStatsService,
         IActivityService activityService,
         IConsultaService consultaService,
+        INotificationService notificationService,
         ILogger<DashboardViewModel> logger)
         : base(navigationService, pacienteService)
     {
         _logger = logger;
+        _pacienteService = pacienteService;
+        _navigationService = navigationService;
+        _notificationService = notificationService;
         _dashboardStatsService = dashboardStatsService;
         _activityService = activityService;
         _consultaService = consultaService;
@@ -122,18 +130,32 @@ public partial class DashboardViewModel : NavigationViewModelBase
     [RelayCommand]
     private void NovoPaciente()
     {
-        _logger.LogInformation("Preparando criação de novo paciente na ficha");
-
-        var novoPaciente = new Paciente
+        try
         {
-            Nome = string.Empty,
-            Email = string.Empty,
-            Telefone = string.Empty,
-            DataNascimento = DateTime.Today.AddYears(-30)
-        };
-
-        PacienteService.SetPacienteAtivo(novoPaciente);
-        NavigationService.NavigateTo("FichaPaciente");
+            _logger.LogInformation("🆕 Iniciando criação de novo paciente");
+            
+            // CORREÇÃO: Criar paciente vazio em vez de null
+            var novoPaciente = new Paciente
+            {
+                Id = 0,
+                Nome = string.Empty,
+                Email = string.Empty,
+                Telefone = string.Empty,
+                // DataNascimento removido conforme solicitado
+                CriadoEm = DateTime.Now
+            };
+            
+            _logger.LogInformation("✅ Paciente vazio criado para novo formulário");
+            _pacienteService.SetPacienteAtivo(novoPaciente);
+            
+            _navigationService.NavigateTo("FichaPaciente");
+            _logger.LogInformation("✅ Navegação para FichaPaciente concluída");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao navegar para novo paciente");
+            _ = _notificationService.ShowErrorAsync($"Erro ao abrir formulário: {ex.Message}");
+        }
     }
 
     /// <summary>

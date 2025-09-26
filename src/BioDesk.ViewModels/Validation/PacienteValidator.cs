@@ -30,6 +30,15 @@ public class PacienteValidator : AbstractValidator<Paciente>
             .MaximumLength(255)
             .WithMessage("Email não pode ter mais de 255 caracteres");
 
+        // Validação obrigatória da data de nascimento
+        RuleFor(p => p.DataNascimento)
+            .NotNull()
+            .WithMessage("Data de nascimento é obrigatória")
+            .LessThan(DateTime.Today)
+            .WithMessage("Data de nascimento não pode ser futura")
+            .GreaterThan(DateTime.Today.AddYears(-120))
+            .WithMessage("Data de nascimento não pode ser superior a 120 anos");
+
         RuleFor(p => p.Telefone)
             .Matches(@"^[\d\s+()-]*$")
             .WithMessage("Telefone contém caracteres inválidos")
@@ -37,13 +46,7 @@ public class PacienteValidator : AbstractValidator<Paciente>
             .WithMessage("Telefone não pode ter mais de 20 caracteres")
             .When(p => !string.IsNullOrWhiteSpace(p.Telefone));
 
-        RuleFor(p => p.DataNascimento)
-            .NotEmpty()
-            .WithMessage("Data de nascimento é obrigatória")
-            .LessThan(DateTime.Today)
-            .WithMessage("Data de nascimento deve ser anterior a hoje")
-            .GreaterThan(DateTime.Today.AddYears(-150))
-            .WithMessage("Data de nascimento inválida (mais de 150 anos)");
+        // Validação DataNascimento removida conforme solicitado
     }
 }
 
@@ -68,10 +71,6 @@ public class PacienteViewModelValidator : AbstractValidator<PacienteViewModel>
             .WithMessage("Email inválido")
             .When(vm => !string.IsNullOrWhiteSpace(vm.Email));
 
-        RuleFor(vm => vm.DataNascimento)
-            .NotEmpty()
-            .WithMessage("Data de nascimento é obrigatória")
-            .LessThan(DateTime.Today)
-            .WithMessage("Data de nascimento deve ser anterior a hoje");
+        // Validação DataNascimento removida conforme solicitado
     }
 }

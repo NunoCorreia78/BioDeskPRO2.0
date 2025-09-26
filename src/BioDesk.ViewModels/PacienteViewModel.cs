@@ -34,19 +34,7 @@ namespace BioDesk.ViewModels
             }
         }
 
-        public DateTime DataNascimento
-        {
-            get => _paciente.DataNascimento;
-            set
-            {
-                if (_paciente.DataNascimento != value)
-                {
-                    _paciente.DataNascimento = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(Idade));
-                }
-            }
-        }
+        // DataNascimento removido conforme solicitado
 
         public string Email
         {
@@ -390,17 +378,15 @@ namespace BioDesk.ViewModels
 
         #endregion
 
-        // Propriedades read-only para binding
-        public int Idade => DateTime.Now.Year - _paciente.DataNascimento.Year - 
-                           (DateTime.Now.DayOfYear < _paciente.DataNascimento.DayOfYear ? 1 : 0);
-
+        // Propriedades de idade removidas conforme solicitado
+        
         public DateTime CriadoEm => _paciente.CriadoEm;
         public DateTime AtualizadoEm => _paciente.AtualizadoEm;
 
         /// <summary>
         /// Propriedades formatadas para exibição no DataGrid
         /// </summary>
-        public string IdadeFormatada => $"{Idade} anos";
+        // IdadeFormatada removida conforme solicitado
         
         public string UltimaConsultaFormatada
         {

@@ -96,109 +96,47 @@ public class DashboardStatsService : IDashboardStatsService
     }
 
     /// <summary>
-    /// Gerar gráfico de distribuição de idades
+    /// Gerar gráfico de distribuição de idades - Desabilitado após remoção de DataNascimento
     /// </summary>
-    public async Task<PlotModel> GenerateDistribuicaoIdadeChartAsync()
+    public Task<PlotModel> GenerateDistribuicaoIdadeChartAsync()
     {
         try
         {
-            var pacientes = await _pacienteService.SearchAsync(string.Empty);
-            var hoje = DateTime.Today;
-
-            // Calcular idades e agrupar
-            var idades = pacientes
-                .Select(p => (int)((hoje - p.DataNascimento).TotalDays / 365.25))
-                .Where(idade => idade >= 0)
-                .ToList();
-
-            // Agrupar por faixas etárias
-            var faixasEtarias = new[]
-            {
-                new { Nome = "0-18", Min = 0, Max = 18 },
-                new { Nome = "19-30", Min = 19, Max = 30 },
-                new { Nome = "31-45", Min = 31, Max = 45 },
-                new { Nome = "46-60", Min = 46, Max = 60 },
-                new { Nome = "60+", Min = 61, Max = int.MaxValue }
-            };
-
-            var distribuicao = faixasEtarias
-                .Select(faixa => new
-                {
-                    faixa.Nome,
-                    Quantidade = idades.Count(i => i >= faixa.Min && i <= faixa.Max)
-                })
-                .Where(item => item.Quantidade > 0)
-                .ToList();
-
+            // Gráfico desabilitado após remoção de DataNascimento
             var plotModel = new PlotModel
             {
-                Title = "Distribuição de Idades",
+                Title = "Distribuição de Idades - Funcionalidade Desabilitada",
                 TitleFontSize = 16,
                 Background = OxyColors.Transparent
             };
 
-            // Criar série de pizza
-            var pieSeries = new PieSeries
-            {
-                StrokeThickness = 2,
-                InsideLabelPosition = 0.5,
-                OutsideLabelFormat = "{1}: {2:0}%",
-                TickDistance = 0
-            };
-
-            var cores = new[]
-            {
-                OxyColor.FromRgb(156, 175, 151), // Verde terroso
-                OxyColor.FromRgb(135, 155, 131), // Verde mais escuro
-                OxyColor.FromRgb(174, 188, 170), // Verde claro
-                OxyColor.FromRgb(195, 205, 192), // Verde muito claro
-                OxyColor.FromRgb(115, 135, 111)  // Verde escuro
-            };
-
-            for (int i = 0; i < distribuicao.Count; i++)
-            {
-                var item = distribuicao[i];
-                pieSeries.Slices.Add(new PieSlice(item.Nome, item.Quantidade)
-                {
-                    Fill = cores[i % cores.Length]
-                });
-            }
-
-            plotModel.Series.Add(pieSeries);
-
-            _logger.LogInformation($"Gráfico de distribuição de idades gerado com {distribuicao.Count} faixas");
-
-            return plotModel;
+            return Task.FromResult(plotModel);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao gerar gráfico de distribuição de idades");
-            return CreateErrorPlotModel("Erro ao carregar distribuição");
+            return Task.FromResult(CreateErrorPlotModel("Erro ao carregar distribuição"));
         }
     }
 
     /// <summary>
-    /// Obter estatísticas básicas do dashboard
+    /// Obter estatísticas básicas do dashboard - Simplificado após remoção de DataNascimento
     /// </summary>
     public async Task<DashboardStats> GetDashboardStatsAsync()
     {
         try
         {
             var pacientes = await _pacienteService.SearchAsync(string.Empty);
-            var hoje = DateTime.Today;
-            var inicioAno = new DateTime(hoje.Year, 1, 1);
-            var inicioMes = new DateTime(hoje.Year, hoje.Month, 1);
 
             var stats = new DashboardStats
             {
                 TotalPacientes = pacientes.Count,
-                PacientesEsteAno = pacientes.Count(p => p.DataNascimento >= inicioAno),
-                PacientesEsteMes = pacientes.Count(p => p.DataNascimento >= inicioMes),
-                IdadeMedia = pacientes.Any() 
-                    ? pacientes.Average(p => (hoje - p.DataNascimento).TotalDays / 365.25)
-                    : 0,
+                // Estatísticas por idade desabilitadas após remoção de DataNascimento
+                PacientesEsteAno = 0,
+                PacientesEsteMes = 0,
+                IdadeMedia = 0,
                 PacienteMaisRecente = pacientes
-                    .OrderByDescending(p => p.DataNascimento)
+                    .OrderByDescending(p => p.CriadoEm)
                     .FirstOrDefault()?.Nome ?? "Nenhum"
             };
 

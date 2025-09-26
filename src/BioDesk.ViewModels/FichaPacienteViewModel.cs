@@ -10,6 +10,8 @@ using BioDesk.Services.Pacientes;
 using BioDesk.Services.Navigation;
 using BioDesk.Services.AutoSave;
 using BioDesk.Services.Notifications;
+using BioDesk.Services.Settings;
+using BioDesk.Services.Consultas;
 using BioDesk.ViewModels.Base;
 
 namespace BioDesk.ViewModels;
@@ -19,22 +21,39 @@ namespace BioDesk.ViewModels;
 /// Permite visualizar e editar dados básicos do paciente
 /// Com auto-save integrado usando debounce
 /// </summary>
-public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
+public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposable
 {
     private readonly IPacienteService _pacienteService;
     private readonly INavigationService _navigationService;
     private readonly INotificationService _notificationService;
     private readonly ILogger<FichaPacienteViewModel> _logger;
     private readonly IAutoSaveService<Paciente> _autoSaveService;
+    private readonly ISettingsService _settingsService;
+    private readonly IConsultaService _consultaService;
 
-    // Contador para testar se os comandos funcionam
-    private int _testeContador = 0;
-
-    // ViewModel para o sistema de anamnese revolucionário INTEGRADO
-    public AnamneseViewModelIntegrado AnamneseViewModelIntegrado { get; }
-
-    [ObservableProperty]
-    private bool _autoSaveEnabled = true;
+    /// <summary>
+    /// Auto-save controlado pelas configurações globais
+    /// </summary>
+    public bool AutoSaveEnabled 
+    { 
+        get => _settingsService.AutoSaveEnabled;
+        set 
+        {
+            _settingsService.AutoSaveEnabled = value;
+            _settingsService.SaveSettings();
+            OnPropertyChanged();
+            
+            // Reconfigurar auto-save se necessário
+            if (value && _autoSaveService != null)
+            {
+                ConfigurarAutoSave();
+            }
+            else if (!value && _autoSaveService != null)
+            {
+                _autoSaveService.StopMonitoring();
+            }
+        }
+    }
 
     [ObservableProperty]
     private DateTime? _lastAutoSave;
@@ -62,172 +81,149 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     private string _telefone = string.Empty;
     
     [ObservableProperty]
-    private DateTime _dataNascimento = DateTime.Today.AddYears(-30);
+    private DateTime? _dataNascimento;
 
-    // ================= PROPRIEDADES DA AVALIAÇÃO CLÍNICA =================
-    
-    // Motivos da Consulta - Chips Toggle
+    // Propriedades para gestão de consultas
     [ObservableProperty]
-    private bool _motivosDor = false;
-    
+    private List<Consulta> _consultasPaciente = new();
+
     [ObservableProperty]
-    private bool _motivosFadiga = false;
-    
+    private bool _hasConsultas = false;
+
+    // Novas propriedades para o layout moderno
     [ObservableProperty]
-    private bool _motivosAnsiedade = false;
-    
+    private Consulta? _consultaSelecionada;
+
     [ObservableProperty]
-    private bool _motivosStress = false;
-    
+    private string _resumoAnamnese = string.Empty;
+
     [ObservableProperty]
-    private bool _motivosDigestivo = false;
-    
+    private string _buscaTemplate = string.Empty;
+
     [ObservableProperty]
-    private bool _motivosRespiratorio = false;
-    
+    private List<TemplatePrescricao> _templatesSugeridos = new();
+
+    // 🆕 Propriedades para Modal Nova Consulta
     [ObservableProperty]
-    private bool _motivosSono = false;
-    
+    private bool _mostrarModalNovaConsulta = false;
+
     [ObservableProperty]
-    private bool _motivosPrevencao = false;
-    
+    private string _novaConsultaTipo = "Naturopatia";
+
     [ObservableProperty]
-    private bool _motivosOutro = false;
-    
+    private DateTime _novaConsultaData = DateTime.Today.AddDays(1);
+
     [ObservableProperty]
-    private string _motivosOutroTexto = string.Empty;
-    
+    private string _novaConsultaHora = "09:00";
+
     [ObservableProperty]
-    private string _motivoConsulta = string.Empty;
-    
+    private int _novaConsultaDuracao = 60;
+
     [ObservableProperty]
-    private string _objetivoPaciente = string.Empty;
-    
-    // Sintomas - Musculoesquelético
+    private decimal _novaConsultaValor = 50.00m;
+
     [ObservableProperty]
-    private bool _sintomasMusculoCervicalgia = false;
-    
+    private string _novaConsultaStatus = "Agendada";
+
     [ObservableProperty]
-    private bool _sintomasMusculoLombalgia = false;
+    private string _novaConsultaNotas = string.Empty;
+
+    // Listas para dropdowns do modal
+    public List<string> TiposConsultaDisponiveis => new() { "Naturopatia", "Osteopatia", "Medicina Quântica", "Iridologia", "Seguimento" };
     
-    [ObservableProperty]
-    private bool _sintomasMusculoDorsalgia = false;
+    public List<string> HorariosDisponiveis => GenerateTimeSlots();
     
-    [ObservableProperty]
-    private bool _sintomasMusculoDorArticular = false;
+    public List<int> DuracoesDisponiveis => new() { 30, 45, 60, 90, 120 };
     
-    [ObservableProperty]
-    private bool _sintomasMusculoRigidezMatinal = false;
-    
-    [ObservableProperty]
-    private bool _sintomasMusculoFraqueza = false;
-    
-    // Sintomas - Neurológico
-    [ObservableProperty]
-    private bool _sintomasNeurologicoCefaleia = false;
-    
-    [ObservableProperty]
-    private bool _sintomasNeurologicoTonturas = false;
-    
-    [ObservableProperty]
-    private bool _sintomasNeurologicoVertigens = false;
-    
-    [ObservableProperty]
-    private bool _sintomasNeurologicoParestesias = false;
-    
-    [ObservableProperty]
-    private bool _sintomasNeurologicoDormencia = false;
-    
-    // Sintomas - Digestivo
-    [ObservableProperty]
-    private bool _sintomasDigestivoAzia = false;
-    
-    [ObservableProperty]
-    private bool _sintomasDigestivoRefluxo = false;
-    
-    [ObservableProperty]
-    private bool _sintomasDigestivoNauseas = false;
-    
-    [ObservableProperty]
-    private bool _sintomasDigestivoDistensao = false;
-    
-    [ObservableProperty]
-    private bool _sintomasDigestivoObstipacao = false;
-    
-    [ObservableProperty]
-    private bool _sintomasDigestivoDiarreia = false;
-    
-    // Sintomas - Saúde Mental
-    [ObservableProperty]
-    private bool _sintomasMentalAnsiedade = false;
-    
-    [ObservableProperty]
-    private bool _sintomasMentalDepressao = false;
-    
-    [ObservableProperty]
-    private bool _sintomasMentalIrritabilidade = false;
-    
-    [ObservableProperty]
-    private bool _sintomasMentalPanico = false;
-    
-    [ObservableProperty]
-    private bool _sintomasMentalInsonia = false;
-    
-    [ObservableProperty]
-    private bool _sintomasMentalSonolencia = false;
-    
-    // História da Queixa Atual (HQA)
-    [ObservableProperty]
-    private string _localizacaoHQA = string.Empty;
-    
-    [ObservableProperty]
-    private double _intensidadeHQA = 0;
-    
-    [ObservableProperty]
-    private string _caraterHQA = string.Empty;
-    
-    // Saúde Mental / Stress
-    [ObservableProperty]
-    private double _nivelStress = 0;
-    
-    // Outros Sintomas
-    [ObservableProperty]
-    private string _outrosSintomas = string.Empty;
+    public List<string> StatusDisponiveis => new() { "Agendada", "Confirmada", "Realizada" };
+
+    public bool PodeConfirmarNovaConsulta => !string.IsNullOrEmpty(NovaConsultaTipo) && NovaConsultaData > DateTime.Today;
+
+    /// <summary>
+    /// Gera slots de horário de 30 em 30 minutos das 8h às 19h
+    /// </summary>
+    private static List<string> GenerateTimeSlots()
+    {
+        var slots = new List<string>();
+        for (int hour = 8; hour <= 19; hour++)
+        {
+            slots.Add($"{hour:D2}:00");
+            if (hour < 19) slots.Add($"{hour:D2}:30");
+        }
+        return slots;
+    }
 
     public FichaPacienteViewModel(
         IPacienteService pacienteService,
         INavigationService navigationService,
         INotificationService notificationService,
         IAutoSaveService<Paciente> autoSaveService,
-        AnamneseViewModelIntegrado anamneseViewModelIntegrado,
-        ILogger<FichaPacienteViewModel> logger)
+        ISettingsService settingsService,
+        IConsultaService consultaService,
+        ILogger<FichaPacienteViewModel> logger) : base(navigationService, pacienteService)
     {
-        _pacienteService = pacienteService;
-        _navigationService = navigationService;
-        _notificationService = notificationService;
-        _autoSaveService = autoSaveService;
-        _logger = logger;
-        AnamneseViewModelIntegrado = anamneseViewModelIntegrado;
+        try
+        {
+            _logger = logger;
+            _logger.LogInformation("🚀 FichaPacienteViewModel: Iniciando construção...");
 
-        // Configurar auto-save
-        ConfigurarAutoSave();
+            _pacienteService = pacienteService;
+            _logger.LogInformation("✓ PacienteService definido");
+
+            _navigationService = navigationService;
+            _logger.LogInformation("✓ NavigationService definido");
+
+            _notificationService = notificationService;
+            _logger.LogInformation("✓ NotificationService definido");
+
+            _autoSaveService = autoSaveService;
+            _logger.LogInformation("✓ AutoSaveService definido");
+
+            _settingsService = settingsService;
+            _logger.LogInformation("✓ SettingsService definido");
+
+            _consultaService = consultaService;
+            _logger.LogInformation("✓ ConsultaService definido");
+
+            // Configurar auto-save
+            _logger.LogInformation("🔧 Configurando auto-save...");
+            ConfigurarAutoSave();
+            _logger.LogInformation("✓ Auto-save configurado");
+
+            // Subscrever ao evento PacienteAtivoChanged
+            _logger.LogInformation("🔗 Configurando event handler...");
+            _pacienteService.PacienteAtivoChanged += OnPacienteAtivoChanged;
+            _logger.LogInformation("✓ Event handler configurado");
         
-        // Inicializar com paciente ativo se existir
-        var pacienteAtivo = _pacienteService.GetPacienteAtivo();
-        if (pacienteAtivo != null)
-        {
-            CarregarPaciente(pacienteAtivo);
+            // Inicializar com paciente ativo se existir
+            _logger.LogInformation("👤 Verificando paciente ativo...");
+            var pacienteAtivo = _pacienteService.GetPacienteAtivo();
+            
+            if (pacienteAtivo != null)
+            {
+                _logger.LogInformation($"👤 Paciente ativo encontrado: {pacienteAtivo.Nome} (ID: {pacienteAtivo.Id})");
+                CarregarPaciente(pacienteAtivo);
+                _logger.LogInformation("✓ Paciente carregado");
+            }
+            else
+            {
+                _logger.LogInformation("👤 Nenhum paciente ativo - iniciando formulário limpo");
+                LimparFormulario();
+                _logger.LogInformation("✓ Formulário limpo");
+            }
+
+            _logger.LogInformation("🎉 FichaPacienteViewModel: Construção concluída com sucesso!");
         }
-        else
+        catch (Exception ex)
         {
-            LimparFormulario();
+            _logger?.LogError(ex, "💥 CRASH no construtor FichaPacienteViewModel: {Message}", ex.Message);
+            throw; // Re-throw para manter o crash visível
         }
     }
 
     /// <summary>
-    /// Propriedade computada para mostrar a idade do paciente
+    /// Propriedades de idade e data de nascimento removidas conforme solicitado
     /// </summary>
-    public string Idade => CalcularIdade(DataNascimento);
 
     /// <summary>
     /// Propriedade para o ID do paciente (somente leitura)
@@ -245,9 +241,21 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     public DateTime? AtualizadoEm => PacienteAtual?.AtualizadoEm;
 
     /// <summary>
-    /// Serviço de navegação (para uso nos bindings)
+    /// Idade calculada automaticamente a partir da data de nascimento
     /// </summary>
-    public INavigationService NavigationService => _navigationService;
+    public string IdadeCalculada
+    {
+        get
+        {
+            if (DataNascimento == null) return string.Empty;
+            var nascimento = DataNascimento.Value.Date;
+            var hoje = DateTime.Today;
+            var anos = hoje.Year - nascimento.Year;
+            if (nascimento > hoje.AddYears(-anos)) anos--;
+            if (anos < 0) return string.Empty;
+            return anos == 1 ? "1 ano" : $"{anos} anos";
+        }
+    }
 
     [RelayCommand]
     private void Editar()
@@ -259,7 +267,7 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private async Task GravarAsync()
     {
-        if (!ValidarFormulario())
+        if (!await ValidarFormularioAsync())
             return;
 
         try
@@ -277,10 +285,13 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
             
             // Recarregar dados
             CarregarPaciente(pacienteGravado);
+            
+            await _notificationService.ShowSuccessAsync("Paciente gravado com sucesso!");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao gravar paciente");
+            await _notificationService.ShowErrorAsync($"Erro ao gravar paciente: {ex.Message}");
         }
     }
 
@@ -327,250 +338,349 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// Marca sintomas musculoesqueléticos para trabalhar na sessão atual
+    /// Comando para abrir modal de nova consulta
     /// </summary>
     [RelayCommand]
-    private async Task TrabalharHojeMusculoAsync()
+    private void NovaConsulta()
+    {
+        if (PacienteAtual == null)
+        {
+            _ = _notificationService.ShowErrorAsync("Nenhum paciente selecionado para criar consulta.");
+            return;
+        }
+
+        // Resetar dados do modal
+        NovaConsultaTipo = "Naturopatia";
+        NovaConsultaData = DateTime.Today.AddDays(1);
+        NovaConsultaHora = "09:00";
+        NovaConsultaDuracao = 60;
+        NovaConsultaValor = 50.00m;
+        NovaConsultaStatus = "Agendada";
+        NovaConsultaNotas = string.Empty;
+
+        MostrarModalNovaConsulta = true;
+        _logger.LogInformation("Modal nova consulta aberto para paciente {Nome}", PacienteAtual.Nome);
+    }
+
+    /// <summary>
+    /// Comando para fechar o modal
+    /// </summary>
+    [RelayCommand]
+    private void FecharModal()
+    {
+        MostrarModalNovaConsulta = false;
+    }
+
+    /// <summary>
+    /// Comando para criar nova consulta com dados do modal
+    /// </summary>
+    [RelayCommand]
+    private async Task CriarNovaConsulta()
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            // TESTE SIMPLES: Incrementar contador
-            _testeContador++;
-            
-            var sintomasAtivos = new List<string>();
-            if (SintomasMusculoCervicalgia) sintomasAtivos.Add("Cervicalgia");
-            if (SintomasMusculoLombalgia) sintomasAtivos.Add("Lombalgia");
-            if (SintomasMusculoDorsalgia) sintomasAtivos.Add("Dorsalgia");
-            if (SintomasMusculoDorArticular) sintomasAtivos.Add("Dor articular");
-            if (SintomasMusculoRigidezMatinal) sintomasAtivos.Add("Rigidez matinal");
-            if (SintomasMusculoFraqueza) sintomasAtivos.Add("Fraqueza");
+            if (PacienteAtual == null || !PodeConfirmarNovaConsulta)
+            {
+                await _notificationService.ShowWarningAsync("Dados inválidos para criar consulta.");
+                return;
+            }
 
-            if (sintomasAtivos.Any())
+            // Se é um paciente novo (ID = 0), precisa de ser gravado primeiro
+            if (PacienteAtual.Id == 0)
             {
-                ErrorMessage = $"✅ CLIQUE #{_testeContador}: {string.Join(", ", sintomasAtivos)} → SESSÃO";
-                _logger?.LogInformation("Sintomas musculoesqueléticos marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
+                await _notificationService.ShowWarningAsync("Precisa de gravar o paciente antes de criar uma consulta.");
+                return;
             }
-            else
+
+            // Combinar data e hora
+            var horaPartes = NovaConsultaHora.Split(':');
+            var dataHoraCompleta = NovaConsultaData
+                .AddHours(int.Parse(horaPartes[0]))
+                .AddMinutes(int.Parse(horaPartes[1]));
+
+            var novaConsulta = new Consulta
             {
-                ErrorMessage = $"⚠️ CLIQUE #{_testeContador}: Marque primeiro os chips musculoesqueléticos!";
+                PacienteId = PacienteAtual.Id,
+                DataConsulta = dataHoraCompleta,
+                Status = NovaConsultaStatus,
+                TipoConsulta = NovaConsultaTipo,
+                Valor = NovaConsultaValor,
+                Notas = $"{NovaConsultaNotas}\n\n[Duração prevista: {NovaConsultaDuracao} minutos]"
+            };
+
+            var consultaCriada = await _consultaService.CriarConsultaAsync(novaConsulta);
+            if (consultaCriada != null)
+            {
+                await CarregarConsultasPaciente();
+                MostrarModalNovaConsulta = false;
+                
+                // Selecionar a nova consulta criada
+                ConsultaSelecionada = consultaCriada;
+                
+                await _notificationService.ShowSuccessAsync($"Nova consulta de {NovaConsultaTipo} agendada para {NovaConsultaData:dd/MM/yyyy} às {NovaConsultaHora}!");
+                _logger.LogInformation($"Nova consulta criada: {consultaCriada.TipoConsulta} - {consultaCriada.DataConsulta:dd/MM/yyyy HH:mm}");
             }
-            
-            await Task.CompletedTask;
         });
     }
 
     /// <summary>
-    /// Atualiza o perfil permanente com sintomas musculoesqueléticos
+    /// Comando para editar uma consulta existente
     /// </summary>
     [RelayCommand]
-    private async Task AtualizarPermanenteMusculoAsync()
+    private async Task EditarConsulta(Consulta consulta)
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            var sintomasAtivos = new List<string>();
-            if (SintomasMusculoCervicalgia) sintomasAtivos.Add("Cervicalgia");
-            if (SintomasMusculoLombalgia) sintomasAtivos.Add("Lombalgia");
-            if (SintomasMusculoDorsalgia) sintomasAtivos.Add("Dorsalgia");
-            if (SintomasMusculoDorArticular) sintomasAtivos.Add("Dor articular");
-            if (SintomasMusculoRigidezMatinal) sintomasAtivos.Add("Rigidez matinal");
-            if (SintomasMusculoFraqueza) sintomasAtivos.Add("Fraqueza");
+            if (consulta == null) return;
 
-            if (sintomasAtivos.Any())
+            // Por agora, permite alterar status e notas da consulta
+            // Futuramente pode abrir um dialog de edição
+            if (consulta.Status == "Agendada")
             {
-                ErrorMessage = $"💾 PERMANENTE: {string.Join(", ", sintomasAtivos)} salvo no perfil";
-                _logger?.LogInformation("Perfil musculoesquelético permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
+                consulta.Status = "Realizada";
+                consulta.Notas += $" [Realizada em {DateTime.Now:dd/MM/yyyy HH:mm}]";
             }
-            else
-            {
-                ErrorMessage = "⚠️ Selecione sintomas para salvar no perfil permanente";
-            }
-            
-            await Task.CompletedTask;
+
+            await _consultaService.AtualizarConsultaAsync(consulta);
+            await CarregarConsultasPaciente();
+            await _notificationService.ShowSuccessAsync("Consulta atualizada!");
         });
     }
 
     /// <summary>
-    /// Marca sintomas neurológicos para trabalhar na sessão atual
+    /// Comando para ver detalhes de uma consulta
     /// </summary>
     [RelayCommand]
-    private async Task TrabalharHojeNeuroAsync()
+    private void VerDetalhesConsulta(Consulta consulta)
+    {
+        if (consulta == null) return;
+
+        var detalhes = $"Consulta: {consulta.TipoConsulta}\n" +
+                      $"Data: {consulta.DataConsulta:dd/MM/yyyy HH:mm}\n" +
+                      $"Status: {consulta.Status}\n" +
+                      $"Valor: {consulta.Valor:C}\n" +
+                      $"Notas: {consulta.Notas}";
+
+        _ = _notificationService.ShowInfoAsync($"Detalhes da Consulta\n\n{detalhes}");
+    }
+
+    /// <summary>
+    /// Comando para selecionar uma consulta e mostrar painel de detalhes
+    /// </summary>
+    [RelayCommand]
+    private void SelecionarConsulta(Consulta consulta)
+    {
+        if (consulta == null) return;
+        
+        ConsultaSelecionada = consulta;
+        GerarResumoAnamnese();
+        CarregarTemplatesSugeridos();
+        
+        _logger.LogInformation($"Consulta selecionada: {consulta.TipoConsulta} - {consulta.DataConsulta:dd/MM/yyyy}");
+    }
+
+    /// <summary>
+    /// Comando para fechar o painel de detalhes
+    /// </summary>
+    [RelayCommand]
+    private void FecharDetalhes()
+    {
+        ConsultaSelecionada = null;
+        ResumoAnamnese = string.Empty;
+        TemplatesSugeridos.Clear();
+    }
+
+    /// <summary>
+    /// Comando para repetir a última consulta
+    /// </summary>
+    [RelayCommand]
+    private async Task RepetirConsulta()
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            var sintomasAtivos = new List<string>();
-            if (SintomasNeurologicoCefaleia) sintomasAtivos.Add("Cefaleia");
-            if (SintomasNeurologicoTonturas) sintomasAtivos.Add("Tonturas");
-            if (SintomasNeurologicoVertigens) sintomasAtivos.Add("Vertigens");
-            if (SintomasNeurologicoParestesias) sintomasAtivos.Add("Parestesias");
-            if (SintomasNeurologicoDormencia) sintomasAtivos.Add("Dormência");
+            if (PacienteAtual?.Id == null || !ConsultasPaciente.Any())
+            {
+                await _notificationService.ShowWarningAsync("Não há consultas anteriores para repetir.");
+                return;
+            }
 
-            if (sintomasAtivos.Any())
-            {
-                ErrorMessage = $"✅ Neurológicos para SESSÃO: {string.Join(", ", sintomasAtivos)}";
-                _logger?.LogInformation("Sintomas neurológicos marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
-            }
-            else
-            {
-                ErrorMessage = "⚠️ Selecione primeiro os sintomas neurológicos";
-            }
+            var ultimaConsulta = ConsultasPaciente.OrderByDescending(c => c.DataConsulta).First();
             
-            await Task.CompletedTask;
+            var novaConsulta = new Consulta
+            {
+                PacienteId = PacienteAtual.Id,
+                DataConsulta = DateTime.Now.AddDays(7), // Agendar para a próxima semana
+                Status = "Agendada",
+                TipoConsulta = ultimaConsulta.TipoConsulta,
+                Valor = ultimaConsulta.Valor,
+                Notas = $"Repetição de consulta anterior ({ultimaConsulta.DataConsulta:dd/MM/yyyy})"
+            };
+
+            var consultaCriada = await _consultaService.CriarConsultaAsync(novaConsulta);
+            if (consultaCriada != null)
+            {
+                await CarregarConsultasPaciente();
+                await _notificationService.ShowSuccessAsync("Consulta repetida e agendada!");
+            }
         });
     }
 
     /// <summary>
-    /// Atualiza o perfil permanente com sintomas neurológicos
+    /// Comando para selecionar template de prescrição
     /// </summary>
     [RelayCommand]
-    private async Task AtualizarPermanenteNeuroAsync()
+    private void SelecionarTemplate(TemplatePrescricao template)
+    {
+        if (template == null || ConsultaSelecionada == null) return;
+        
+        ConsultaSelecionada.Prescricao = template.Conteudo;
+        OnPropertyChanged(nameof(ConsultaSelecionada));
+    }
+
+    /// <summary>
+    /// Comando para guardar alterações na consulta
+    /// </summary>
+    [RelayCommand]
+    private async Task GuardarConsulta()
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            var sintomasAtivos = new List<string>();
-            if (SintomasNeurologicoCefaleia) sintomasAtivos.Add("Cefaleia");
-            if (SintomasNeurologicoTonturas) sintomasAtivos.Add("Tonturas");
-            if (SintomasNeurologicoVertigens) sintomasAtivos.Add("Vertigens");
-            if (SintomasNeurologicoParestesias) sintomasAtivos.Add("Parestesias");
-            if (SintomasNeurologicoDormencia) sintomasAtivos.Add("Dormência");
+            if (ConsultaSelecionada == null) return;
 
-            if (sintomasAtivos.Any())
-            {
-                ErrorMessage = $"💾 PERMANENTE neurológico: {string.Join(", ", sintomasAtivos)}";
-                _logger?.LogInformation("Perfil neurológico permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
-            }
-            else
-            {
-                ErrorMessage = "⚠️ Selecione sintomas neurológicos para perfil permanente";
-            }
-            
-            await Task.CompletedTask;
+            await _consultaService.AtualizarConsultaAsync(ConsultaSelecionada);
+            await CarregarConsultasPaciente();
+            await _notificationService.ShowSuccessAsync("Consulta atualizada com sucesso!");
         });
     }
 
     /// <summary>
-    /// Marca sintomas digestivos para trabalhar na sessão atual
+    /// Comando para gerar PDF da consulta
     /// </summary>
     [RelayCommand]
-    private async Task TrabalharHojeDigestivoAsync()
+    private async Task GerarPdfConsulta()
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            var sintomasAtivos = new List<string>();
-            if (SintomasDigestivoAzia) sintomasAtivos.Add("Azia");
-            if (SintomasDigestivoRefluxo) sintomasAtivos.Add("Refluxo");
-            if (SintomasDigestivoNauseas) sintomasAtivos.Add("Náuseas");
-            if (SintomasDigestivoDistensao) sintomasAtivos.Add("Distensão");
-            if (SintomasDigestivoObstipacao) sintomasAtivos.Add("Obstipação");
-            if (SintomasDigestivoDiarreia) sintomasAtivos.Add("Diarreia");
+            if (ConsultaSelecionada == null || PacienteAtual == null) return;
 
-            if (sintomasAtivos.Any())
-            {
-                ErrorMessage = $"✅ Digestivos para SESSÃO: {string.Join(", ", sintomasAtivos)}";
-                _logger?.LogInformation("Sintomas digestivos marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
-            }
-            else
-            {
-                ErrorMessage = "⚠️ Selecione primeiro os sintomas digestivos";
-            }
+            // Funcionalidade de geração de PDF planejada para próximas versões
+            await _notificationService.ShowInfoAsync("Funcionalidade de geração de PDF será implementada em breve!");
             
-            await Task.CompletedTask;
+            _logger.LogInformation($"PDF solicitado para consulta {ConsultaSelecionada.Id} - Paciente: {PacienteAtual.Nome}");
         });
     }
 
     /// <summary>
-    /// Atualiza o perfil permanente com sintomas digestivos
+    /// Gera um resumo automático da anamnese do paciente
     /// </summary>
-    [RelayCommand]
-    private async Task AtualizarPermanenteDigestivoAsync()
+    private void GerarResumoAnamnese()
     {
-        await ExecuteWithErrorHandlingAsync(async () =>
+        if (PacienteAtual == null)
         {
-            var sintomasAtivos = new List<string>();
-            if (SintomasDigestivoAzia) sintomasAtivos.Add("Azia");
-            if (SintomasDigestivoRefluxo) sintomasAtivos.Add("Refluxo");
-            if (SintomasDigestivoNauseas) sintomasAtivos.Add("Náuseas");
-            if (SintomasDigestivoDistensao) sintomasAtivos.Add("Distensão");
-            if (SintomasDigestivoObstipacao) sintomasAtivos.Add("Obstipação");
-            if (SintomasDigestivoDiarreia) sintomasAtivos.Add("Diarreia");
+            ResumoAnamnese = string.Empty;
+            return;
+        }
 
-            if (sintomasAtivos.Any())
-            {
-                ErrorMessage = $"💾 PERMANENTE digestivo: {string.Join(", ", sintomasAtivos)}";
-                _logger?.LogInformation("Perfil digestivo permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
-            }
-            else
-            {
-                ErrorMessage = "⚠️ Selecione sintomas digestivos para perfil permanente";
-            }
-            
-            await Task.CompletedTask;
-        });
+        var resumo = $"Paciente: {PacienteAtual.Nome}\n"; // Idade removida conforme solicitado
+        resumo += $"Contacto: {PacienteAtual.Email}";
+        
+        if (!string.IsNullOrEmpty(PacienteAtual.Telefone))
+        {
+            resumo += $" | {PacienteAtual.Telefone}";
+        }
+
+        // Dados adicionais da anamnese serão incluídos em futuras versões
+        resumo += "\n\n[Resumo completo da anamnese será implementado quando os dados estiverem disponíveis]";
+
+        ResumoAnamnese = resumo;
     }
 
     /// <summary>
-    /// Marca sintomas de saúde mental para trabalhar na sessão atual
+    /// Carrega templates sugeridos baseado na busca
     /// </summary>
-    [RelayCommand]
-    private async Task TrabalharHojeMentalAsync()
+    private void CarregarTemplatesSugeridos()
     {
-        await ExecuteWithErrorHandlingAsync(async () =>
-        {
-            var sintomasAtivos = new List<string>();
-            if (SintomasMentalAnsiedade) sintomasAtivos.Add("Ansiedade");
-            if (SintomasMentalDepressao) sintomasAtivos.Add("Humor deprimido");
-            if (SintomasMentalIrritabilidade) sintomasAtivos.Add("Irritabilidade");
-            if (SintomasMentalPanico) sintomasAtivos.Add("Ataques de pânico");
-            if (SintomasMentalInsonia) sintomasAtivos.Add("Insónia");
-            if (SintomasMentalSonolencia) sintomasAtivos.Add("Sonolência diurna");
+        TemplatesSugeridos.Clear();
 
-            if (sintomasAtivos.Any())
-            {
-                ErrorMessage = $"✅ Saúde mental para SESSÃO: {string.Join(", ", sintomasAtivos)}";
-                _logger?.LogInformation("Sintomas de saúde mental marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
-            }
-            else
-            {
-                ErrorMessage = "⚠️ Selecione primeiro os sintomas de saúde mental";
-            }
-            
-            await Task.CompletedTask;
-        });
+        // Templates mockados para demonstração
+        var templates = new List<TemplatePrescricao>
+        {
+            new() { Id = 1, Nome = "Lombalgia Aguda", Categoria = "Osteopatia", 
+                   Conteudo = "1. Repouso relativo\n2. Aplicação de calor local\n3. Exercícios suaves de mobilização" },
+            new() { Id = 2, Nome = "Ansiedade", Categoria = "Naturopatia", 
+                   Conteudo = "1. Chá de camomila 2x/dia\n2. Técnicas de respiração\n3. Suplemento de magnésio" },
+            new() { Id = 3, Nome = "Digestão", Categoria = "Naturopatia", 
+                   Conteudo = "1. Enzimas digestivas antes das refeições\n2. Probióticos\n3. Evitar alimentos processados" }
+        };
+
+        // Filtrar por busca se houver texto
+        if (!string.IsNullOrEmpty(BuscaTemplate))
+        {
+            templates = templates.Where(t => 
+                t.Nome.Contains(BuscaTemplate, StringComparison.OrdinalIgnoreCase) ||
+                t.Categoria.Contains(BuscaTemplate, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+
+        foreach (var template in templates)
+        {
+            TemplatesSugeridos.Add(template);
+        }
     }
 
     /// <summary>
-    /// Atualiza o perfil permanente com sintomas de saúde mental
+    /// Atualizar templates quando busca muda
     /// </summary>
-    [RelayCommand]
-    private async Task AtualizarPermanenteMentalAsync()
+    partial void OnBuscaTemplateChanged(string value)
     {
-        await ExecuteWithErrorHandlingAsync(async () =>
+        if (ConsultaSelecionada != null)
         {
-            var sintomasAtivos = new List<string>();
-            if (SintomasMentalAnsiedade) sintomasAtivos.Add("Ansiedade");
-            if (SintomasMentalDepressao) sintomasAtivos.Add("Humor deprimido");
-            if (SintomasMentalIrritabilidade) sintomasAtivos.Add("Irritabilidade");
-            if (SintomasMentalPanico) sintomasAtivos.Add("Ataques de pânico");
-            if (SintomasMentalInsonia) sintomasAtivos.Add("Insónia");
-            if (SintomasMentalSonolencia) sintomasAtivos.Add("Sonolência diurna");
+            CarregarTemplatesSugeridos();
+        }
+    }
 
-            if (sintomasAtivos.Any())
+    /// <summary>
+    /// Triggers para atualizar propriedades computadas do modal
+    /// </summary>
+    partial void OnNovaConsultaTipoChanged(string value) => OnPropertyChanged(nameof(PodeConfirmarNovaConsulta));
+    partial void OnNovaConsultaDataChanged(DateTime value) => OnPropertyChanged(nameof(PodeConfirmarNovaConsulta));
+
+    /// <summary>
+    /// Carrega as consultas do paciente atual
+    /// </summary>
+    private async Task CarregarConsultasPaciente()
+    {
+        if (PacienteAtual?.Id == null || PacienteAtual.Id == 0)
+        {
+            ConsultasPaciente.Clear();
+            HasConsultas = false;
+            return;
+        }
+
+        try
+        {
+            var consultas = await _consultaService.ObterConsultasPorPacienteAsync(PacienteAtual.Id);
+            
+            ConsultasPaciente.Clear();
+            foreach (var consulta in consultas.OrderByDescending(c => c.DataConsulta))
             {
-                ErrorMessage = $"💾 PERMANENTE saúde mental: {string.Join(", ", sintomasAtivos)}";
-                _logger?.LogInformation("Perfil de saúde mental permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
-            }
-            else
-            {
-                ErrorMessage = "⚠️ Selecione sintomas de saúde mental para perfil permanente";
+                ConsultasPaciente.Add(consulta);
             }
             
-            await Task.CompletedTask;
-        });
+            HasConsultas = ConsultasPaciente.Count > 0;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Erro ao carregar consultas do paciente {PacienteAtual.Nome}");
+            ConsultasPaciente.Clear();
+            HasConsultas = false;
+        }
     }
 
     /// <summary>
     /// Carrega um paciente no formulário
     /// </summary>
-    public void CarregarPaciente(Paciente paciente)
+    public async Task CarregarPacienteAsync(Paciente paciente)
     {
         if (paciente == null) return;
 
@@ -580,18 +690,27 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
         Nome = paciente.Nome ?? string.Empty;
         Email = paciente.Email ?? string.Empty;
         Telefone = paciente.Telefone ?? string.Empty;
-        DataNascimento = paciente.DataNascimento == default
-            ? DateTime.Today.AddYears(-30)
-            : paciente.DataNascimento;
+        DataNascimento = paciente.DataNascimento;
         
         IsEdicao = isNovoPaciente ? true : false;
         IsDirty = false;
+        
+        // Carregar consultas do paciente (se não for novo)
+        if (!isNovoPaciente)
+        {
+            await CarregarConsultasPaciente();
+        }
+        else
+        {
+            ConsultasPaciente = new List<Consulta>();
+            HasConsultas = false;
+        }
         
         // Notificar propriedades computadas
         OnPropertyChanged(nameof(Id));
         OnPropertyChanged(nameof(CriadoEm));
         OnPropertyChanged(nameof(AtualizadoEm));
-        OnPropertyChanged(nameof(Idade));
+        OnPropertyChanged(nameof(IdadeCalculada));
         
         if (isNovoPaciente)
         {
@@ -599,7 +718,70 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
         }
         else
         {
-            _logger.LogInformation("Paciente carregado: {Nome} (ID: {Id})", paciente.Nome, paciente.Id);
+            _logger.LogInformation("Paciente carregado: {Nome} (ID: {Id}) com {Count} consultas", 
+                paciente.Nome, paciente.Id, ConsultasPaciente.Count);
+        }
+    }
+
+    /// <summary>
+    /// Método síncrono mantido para compatibilidade
+    /// </summary>
+    public void CarregarPaciente(Paciente paciente)
+    {
+        try
+        {
+            if (paciente == null)
+            {
+                _logger.LogWarning("CarregarPaciente chamado com paciente null");
+                LimparFormulario();
+                return;
+            }
+
+            _logger.LogInformation($"📂 Carregando paciente: {paciente.Nome}");
+
+            var isNovoPaciente = paciente.Id == 0;
+
+            PacienteAtual = paciente;
+            Nome = paciente.Nome ?? string.Empty;
+            Email = paciente.Email ?? string.Empty;
+            Telefone = paciente.Telefone ?? string.Empty;
+            DataNascimento = paciente.DataNascimento;
+            
+            // CORREÇÃO: Lógica correta para IsEdicao
+            IsEdicao = isNovoPaciente; // Novo paciente deve começar em edição
+            IsDirty = false;
+            
+            // Para novo paciente, limpar consultas
+            if (isNovoPaciente)
+            {
+                ConsultasPaciente = new List<Consulta>();
+                HasConsultas = false;
+            }
+            else
+            {
+                // Carregar consultas de forma assíncrona mas segura
+                _ = CarregarConsultasPaciente();
+            }
+            
+            // Notificar propriedades computadas
+            OnPropertyChanged(nameof(Id));
+            OnPropertyChanged(nameof(CriadoEm));
+            OnPropertyChanged(nameof(AtualizadoEm));
+            OnPropertyChanged(nameof(IdadeCalculada));
+            
+            if (isNovoPaciente)
+            {
+                _logger.LogInformation("Ficha preparada para novo paciente");
+            }
+            else
+            {
+                _logger.LogInformation("Paciente carregado: {Nome} (ID: {Id})", 
+                    paciente.Nome, paciente.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao carregar paciente no método síncrono");
         }
     }
 
@@ -612,7 +794,7 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
         Nome = string.Empty;
         Email = string.Empty;
         Telefone = string.Empty;
-        DataNascimento = DateTime.Today.AddYears(-30);
+        DataNascimento = null;
         
         IsEdicao = true; // Novo paciente começa em modo de edição
         IsDirty = false;
@@ -621,19 +803,61 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(Id));
         OnPropertyChanged(nameof(CriadoEm));
         OnPropertyChanged(nameof(AtualizadoEm));
-        OnPropertyChanged(nameof(Idade));
+        OnPropertyChanged(nameof(IdadeCalculada));
         
         _logger.LogInformation("Formulário limpo para novo paciente");
     }
 
     /// <summary>
-    /// Valida o formulário antes de gravar
+    /// Valida o formulário antes de gravar usando FluentValidation
+    /// </summary>
+    private async Task<bool> ValidarFormularioAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Nome))
+        {
+            await _notificationService.ShowWarningAsync("Nome é obrigatório");
+            _logger.LogWarning("Tentativa de gravar paciente sem nome");
+            return false;
+        }
+
+        if (DataNascimento == null)
+        {
+            await _notificationService.ShowWarningAsync("Data de nascimento é obrigatória");
+            _logger.LogWarning("Tentativa de gravar paciente sem data de nascimento");
+            return false;
+        }
+
+        if (DataNascimento >= DateTime.Today)
+        {
+            await _notificationService.ShowWarningAsync("Data de nascimento não pode ser futura");
+            _logger.LogWarning("Tentativa de gravar paciente com data de nascimento futura");
+            return false;
+        }
+
+        if (DataNascimento < DateTime.Today.AddYears(-120))
+        {
+            await _notificationService.ShowWarningAsync("Data de nascimento não pode ser superior a 120 anos");
+            _logger.LogWarning("Tentativa de gravar paciente com idade superior a 120 anos");
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Método de validação simples mantido para compatibilidade
     /// </summary>
     private bool ValidarFormulario()
     {
         if (string.IsNullOrWhiteSpace(Nome))
         {
             _logger.LogWarning("Tentativa de gravar paciente sem nome");
+            return false;
+        }
+
+        if (DataNascimento == null)
+        {
+            _logger.LogWarning("Tentativa de gravar paciente sem data de nascimento");
             return false;
         }
 
@@ -656,18 +880,8 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// Calcula a idade baseada na data de nascimento
+    /// Métodos de cálculo de idade removidos conforme solicitado
     /// </summary>
-    private static string CalcularIdade(DateTime dataNascimento)
-    {
-        var hoje = DateTime.Today;
-        var idade = hoje.Year - dataNascimento.Year;
-        
-        if (dataNascimento.Date > hoje.AddYears(-idade))
-            idade--;
-            
-        return $"{idade} anos";
-    }
 
     /// <summary>
     /// Marca o formulário como alterado quando propriedades mudam
@@ -675,10 +889,22 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     partial void OnNomeChanged(string value) => MarkAsDirtyAndTriggerAutoSave();
     partial void OnEmailChanged(string value) => MarkAsDirtyAndTriggerAutoSave();
     partial void OnTelefoneChanged(string value) => MarkAsDirtyAndTriggerAutoSave();
-    partial void OnDataNascimentoChanged(DateTime value) 
+    
+    /// <summary>
+    /// Handler chamado quando a data de nascimento muda
+    /// </summary>
+    partial void OnDataNascimentoChanged(DateTime? value)
     {
         MarkAsDirtyAndTriggerAutoSave();
-        OnPropertyChanged(nameof(Idade));
+        OnPropertyChanged(nameof(IdadeCalculada));
+    }
+
+    partial void OnPacienteAtualChanged(Paciente? value)
+    {
+        // Propriedades de idade removidas conforme solicitado
+        
+        // Se temos um paciente ativo, marcar como edição
+        IsEdicao = value != null;
     }
 
     private void MarkAsDirty()
@@ -709,11 +935,21 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     /// </summary>
     private void ConfigurarAutoSave()
     {
+        // Verificar se auto-save está habilitado nas configurações (sem usar o setter para evitar recursão)
+        var autoSaveEnabled = _settingsService.AutoSaveEnabled;
+        
+        if (!autoSaveEnabled)
+        {
+            _logger.LogInformation("Auto-save desabilitado nas configurações");
+            return;
+        }
+
         // Configurar função de save
         _autoSaveService.SetSaveFunction(async paciente => await SalvarPacienteInternoAsync(paciente));
         
-        // Configurar debounce de 2 segundos
-        _autoSaveService.SetDebounceTime(TimeSpan.FromSeconds(2.0));
+        // Configurar debounce usando as configurações
+        var intervalSeconds = _settingsService.AutoSaveIntervalSeconds;
+        _autoSaveService.SetDebounceTime(TimeSpan.FromSeconds(intervalSeconds));
 
         // Subscrever aos eventos do auto-save
         _autoSaveService.AutoSaveExecuted += OnAutoSaveExecuted;
@@ -721,6 +957,8 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
 
         // Iniciar monitoramento
         _autoSaveService.StartMonitoring();
+        
+        _logger.LogInformation("Auto-save configurado: intervalo {Interval}s", intervalSeconds);
     }
 
     /// <summary>
@@ -738,8 +976,10 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     /// </summary>
     private void OnAutoSaveExecuted(object? sender, AutoSaveEventArgs<Paciente> e)
     {
-        // Mostrar notificação discreta de sucesso
-        _ = Task.Run(async () => await _notificationService.ShowSuccessAsync("Dados guardados automaticamente"));
+        // CORREÇÃO: Usar padrão fire-and-forget mais seguro
+        _ = ExecuteWithErrorHandlingAsync(async () => 
+            await _notificationService.ShowSuccessAsync("Dados guardados automaticamente")
+        );
         IsDirty = false;
     }
 
@@ -749,7 +989,10 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     private void OnAutoSaveError(object? sender, AutoSaveErrorEventArgs<Paciente> e)
     {
         var errorMsg = e.Exception?.Message ?? "Erro desconhecido";
-        _ = Task.Run(async () => await _notificationService.ShowWarningAsync($"Falha no auto-save: {errorMsg}", durationMs: 0)); // Sem auto-close
+        // CORREÇÃO: Usar padrão fire-and-forget mais seguro
+        _ = ExecuteWithErrorHandlingAsync(async () => 
+            await _notificationService.ShowWarningAsync($"Falha no auto-save: {errorMsg}", durationMs: 0)
+        );
         _logger.LogError(e.Exception, "Erro no auto-save do paciente");
     }
 
@@ -768,8 +1011,37 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
         // Parar monitoramento
         _autoSaveService.StopMonitoring();
 
-        // Desinscrever eventos
+        // Desinscrever eventos do auto-save
         _autoSaveService.AutoSaveExecuted -= OnAutoSaveExecuted;
         _autoSaveService.AutoSaveError -= OnAutoSaveError;
+
+        // Desinscrever evento do PacienteService
+        _pacienteService.PacienteAtivoChanged -= OnPacienteAtivoChanged;
+
+        _logger.LogInformation("FichaPacienteViewModel recursos liberados");
+    }
+
+    private void OnPacienteAtivoChanged(object? sender, Paciente? paciente)
+    {
+        try
+        {
+            _logger.LogInformation("🔄 Evento PacienteAtivoChanged recebido");
+            
+            if (paciente != null)
+            {
+                _logger.LogInformation($"📋 Novo paciente ativo: {paciente.Nome} (ID: {paciente.Id})");
+                CarregarPaciente(paciente);
+            }
+            else
+            {
+                _logger.LogInformation("📋 Limpando formulário");
+                LimparFormulario();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro no handler PacienteAtivoChanged");
+            // Não re-throw - evita crash
+        }
     }
 }
