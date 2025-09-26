@@ -37,6 +37,8 @@ namespace BioDesk.App
             _navigationService.Register("NovoPaciente", typeof(Views.NovoPacienteView));
             _navigationService.Register("ListaPacientes", typeof(Views.ListaPacientesView));
             _navigationService.Register("FichaPaciente", typeof(Views.FichaPacienteView));
+            _navigationService.Register("AvaliacaoClinica", typeof(Views.AvaliacaoClinicaView));
+            _navigationService.Register("Anamnese", typeof(Views.AnamneseView)); // 🚀 Sistema Integrado!
         }
 
         private void OnNavigationRequested(object? sender, string viewName)
@@ -61,6 +63,7 @@ namespace BioDesk.App
                     "NovoPaciente" => _serviceProvider.GetRequiredService<Views.NovoPacienteView>(),
                     "ListaPacientes" => _serviceProvider.GetRequiredService<Views.ListaPacientesView>(),
                     "FichaPaciente" => _serviceProvider.GetRequiredService<Views.FichaPacienteView>(),
+                    "AvaliacaoClinica" => _serviceProvider.GetRequiredService<Views.AvaliacaoClinicaView>(),
                     _ => null
                 };
 
@@ -80,6 +83,7 @@ namespace BioDesk.App
                         "NovoPaciente" => _serviceProvider.GetRequiredService<NovoPacienteViewModel>(),
                         "ListaPacientes" => _serviceProvider.GetRequiredService<ListaPacientesViewModel>(),
                         "FichaPaciente" => _serviceProvider.GetRequiredService<FichaPacienteViewModel>(),
+                        "AvaliacaoClinica" => _serviceProvider.GetRequiredService<AvaliacaoClinicaViewModel>(),
                         _ => null
                     };
 

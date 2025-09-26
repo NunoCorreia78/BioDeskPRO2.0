@@ -101,6 +101,60 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 - **Serviços**: PacienteService e NavigationService completamente funcionais
 - **Views**: Todas as views registadas e funcionais no DI container
 
+## 🎯 NOVA ARQUITETURA APROVADA - Interface Clínica Otimizada
+
+### Tab 2 — Gestão Clínica (Zero Redundâncias)
+
+#### Sub-tab 2.1 — Avaliação Clínica (Questionário Estruturado)
+**Interface**: Checklists/chips + sliders. **Zero texto obrigatório**.
+
+1. **Motivos da consulta**
+   - Motivos (multi-select chips): Dor lombar, Cervicalgia, Cefaleias, Ansiedade, Stress, Fadiga, Refluxo, Dispepsia, Obstipação, Diarreia, Intolerâncias, Alergias, Insónia, Dores articulares, Outro
+   - Localização (selector corporal) + Lado (E/D/Bilateral)
+   - Início (date picker), Duração (dropdown), Evolução (radio)
+   - Intensidade (slider 0–10), Caráter (multi-chips)
+   - Fatores agravantes/alívio (chips)
+
+2. **História clínica passada**
+   - Doenças crónicas (multi-select + "Nenhuma")
+   - Cirurgias ([+] adicionar: Ano|Tipo|Observações)
+   - Alergias (chips por tipo + "Sem alergias")
+   - Medicação/Suplementação atual (listas + atalhos)
+
+3. **Revisão de sistemas** (colapsável, tri-state)
+   - Por sistema: Cardiovascular, Respiratório, Digestivo, etc.
+   - Multi-select com observações opcionais
+
+4. **Estilo de vida**
+   - Alimentação, Hidratação, Exercício (chips/dropdowns)
+   - Tabaco/Álcool/Cafeína (radio/dropdowns)
+   - Stress (slider), Sono (chips)
+
+5. **História familiar**
+   - Antecedentes (multi-select) + Parentesco (chips)
+
+**⚡ Frases Rápidas**: "Sem alergias", "Sem medicação crónica", etc.
+
+#### Sub-tab 2.2 — Declaração & Consentimentos (Vista Legal)
+- **Dataset**: Mesmo da 2.1, formatado como declaração
+- **Consentimentos**: Accordion por tema (Naturopatia, Osteopatia, etc.)
+- **Assinatura digital** + Data automática
+- **RGPD**: Checkbox + assinatura
+- **Ações**: Guardar | PDF | Email
+
+**Princípio**: Edita na 2.1, assina na 2.2. **Zero duplicação**.
+
+#### Sub-tab 2.3 — Registo Clínico  
+- **Consultas**: Tabela (Data|Tipo|Motivos|Observações)
+- **Prescrições**: Templates → personalizar → PDF/Email
+- **Timeline**: E-mails, PDFs, SMS, chamadas
+- **Análises**: Títulos + relatórios
+
+### Tab 3 — Medicina Complementar (🚧 EM DESENVOLVIMENTO)
+#### 3.1 Naturopatia - Templates por objetivo
+#### 3.2 Irisdiagnóstico - Galeria + overlays  
+#### 3.3 Terapia Bioenergética - Protocolos em cards
+
 ---
 
 ## 🚨 REGRAS CRÍTICAS DE VERIFICAÇÃO - COPILOT

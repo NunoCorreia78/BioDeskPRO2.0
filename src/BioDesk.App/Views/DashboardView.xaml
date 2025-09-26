@@ -55,7 +55,7 @@
         </Grid.RowDefinitions>
 
         <!-- Navigation Cards Row -->
-        <Grid Grid.Row="0" Margin="20,20,20,20">
+                <Grid Grid.Row="0" Margin="20,20,20,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -98,7 +98,7 @@
                 <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="0,8,8,8">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
                         <StackPanel>
-                            <!-- Statistics Cards (moved here) -->
+                            <!-- Statistics Cards (general stats only) -->
                             <TextBlock Text="Estatísticas do Sistema" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
                             
                             <Grid Margin="0,0,0,30">
@@ -223,6 +223,11 @@
                                     <RowDefinition Height="300"/>
                                     <RowDefinition Height="20"/>
                                     <RowDefinition Height="300"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="300"/>
+                                    <RowDefinition Height="20"/>
+                                    <RowDefinition Height="300"/>
                                 </Grid.RowDefinitions>
 
                                 <!-- Registros por Dia -->
@@ -262,6 +267,50 @@
                                                       Background="Transparent"/>
                                     </Grid>
                                 </Border>
+
+                                <!-- Separador Consultas -->
+                                <TextBlock Grid.Row="4" Text="📅 Estatísticas de Consultas" 
+                                           FontSize="18" FontWeight="SemiBold" 
+                                           Foreground="#9CAF97" 
+                                           Margin="0,20,0,20" HorizontalAlignment="Center"/>
+
+                                <!-- Consultas por Semana -->
+                                <Border Grid.Row="5" Style="{StaticResource StatCard}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <TextBlock Grid.Row="0" Text="Consultas Realizadas por Semana (Últimas 8 Semanas)" 
+                                                   FontSize="16" FontWeight="SemiBold" 
+                                                   Foreground="#3F4A3D" 
+                                                   Margin="0,0,0,10"/>
+                                        
+                                        <oxy:PlotView Grid.Row="1" 
+                                                      Model="{Binding ConsultasPorSemanaChart}"
+                                                      Background="Transparent"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Tipos de Consulta -->
+                                <Border Grid.Row="7" Style="{StaticResource StatCard}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <TextBlock Grid.Row="0" Text="Distribuição por Tipo de Consulta" 
+                                                   FontSize="16" FontWeight="SemiBold" 
+                                                   Foreground="#3F4A3D" 
+                                                   Margin="0,0,0,10"/>
+                                        
+                                        <oxy:PlotView Grid.Row="1" 
+                                                      Model="{Binding TiposConsultaChart}"
+                                                      Background="Transparent"/>
+                                    </Grid>
+                                </Border>
                             </Grid>
                         </StackPanel>
                     </ScrollViewer>
@@ -275,7 +324,9 @@
                         <StackPanel>
                             <TextBlock Text="Resumo Estatístico Detalhado" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
                             
-                            <Grid>
+                            <!-- Estatísticas de Pacientes -->
+                            <TextBlock Text="👥 Pacientes" FontSize="16" FontWeight="SemiBold" Foreground="#9CAF97" Margin="0,0,0,15"/>
+                            <Grid Margin="0,0,0,30">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -296,6 +347,52 @@
                                         <TextBlock Text="Este Mês" FontWeight="SemiBold" Foreground="#5A6558" FontSize="16" Margin="0,0,0,10"/>
                                         <TextBlock Text="{Binding PacientesMes}" FontSize="32" FontWeight="Bold" Foreground="#9CAF97"/>
                                         <TextBlock Text="novos registros" FontSize="12" Foreground="#5A6558"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Estatísticas de Consultas -->
+                            <TextBlock Text="📅 Consultas" FontSize="16" FontWeight="SemiBold" Foreground="#9CAF97" Margin="0,25,0,15"/>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Total Consultas Card -->
+                                <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="Total Consultas" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
+                                        <TextBlock Text="{Binding ConsultaStats.TotalConsultas}" FontSize="24" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Consultas Esta Semana Card -->
+                                <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="Esta Semana" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
+                                        <TextBlock Text="{Binding ConsultaStats.ConsultasEstaSemana}" FontSize="24" FontWeight="Bold" Foreground="#9CAF97" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Primeiras Consultas Card -->
+                                <Border Grid.Column="4" Style="{StaticResource StatCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="Primeiras Consultas" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
+                                        <TextBlock Text="{Binding ConsultaStats.PrimeirasConsultas}" FontSize="24" FontWeight="Bold" Foreground="#879B83" Margin="0,5,0,0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Valor Semana Card -->
+                                <Border Grid.Column="6" Style="{StaticResource StatCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="Valor Esta Semana" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
+                                        <TextBlock Text="{Binding ConsultaStats.ValorTotalSemana, StringFormat='{}{0:C}'}" FontSize="20" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>

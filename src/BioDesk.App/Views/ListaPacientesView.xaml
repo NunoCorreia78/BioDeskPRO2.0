@@ -3,9 +3,79 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d">
+             xmlns:viewModels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:ListaPacientesViewModel}">
 
-    <Grid>
+    <UserControl.Resources>
+        <!-- Efeito de sombra para cartões -->
+        <DropShadowEffect x:Key="SombraCartao" 
+                         Color="Black" 
+                         Direction="315" 
+                         ShadowDepth="2" 
+                         Opacity="0.1" 
+                         BlurRadius="6"/>
+        
+        <!-- Estilo para DataGrid -->
+        <Style x:Key="DataGridHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#9CAF97"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+
+        <Style x:Key="DataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Height" Value="45"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F7F9F6"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E3F2DF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Estilo para botões de ação -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#9CAF97"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#879B83"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
         <!-- Fundo gradiente -->
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -14,30 +84,232 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <!-- Conteúdo da view Lista de Pacientes -->
-        <Border Style="{StaticResource CartaoStyle}" 
-                MaxWidth="800" 
-                HorizontalAlignment="Center" 
-                VerticalAlignment="Center">
-            <StackPanel>
-                <TextBlock Text="Lista de Pacientes" 
-                          FontSize="32" 
-                          FontWeight="Bold" 
-                          Foreground="{StaticResource TextoPrincipal}"
-                          HorizontalAlignment="Center" 
-                          Margin="0,0,0,32"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Cabeçalho -->
+            <RowDefinition Height="Auto"/>  <!-- Barra de pesquisa e ações -->
+            <RowDefinition Height="*"/>     <!-- DataGrid -->
+            <RowDefinition Height="Auto"/>  <!-- Rodapé com navegação -->
+        </Grid.RowDefinitions>
+
+        <!-- CABEÇALHO -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,24">
+            <Button Content="← Dashboard" 
+                    Style="{StaticResource ActionButtonStyle}"
+                    Command="{Binding VoltarDashboardCommand}"
+                    Background="#6B7D67"
+                    HorizontalAlignment="Left"/>
+            
+            <TextBlock Text="📋 Lista de Pacientes" 
+                      FontSize="28" 
+                      FontWeight="Bold" 
+                      Foreground="{StaticResource TextoPrincipal}"
+                      VerticalAlignment="Center"
+                      Margin="24,0,0,0"/>
+        </StackPanel>
+
+        <!-- BARRA DE PESQUISA E AÇÕES -->
+        <Border Grid.Row="1" 
+                Background="White" 
+                CornerRadius="8" 
+                Padding="16" 
+                Margin="0,0,0,16"
+                Effect="{StaticResource SombraCartao}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Pesquisa -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBox x:Name="PesquisaTextBox"
+                             Text="{Binding PesquisarTexto, UpdateSourceTrigger=PropertyChanged}"
+                             Width="300" 
+                             Height="36"
+                             FontSize="14"
+                             Padding="12,8"
+                             BorderBrush="#E3E9DE"
+                             BorderThickness="2"
+                             VerticalAlignment="Center">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TextBox">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="6">
+                                                <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    
+                    <TextBlock Text="🔍 Pesquisar por nome, telefone..." 
+                               Foreground="#A0A0A0" 
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="12,0,0,0"
+                               Visibility="{Binding Text, ElementName=PesquisaTextBox, Converter={StaticResource StringToVisibilityConverter}}"/>
+                </StackPanel>
+
+                <!-- Botões de Ação -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="🔄 Atualizar" 
+                            Style="{StaticResource ActionButtonStyle}"
+                            Command="{Binding AtualizarListaCommand}"
+                            Background="#7A8F75"
+                            Margin="8,0,0,0"/>
+                    
+                    <Button Content="➕ Novo Paciente" 
+                            Style="{StaticResource ActionButtonStyle}"
+                            Command="{Binding NovoPacienteCommand}"
+                            Background="#9CAF97"
+                            Margin="8,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- DATAGRID DE PACIENTES -->
+        <Border Grid.Row="2" 
+                Background="White" 
+                CornerRadius="8" 
+                Effect="{StaticResource SombraCartao}">
+            <DataGrid x:Name="PacientesDataGrid"
+                      ItemsSource="{Binding PacientesExibicao}"
+                      SelectedItem="{Binding PacienteSelecionado}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="None"
+                      HeadersVisibility="Column"
+                      SelectionMode="Single"
+                      RowHeaderWidth="0"
+                      ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}"
+                      RowStyle="{StaticResource DataGridRowStyle}"
+                      CellStyle="{StaticResource DataGridCellStyle}"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
                 
-                <TextBlock Text="📋 Esta view mostrará a lista completa de pacientes..." 
-                          FontSize="18" 
-                          Foreground="{StaticResource TextoSecundario}"
-                          HorizontalAlignment="Center" 
-                          Margin="0,0,0,24"/>
-                
-                <Button Content="← Voltar ao Dashboard" 
-                        Style="{StaticResource BotaoPrincipalStyle}"
-                        HorizontalAlignment="Center"
-                        Click="VoltarDashboard_Click"/>
-            </StackPanel>
+                <DataGrid.Columns>
+                    <!-- Nome -->
+                    <DataGridTextColumn Header="Nome" 
+                                        Binding="{Binding Nome}" 
+                                        Width="200"
+                                        FontWeight="SemiBold"/>
+                    
+                    <!-- Idade -->
+                    <DataGridTextColumn Header="Idade" 
+                                        Binding="{Binding IdadeFormatada}" 
+                                        Width="80"/>
+                    
+                    <!-- Telefone -->
+                    <DataGridTextColumn Header="Telefone" 
+                                        Binding="{Binding Telefone}" 
+                                        Width="130"/>
+                    
+                    <!-- Email -->
+                    <DataGridTextColumn Header="Email" 
+                                        Binding="{Binding Email}" 
+                                        Width="200"/>
+                    
+                    <!-- Última Consulta -->
+                    <DataGridTextColumn Header="Última Consulta" 
+                                        Binding="{Binding UltimaConsultaFormatada}" 
+                                        Width="130"/>
+                    
+                    <!-- Status -->
+                    <DataGridTextColumn Header="Status" 
+                                        Binding="{Binding StatusFormatado}" 
+                                        Width="100"/>
+                    
+                    <!-- Ações -->
+                    <DataGridTemplateColumn Header="Ações" Width="180">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="👁️ Ver" 
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Command="{Binding DataContext.VerFichaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="#9CAF97"
+                                            Width="50"/>
+                                    
+                                    <Button Content="✏️ Editar" 
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Command="{Binding DataContext.EditarPacienteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="#8A9D85"
+                                            Width="60"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- RODAPÉ COM ESTATÍSTICAS -->
+        <Border Grid.Row="3" 
+                Background="White" 
+                CornerRadius="8" 
+                Padding="16" 
+                Margin="0,16,0,0"
+                Effect="{StaticResource SombraCartao}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Estatísticas -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock FontSize="14" Foreground="{StaticResource TextoSecundario}">
+                        <Run Text="Total: "/>
+                        <Run Text="{Binding TotalPacientes}" FontWeight="SemiBold"/>
+                        <Run Text=" pacientes"/>
+                    </TextBlock>
+                    
+                    <TextBlock Margin="24,0,0,0" FontSize="14" Foreground="{StaticResource TextoSecundario}">
+                        <Run Text="Exibindo: "/>
+                        <Run Text="{Binding PacientesExibidos}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                    
+                    <!-- Indicador de carregamento -->
+                    <StackPanel Orientation="Horizontal" 
+                                Margin="24,0,0,0"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="🔄 Carregando..." 
+                                   FontSize="14" 
+                                   Foreground="#9CAF97"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Filtros rápidos -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Filtro:" 
+                               FontSize="14" 
+                               Foreground="{StaticResource TextoSecundario}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+                    
+                    <ComboBox x:Name="FiltroComboBox"
+                              SelectedValue="{Binding FiltroSelecionado}"
+                              Width="150"
+                              Height="28">
+                        <ComboBoxItem Content="Todos" Tag="Todos"/>
+                        <ComboBoxItem Content="Ativos" Tag="Ativo"/>
+                        <ComboBoxItem Content="Inativos" Tag="Inativo"/>
+                        <ComboBoxItem Content="Recentes" Tag="Recentes"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

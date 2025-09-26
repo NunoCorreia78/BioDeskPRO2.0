@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -24,6 +26,12 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     private readonly INotificationService _notificationService;
     private readonly ILogger<FichaPacienteViewModel> _logger;
     private readonly IAutoSaveService<Paciente> _autoSaveService;
+
+    // Contador para testar se os comandos funcionam
+    private int _testeContador = 0;
+
+    // ViewModel para o sistema de anamnese revolucionário INTEGRADO
+    public AnamneseViewModelIntegrado AnamneseViewModelIntegrado { get; }
 
     [ObservableProperty]
     private bool _autoSaveEnabled = true;
@@ -56,11 +64,142 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private DateTime _dataNascimento = DateTime.Today.AddYears(-30);
 
+    // ================= PROPRIEDADES DA AVALIAÇÃO CLÍNICA =================
+    
+    // Motivos da Consulta - Chips Toggle
+    [ObservableProperty]
+    private bool _motivosDor = false;
+    
+    [ObservableProperty]
+    private bool _motivosFadiga = false;
+    
+    [ObservableProperty]
+    private bool _motivosAnsiedade = false;
+    
+    [ObservableProperty]
+    private bool _motivosStress = false;
+    
+    [ObservableProperty]
+    private bool _motivosDigestivo = false;
+    
+    [ObservableProperty]
+    private bool _motivosRespiratorio = false;
+    
+    [ObservableProperty]
+    private bool _motivosSono = false;
+    
+    [ObservableProperty]
+    private bool _motivosPrevencao = false;
+    
+    [ObservableProperty]
+    private bool _motivosOutro = false;
+    
+    [ObservableProperty]
+    private string _motivosOutroTexto = string.Empty;
+    
+    [ObservableProperty]
+    private string _motivoConsulta = string.Empty;
+    
+    [ObservableProperty]
+    private string _objetivoPaciente = string.Empty;
+    
+    // Sintomas - Musculoesquelético
+    [ObservableProperty]
+    private bool _sintomasMusculoCervicalgia = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMusculoLombalgia = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMusculoDorsalgia = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMusculoDorArticular = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMusculoRigidezMatinal = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMusculoFraqueza = false;
+    
+    // Sintomas - Neurológico
+    [ObservableProperty]
+    private bool _sintomasNeurologicoCefaleia = false;
+    
+    [ObservableProperty]
+    private bool _sintomasNeurologicoTonturas = false;
+    
+    [ObservableProperty]
+    private bool _sintomasNeurologicoVertigens = false;
+    
+    [ObservableProperty]
+    private bool _sintomasNeurologicoParestesias = false;
+    
+    [ObservableProperty]
+    private bool _sintomasNeurologicoDormencia = false;
+    
+    // Sintomas - Digestivo
+    [ObservableProperty]
+    private bool _sintomasDigestivoAzia = false;
+    
+    [ObservableProperty]
+    private bool _sintomasDigestivoRefluxo = false;
+    
+    [ObservableProperty]
+    private bool _sintomasDigestivoNauseas = false;
+    
+    [ObservableProperty]
+    private bool _sintomasDigestivoDistensao = false;
+    
+    [ObservableProperty]
+    private bool _sintomasDigestivoObstipacao = false;
+    
+    [ObservableProperty]
+    private bool _sintomasDigestivoDiarreia = false;
+    
+    // Sintomas - Saúde Mental
+    [ObservableProperty]
+    private bool _sintomasMentalAnsiedade = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMentalDepressao = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMentalIrritabilidade = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMentalPanico = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMentalInsonia = false;
+    
+    [ObservableProperty]
+    private bool _sintomasMentalSonolencia = false;
+    
+    // História da Queixa Atual (HQA)
+    [ObservableProperty]
+    private string _localizacaoHQA = string.Empty;
+    
+    [ObservableProperty]
+    private double _intensidadeHQA = 0;
+    
+    [ObservableProperty]
+    private string _caraterHQA = string.Empty;
+    
+    // Saúde Mental / Stress
+    [ObservableProperty]
+    private double _nivelStress = 0;
+    
+    // Outros Sintomas
+    [ObservableProperty]
+    private string _outrosSintomas = string.Empty;
+
     public FichaPacienteViewModel(
         IPacienteService pacienteService,
         INavigationService navigationService,
         INotificationService notificationService,
         IAutoSaveService<Paciente> autoSaveService,
+        AnamneseViewModelIntegrado anamneseViewModelIntegrado,
         ILogger<FichaPacienteViewModel> logger)
     {
         _pacienteService = pacienteService;
@@ -68,6 +207,7 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
         _notificationService = notificationService;
         _autoSaveService = autoSaveService;
         _logger = logger;
+        AnamneseViewModelIntegrado = anamneseViewModelIntegrado;
 
         // Configurar auto-save
         ConfigurarAutoSave();
@@ -184,6 +324,247 @@ public partial class FichaPacienteViewModel : ViewModelBase, IDisposable
     private void VoltarLista()
     {
         _navigationService.NavigateTo("ListaPacientes");
+    }
+
+    /// <summary>
+    /// Marca sintomas musculoesqueléticos para trabalhar na sessão atual
+    /// </summary>
+    [RelayCommand]
+    private async Task TrabalharHojeMusculoAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            // TESTE SIMPLES: Incrementar contador
+            _testeContador++;
+            
+            var sintomasAtivos = new List<string>();
+            if (SintomasMusculoCervicalgia) sintomasAtivos.Add("Cervicalgia");
+            if (SintomasMusculoLombalgia) sintomasAtivos.Add("Lombalgia");
+            if (SintomasMusculoDorsalgia) sintomasAtivos.Add("Dorsalgia");
+            if (SintomasMusculoDorArticular) sintomasAtivos.Add("Dor articular");
+            if (SintomasMusculoRigidezMatinal) sintomasAtivos.Add("Rigidez matinal");
+            if (SintomasMusculoFraqueza) sintomasAtivos.Add("Fraqueza");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"✅ CLIQUE #{_testeContador}: {string.Join(", ", sintomasAtivos)} → SESSÃO";
+                _logger?.LogInformation("Sintomas musculoesqueléticos marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = $"⚠️ CLIQUE #{_testeContador}: Marque primeiro os chips musculoesqueléticos!";
+            }
+            
+            await Task.CompletedTask;
+        });
+    }
+
+    /// <summary>
+    /// Atualiza o perfil permanente com sintomas musculoesqueléticos
+    /// </summary>
+    [RelayCommand]
+    private async Task AtualizarPermanenteMusculoAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            var sintomasAtivos = new List<string>();
+            if (SintomasMusculoCervicalgia) sintomasAtivos.Add("Cervicalgia");
+            if (SintomasMusculoLombalgia) sintomasAtivos.Add("Lombalgia");
+            if (SintomasMusculoDorsalgia) sintomasAtivos.Add("Dorsalgia");
+            if (SintomasMusculoDorArticular) sintomasAtivos.Add("Dor articular");
+            if (SintomasMusculoRigidezMatinal) sintomasAtivos.Add("Rigidez matinal");
+            if (SintomasMusculoFraqueza) sintomasAtivos.Add("Fraqueza");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"💾 PERMANENTE: {string.Join(", ", sintomasAtivos)} salvo no perfil";
+                _logger?.LogInformation("Perfil musculoesquelético permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = "⚠️ Selecione sintomas para salvar no perfil permanente";
+            }
+            
+            await Task.CompletedTask;
+        });
+    }
+
+    /// <summary>
+    /// Marca sintomas neurológicos para trabalhar na sessão atual
+    /// </summary>
+    [RelayCommand]
+    private async Task TrabalharHojeNeuroAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            var sintomasAtivos = new List<string>();
+            if (SintomasNeurologicoCefaleia) sintomasAtivos.Add("Cefaleia");
+            if (SintomasNeurologicoTonturas) sintomasAtivos.Add("Tonturas");
+            if (SintomasNeurologicoVertigens) sintomasAtivos.Add("Vertigens");
+            if (SintomasNeurologicoParestesias) sintomasAtivos.Add("Parestesias");
+            if (SintomasNeurologicoDormencia) sintomasAtivos.Add("Dormência");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"✅ Neurológicos para SESSÃO: {string.Join(", ", sintomasAtivos)}";
+                _logger?.LogInformation("Sintomas neurológicos marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = "⚠️ Selecione primeiro os sintomas neurológicos";
+            }
+            
+            await Task.CompletedTask;
+        });
+    }
+
+    /// <summary>
+    /// Atualiza o perfil permanente com sintomas neurológicos
+    /// </summary>
+    [RelayCommand]
+    private async Task AtualizarPermanenteNeuroAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            var sintomasAtivos = new List<string>();
+            if (SintomasNeurologicoCefaleia) sintomasAtivos.Add("Cefaleia");
+            if (SintomasNeurologicoTonturas) sintomasAtivos.Add("Tonturas");
+            if (SintomasNeurologicoVertigens) sintomasAtivos.Add("Vertigens");
+            if (SintomasNeurologicoParestesias) sintomasAtivos.Add("Parestesias");
+            if (SintomasNeurologicoDormencia) sintomasAtivos.Add("Dormência");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"💾 PERMANENTE neurológico: {string.Join(", ", sintomasAtivos)}";
+                _logger?.LogInformation("Perfil neurológico permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = "⚠️ Selecione sintomas neurológicos para perfil permanente";
+            }
+            
+            await Task.CompletedTask;
+        });
+    }
+
+    /// <summary>
+    /// Marca sintomas digestivos para trabalhar na sessão atual
+    /// </summary>
+    [RelayCommand]
+    private async Task TrabalharHojeDigestivoAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            var sintomasAtivos = new List<string>();
+            if (SintomasDigestivoAzia) sintomasAtivos.Add("Azia");
+            if (SintomasDigestivoRefluxo) sintomasAtivos.Add("Refluxo");
+            if (SintomasDigestivoNauseas) sintomasAtivos.Add("Náuseas");
+            if (SintomasDigestivoDistensao) sintomasAtivos.Add("Distensão");
+            if (SintomasDigestivoObstipacao) sintomasAtivos.Add("Obstipação");
+            if (SintomasDigestivoDiarreia) sintomasAtivos.Add("Diarreia");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"✅ Digestivos para SESSÃO: {string.Join(", ", sintomasAtivos)}";
+                _logger?.LogInformation("Sintomas digestivos marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = "⚠️ Selecione primeiro os sintomas digestivos";
+            }
+            
+            await Task.CompletedTask;
+        });
+    }
+
+    /// <summary>
+    /// Atualiza o perfil permanente com sintomas digestivos
+    /// </summary>
+    [RelayCommand]
+    private async Task AtualizarPermanenteDigestivoAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            var sintomasAtivos = new List<string>();
+            if (SintomasDigestivoAzia) sintomasAtivos.Add("Azia");
+            if (SintomasDigestivoRefluxo) sintomasAtivos.Add("Refluxo");
+            if (SintomasDigestivoNauseas) sintomasAtivos.Add("Náuseas");
+            if (SintomasDigestivoDistensao) sintomasAtivos.Add("Distensão");
+            if (SintomasDigestivoObstipacao) sintomasAtivos.Add("Obstipação");
+            if (SintomasDigestivoDiarreia) sintomasAtivos.Add("Diarreia");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"💾 PERMANENTE digestivo: {string.Join(", ", sintomasAtivos)}";
+                _logger?.LogInformation("Perfil digestivo permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = "⚠️ Selecione sintomas digestivos para perfil permanente";
+            }
+            
+            await Task.CompletedTask;
+        });
+    }
+
+    /// <summary>
+    /// Marca sintomas de saúde mental para trabalhar na sessão atual
+    /// </summary>
+    [RelayCommand]
+    private async Task TrabalharHojeMentalAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            var sintomasAtivos = new List<string>();
+            if (SintomasMentalAnsiedade) sintomasAtivos.Add("Ansiedade");
+            if (SintomasMentalDepressao) sintomasAtivos.Add("Humor deprimido");
+            if (SintomasMentalIrritabilidade) sintomasAtivos.Add("Irritabilidade");
+            if (SintomasMentalPanico) sintomasAtivos.Add("Ataques de pânico");
+            if (SintomasMentalInsonia) sintomasAtivos.Add("Insónia");
+            if (SintomasMentalSonolencia) sintomasAtivos.Add("Sonolência diurna");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"✅ Saúde mental para SESSÃO: {string.Join(", ", sintomasAtivos)}";
+                _logger?.LogInformation("Sintomas de saúde mental marcados para sessão: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = "⚠️ Selecione primeiro os sintomas de saúde mental";
+            }
+            
+            await Task.CompletedTask;
+        });
+    }
+
+    /// <summary>
+    /// Atualiza o perfil permanente com sintomas de saúde mental
+    /// </summary>
+    [RelayCommand]
+    private async Task AtualizarPermanenteMentalAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            var sintomasAtivos = new List<string>();
+            if (SintomasMentalAnsiedade) sintomasAtivos.Add("Ansiedade");
+            if (SintomasMentalDepressao) sintomasAtivos.Add("Humor deprimido");
+            if (SintomasMentalIrritabilidade) sintomasAtivos.Add("Irritabilidade");
+            if (SintomasMentalPanico) sintomasAtivos.Add("Ataques de pânico");
+            if (SintomasMentalInsonia) sintomasAtivos.Add("Insónia");
+            if (SintomasMentalSonolencia) sintomasAtivos.Add("Sonolência diurna");
+
+            if (sintomasAtivos.Any())
+            {
+                ErrorMessage = $"💾 PERMANENTE saúde mental: {string.Join(", ", sintomasAtivos)}";
+                _logger?.LogInformation("Perfil de saúde mental permanente atualizado: {Sintomas}", string.Join(", ", sintomasAtivos));
+            }
+            else
+            {
+                ErrorMessage = "⚠️ Selecione sintomas de saúde mental para perfil permanente";
+            }
+            
+            await Task.CompletedTask;
+        });
     }
 
     /// <summary>

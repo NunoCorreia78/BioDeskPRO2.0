@@ -17,7 +17,11 @@ project.fragment.lock.json
 artifacts/
 
 # Database files
-*.db
+*.db-shm
+*.db-wal
+
+# MANTER biodesk.db (crítica para funcionamento)
+!biodesk.db
 *.db-shm
 *.db-wal
 

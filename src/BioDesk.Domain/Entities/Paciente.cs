@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace BioDesk.Domain.Entities;
@@ -36,6 +37,11 @@ public class Paciente
     [MaxLength(100)]
     public string? Profissao { get; set; }
 
+    [MaxLength(9, ErrorMessage = "NIF deve ter 9 dígitos")]
+    [MinLength(9, ErrorMessage = "NIF deve ter 9 dígitos")]
+    [RegularExpression(@"^\d{9}$", ErrorMessage = "NIF deve conter apenas 9 dígitos")]
+    public string? NIF { get; set; } = string.Empty;
+
     [MaxLength(500)]
     public string? Morada { get; set; }
 
@@ -46,7 +52,72 @@ public class Paciente
     public string? TelefoneEmergencia { get; set; }
     #endregion
 
-    #region Anamnese Médica
+    #region Anamnese Médica Detalhada
+    [MaxLength(2000)]
+    public string? QueixaPrincipal { get; set; }
+
+    [MaxLength(100)]
+    public string? DuracaoSintomas { get; set; }
+
+    [MaxLength(20)]
+    public string? IntensidadeSintomas { get; set; }
+
+    [MaxLength(3000)]
+    public string? HistoriaDoencaAtual { get; set; }
+
+    [MaxLength(2000)]
+    public string? FatoresDesencadeantes { get; set; }
+
+    [MaxLength(2000)]
+    public string? TratamentosRealizados { get; set; }
+
+    [MaxLength(2000)]
+    public string? DoencasAnteriores { get; set; }
+
+    [MaxLength(2000)]
+    public string? CirurgiasRealizadas { get; set; }
+
+    [MaxLength(1000)]
+    public string? AlergiasConhecidas { get; set; }
+
+    [MaxLength(2000)]
+    public string? SistemaCardiovascular { get; set; }
+
+    [MaxLength(2000)]
+    public string? SistemaRespiratorio { get; set; }
+
+    [MaxLength(2000)]
+    public string? SistemaDigestivo { get; set; }
+
+    [MaxLength(2000)]
+    public string? SistemaNeurologico { get; set; }
+
+    [MaxLength(2000)]
+    public string? HabitosAlimentares { get; set; }
+
+    [MaxLength(1000)]
+    public string? AtividadeFisica { get; set; }
+
+    [MaxLength(50)]
+    public string? QualidadeDesonoEnum { get; set; }
+
+    [MaxLength(2000)]
+    public string? GestaoStress { get; set; }
+
+    [MaxLength(50)]
+    public string? ConsumoAlcoolEnum { get; set; }
+
+    [MaxLength(50)]
+    public string? Tabagismo { get; set; }
+
+    [MaxLength(3000)]
+    public string? AntecedentesFamiliares { get; set; }
+
+    [MaxLength(2000)]
+    public string? DoencasHereditarias { get; set; }
+    #endregion
+
+    #region Anamnese Médica (Legado)
     [MaxLength(2000)]
     public string? HistoricoMedicoFamiliar { get; set; }
 
@@ -247,6 +318,13 @@ public class Paciente
             return age;
         } 
     }
+
+    #region Navegação para Consultas
+    /// <summary>
+    /// Lista de consultas associadas a este paciente
+    /// </summary>
+    public virtual ICollection<Consulta> Consultas { get; set; } = new List<Consulta>();
+    #endregion
 
     /// <summary>
     /// Atualiza a data de última atualização

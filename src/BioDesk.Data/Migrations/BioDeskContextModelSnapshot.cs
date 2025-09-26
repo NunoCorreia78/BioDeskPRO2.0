@@ -17,6 +17,568 @@ namespace BioDesk.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
+            modelBuilder.Entity("BioDesk.Domain.Entities.AlteracaoMedicacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AtualizarPermanente")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DataAlteracao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DoseAnterior")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Frequencia")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Indicacao")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MotivoAlteracao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NomeMedicacao")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NovaDosse")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SessaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TipoAlteracao")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Via")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoClinicaId");
+
+                    b.ToTable("AlteracoesMedicacao");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.AvaliacaoClinica", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsCompleta")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UltimaAtualizacao")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DataCriacao")
+                        .HasDatabaseName("IX_AvaliacaoClinica_DataCriacao");
+
+                    b.HasIndex("PacienteId")
+                        .HasDatabaseName("IX_AvaliacaoClinica_PacienteId");
+
+                    b.ToTable("AvaliacoesClinicas");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.Consulta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DataConsulta")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataUltimaEdicao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notas")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TipoConsulta")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Valor")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DataConsulta")
+                        .HasDatabaseName("IX_Consulta_DataConsulta");
+
+                    b.HasIndex("PacienteId")
+                        .HasDatabaseName("IX_Consulta_PacienteId");
+
+                    b.ToTable("Consultas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DataConsulta = new DateTime(2025, 9, 12, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            DataCriacao = new DateTime(2025, 9, 12, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            Notas = "Primeira consulta de naturopatia. Paciente apresenta sintomas de stress.",
+                            PacienteId = 1,
+                            Status = "Realizada",
+                            TipoConsulta = "Primeira",
+                            Valor = 60.00m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DataConsulta = new DateTime(2025, 9, 19, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            DataCriacao = new DateTime(2025, 9, 19, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            Notas = "Seguimento - melhoria dos sintomas de stress.",
+                            PacienteId = 1,
+                            Status = "Realizada",
+                            TipoConsulta = "Seguimento",
+                            Valor = 45.00m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DataConsulta = new DateTime(2025, 9, 16, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            DataCriacao = new DateTime(2025, 9, 16, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            Notas = "Primeira consulta de osteopatia. Dores lombares.",
+                            PacienteId = 2,
+                            Status = "Realizada",
+                            TipoConsulta = "Primeira",
+                            Valor = 65.00m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DataConsulta = new DateTime(2025, 9, 28, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            DataCriacao = new DateTime(2025, 9, 23, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            Notas = "Consulta agendada para medicina quântica.",
+                            PacienteId = 3,
+                            Status = "Agendada",
+                            TipoConsulta = "Primeira",
+                            Valor = 70.00m
+                        });
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.DeclaracaoLegal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AssinadoPaciente")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AssinadoProfissional")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConsentimentosAtivos")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConteudoDeclaracao")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataAssinaturaPaciente")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataAssinaturaProfissional")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataGeracao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HashIntegridade")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetodoAssinaturaPaciente")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NomeProfissional")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RegistoProfissional")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SessaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UltimaAtualizacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Versao")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoClinicaId")
+                        .IsUnique();
+
+                    b.ToTable("DeclaracoesLegais");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.EstiloVida", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Alcool")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AlimentacaoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AvaliacaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Cafeina")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExercicioFrequencia")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExercicioJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Hidratacao")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SonoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Stress")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Tabaco")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("TabacoQuantidade")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AvaliacaoClinicaId")
+                        .IsUnique();
+
+                    b.ToTable("EstilosVida");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.HistoriaClinica", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AvaliacaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CirurgiasJson")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DoencasCronicasJson")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EspecificarAlergias")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MedicacaoAtualJson")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("SemAlergias")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("SemMedicacao")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("SemSuplementacao")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SuplementacaoJson")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TiposAlergiasJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VacinacaoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("VacinacaoNaoAplicavel")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AvaliacaoClinicaId")
+                        .IsUnique();
+
+                    b.ToTable("HistoriaClinicas");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.HistoriaFamiliar", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AntecedentesJson")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AvaliacaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ParentescoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AvaliacaoClinicaId")
+                        .IsUnique();
+
+                    b.ToTable("HistoriasFamiliares");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.MedicacaoAtual", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Adesao")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataInicio")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataSuspensao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Dose")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EfeitosAdversos")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Frequencia")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Indicacao")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ReverEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("SessaoOrigemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UltimaAtualizacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Via")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoOrigemId");
+
+                    b.HasIndex("PacienteId", "Estado");
+
+                    b.HasIndex("PacienteId", "Nome", "Dose")
+                        .IsUnique();
+
+                    b.ToTable("MedicacaoAtual");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.MotivoConsulta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AvaliacaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CaraterJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Duracao")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Evolucao")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FatoresAgravantesJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FatoresAlivioJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Intensidade")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Lado")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Localizacao")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MotivosJson")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OutroMotivo")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AvaliacaoClinicaId")
+                        .IsUnique();
+
+                    b.ToTable("MotivosConsulta");
+                });
+
             modelBuilder.Entity("BioDesk.Domain.Entities.Paciente", b =>
                 {
                     b.Property<int>("Id")
@@ -31,10 +593,22 @@ namespace BioDesk.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("AlergiasConhecidas")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal?>("Altura")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AmplitudeMovimento")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AntecedentesFamiliares")
+                        .HasMaxLength(3000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AtividadeFisica")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
@@ -61,12 +635,20 @@ namespace BioDesk.Data.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CirurgiasRealizadas")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ConsumoAgua")
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConsumoAlcool")
                         .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConsumoAlcoolEnum")
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ContatoEmergencia")
@@ -81,6 +663,18 @@ namespace BioDesk.Data.Migrations
 
                     b.Property<string>("DiagnosticoEnergetico")
                         .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DoencasAnteriores")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DoencasHereditarias")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DuracaoSintomas")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
@@ -104,6 +698,10 @@ namespace BioDesk.Data.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FatoresDesencadeantes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("FrequenciaCardiaca")
                         .HasColumnType("INTEGER");
 
@@ -121,6 +719,18 @@ namespace BioDesk.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("GestaoStress")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HabitosAlimentares")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HistoriaDoencaAtual")
+                        .HasMaxLength(3000)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("HistoricoMedicoFamiliar")
                         .HasMaxLength(2000)
                         .HasColumnType("TEXT");
@@ -134,6 +744,10 @@ namespace BioDesk.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("InicioSintomas")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IntensidadeSintomas")
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("IntoleranciasAlimentares")
@@ -150,6 +764,10 @@ namespace BioDesk.Data.Migrations
 
                     b.Property<string>("MudancasEstiloVida")
                         .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NIF")
+                        .HasMaxLength(9)
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("NivelAtividadeFisica")
@@ -233,8 +851,16 @@ namespace BioDesk.Data.Migrations
                     b.Property<DateTime?>("ProximaConsulta")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("QualidadeDesonoEnum")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("QualidadeSono")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("QueixaPrincipal")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ResultadosTestes")
                         .HasMaxLength(1000)
@@ -248,12 +874,32 @@ namespace BioDesk.Data.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SistemaCardiovascular")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SistemaDigestivo")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SistemaNeurologico")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SistemaRespiratorio")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SuplementacaoRecomendada")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SuplementosAtuais")
                         .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tabagismo")
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telefone")
@@ -284,6 +930,10 @@ namespace BioDesk.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TratamentosRealizados")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("UltimaSessao")
                         .HasColumnType("TEXT");
 
@@ -299,36 +949,584 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 1,
-                            AtualizadoEm = new DateTime(2025, 9, 22, 17, 49, 22, 197, DateTimeKind.Local).AddTicks(8667),
-                            CriadoEm = new DateTime(2025, 8, 25, 17, 49, 22, 197, DateTimeKind.Local).AddTicks(8667),
+                            AtualizadoEm = new DateTime(2025, 9, 24, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            CriadoEm = new DateTime(2025, 8, 27, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
                             DataNascimento = new DateTime(1985, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "ana.silva@email.com",
                             Fumador = false,
+                            NIF = "",
                             Nome = "Ana Silva",
                             Telefone = "912345678"
                         },
                         new
                         {
                             Id = 2,
-                            AtualizadoEm = new DateTime(2025, 9, 19, 17, 49, 22, 197, DateTimeKind.Local).AddTicks(8667),
-                            CriadoEm = new DateTime(2025, 8, 30, 17, 49, 22, 197, DateTimeKind.Local).AddTicks(8667),
+                            AtualizadoEm = new DateTime(2025, 9, 21, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            CriadoEm = new DateTime(2025, 9, 1, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
                             DataNascimento = new DateTime(1978, 7, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "joao.ferreira@email.com",
                             Fumador = false,
+                            NIF = "",
                             Nome = "João Ferreira",
                             Telefone = "925678912"
                         },
                         new
                         {
                             Id = 3,
-                            AtualizadoEm = new DateTime(2025, 9, 23, 17, 49, 22, 197, DateTimeKind.Local).AddTicks(8667),
-                            CriadoEm = new DateTime(2025, 9, 4, 17, 49, 22, 197, DateTimeKind.Local).AddTicks(8667),
+                            AtualizadoEm = new DateTime(2025, 9, 25, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
+                            CriadoEm = new DateTime(2025, 9, 6, 8, 14, 27, 216, DateTimeKind.Local).AddTicks(7638),
                             DataNascimento = new DateTime(1992, 11, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "maria.costa@email.com",
                             Fumador = false,
+                            NIF = "",
                             Nome = "Maria Costa",
                             Telefone = "934567823"
                         });
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.RedFlag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AcoesTomadas")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AtualizarPermanente")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DataIdentificacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataResolucao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NivelRisco")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Observacoes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SessaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoClinicaId");
+
+                    b.HasIndex("Estado", "NivelRisco");
+
+                    b.ToTable("RedFlags");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.RevisaoSistemas", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AvaliacaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CardiovascularJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CardiovascularObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DigestivoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DigestivoObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EndocrinoMetabolicoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EndocrinoMetabolicoObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HumorSonoEnergiaJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HumorSonoEnergiaObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MusculoEsqueleticoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MusculoEsqueleticoObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NeurologicoJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NeurologicoObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PeleJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PeleObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RenalUrinarioJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RenalUrinarioObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RespiratorioJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RespiratorioObs")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AvaliacaoClinicaId")
+                        .IsUnique();
+
+                    b.ToTable("RevisoesSistemas");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SessaoClinica", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataSessao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HistoriaQueixaAtual")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("HouveAlteracoesAlergias")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HouveAlteracoesCronicas")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HouveAlteracoesMedicacao")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Motivo")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ObservacoesSessao")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PlanoTerapeutico")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Profissional")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PacienteId", "DataSessao");
+
+                    b.ToTable("SessoesClinicas");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SintomaAtivo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("HistoricoIntensidades")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("IntensidadeAtual")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ObservacoesPermanentes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("PrimeiraOcorrencia")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Prioridade")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ReverEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("SessaoOrigemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Sistema")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UltimaAtualizacao")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoOrigemId");
+
+                    b.HasIndex("PacienteId", "Nome")
+                        .IsUnique();
+
+                    b.HasIndex("PacienteId", "Prioridade");
+
+                    b.ToTable("SintomasAtivos");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SintomaSessao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Aliviantes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AtualizarPermanente")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Carater")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Desencadeantes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Frequencia")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Intensidade")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("IntensidadeAnterior")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Localizacao")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("NivelRisco")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Persistente")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("PrimeiroRegisto")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Relevante")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SessaoClinicaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Sistema")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TrabalharHoje")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UltimaAtualizacao")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoClinicaId");
+
+                    b.ToTable("SintomasSessao");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.AlteracaoMedicacao", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.SessaoClinica", "SessaoClinica")
+                        .WithMany("AlteracoesMedicacao")
+                        .HasForeignKey("SessaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SessaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.AvaliacaoClinica", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.Consulta", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
+                        .WithMany("Consultas")
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.DeclaracaoLegal", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.SessaoClinica", "SessaoClinica")
+                        .WithOne("Declaracao")
+                        .HasForeignKey("BioDesk.Domain.Entities.DeclaracaoLegal", "SessaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SessaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.EstiloVida", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.AvaliacaoClinica", "AvaliacaoClinica")
+                        .WithOne("EstiloVida")
+                        .HasForeignKey("BioDesk.Domain.Entities.EstiloVida", "AvaliacaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AvaliacaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.HistoriaClinica", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.AvaliacaoClinica", "AvaliacaoClinica")
+                        .WithOne("HistoriaClinica")
+                        .HasForeignKey("BioDesk.Domain.Entities.HistoriaClinica", "AvaliacaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AvaliacaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.HistoriaFamiliar", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.AvaliacaoClinica", "AvaliacaoClinica")
+                        .WithOne("HistoriaFamiliar")
+                        .HasForeignKey("BioDesk.Domain.Entities.HistoriaFamiliar", "AvaliacaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AvaliacaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.MedicacaoAtual", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BioDesk.Domain.Entities.SessaoClinica", "SessaoOrigem")
+                        .WithMany()
+                        .HasForeignKey("SessaoOrigemId");
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("SessaoOrigem");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.MotivoConsulta", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.AvaliacaoClinica", "AvaliacaoClinica")
+                        .WithOne("MotivoConsulta")
+                        .HasForeignKey("BioDesk.Domain.Entities.MotivoConsulta", "AvaliacaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AvaliacaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.RedFlag", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.SessaoClinica", "SessaoClinica")
+                        .WithMany("RedFlags")
+                        .HasForeignKey("SessaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SessaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.RevisaoSistemas", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.AvaliacaoClinica", "AvaliacaoClinica")
+                        .WithOne("RevisaoSistemas")
+                        .HasForeignKey("BioDesk.Domain.Entities.RevisaoSistemas", "AvaliacaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AvaliacaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SessaoClinica", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SintomaAtivo", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BioDesk.Domain.Entities.SessaoClinica", "SessaoOrigem")
+                        .WithMany()
+                        .HasForeignKey("SessaoOrigemId");
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("SessaoOrigem");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SintomaSessao", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.SessaoClinica", "SessaoClinica")
+                        .WithMany("SintomasTrabalhados")
+                        .HasForeignKey("SessaoClinicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SessaoClinica");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.AvaliacaoClinica", b =>
+                {
+                    b.Navigation("EstiloVida");
+
+                    b.Navigation("HistoriaClinica");
+
+                    b.Navigation("HistoriaFamiliar");
+
+                    b.Navigation("MotivoConsulta");
+
+                    b.Navigation("RevisaoSistemas");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.Paciente", b =>
+                {
+                    b.Navigation("Consultas");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SessaoClinica", b =>
+                {
+                    b.Navigation("AlteracoesMedicacao");
+
+                    b.Navigation("Declaracao");
+
+                    b.Navigation("RedFlags");
+
+                    b.Navigation("SintomasTrabalhados");
                 });
 #pragma warning restore 612, 618
         }

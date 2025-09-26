@@ -12,6 +12,7 @@ using BioDesk.Services.Pacientes;
 using BioDesk.Services.Navigation;
 using BioDesk.Services.Dashboard;
 using BioDesk.Services.Activity;
+using BioDesk.Services.Consultas;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -79,6 +80,7 @@ public abstract class ViewModelTestBase : IDisposable
         // Dashboard services
         services.AddSingleton<IDashboardStatsService, DashboardStatsService>();
         services.AddScoped<IActivityService, ActivityService>();
+        services.AddScoped<IConsultaService, ConsultaService>(); // 🩺 Consulta Service
     }
 
     /// <summary>

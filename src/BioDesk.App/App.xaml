@@ -3,13 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:BioDesk.App.Converters">
     <Application.Resources>
-        <!-- Conversores globais -->
-        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
-        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
-        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverterCollapsed" 
-                                              NullValue="Collapsed" NotNullValue="Visible"/>
+        <ResourceDictionary>
+            <!-- Incluir estilos de loading -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/LoadingStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Conversores globais -->
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverterCollapsed" 
+                                                  NullValue="Collapsed" NotNullValue="Visible"/>
         <!-- Paleta de cores terroso pastel -->
         <SolidColorBrush x:Key="FundoPrimario">#FCFDFB</SolidColorBrush>
         <SolidColorBrush x:Key="FundoSecundario">#F2F5F0</SolidColorBrush>
@@ -74,5 +81,36 @@
             <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
             <Setter Property="Margin" Value="0,0,0,16" />
         </Style>
+
+        <!-- Alias para CorBorda -->
+        <SolidColorBrush x:Key="Borda">#E3E9DE</SolidColorBrush>
+        
+        <!-- Estilo para campos de texto -->
+        <Style x:Key="CampoTextoStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="BorderBrush" Value="{StaticResource CorBorda}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{StaticResource FundoCartao}" />
+            <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Height" Value="35" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                        Margin="{TemplateBinding Padding}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -53,6 +53,55 @@ public class BooleanToVisibilityConverter : IValueConverter
 }
 
 /// <summary>
+/// Converte bool para string com parâmetros (true|false)
+/// Usado para alternar texto de botões baseado em estado
+/// </summary>
+public class BooleanToStringConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool boolValue && parameter is string paramStr)
+        {
+            var parts = paramStr.Split('|');
+            if (parts.Length == 2)
+            {
+                return boolValue ? parts[0] : parts[1];
+            }
+        }
+        return value?.ToString() ?? string.Empty;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+/// <summary>
+/// Converte valor para Visibility se igual ao parâmetro
+/// </summary>
+public class EqualToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value?.ToString() == parameter?.ToString())
+        {
+            return Visibility.Visible;
+        }
+        return Visibility.Collapsed;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is Visibility visibility)
+        {
+            return visibility == Visibility.Visible;
+        }
+        return false;
+    }
+}
+
+/// <summary>
 /// Converte bool para Visibility invertido (true = Collapsed, false = Visible)
 /// </summary>
 public class InverseBooleanToVisibilityConverter : IValueConverter

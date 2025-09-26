@@ -14,6 +14,7 @@ using BioDesk.Services.Navigation;
 using BioDesk.Services.Pacientes;
 using BioDesk.Services.Dashboard;
 using BioDesk.Services.Activity;
+using BioDesk.Services.Consultas;
 using BioDesk.Domain.Entities;
 
 namespace BioDesk.ViewModels;
@@ -28,6 +29,7 @@ public partial class DashboardViewModel : NavigationViewModelBase
     private readonly ILogger<DashboardViewModel> _logger;
     private readonly IDashboardStatsService _dashboardStatsService;
     private readonly IActivityService _activityService;
+    private readonly IConsultaService _consultaService;
     private readonly Timer _relogio;
 
     [ObservableProperty]
@@ -58,6 +60,16 @@ public partial class DashboardViewModel : NavigationViewModelBase
     [ObservableProperty]
     private DashboardStats? _dashboardStats;
 
+    // 🩺 Propriedades dos Gráficos de Consultas
+    [ObservableProperty]
+    private PlotModel? _consultasPorSemanaChart;
+
+    [ObservableProperty]
+    private PlotModel? _tiposConsultaChart;
+
+    [ObservableProperty]
+    private ConsultaStats? _consultaStats;
+
     [ObservableProperty]
     private bool _carregandoGraficos;
 
@@ -87,12 +99,14 @@ public partial class DashboardViewModel : NavigationViewModelBase
         IPacienteService pacienteService,
         IDashboardStatsService dashboardStatsService,
         IActivityService activityService,
+        IConsultaService consultaService,
         ILogger<DashboardViewModel> logger)
         : base(navigationService, pacienteService)
     {
         _logger = logger;
         _dashboardStatsService = dashboardStatsService;
         _activityService = activityService;
+        _consultaService = consultaService;
 
         // Inicia o relógio
         _relogio = new Timer(1000); // Atualiza a cada segundo
@@ -234,10 +248,13 @@ public partial class DashboardViewModel : NavigationViewModelBase
 
                 // Carregar estatísticas
                 DashboardStats = await _dashboardStatsService.GetDashboardStatsAsync();
+                ConsultaStats = await _consultaService.GetConsultaStatsAsync();
 
                 // Carregar gráficos em paralelo
                 var taskPacientesPorMes = _dashboardStatsService.GeneratePacientesPorMesChartAsync();
                 var taskDistribuicaoIdade = _dashboardStatsService.GenerateDistribuicaoIdadeChartAsync();
+                var taskConsultasPorSemana = _consultaService.GenerateConsultasPorSemanaChartAsync();
+                var taskTiposConsulta = _consultaService.GenerateTiposConsultaChartAsync();
 
                 // Carregar atividade recente em paralelo
                 var taskPacientesRecentesItems = _activityService.GetPacientesRecentesAsync();
@@ -247,6 +264,8 @@ public partial class DashboardViewModel : NavigationViewModelBase
                 // Aguardar todos os tasks
                 PacientesPorMesChart = await taskPacientesPorMes;
                 DistribuicaoIdadeChart = await taskDistribuicaoIdade;
+                ConsultasPorSemanaChart = await taskConsultasPorSemana;
+                TiposConsultaChart = await taskTiposConsulta;
 
                 // Atualizar atividade
                 var pacientesRecentesItems = await taskPacientesRecentesItems;
@@ -266,7 +285,7 @@ public partial class DashboardViewModel : NavigationViewModelBase
                     AtividadeRecente.Add(item);
                 }
 
-                _logger.LogInformation("Dashboard carregado com {Pacientes} pacientes, 2 gráficos, {PacientesRecentes} pacientes recentes e {Atividades} atividades", 
+                _logger.LogInformation("Dashboard carregado com {Pacientes} pacientes, 4 gráficos (2 pacientes + 2 consultas), {PacientesRecentes} pacientes recentes e {Atividades} atividades", 
                     PacientesRecentes.Count, PacientesRecentesItems.Count, AtividadeRecente.Count);
             }
             finally

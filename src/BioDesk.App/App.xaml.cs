@@ -14,6 +14,7 @@ using BioDesk.Services.Cache;
 using BioDesk.Services.FuzzySearch;
 using BioDesk.Services.Dashboard;
 using BioDesk.Services.Activity;
+using BioDesk.Services.Consultas;
 using BioDesk.ViewModels;
 
 namespace BioDesk.App;
@@ -25,6 +26,11 @@ namespace BioDesk.App;
 public partial class App : Application
 {
     private IHost? _host;
+    
+    /// <summary>
+    /// Expõe o Host para acessar serviços DI 
+    /// </summary>
+    public IHost AppHost => _host ?? throw new InvalidOperationException("Host não inicializado");
 
     /// <summary>
     /// ServiceProvider público para acesso aos serviços registrados
@@ -54,7 +60,13 @@ public partial class App : Application
 
             // Criar e mostrar a janela principal
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            
+            // Log para confirmar inicialização
+            var logger = _host.Services.GetRequiredService<ILogger<App>>();
+            logger.LogInformation("🚀 BioDeskPro2 inicializado com sucesso!");
+            
             mainWindow.Show();
+            logger.LogInformation("✅ MainWindow apresentada - aplicação pronta!");
 
             base.OnStartup(e);
         }
@@ -86,18 +98,22 @@ public partial class App : Application
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddScoped<IPacienteService, PacienteService>();
         services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<BioDesk.Services.Settings.ISettingsService, BioDesk.Services.Settings.SettingsService>();
         services.AddSingleton(typeof(IAutoSaveService<>), typeof(AutoSaveService<>));
         services.AddMemoryCache(); // Para IMemoryCache
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IFuzzySearchService, FuzzySearchService>(); // 🔍 Fuzzy Search
         services.AddScoped<IDashboardStatsService, DashboardStatsService>(); // 📊 Dashboard Charts
         services.AddScoped<IActivityService, ActivityService>(); // 🔔 Activity Service
+        services.AddScoped<IConsultaService, ConsultaService>(); // 🩺 Consulta Service
 
         // ViewModels
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<NovoPacienteViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
         services.AddTransient<ListaPacientesViewModel>();
+        services.AddTransient<AvaliacaoClinicaViewModel>();
+        services.AddTransient<AnamneseViewModelIntegrado>(); // 🚀 Sistema Integrado com 11 Expanders Médicos!
 
         // Views
         services.AddSingleton<MainWindow>();
@@ -105,8 +121,8 @@ public partial class App : Application
         services.AddTransient<Views.NovoPacienteView>();
         services.AddTransient<Views.FichaPacienteView>();
         services.AddTransient<Views.ListaPacientesView>();
-        services.AddTransient<Views.FichaPacienteView>();
-        services.AddTransient<Views.ListaPacientesView>();
+        services.AddTransient<Views.AvaliacaoClinicaView>();
+        services.AddTransient<Views.AnamneseView>(); // 🚀 Sistema Integrado com 11 Expanders!
     }
 
     private async Task InicializarBaseDadosAsync()

@@ -218,7 +218,7 @@ public class CacheService : ICacheService, IDisposable
     /// <summary>
     /// Callback quando item é removido do cache
     /// </summary>
-    private void OnItemEvicted(object key, object value, EvictionReason reason, object state)
+    private void OnItemEvicted(object key, object? value, EvictionReason reason, object? state)
     {
         if (key is string keyStr)
         {

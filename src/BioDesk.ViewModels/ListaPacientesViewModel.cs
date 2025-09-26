@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,119 +14,196 @@ namespace BioDesk.ViewModels;
 
 /// <summary>
 /// ViewModel para a Lista de Pacientes
-/// Funcionalidades: Listar, pesquisar e navegar para ficha do paciente
+/// Funcionalidades completas: Listar, pesquisar, filtrar, navegar e gerenciar pacientes
 /// </summary>
-public partial class ListaPacientesViewModel : ViewModelBase
+public partial class ListaPacientesViewModel : NavigationViewModelBase
 {
     private readonly IPacienteService _pacienteService;
-    private readonly INavigationService _navigationService;
 
     public ListaPacientesViewModel(IPacienteService pacienteService, INavigationService navigationService)
+        : base(navigationService, pacienteService)
     {
         _pacienteService = pacienteService;
-        _navigationService = navigationService;
         
-        Pacientes = new ObservableCollection<Paciente>();
+        // Coleções
+        PacientesTodos = new ObservableCollection<PacienteViewModel>();
+        PacientesExibicao = new ObservableCollection<PacienteViewModel>();
         
-        // Comandos
-        PesquisarCommand = new AsyncRelayCommand(PesquisarAsync);
-        SelecionarPacienteCommand = new RelayCommand<Paciente>(SelecionarPaciente);
-        NavegarParaFichaCommand = new RelayCommand<Paciente>(NavegarParaFicha);
+        // Propriedades iniciais
+        FiltroSelecionado = "Todos";
+        PesquisarTexto = string.Empty;
+        
+        // Configurar atualização automática da pesquisa
+        PropertyChanged += OnPropertyChanged;
     }
+
+    #region Propriedades Observáveis
 
     [ObservableProperty]
     private string _pesquisarTexto = string.Empty;
 
     [ObservableProperty]
-    private Paciente? _pacienteSelecionado;
+    private PacienteViewModel? _pacienteSelecionado;
 
     [ObservableProperty]
     private bool _isLoading;
 
-    public ObservableCollection<Paciente> Pacientes { get; }
+    [ObservableProperty]
+    private string _filtroSelecionado = "Todos";
 
-    public IAsyncRelayCommand PesquisarCommand { get; }
-    public IRelayCommand<Paciente> SelecionarPacienteCommand { get; }
-    public IRelayCommand<Paciente> NavegarParaFichaCommand { get; }
+    [ObservableProperty]
+    private int _totalPacientes;
+
+    [ObservableProperty]
+    private int _pacientesExibidos;
+
+    #endregion
+
+    #region Coleções
 
     /// <summary>
-    /// Carrega dados iniciais da lista
+    /// Todos os pacientes carregados
+    /// </summary>
+    public ObservableCollection<PacienteViewModel> PacientesTodos { get; }
+
+    /// <summary>
+    /// Pacientes filtrados para exibição no DataGrid
+    /// </summary>
+    public ObservableCollection<PacienteViewModel> PacientesExibicao { get; }
+
+    #endregion
+
+    #region Comandos
+
+    [RelayCommand]
+    private void VoltarDashboard()
+    {
+        NavigationService.NavigateTo("Dashboard");
+    }
+
+    [RelayCommand]
+    private async Task AtualizarLista()
+    {
+        await CarregarDadosAsync();
+    }
+
+    [RelayCommand]
+    private void NovoPaciente()
+    {
+        NavigationService.NavigateTo("NovoPaciente");
+    }
+
+    [RelayCommand]
+    private void VerFicha(PacienteViewModel? pacienteVm)
+    {
+        if (pacienteVm?.PacienteOriginal == null) return;
+
+        _pacienteService.SetPacienteAtivo(pacienteVm.PacienteOriginal);
+        NavigationService.NavigateTo("FichaPaciente");
+    }
+
+    [RelayCommand]
+    private void EditarPaciente(PacienteViewModel? pacienteVm)
+    {
+        if (pacienteVm?.PacienteOriginal == null) return;
+
+        _pacienteService.SetPacienteAtivo(pacienteVm.PacienteOriginal);
+        NavigationService.NavigateTo("FichaPaciente");
+    }
+
+    [RelayCommand]
+    private void SelecionarPaciente(PacienteViewModel? pacienteVm)
+    {
+        PacienteSelecionado = pacienteVm;
+    }
+
+    #endregion
+
+    #region Métodos Públicos
+
+    /// <summary>
+    /// Carrega todos os pacientes da base de dados
     /// </summary>
     public async Task CarregarDadosAsync()
     {
-        IsLoading = true;
-        try
+        await ExecuteWithErrorHandlingAsync(async () =>
         {
+            IsLoading = true;
+            
             var pacientes = await _pacienteService.GetTodosAsync();
             
-            Pacientes.Clear();
+            PacientesTodos.Clear();
             foreach (var paciente in pacientes)
             {
-                Pacientes.Add(paciente);
+                PacientesTodos.Add(new PacienteViewModel(paciente));
             }
-        }
-        catch (Exception ex)
-        {
-            // TODO: Implementar tratamento de erro adequado
-            System.Diagnostics.Debug.WriteLine($"Erro ao carregar pacientes: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
-
-    /// <summary>
-    /// Pesquisa pacientes por nome
-    /// </summary>
-    private async Task PesquisarAsync()
-    {
-        if (string.IsNullOrWhiteSpace(PesquisarTexto))
-        {
-            await CarregarDadosAsync();
-            return;
-        }
-
-        IsLoading = true;
-        try
-        {
-            var pacientes = await _pacienteService.SearchAsync(PesquisarTexto);
             
-            Pacientes.Clear();
-            foreach (var paciente in pacientes)
+            TotalPacientes = PacientesTodos.Count;
+            AplicarFiltros();
+            
+        }, "Erro ao carregar lista de pacientes");
+    }
+
+    #endregion
+
+    #region Métodos Privados
+
+    /// <summary>
+    /// Aplica filtros à lista de pacientes
+    /// </summary>
+    private void AplicarFiltros()
+    {
+        var pacientesFiltrados = PacientesTodos.AsEnumerable();
+
+        // Filtro por texto de pesquisa
+        if (!string.IsNullOrWhiteSpace(PesquisarTexto))
+        {
+            var textoPesquisa = PesquisarTexto.ToLowerInvariant();
+            pacientesFiltrados = pacientesFiltrados.Where(p =>
+                p.Nome.ToLowerInvariant().Contains(textoPesquisa) ||
+                (!string.IsNullOrEmpty(p.Telefone) && p.Telefone.Contains(textoPesquisa)) ||
+                (!string.IsNullOrEmpty(p.Email) && p.Email.ToLowerInvariant().Contains(textoPesquisa))
+            );
+        }
+
+        // Filtro por status
+        if (FiltroSelecionado != "Todos")
+        {
+            pacientesFiltrados = FiltroSelecionado switch
             {
-                Pacientes.Add(paciente);
-            }
+                "Ativo" => pacientesFiltrados.Where(p => p.StatusFormatado == "Ativo"),
+                "Inativo" => pacientesFiltrados.Where(p => p.StatusFormatado == "Inativo"),
+                "Recentes" => pacientesFiltrados.Where(p => p.PacienteOriginal.CriadoEm >= DateTime.Now.AddDays(-30)),
+                _ => pacientesFiltrados
+            };
         }
-        catch (Exception ex)
+
+        // Ordenar por nome
+        pacientesFiltrados = pacientesFiltrados.OrderBy(p => p.Nome);
+
+        // Atualizar coleção de exibição
+        PacientesExibicao.Clear();
+        foreach (var paciente in pacientesFiltrados)
         {
-            System.Diagnostics.Debug.WriteLine($"Erro ao pesquisar pacientes: {ex.Message}");
+            PacientesExibicao.Add(paciente);
         }
-        finally
-        {
-            IsLoading = false;
-        }
+
+        PacientesExibidos = PacientesExibicao.Count;
     }
 
     /// <summary>
-    /// Seleciona um paciente da lista
+    /// Manipulador para mudanças de propriedades
     /// </summary>
-    private void SelecionarPaciente(Paciente? paciente)
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        PacienteSelecionado = paciente;
+        switch (e.PropertyName)
+        {
+            case nameof(PesquisarTexto):
+            case nameof(FiltroSelecionado):
+                AplicarFiltros();
+                break;
+        }
     }
 
-    /// <summary>
-    /// Navega para a ficha do paciente selecionado
-    /// </summary>
-    private void NavegarParaFicha(Paciente? paciente)
-    {
-        if (paciente == null) return;
-
-        // Definir paciente ativo no serviço de pacientes
-        _pacienteService.SetPacienteAtivo(paciente);
-        
-        // Navegar para a ficha
-        _navigationService.NavigateTo("FichaPaciente");
-    }
+    #endregion
 }

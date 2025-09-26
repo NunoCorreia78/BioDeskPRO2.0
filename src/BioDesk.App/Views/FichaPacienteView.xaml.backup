@@ -1,0 +1,1083 @@
+<UserControl x:Class="BioDesk.App.Views.FichaPacienteView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=viewModels:FichaPacienteViewModel}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <!-- Converter para IsLoading -->
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            
+            <!-- Gradiente de fundo terroso -->
+            <LinearGradientBrush x:Key="BackgroundGradient" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FCFDFB" Offset="0"/>
+                <GradientStop Color="#F2F5F0" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Estilo para cartões de seção -->
+            <Style x:Key="SectionCard" TargetType="Border">
+                <Setter Property="Background" Value="#F7F9F6"/>
+                <Setter Property="BorderBrush" Value="#E3E9DE"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="20"/>
+                <Setter Property="Margin" Value="0,0,0,15"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#E3E9DE" ShadowDepth="2" BlurRadius="8" Opacity="0.3"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Estilo para rótulos de campo -->
+            <Style x:Key="FieldLabel" TargetType="TextBlock">
+                <Setter Property="FontWeight" Value="Medium"/>
+                <Setter Property="Foreground" Value="#3F4A3D"/>
+                <Setter Property="Margin" Value="0,0,0,5"/>
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
+
+            <!-- Estilo para inputs -->
+            <Style x:Key="FieldInput" TargetType="TextBox">
+                <Setter Property="Padding" Value="10"/>
+                <Setter Property="Margin" Value="0,0,0,15"/>
+                <Setter Property="BorderBrush" Value="#E3E9DE"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Style.Triggers>
+                    <Trigger Property="IsFocused" Value="True">
+                        <Setter Property="BorderBrush" Value="#9CAF97"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <Style x:Key="NaturoTabItem" TargetType="TabItem">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Grid>
+                                <Border Name="Border" Background="#F7F9F6" BorderBrush="#E3E9DE" 
+                                        BorderThickness="1,1,1,0" CornerRadius="8,8,0,0" 
+                                        Margin="2,0,2,0" Padding="20,12">
+                                    <ContentPresenter ContentSource="Header"/>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#9CAF97"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Border" Property="Background" Value="#879B83"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource BackgroundGradient}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#9CAF97" Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Botão Voltar -->
+                <Button Grid.Column="0" Content="← Dashboard" Command="{Binding VoltarCommand}" 
+                        Background="Transparent" Foreground="White" BorderThickness="0"
+                        Padding="0,0,20,0" FontWeight="Medium" VerticalAlignment="Center"
+                        Cursor="Hand"/>
+                
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding PacienteAtual.Nome, FallbackValue='Novo Paciente'}" 
+                               FontSize="22" FontWeight="Bold" Foreground="White"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock Text="{Binding PacienteAtual.Idade, StringFormat='Idade: {0} anos'}" 
+                               FontSize="14" Foreground="White" Margin="0,0,20,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding PacienteAtual.IMC, StringFormat='IMC: {0:F1}'}" 
+                               FontSize="14" Foreground="White" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content com Nova Estrutura Organizacional -->
+        <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="20">
+            
+            <!-- ======================= TAB 1: DADOS PESSOAIS ======================= -->
+            <TabItem Header="📋 Dados Pessoais" Style="{StaticResource NaturoTabItem}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        
+                        <!-- Informações Básicas -->
+                        <Border Style="{StaticResource SectionCard}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                    <TextBlock Text="Nome Completo *" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding PacienteAtual.Nome, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource FieldInput}"/>
+                                    
+                                    <TextBlock Text="Data de Nascimento *" Style="{StaticResource FieldLabel}"/>
+                                    <DatePicker SelectedDate="{Binding PacienteAtual.DataNascimento}" 
+                                                Margin="0,0,0,15"/>
+                                    
+                                    <TextBlock Text="Email *" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding PacienteAtual.Email, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource FieldInput}"/>
+                                </StackPanel>
+                                
+                                <StackPanel Grid.Column="1" Margin="0,0,20,0">
+                                    <TextBlock Text="Telefone" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding PacienteAtual.Telefone, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource FieldInput}"/>
+                                    
+                                    <TextBlock Text="Profissão" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding PacienteAtual.Profissao, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource FieldInput}"/>
+                                             
+                                    <TextBlock Text="Estado Civil" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox SelectedItem="{Binding PacienteAtual.EstadoCivil}" 
+                                              Margin="0,0,0,15">
+                                        <ComboBoxItem Content="Solteiro(a)"/>
+                                        <ComboBoxItem Content="Casado(a)"/>
+                                        <ComboBoxItem Content="Divorciado(a)"/>
+                                        <ComboBoxItem Content="Viúvo(a)"/>
+                                    </ComboBox>
+                                </StackPanel>
+                                
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Altura (cm)" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding PacienteAtual.Altura, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource FieldInput}"/>
+                                    
+                                    <TextBlock Text="Peso (kg)" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding PacienteAtual.Peso, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource FieldInput}"/>
+                                             
+                                    <TextBlock Text="Tipo Sanguíneo" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox SelectedItem="{Binding PacienteAtual.TipoSanguineo}" 
+                                              Margin="0,0,0,15">
+                                        <ComboBoxItem Content="A+"/>
+                                        <ComboBoxItem Content="A-"/>
+                                        <ComboBoxItem Content="B+"/>
+                                        <ComboBoxItem Content="B-"/>
+                                        <ComboBoxItem Content="AB+"/>
+                                        <ComboBoxItem Content="AB-"/>
+                                        <ComboBoxItem Content="O+"/>
+                                        <ComboBoxItem Content="O-"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- Contacto de Emergência -->
+                        <Border Style="{StaticResource SectionCard}">
+                            <StackPanel>
+                                <TextBlock Text="CONTACTO DE EMERGÊNCIA" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                        <TextBlock Text="Nome do Contacto" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding PacienteAtual.ContactoEmergenciaNome, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Telefone de Emergência" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding PacienteAtual.ContactoEmergenciaTelefone, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ======================= TAB 2: GESTÃO CLÍNICA ======================= -->
+            <TabItem Header="🏥 Gestão Clínica" Style="{StaticResource NaturoTabItem}">
+                <!-- Sub-TabControl para Gestão Clínica -->
+                <TabControl Background="Transparent" BorderThickness="0" Margin="10,0">
+                    
+                    <!-- SUB-TAB 2.1: ANAMNESE -->
+                    <TabItem Header="🩺 Anamnese" Style="{StaticResource NaturoTabItem}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                            <StackPanel>
+                                
+                                <!-- Queixa Principal -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="QUEIXA PRINCIPAL" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <TextBlock Text="Motivo da consulta" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10">
+                                            <ComboBoxItem Content="Dores de cabeça / Enxaquecas"/>
+                                            <ComboBoxItem Content="Problemas digestivos"/>
+                                            <ComboBoxItem Content="Distúrbios do sono"/>
+                                            <ComboBoxItem Content="Stress e ansiedade"/>
+                                            <ComboBoxItem Content="Fadiga crónica"/>
+                                            <ComboBoxItem Content="Problemas de pele"/>
+                                            <ComboBoxItem Content="Dores músculo-esqueléticas"/>
+                                            <ComboBoxItem Content="Problemas respiratórios"/>
+                                            <ComboBoxItem Content="Check-up preventivo"/>
+                                            <ComboBoxItem Content="Outras queixas"/>
+                                        </ComboBox>
+                                        
+                                        <TextBlock Text="Descrição detalhada da queixa" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Text="{Binding PacienteAtual.QueixaPrincipal, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" 
+                                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- História da Doença Atual (HDA) -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="HISTÓRIA DA DOENÇA ATUAL" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                                <TextBlock Text="Início dos sintomas" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox Margin="0,0,0,15">
+                                                    <ComboBoxItem Content="Há poucos dias"/>
+                                                    <ComboBoxItem Content="Há 1-2 semanas"/>
+                                                    <ComboBoxItem Content="Há 1 mês"/>
+                                                    <ComboBoxItem Content="Há 3 meses"/>
+                                                    <ComboBoxItem Content="Há 6 meses"/>
+                                                    <ComboBoxItem Content="Há 1 ano"/>
+                                                    <ComboBoxItem Content="Há mais de 1 ano"/>
+                                                </ComboBox>
+                                                
+                                                <TextBlock Text="Evolução" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox Margin="0,0,0,15">
+                                                    <ComboBoxItem Content="Melhorando gradualmente"/>
+                                                    <ComboBoxItem Content="Mantém-se estável"/>
+                                                    <ComboBoxItem Content="Piorando progressivamente"/>
+                                                    <ComboBoxItem Content="Alternância (melhora/piora)"/>
+                                                    <ComboBoxItem Content="Episódios esporádicos"/>
+                                                </ComboBox>
+                                                
+                                                <TextBlock Text="Fatores desencadeantes" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Stress emocional" Margin="0,2"/>
+                                                    <CheckBox Content="Mudanças alimentares" Margin="0,2"/>
+                                                    <CheckBox Content="Alterações do sono" Margin="0,2"/>
+                                                    <CheckBox Content="Exposição ambiental" Margin="0,2"/>
+                                                    <CheckBox Content="Atividade física intensa" Margin="0,2"/>
+                                                    <CheckBox Content="Mudanças hormonais" Margin="0,2"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="Intensidade dos sintomas (0-10)" Style="{StaticResource FieldLabel}"/>
+                                                <Slider Value="{Binding PacienteAtual.IntensidadeSintomas}" 
+                                                        Minimum="0" Maximum="10" TickPlacement="BottomRight" 
+                                                        TickFrequency="1" IsSnapToTickEnabled="True"
+                                                        Margin="0,0,0,10"/>
+                                                <TextBlock Text="{Binding PacienteAtual.IntensidadeSintomas, StringFormat='Nível: {0}'}" 
+                                                           HorizontalAlignment="Center" Margin="0,0,0,15"/>
+                                                
+                                                <TextBlock Text="Fatores de alívio" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Repouso" Margin="0,2"/>
+                                                    <CheckBox Content="Atividade física ligeira" Margin="0,2"/>
+                                                    <CheckBox Content="Calor (compressas)" Margin="0,2"/>
+                                                    <CheckBox Content="Frio (gelo)" Margin="0,2"/>
+                                                    <CheckBox Content="Massagem" Margin="0,2"/>
+                                                    <CheckBox Content="Medicação" Margin="0,2"/>
+                                                    <CheckBox Content="Técnicas de relaxamento" Margin="0,2"/>
+                                                    <CheckBox Content="Mudança de posição" Margin="0,2"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                        
+                                        <TextBlock Text="Observações detalhadas" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Text="{Binding PacienteAtual.HistoriaDoencaAtual, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}" MinHeight="100" TextWrapping="Wrap" 
+                                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Antecedentes Pessoais -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="ANTECEDENTES PESSOAIS" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                                <TextBlock Text="Doenças anteriores" Style="{StaticResource FieldLabel}" Margin="0,0,0,5"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Diabetes" Margin="0,2"/>
+                                                    <CheckBox Content="Hipertensão arterial" Margin="0,2"/>
+                                                    <CheckBox Content="Doenças cardiovasculares" Margin="0,2"/>
+                                                    <CheckBox Content="Doenças respiratórias" Margin="0,2"/>
+                                                    <CheckBox Content="Doenças gastrointestinais" Margin="0,2"/>
+                                                    <CheckBox Content="Doenças neurológicas" Margin="0,2"/>
+                                                    <CheckBox Content="Doenças endócrinas" Margin="0,2"/>
+                                                    <CheckBox Content="Cancro" Margin="0,2"/>
+                                                    <CheckBox Content="Doenças autoimunes" Margin="0,2"/>
+                                                </StackPanel>
+                                                
+                                                <TextBlock Text="Cirurgias realizadas" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                                <TextBox Text="{Binding PacienteAtual.CirurgiasRealizadas, UpdateSourceTrigger=PropertyChanged}"
+                                                         Style="{StaticResource FieldInput}" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="Alergias conhecidas" Style="{StaticResource FieldLabel}" Margin="0,0,0,5"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Medicamentos" Margin="0,2"/>
+                                                    <CheckBox Content="Alimentos" Margin="0,2"/>
+                                                    <CheckBox Content="Pólenes" Margin="0,2"/>
+                                                    <CheckBox Content="Ácaros" Margin="0,2"/>
+                                                    <CheckBox Content="Animais" Margin="0,2"/>
+                                                    <CheckBox Content="Produtos químicos" Margin="0,2"/>
+                                                    <CheckBox Content="Látex" Margin="0,2"/>
+                                                    <CheckBox Content="Outras alergias:" Margin="0,2"/>
+                                                    <TextBox Text="{Binding PacienteAtual.Alergias, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource FieldInput}" Margin="20,2,0,10"/>
+                                                </StackPanel>
+                                                
+                                                <TextBlock Text="Medicação atual" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Anti-hipertensores" Margin="0,2"/>
+                                                    <CheckBox Content="Antidiabéticos" Margin="0,2"/>
+                                                    <CheckBox Content="Analgésicos" Margin="0,2"/>
+                                                    <CheckBox Content="Anti-inflamatórios" Margin="0,2"/>
+                                                    <CheckBox Content="Antidepressivos" Margin="0,2"/>
+                                                    <CheckBox Content="Suplementos vitamínicos" Margin="0,2"/>
+                                                    <CheckBox Content="Outros medicamentos:" Margin="0,2"/>
+                                                    <TextBox Text="{Binding PacienteAtual.MedicamentosAtuais, UpdateSourceTrigger=PropertyChanged}"
+                                                             Style="{StaticResource FieldInput}" Margin="20,2,0,0"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    
+                    <!-- SUB-TAB 2.2: DECLARAÇÃO E CONSENTIMENTOS -->
+                    <TabItem Header="📄 Declaração e Consentimentos" Style="{StaticResource NaturoTabItem}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                            <StackPanel>
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="DECLARAÇÃO DE SAÚDE" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <TextBlock Text="Estado de saúde geral declarado pelo paciente" 
+                                                 Style="{StaticResource FieldLabel}" Margin="0,0,0,10"/>
+                                        
+                                        <CheckBox Content="Declaro estar em bom estado de saúde geral" Margin="0,5"/>
+                                        <CheckBox Content="Declaro não ter doenças infeciosas ativas" Margin="0,5"/>
+                                        <CheckBox Content="Declaro não estar grávida (se aplicável)" Margin="0,5"/>
+                                        <CheckBox Content="Declaro que as informações fornecidas são verdadeiras" Margin="0,5"/>
+                                        
+                                        <TextBlock Text="Observações adicionais" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Style="{StaticResource FieldInput}" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="CONSENTIMENTOS INFORMADOS" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <CheckBox Content="Autorizo a realização dos tratamentos naturais propostos" Margin="0,5"/>
+                                        <CheckBox Content="Fui informado(a) sobre os possíveis efeitos dos tratamentos" Margin="0,5"/>
+                                        <CheckBox Content="Compreendo que a naturopatia é complementar à medicina convencional" Margin="0,5"/>
+                                        <CheckBox Content="Autorizo o tratamento de dados pessoais para fins terapêuticos" Margin="0,5"/>
+                                        <CheckBox Content="Aceito a política de privacidade e confidencialidade" Margin="0,5"/>
+                                        
+                                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                            <TextBlock Text="Data do consentimento: " Style="{StaticResource FieldLabel}"/>
+                                            <DatePicker SelectedDate="{Binding DataConsentimento}" Margin="10,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    
+                    <!-- SUB-TAB 2.3: REGISTO CLÍNICO -->
+                    <TabItem Header="📝 Registo Clínico" Style="{StaticResource NaturoTabItem}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                            <StackPanel>
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="SESSÕES DE CONSULTA" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <TextBlock Grid.Column="0" Text="Próxima Consulta" Style="{StaticResource FieldLabel}" 
+                                                     VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                            <DatePicker Grid.Column="1" SelectedDate="{Binding PacienteAtual.ProximaConsulta}" 
+                                                       Margin="0,0,10,0"/>
+                                            <Button Grid.Column="2" Content="Agendar" 
+                                                   Background="#9CAF97" Foreground="White" 
+                                                   Padding="15,8" BorderThickness="0"/>
+                                        </Grid>
+                                        
+                                        <TextBlock Text="Notas da sessão atual" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Style="{StaticResource FieldInput}" MinHeight="100" TextWrapping="Wrap" 
+                                                AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                        
+                                        <TextBlock Text="Plano de tratamento" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" 
+                                                AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                        
+                                        <TextBlock Text="Evolução clínica" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" 
+                                                AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+
+            <!-- ======================= TAB 3: MEDICINA COMPLEMENTAR ======================= -->
+            <TabItem Header="🌿 Medicina Complementar" Style="{StaticResource NaturoTabItem}">
+                <!-- Sub-TabControl para Medicina Complementar -->
+                <TabControl Background="Transparent" BorderThickness="0" Margin="10,0">
+                    
+                    <!-- SUB-TAB 3.1: NATUROPATIA COM TEMPLATES -->
+                    <TabItem Header="🌱 Naturopatia" Style="{StaticResource NaturoTabItem}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                            <StackPanel>
+                                
+                                <!-- Templates de Exercícios e Atividade Física -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="🏃‍♂️ EXERCÍCIOS E ATIVIDADE FÍSICA" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                                <TextBlock Text="Tipo de Exercício" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Caminhada (30 min/dia)" Margin="0,2"/>
+                                                    <CheckBox Content="Yoga / Pilates" Margin="0,2"/>
+                                                    <CheckBox Content="Natação" Margin="0,2"/>
+                                                    <CheckBox Content="Exercícios cardiovasculares" Margin="0,2"/>
+                                                    <CheckBox Content="Treino de força" Margin="0,2"/>
+                                                    <CheckBox Content="Tai Chi / Qi Gong" Margin="0,2"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                                <TextBlock Text="Frequência Recomendada" Style="{StaticResource FieldLabel}"/>
+                                                <ComboBox Margin="0,0,0,10">
+                                                    <ComboBoxItem Content="Diário"/>
+                                                    <ComboBoxItem Content="3x por semana"/>
+                                                    <ComboBoxItem Content="5x por semana"/>
+                                                    <ComboBoxItem Content="Conforme tolerância"/>
+                                                </ComboBox>
+                                                
+                                                <TextBlock Text="Observações" Style="{StaticResource FieldLabel}"/>
+                                                <TextBox Height="60" TextWrapping="Wrap" AcceptsReturn="True" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Templates de Alongamentos -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="🤸‍♀️ ALONGAMENTOS E FLEXIBILIDADE" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <StackPanel>
+                                            <CheckBox Content="Alongamentos matinais (10 min)" Margin="0,2"/>
+                                            <CheckBox Content="Alongamentos para pescoço e ombros" Margin="0,2"/>
+                                            <CheckBox Content="Alongamentos para coluna" Margin="0,2"/>
+                                            <CheckBox Content="Alongamentos para pernas" Margin="0,2"/>
+                                            <CheckBox Content="Relaxamento muscular progressivo" Margin="0,2"/>
+                                            
+                                            <TextBlock Text="Instruções específicas" Style="{StaticResource FieldLabel}" Margin="0,10,0,5"/>
+                                            <TextBox Height="80" TextWrapping="Wrap" AcceptsReturn="True" 
+                                                />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Templates de Dieta -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="🥗 PLANO ALIMENTAR" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                                <TextBlock Text="Alimentos Recomendados" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Frutas e vegetais orgânicos" Margin="0,2"/>
+                                                    <CheckBox Content="Cereais integrais" Margin="0,2"/>
+                                                    <CheckBox Content="Proteínas magras" Margin="0,2"/>
+                                                    <CheckBox Content="Frutos secos e sementes" Margin="0,2"/>
+                                                    <CheckBox Content="Peixes ricos em ómega-3" Margin="0,2"/>
+                                                    <CheckBox Content="Leguminosas" Margin="0,2"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                                <TextBlock Text="Alimentos a Evitar/Reduzir" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Açúcares refinados" Margin="0,2"/>
+                                                    <CheckBox Content="Alimentos processados" Margin="0,2"/>
+                                                    <CheckBox Content="Gorduras trans" Margin="0,2"/>
+                                                    <CheckBox Content="Álcool" Margin="0,2"/>
+                                                    <CheckBox Content="Cafeína em excesso" Margin="0,2"/>
+                                                    <CheckBox Content="Glúten (se intolerante)" Margin="0,2"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                        
+                                        <TextBlock Text="Plano de Refeições Personalizado" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Height="100" TextWrapping="Wrap" AcceptsReturn="True" 
+                                                />
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Templates de Meditação -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="🧘‍♀️ MEDITAÇÃO E MINDFULNESS" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                                <TextBlock Text="Técnicas Recomendadas" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Meditação de respiração (10 min/dia)" Margin="0,2"/>
+                                                    <CheckBox Content="Body scan / Varredura corporal" Margin="0,2"/>
+                                                    <CheckBox Content="Meditação mindfulness" Margin="0,2"/>
+                                                    <CheckBox Content="Visualização guiada" Margin="0,2"/>
+                                                    <CheckBox Content="Meditação caminhada" Margin="0,2"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                                <TextBlock Text="Horários Sugeridos" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Manhã (ao acordar)" Margin="0,2"/>
+                                                    <CheckBox Content="Pausa do almoço" Margin="0,2"/>
+                                                    <CheckBox Content="Final do dia (antes do jantar)" Margin="0,2"/>
+                                                    <CheckBox Content="Antes de dormir" Margin="0,2"/>
+                                                </StackPanel>
+                                                
+                                                <TextBlock Text="Duração" Style="{StaticResource FieldLabel}" Margin="0,10,0,5"/>
+                                                <ComboBox>
+                                                    <ComboBoxItem Content="5-10 minutos"/>
+                                                    <ComboBoxItem Content="10-15 minutos"/>
+                                                    <ComboBoxItem Content="20-30 minutos"/>
+                                                    <ComboBoxItem Content="Conforme disponibilidade"/>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Grid>
+                                        
+                                        <TextBlock Text="Instruções personalizadas" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <TextBox Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
+                                                />
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- Outras Terapias Complementares -->
+                                <Border Style="{StaticResource SectionCard}">
+                                    <StackPanel>
+                                        <TextBlock Text="🌿 OUTRAS TERAPIAS COMPLEMENTARES" FontWeight="Bold" 
+                                                 Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                                <TextBlock Text="Suplementos Naturais" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Vitamina D3" Margin="0,2"/>
+                                                    <CheckBox Content="Ómega-3" Margin="0,2"/>
+                                                    <CheckBox Content="Magnésio" Margin="0,2"/>
+                                                    <CheckBox Content="Probióticos" Margin="0,2"/>
+                                                    <CheckBox Content="Complexo B" Margin="0,2"/>
+                                                    <CheckBox Content="Cúrcuma" Margin="0,2"/>
+                                                </StackPanel>
+                                                
+                                                <TextBlock Text="Dosagem e Instruções" Style="{StaticResource FieldLabel}" Margin="0,10,0,5"/>
+                                                <TextBox Height="80" TextWrapping="Wrap" AcceptsReturn="True" 
+                                                        />
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                                                <TextBlock Text="Terapias Adicionais" Style="{StaticResource FieldLabel}"/>
+                                                <StackPanel>
+                                                    <CheckBox Content="Aromaterapia" Margin="0,2"/>
+                                                    <CheckBox Content="Fitoterapia personalizada" Margin="0,2"/>
+                                                    <CheckBox Content="Acupunctura" Margin="0,2"/>
+                                                    <CheckBox Content="Massagem terapêutica" Margin="0,2"/>
+                                                    <CheckBox Content="Hidroterapia" Margin="0,2"/>
+                                                    <CheckBox Content="Técnicas de respiração" Margin="0,2"/>
+                                                </StackPanel>
+                                                
+                                                <TextBlock Text="Observações" Style="{StaticResource FieldLabel}" Margin="0,10,0,5"/>
+                                                <TextBox Height="80" TextWrapping="Wrap" AcceptsReturn="True" 
+                                                        />
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                                
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                                        <!-- Queixa Principal -->
+                                        <TextBlock Text="Queixa Principal" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10" IsEditable="True"
+                                                 Text="{Binding PacienteAtual.QueixaPrincipal, UpdateSourceTrigger=PropertyChanged}">
+                                            <ComboBoxItem Content="Dores de cabeça"/>
+                                            <ComboBoxItem Content="Dores nas costas"/>
+                                            <ComboBoxItem Content="Ansiedade e stress"/>
+                                            <ComboBoxItem Content="Problemas digestivos"/>
+                                            <ComboBoxItem Content="Insónia"/>
+                                            <ComboBoxItem Content="Fadiga crónica"/>
+                                            <ComboBoxItem Content="Dores articulares"/>
+                                            <ComboBoxItem Content="Problemas hormonais"/>
+                                            <ComboBoxItem Content="Outro (especificar)"/>
+                                        </ComboBox>
+                                        
+                                        <!-- História da Doença Atual -->
+                                        <TextBlock Text="História da Doença Atual" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding PacienteAtual.HistoriaDoencaAtual, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}" MinHeight="60" TextWrapping="Wrap" 
+                                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                        
+                                        <!-- Sintomas Associados -->
+                                        <TextBlock Text="Sintomas Associados" Style="{StaticResource FieldLabel}" Margin="0,10,0,5"/>
+                                        <StackPanel>
+                                            <CheckBox Content="Náuseas" Margin="0,2"/>
+                                            <CheckBox Content="Tonturas" Margin="0,2"/>
+                                            <CheckBox Content="Alterações do sono" Margin="0,2"/>
+                                            <CheckBox Content="Alterações do apetite" Margin="0,2"/>
+                                            <CheckBox Content="Irritabilidade" Margin="0,2"/>
+                                            <CheckBox Content="Outros sintomas:" Margin="0,2"/>
+                                            <TextBox Text="{Binding PacienteAtual.Sintomas, UpdateSourceTrigger=PropertyChanged}"
+                                                   Style="{StaticResource FieldInput}" Margin="20,2,0,10"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <!-- Intensidade da Dor -->
+                                        <TextBlock Text="Intensidade da Dor (0-10)" Style="{StaticResource FieldLabel}"/>
+                                        <Slider Minimum="0" Maximum="10" TickFrequency="1" TickPlacement="BottomRight" 
+                                               IsSnapToTickEnabled="True" Margin="0,0,0,10"/>
+                                        
+                                        <!-- Frequência dos Sintomas -->
+                                        <TextBlock Text="Frequência dos Sintomas" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10">
+                                            <ComboBoxItem Content="Constante"/>
+                                            <ComboBoxItem Content="Diária"/>
+                                            <ComboBoxItem Content="Semanal"/>
+                                            <ComboBoxItem Content="Mensal"/>
+                                            <ComboBoxItem Content="Ocasional"/>
+                                        </ComboBox>
+                                        
+                                        <!-- Medicamentos Atuais -->
+                                        <TextBlock Text="Medicamentos Atuais" Style="{StaticResource FieldLabel}"/>
+                                        <StackPanel>
+                                            <CheckBox Content="Não toma medicamentos" Margin="0,2"/>
+                                            <CheckBox Content="Analgésicos (ex: paracetamol)" Margin="0,2"/>
+                                            <CheckBox Content="Anti-inflamatórios (ex: ibuprofeno)" Margin="0,2"/>
+                                            <CheckBox Content="Medicamentos para ansiedade" Margin="0,2"/>
+                                            <CheckBox Content="Medicamentos para o sono" Margin="0,2"/>
+                                            <CheckBox Content="Suplementos vitamínicos" Margin="0,2"/>
+                                            <CheckBox Content="Outros medicamentos:" Margin="0,2"/>
+                                            <TextBox Text="{Binding PacienteAtual.MedicamentosAtuais, UpdateSourceTrigger=PropertyChanged}"
+                                                   Style="{StaticResource FieldInput}" Margin="20,2,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Estilo de Vida -->
+                        <Border Style="{StaticResource SectionCard}">
+                            <StackPanel>
+                                <TextBlock Text="ESTILO DE VIDA" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                         
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                        <!-- Hábitos Alimentares -->
+                                        <TextBlock Text="Tipo de Alimentação" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10">
+                                            <ComboBoxItem Content="Omnívora (come tudo)"/>
+                                            <ComboBoxItem Content="Vegetariana"/>
+                                            <ComboBoxItem Content="Vegana"/>
+                                            <ComboBoxItem Content="Mediterrânica"/>
+                                            <ComboBoxItem Content="Low carb"/>
+                                            <ComboBoxItem Content="Sem glúten"/>
+                                            <ComboBoxItem Content="Sem lactose"/>
+                                            <ComboBoxItem Content="Outra (especificar)"/>
+                                        </ComboBox>
+                                        
+                                        <TextBlock Text="Número de Refeições por Dia" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10">
+                                            <ComboBoxItem Content="2 refeições"/>
+                                            <ComboBoxItem Content="3 refeições"/>
+                                            <ComboBoxItem Content="4-5 refeições"/>
+                                            <ComboBoxItem Content="6+ refeições"/>
+                                            <ComboBoxItem Content="Irregular"/>
+                                        </ComboBox>
+                                        
+                                        <TextBlock Text="Ingestão de Água (litros/dia)" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10">
+                                            <ComboBoxItem Content="Menos de 1L"/>
+                                            <ComboBoxItem Content="1-1.5L"/>
+                                            <ComboBoxItem Content="1.5-2L"/>
+                                            <ComboBoxItem Content="Mais de 2L"/>
+                                        </ComboBox>
+                                        
+                                        <!-- Exercício Físico -->
+                                        <TextBlock Text="Atividade Física" Style="{StaticResource FieldLabel}" Margin="0,10,0,5"/>
+                                        <StackPanel>
+                                            <CheckBox Content="Sedentário" Margin="0,2"/>
+                                            <CheckBox Content="Caminhadas regulares" Margin="0,2"/>
+                                            <CheckBox Content="Ginásio 1-2x/semana" Margin="0,2"/>
+                                            <CheckBox Content="Ginásio 3+x/semana" Margin="0,2"/>
+                                            <CheckBox Content="Desporto regular" Margin="0,2"/>
+                                            <CheckBox Content="Yoga/Pilates" Margin="0,2"/>
+                                            <CheckBox Content="Outras atividades:" Margin="0,2"/>
+                                            <TextBox Text="{Binding PacienteAtual.ExercicioFisico, UpdateSourceTrigger=PropertyChanged}"
+                                                   Style="{StaticResource FieldInput}" Margin="20,2,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <!-- Padrão de Sono -->
+                                        <TextBlock Text="Qualidade do Sono" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10">
+                                            <ComboBoxItem Content="Muito boa - durmo bem"/>
+                                            <ComboBoxItem Content="Boa - ocasionalmente acordo"/>
+                                            <ComboBoxItem Content="Razoável - acordo várias vezes"/>
+                                            <ComboBoxItem Content="Má - insónia frequente"/>
+                                            <ComboBoxItem Content="Muito má - raramente durmo bem"/>
+                                        </ComboBox>
+                                        
+                                        <TextBlock Text="Horas de Sono por Noite" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,10">
+                                            <ComboBoxItem Content="Menos de 5 horas"/>
+                                            <ComboBoxItem Content="5-6 horas"/>
+                                            <ComboBoxItem Content="6-7 horas"/>
+                                            <ComboBoxItem Content="7-8 horas"/>
+                                            <ComboBoxItem Content="Mais de 8 horas"/>
+                                        </ComboBox>
+                                        
+                                        <!-- Nível de Stress -->
+                                        <TextBlock Text="Nível de Stress (0-10)" Style="{StaticResource FieldLabel}"/>
+                                        <Slider Minimum="0" Maximum="10" TickFrequency="1" TickPlacement="BottomRight" 
+                                               IsSnapToTickEnabled="True" Margin="0,0,0,10"/>
+                                        
+                                        <TextBlock Text="Principais Fontes de Stress" Style="{StaticResource FieldLabel}" Margin="0,10,0,5"/>
+                                        <StackPanel>
+                                            <CheckBox Content="Trabalho" Margin="0,2"/>
+                                            <CheckBox Content="Família" Margin="0,2"/>
+                                            <CheckBox Content="Relacionamentos" Margin="0,2"/>
+                                            <CheckBox Content="Finanças" Margin="0,2"/>
+                                            <CheckBox Content="Saúde" Margin="0,2"/>
+                                            <CheckBox Content="Estudos" Margin="0,2"/>
+                                            <CheckBox Content="Outras fontes:" Margin="0,2"/>
+                                            <TextBox Text="{Binding PacienteAtual.Stress, UpdateSourceTrigger=PropertyChanged}"
+                                                   Style="{StaticResource FieldInput}" Margin="20,2,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Tratamento e Evolução -->
+                        <Border Style="{StaticResource SectionCard}">
+                            <StackPanel>
+                                <TextBlock Text="TRATAMENTO E EVOLUÇÃO" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                         
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                        <TextBlock Text="Plano de Tratamento" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding PacienteAtual.PlanoTratamento, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" 
+                                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                                 
+                                        <TextBlock Text="Observações Gerais" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding PacienteAtual.ObservacoesGerais, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" 
+                                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Evolução do Quadro" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Text="{Binding PacienteAtual.EvolucaoQuadro, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" 
+                                                 AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                                                 
+                                        <TextBlock Text="Próxima Consulta" Style="{StaticResource FieldLabel}"/>
+                                        <DatePicker SelectedDate="{Binding PacienteAtual.ProximaConsulta}" 
+                                                    Margin="0,0,0,15"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
+            <!-- SUB-TAB 3.2: IRISDIAGNÓSTICO -->
+            <TabItem Header="👁️ Irisdiagnóstico" Style="{StaticResource NaturoTabItem}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <Border Style="{StaticResource SectionCard}">
+                            <StackPanel>
+                                <TextBlock Text="ANÁLISE DA ÍRIS" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                        <TextBlock Text="Íris direita" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Style="{StaticResource FieldInput}" MinHeight="100" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                        
+                                        <TextBlock Text="Constituição observada" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <ComboBox>
+                                            <ComboBoxItem Content="Linfática (azul clara)"/>
+                                            <ComboBoxItem Content="Hematogénica (marrom)"/>
+                                            <ComboBoxItem Content="Mista (variações)"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Íris esquerda" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Style="{StaticResource FieldInput}" MinHeight="100" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                        
+                                        <TextBlock Text="Sinais específicos" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <StackPanel>
+                                            <CheckBox Content="Lacunas" Margin="0,2"/>
+                                            <CheckBox Content="Manchas pigmentares" Margin="0,2"/>
+                                            <CheckBox Content="Anéis nervosos" Margin="0,2"/>
+                                            <CheckBox Content="Radiais solaris" Margin="0,2"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <TextBlock Text="Interpretação constitucional" Style="{StaticResource FieldLabel}" Margin="0,20,0,5"/>
+                                <TextBox Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
+            <!-- SUB-TAB 3.3: TERAPIA BIOENERGÉTICA -->
+            <TabItem Header="⚛️ Terapia Bioenergética" Style="{StaticResource NaturoTabItem}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10">
+                    <StackPanel>
+                        <!-- Avaliação Energética -->
+                        <Border Style="{StaticResource SectionCard}">
+                            <StackPanel>
+                                <TextBlock Text="AVALIAÇÃO ENERGÉTICA" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                        <TextBlock Text="Campo energético" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox Margin="0,0,0,15">
+                                            <ComboBoxItem Content="Forte e equilibrado"/>
+                                            <ComboBoxItem Content="Moderadamente estável"/>
+                                            <ComboBoxItem Content="Fraco mas presente"/>
+                                            <ComboBoxItem Content="Instável com oscilações"/>
+                                            <ComboBoxItem Content="Muito desequilibrado"/>
+                                        </ComboBox>
+                                        
+                                        <TextBlock Text="Chakras principais" Style="{StaticResource FieldLabel}" Margin="0,0,0,5"/>
+                                        <StackPanel>
+                                            <CheckBox Content="🔴 Raiz (Muladhara)" Margin="0,2"/>
+                                            <CheckBox Content="🟠 Sacral (Svadhisthana)" Margin="0,2"/>
+                                            <CheckBox Content="🟡 Plexo Solar (Manipura)" Margin="0,2"/>
+                                            <CheckBox Content="🟢 Coração (Anahata)" Margin="0,2"/>
+                                            <CheckBox Content="🔵 Garganta (Vishuddha)" Margin="0,2"/>
+                                            <CheckBox Content="🟣 Terceiro Olho (Ajna)" Margin="0,2"/>
+                                            <CheckBox Content="🟢 Coronário (Sahasrara)" Margin="0,2"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Frequências observadas" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                        
+                                        <TextBlock Text="Padrões bioenergéticos" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                        <ComboBox>
+                                            <ComboBoxItem Content="Harmónico e fluido"/>
+                                            <ComboBoxItem Content="Bloqueios pontuais"/>
+                                            <ComboBoxItem Content="Desalinhamento geral"/>
+                                            <ComboBoxItem Content="Hiperatividade energética"/>
+                                            <ComboBoxItem Content="Défice energético"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <TextBox Text="{Binding PacienteAtual.Chakras, UpdateSourceTrigger=PropertyChanged}"
+                                       Style="{StaticResource FieldInput}" Margin="0,15,0,0" MinHeight="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Protocolo Quântico -->
+                        <Border Style="{StaticResource SectionCard}">
+                            <StackPanel>
+                                <TextBlock Text="PROTOCOLO DE TERAPIA QUÂNTICA" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
+                                
+                                <TextBlock Text="Frequências terapêuticas aplicadas" Style="{StaticResource FieldLabel}" Margin="0,0,0,5"/>
+                                <StackPanel>
+                                    <CheckBox Content="528 Hz (Frequência do Amor)" Margin="0,2"/>
+                                    <CheckBox Content="432 Hz (Harmonia Universal)" Margin="0,2"/>
+                                    <CheckBox Content="963 Hz (Frequência de Deus)" Margin="0,2"/>
+                                    <CheckBox Content="741 Hz (Limpeza e Expressão)" Margin="0,2"/>
+                                    <CheckBox Content="396 Hz (Libertação do Medo)" Margin="0,2"/>
+                                </StackPanel>
+                                
+                                <TextBlock Text="Modalidades aplicadas" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                <StackPanel>
+                                    <CheckBox Content="Bioeletrografia Kirlian" Margin="0,2"/>
+                                    <CheckBox Content="Radiestesia energética" Margin="0,2"/>
+                                    <CheckBox Content="Cristais programados" Margin="0,2"/>
+                                    <CheckBox Content="Geometria sagrada" Margin="0,2"/>
+                                    <CheckBox Content="Campos morfogenéticos" Margin="0,2"/>
+                                </StackPanel>
+                                
+                                <TextBlock Text="Plano de reequilíbrio energético" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
+                                <TextBox Style="{StaticResource FieldInput}" MinHeight="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+                </TabControl>
+            </TabItem>
+
+        <!-- Footer com Botões -->
+        <Border Grid.Row="2" Background="Transparent" Padding="20">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Cancelar" Command="{Binding CancelarCommand}" 
+                        Background="Transparent" Foreground="#5A6558" BorderBrush="#E3E9DE"
+                        Padding="20,10" Margin="0,0,10,0"/>
+                <Button Content="Guardar" Command="{Binding SalvarCommand}" 
+                        Background="#9CAF97" Foreground="White" BorderBrush="#9CAF97"
+                        Padding="20,10"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Loading overlay -->
+        <Border Grid.RowSpan="3" Background="#80FFFFFF" 
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="8" 
+                           Foreground="#9CAF97" Background="#E3E9DE"/>
+                <TextBlock Text="A processar..." 
+                         FontSize="14" Foreground="#5A6558" 
+                         HorizontalAlignment="Center" 
+                         Margin="0,10,0,0"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</UserControl>
