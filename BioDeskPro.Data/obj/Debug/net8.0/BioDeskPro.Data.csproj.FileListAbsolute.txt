@@ -1,0 +1,17 @@
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\bin\Debug\net8.0\BioDeskPro.Data.deps.json
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\bin\Debug\net8.0\BioDeskPro.Data.runtimeconfig.json
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\bin\Debug\net8.0\BioDeskPro.Data.dll
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\bin\Debug\net8.0\BioDeskPro.Data.pdb
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\bin\Debug\net8.0\BioDeskPro.Core.dll
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\bin\Debug\net8.0\BioDeskPro.Core.pdb
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.csproj.AssemblyReference.cache
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.AssemblyInfoInputs.cache
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.AssemblyInfo.cs
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.csproj.CoreCompileInputs.cache
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskP.FECA13AE.Up2Date
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.dll
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\refint\BioDeskPro.Data.dll
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.pdb
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\BioDeskPro.Data.genruntimeconfig.cache
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Data\obj\Debug\net8.0\ref\BioDeskPro.Data.dll

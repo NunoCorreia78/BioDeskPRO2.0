@@ -1,0 +1,11 @@
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\bin\Debug\net8.0\BioDeskPro.Core.deps.json
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\bin\Debug\net8.0\BioDeskPro.Core.dll
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\bin\Debug\net8.0\BioDeskPro.Core.pdb
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\BioDeskPro.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\BioDeskPro.Core.AssemblyInfoInputs.cache
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\BioDeskPro.Core.AssemblyInfo.cs
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\BioDeskPro.Core.csproj.CoreCompileInputs.cache
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\BioDeskPro.Core.dll
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\refint\BioDeskPro.Core.dll
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\BioDeskPro.Core.pdb
+C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro_2.0\BioDeskPro.Core\obj\Debug\net8.0\ref\BioDeskPro.Core.dll
