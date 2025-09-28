@@ -167,6 +167,13 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 3. **NUNCA** ignorar erros do IntelliSense no VS Code
 4. **NUNCA** usar try-catch para silenciar problemas
 
+#### 🛡️ REGRA DOURADA: PRESERVAR CÓDIGO FUNCIONAL
+5. **NUNCA** alterar código que está funcionando sem razão explícita
+6. **NUNCA** refatorar código estável apenas por "melhorar" 
+7. **NUNCA** tocar em funcionalidades que passam nos testes
+8. **SEMPRE** perguntar antes de modificar código funcional
+9. **SEMPRE** priorizar: "Se funciona, não mexe" > "código perfeito"
+
 #### ✅ PROCESSO DE VERIFICAÇÃO OBRIGATÓRIO
 ```bash
 # SEMPRE executar antes de confirmar sucesso:
@@ -215,5 +222,11 @@ Antes de afirmar qualquer correção:
 #### 🛑 QUANDO PARAR E PEDIR AJUDA
 Após 3 tentativas falhadas do mesmo erro, admitir:
 "Este problema requer investigação adicional. O erro sugere [problema específico]. Para corrigir adequadamente, precisamos [ação específica]."
+
+#### ⭐ PRINCÍPIO FUNDAMENTAL
+**"Se está a funcionar e os testes passam, NÃO ALTERES!"**
+- Código funcional é mais valioso que código "perfeito"
+- Estabilidade > Elegância
+- Funcionalidade > Refactoring desnecessário
 
 **LEMBRETE FINAL**: Código funcional > Código "corrigido" que não funciona

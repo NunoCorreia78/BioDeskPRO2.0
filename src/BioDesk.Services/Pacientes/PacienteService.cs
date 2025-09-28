@@ -47,7 +47,35 @@ public class PacienteService : IPacienteService
             return;
         }
         
+        // 🚨 DEBUG CRÍTICO: Verificar dados RECEBIDOS no SetPacienteAtivo
+        _logger.LogError("🔍 SETPACIENTEATIVO - DADOS RECEBIDOS:");
+        _logger.LogError("📋 Nome: '{Nome}'", paciente.Nome ?? "NULL");
+        _logger.LogError("📧 Email: '{Email}'", paciente.Email ?? "NULL");
+        _logger.LogError("📞 Telefone: '{Telefone}'", paciente.Telefone ?? "NULL");
+        _logger.LogError("🆔 Genero: '{Genero}'", paciente.Genero ?? "NULL");
+        _logger.LogError("💍 EstadoCivil: '{EstadoCivil}'", paciente.EstadoCivil ?? "NULL");
+        _logger.LogError("👔 Profissao: '{Profissao}'", paciente.Profissao ?? "NULL");
+        
         _logger.LogInformation("Definindo paciente ativo: {Nome} (ID: {Id})", 
+            paciente.Nome, paciente.Id);
+        
+        _pacienteAtivo = paciente;
+        PacienteAtivoChanged?.Invoke(this, paciente);
+    }
+
+    /// <summary>
+    /// 🚨 MÉTODO DIRETO: Define paciente ativo SEM recarregar da BD
+    /// Usado para garantir que Ficha usa EXATAMENTE os mesmos dados da Lista
+    /// </summary>
+    public void SetPacienteAtivoDirecto(Paciente paciente)
+    {
+        if (paciente == null)
+        {
+            _logger.LogWarning("Tentativa de definir paciente ativo como null - ignorando");
+            return;
+        }
+        
+        _logger.LogInformation("MÉTODO DIRETO: Definindo paciente ativo: {Nome} (ID: {Id})", 
             paciente.Nome, paciente.Id);
         
         _pacienteAtivo = paciente;
@@ -56,6 +84,17 @@ public class PacienteService : IPacienteService
 
     public Paciente? GetPacienteAtivo()
     {
+        if (_pacienteAtivo == null)
+        {
+            _logger.LogInformation("Nenhum paciente ativo definido");
+            return null;
+        }
+
+        // 🚨 RETORNA DIRETAMENTE os dados que foram definidos
+        // Sem recarregar da BD para garantir consistência com a Lista
+        _logger.LogInformation("Retornando paciente ativo diretamente: {Nome} (ID: {Id})", 
+            _pacienteAtivo.Nome, _pacienteAtivo.Id);
+            
         return _pacienteAtivo;
     }
 

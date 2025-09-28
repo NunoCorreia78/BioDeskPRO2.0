@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -65,6 +66,9 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     private Paciente? _pacienteAtual;
     
     [ObservableProperty]
+    private PacienteViewModel? _pacienteWrapper;
+    
+    [ObservableProperty]
     private bool _isEdicao = false;
     
     [ObservableProperty]
@@ -82,6 +86,21 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     
     [ObservableProperty]
     private DateTime? _dataNascimento;
+    
+    [ObservableProperty]
+    private string _genero = string.Empty;
+    
+    [ObservableProperty]
+    private string _estadoCivil = string.Empty;
+    
+    [ObservableProperty]
+    private string _profissao = string.Empty;
+    
+    [ObservableProperty]
+    private string _nif = string.Empty;
+    
+    [ObservableProperty]
+    private string _morada = string.Empty;
 
     // Propriedades para gestão de consultas
     [ObservableProperty]
@@ -165,6 +184,8 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
         try
         {
             _logger = logger;
+            _logger.LogError("🚨🚨🚨 FichaPacienteViewModel: CONSTRUTOR INICIADO!");
+
             _logger.LogInformation("🚀 FichaPacienteViewModel: Iniciando construção...");
 
             _pacienteService = pacienteService;
@@ -196,20 +217,23 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             _logger.LogInformation("✓ Event handler configurado");
         
             // Inicializar com paciente ativo se existir
-            _logger.LogInformation("👤 Verificando paciente ativo...");
+            _logger.LogWarning("� VERIFICANDO PACIENTE ATIVO NO CONSTRUTOR...");
             var pacienteAtivo = _pacienteService.GetPacienteAtivo();
             
             if (pacienteAtivo != null)
             {
-                _logger.LogInformation($"👤 Paciente ativo encontrado: {pacienteAtivo.Nome} (ID: {pacienteAtivo.Id})");
+                _logger.LogWarning($"👤 PACIENTE ATIVO ENCONTRADO: {pacienteAtivo.Nome} (ID: {pacienteAtivo.Id})");
+                _logger.LogWarning($"📧 Email do BD: {pacienteAtivo.Email}");
+                _logger.LogWarning($"📞 Telefone do BD: {pacienteAtivo.Telefone}");
+                _logger.LogWarning($"👔 Profissão do BD: {pacienteAtivo.Profissao}");
                 CarregarPaciente(pacienteAtivo);
-                _logger.LogInformation("✓ Paciente carregado");
+                _logger.LogWarning("✓ PACIENTE CARREGADO NO CONSTRUTOR");
             }
             else
             {
-                _logger.LogInformation("👤 Nenhum paciente ativo - iniciando formulário limpo");
+                _logger.LogWarning("👤 NENHUM PACIENTE ATIVO - formulário limpo");
                 LimparFormulario();
-                _logger.LogInformation("✓ Formulário limpo");
+                _logger.LogWarning("✓ FORMULÁRIO LIMPO");
             }
 
             _logger.LogInformation("🎉 FichaPacienteViewModel: Construção concluída com sucesso!");
@@ -682,45 +706,16 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     /// </summary>
     public async Task CarregarPacienteAsync(Paciente paciente)
     {
-        if (paciente == null) return;
+        if (paciente == null)
+            return;
 
-        var isNovoPaciente = paciente.Id == 0;
+        paciente = await GarantirPacienteDetalhadoAsync(paciente);
 
-        PacienteAtual = paciente;
-        Nome = paciente.Nome ?? string.Empty;
-        Email = paciente.Email ?? string.Empty;
-        Telefone = paciente.Telefone ?? string.Empty;
-        DataNascimento = paciente.DataNascimento;
-        
-        IsEdicao = isNovoPaciente ? true : false;
-        IsDirty = false;
-        
-        // Carregar consultas do paciente (se não for novo)
-        if (!isNovoPaciente)
-        {
-            await CarregarConsultasPaciente();
-        }
-        else
-        {
-            ConsultasPaciente = new List<Consulta>();
-            HasConsultas = false;
-        }
-        
-        // Notificar propriedades computadas
-        OnPropertyChanged(nameof(Id));
-        OnPropertyChanged(nameof(CriadoEm));
-        OnPropertyChanged(nameof(AtualizadoEm));
-        OnPropertyChanged(nameof(IdadeCalculada));
-        
-        if (isNovoPaciente)
-        {
-            _logger.LogInformation("Ficha preparada para novo paciente");
-        }
-        else
-        {
-            _logger.LogInformation("Paciente carregado: {Nome} (ID: {Id}) com {Count} consultas", 
-                paciente.Nome, paciente.Id, ConsultasPaciente.Count);
-        }
+        _logger.LogInformation("📂 (Async) Carregando paciente: {Nome} (ID: {Id})", paciente.Nome, paciente.Id);
+
+        LogDadosPaciente(paciente);
+
+        PreencherFormularioPaciente(paciente);
     }
 
     /// <summary>
@@ -737,47 +732,13 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
                 return;
             }
 
+            paciente = GarantirPacienteDetalhado(paciente);
+
             _logger.LogInformation($"📂 Carregando paciente: {paciente.Nome}");
 
-            var isNovoPaciente = paciente.Id == 0;
+            LogDadosPaciente(paciente);
 
-            PacienteAtual = paciente;
-            Nome = paciente.Nome ?? string.Empty;
-            Email = paciente.Email ?? string.Empty;
-            Telefone = paciente.Telefone ?? string.Empty;
-            DataNascimento = paciente.DataNascimento;
-            
-            // CORREÇÃO: Lógica correta para IsEdicao
-            IsEdicao = isNovoPaciente; // Novo paciente deve começar em edição
-            IsDirty = false;
-            
-            // Para novo paciente, limpar consultas
-            if (isNovoPaciente)
-            {
-                ConsultasPaciente = new List<Consulta>();
-                HasConsultas = false;
-            }
-            else
-            {
-                // Carregar consultas de forma assíncrona mas segura
-                _ = CarregarConsultasPaciente();
-            }
-            
-            // Notificar propriedades computadas
-            OnPropertyChanged(nameof(Id));
-            OnPropertyChanged(nameof(CriadoEm));
-            OnPropertyChanged(nameof(AtualizadoEm));
-            OnPropertyChanged(nameof(IdadeCalculada));
-            
-            if (isNovoPaciente)
-            {
-                _logger.LogInformation("Ficha preparada para novo paciente");
-            }
-            else
-            {
-                _logger.LogInformation("Paciente carregado: {Nome} (ID: {Id})", 
-                    paciente.Nome, paciente.Id);
-            }
+            PreencherFormularioPaciente(paciente);
         }
         catch (Exception ex)
         {
@@ -806,6 +767,173 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
         OnPropertyChanged(nameof(IdadeCalculada));
         
         _logger.LogInformation("Formulário limpo para novo paciente");
+    }
+
+    private void PreencherFormularioPaciente(Paciente paciente)
+    {
+        var isNovoPaciente = paciente.Id == 0;
+
+        PacienteAtual = paciente;
+        PacienteWrapper = new PacienteViewModel(paciente);
+
+        Nome = paciente.Nome ?? string.Empty;
+        Email = paciente.Email ?? string.Empty;
+        Telefone = paciente.Telefone ?? string.Empty;
+        DataNascimento = paciente.DataNascimento;
+        Genero = paciente.Genero ?? string.Empty;
+        EstadoCivil = paciente.EstadoCivil ?? string.Empty;
+        Profissao = paciente.Profissao ?? string.Empty;
+        Nif = paciente.NIF ?? string.Empty;
+        Morada = paciente.Morada ?? string.Empty;
+
+        _logger.LogWarning("🚨 DEPOIS DE ATRIBUIR ÀS PROPRIEDADES:");
+        _logger.LogWarning("📋 Nome: '{Nome}'", Nome);
+        _logger.LogWarning("📧 Email: '{Email}'", Email);
+        _logger.LogWarning("📞 Telefone: '{Telefone}'", Telefone);
+        _logger.LogWarning("📅 DataNascimento: {DataNascimento}", DataNascimento?.ToString("dd/MM/yyyy") ?? "NULL");
+        _logger.LogWarning("👔 Profissao: '{Profissao}'", Profissao);
+        _logger.LogWarning("🆔 Genero: '{Genero}'", Genero);
+        _logger.LogWarning("💍 EstadoCivil: '{EstadoCivil}'", EstadoCivil);
+        _logger.LogWarning("🏠 Morada: '{Morada}'", Morada);
+        _logger.LogWarning("🔢 NIF: '{Nif}'", Nif);
+
+        _logger.LogWarning("⚙️ FORÇANDO NOTIFICAÇÃO DE PROPRIEDADES...");
+        OnPropertyChanged(nameof(Nome));
+        OnPropertyChanged(nameof(Email));
+        OnPropertyChanged(nameof(Telefone));
+        OnPropertyChanged(nameof(DataNascimento));
+        OnPropertyChanged(nameof(Genero));
+        OnPropertyChanged(nameof(EstadoCivil));
+        OnPropertyChanged(nameof(Profissao));
+        OnPropertyChanged(nameof(Nif));
+        OnPropertyChanged(nameof(Morada));
+
+        IsEdicao = isNovoPaciente;
+        IsDirty = false;
+
+        if (isNovoPaciente)
+        {
+            ConsultasPaciente = new List<Consulta>();
+            HasConsultas = false;
+        }
+        else
+        {
+            _ = CarregarConsultasPaciente();
+        }
+
+        OnPropertyChanged(nameof(Id));
+        OnPropertyChanged(nameof(CriadoEm));
+        OnPropertyChanged(nameof(AtualizadoEm));
+        OnPropertyChanged(nameof(IdadeCalculada));
+
+        if (isNovoPaciente)
+        {
+            _logger.LogInformation("Ficha preparada para novo paciente");
+        }
+        else
+        {
+            _logger.LogInformation("Paciente carregado: {Nome} (ID: {Id})", paciente.Nome, paciente.Id);
+        }
+    }
+
+    private Paciente GarantirPacienteDetalhado(Paciente paciente)
+    {
+        ArgumentNullException.ThrowIfNull(paciente);
+
+        if (paciente.Id <= 0)
+            return paciente;
+
+        try
+        {
+            var pacienteCompleto = _pacienteService.GetByIdAsync(paciente.Id)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+
+            if (pacienteCompleto == null)
+            {
+                _logger.LogWarning("Não foi possível obter dados completos para o paciente ID {Id}", paciente.Id);
+                return paciente;
+            }
+
+            if (!ReferenceEquals(paciente, pacienteCompleto))
+            {
+                CopiarPropriedadesPaciente(paciente, pacienteCompleto);
+                _logger.LogInformation("Paciente ID {Id} sincronizado com dados completos do repositório", paciente.Id);
+            }
+
+            return paciente;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao obter dados completos do paciente ID {Id}", paciente.Id);
+            return paciente;
+        }
+    }
+
+    private async Task<Paciente> GarantirPacienteDetalhadoAsync(Paciente paciente)
+    {
+        ArgumentNullException.ThrowIfNull(paciente);
+
+        if (paciente.Id <= 0)
+            return paciente;
+
+        try
+        {
+            var pacienteCompleto = await _pacienteService.GetByIdAsync(paciente.Id);
+
+            if (pacienteCompleto == null)
+            {
+                _logger.LogWarning("[Async] Não foi possível obter dados completos para o paciente ID {Id}", paciente.Id);
+                return paciente;
+            }
+
+            if (!ReferenceEquals(paciente, pacienteCompleto))
+            {
+                CopiarPropriedadesPaciente(paciente, pacienteCompleto);
+                _logger.LogInformation("[Async] Paciente ID {Id} sincronizado com dados completos do repositório", paciente.Id);
+            }
+
+            return paciente;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro async ao obter dados completos do paciente ID {Id}", paciente.Id);
+            return paciente;
+        }
+    }
+
+    private static void CopiarPropriedadesPaciente(Paciente destino, Paciente origem)
+    {
+        var propriedades = typeof(Paciente)
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.CanRead && p.CanWrite);
+
+        foreach (var propriedade in propriedades)
+        {
+            try
+            {
+                var valor = propriedade.GetValue(origem);
+                propriedade.SetValue(destino, valor);
+            }
+            catch
+            {
+                // Ignorar propriedades que não podem ser copiadas (ex: somente leitura ou proxy EF)
+            }
+        }
+    }
+
+    private void LogDadosPaciente(Paciente paciente)
+    {
+        _logger.LogWarning("🔍 DADOS RECEBIDOS DA BASE DE DADOS:");
+        _logger.LogWarning("ID: {Id}", paciente.Id);
+        _logger.LogWarning("Nome: '{Nome}'", paciente.Nome ?? "NULL");
+        _logger.LogWarning("Email: '{Email}'", paciente.Email ?? "NULL");
+        _logger.LogWarning("Telefone: '{Telefone}'", paciente.Telefone ?? "NULL");
+        _logger.LogWarning("DataNascimento: {DataNascimento}", paciente.DataNascimento?.ToString("dd/MM/yyyy") ?? "NULL");
+        _logger.LogWarning("Genero: '{Genero}'", paciente.Genero ?? "NULL");
+        _logger.LogWarning("EstadoCivil: '{EstadoCivil}'", paciente.EstadoCivil ?? "NULL");
+        _logger.LogWarning("Profissao: '{Profissao}'", paciente.Profissao ?? "NULL");
+        _logger.LogWarning("NIF: '{NIF}'", paciente.NIF ?? "NULL");
+        _logger.LogWarning("Morada: '{Morada}'", paciente.Morada ?? "NULL");
     }
 
     /// <summary>

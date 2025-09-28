@@ -15,8 +15,7 @@ namespace BioDesk.App
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro fatal: {ex}");
-                Console.ReadKey();
+                System.Diagnostics.Debug.WriteLine($"💥 ERRO FATAL: {ex}");
                 return 1;
             }
         }

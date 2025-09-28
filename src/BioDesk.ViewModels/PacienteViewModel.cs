@@ -34,7 +34,18 @@ namespace BioDesk.ViewModels
             }
         }
 
-        // DataNascimento removido conforme solicitado
+        public DateTime? DataNascimento
+        {
+            get => _paciente.DataNascimento;
+            set
+            {
+                if (_paciente.DataNascimento != value)
+                {
+                    _paciente.DataNascimento = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public string Email
         {
@@ -83,6 +94,45 @@ namespace BioDesk.ViewModels
                 if (_paciente.NIF != value)
                 {
                     _paciente.NIF = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? Genero
+        {
+            get => _paciente.Genero;
+            set
+            {
+                if (_paciente.Genero != value)
+                {
+                    _paciente.Genero = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? EstadoCivil
+        {
+            get => _paciente.EstadoCivil;
+            set
+            {
+                if (_paciente.EstadoCivil != value)
+                {
+                    _paciente.EstadoCivil = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? Morada
+        {
+            get => _paciente.Morada;
+            set
+            {
+                if (_paciente.Morada != value)
+                {
+                    _paciente.Morada = value;
                     OnPropertyChanged();
                 }
             }

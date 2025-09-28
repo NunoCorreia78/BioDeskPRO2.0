@@ -98,7 +98,9 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
     {
         if (pacienteVm?.PacienteOriginal == null) return;
 
-        _pacienteService.SetPacienteAtivo(pacienteVm.PacienteOriginal);
+        // 🚨 SOLUÇÃO DIRETA: Passar paciente diretamente SEM usar SetPacienteAtivo
+        // Isto garante que usamos EXATAMENTE os mesmos dados da lista
+        _pacienteService.SetPacienteAtivoDirecto(pacienteVm.PacienteOriginal);
         NavigationService.NavigateTo("FichaPaciente");
     }
 

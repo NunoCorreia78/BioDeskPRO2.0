@@ -49,6 +49,13 @@ public class BioDeskContext : DbContext
 
             entity.Property(p => p.AtualizadoEm)
                   .IsRequired();
+
+            // Configuração de campos decimais para precisão
+            entity.Property(p => p.Altura)
+                  .HasColumnType("decimal(5,2)");
+
+            entity.Property(p => p.Peso)
+                  .HasColumnType("decimal(5,2)");
         });
 
         // Seed de dados de exemplo
@@ -89,6 +96,23 @@ public class BioDeskContext : DbContext
                 Email = "maria.costa@email.com",
                 Telefone = "934567823",
                 CriadoEm = agora.AddDays(-20),
+                AtualizadoEm = agora.AddDays(-1)
+            },
+            new Paciente
+            {
+                Id = 4,
+                Nome = "Carlos Teste",
+                DataNascimento = new DateTime(1975, 6, 18),
+                Email = "carlos.teste@email.com",
+                Telefone = "967891234",
+                Genero = "M",
+                EstadoCivil = "Casado",
+                Profissao = "Engenheiro",
+                QueixaPrincipal = "Stress e ansiedade laboral",
+                HistoriaDoencaAtual = "Episódios frequentes de ansiedade relacionados com pressão no trabalho",
+                DuracaoSintomas = "6 meses",
+                IntensidadeSintomas = "Moderada",
+                CriadoEm = agora.AddDays(-15),
                 AtualizadoEm = agora.AddDays(-1)
             }
         };
@@ -177,6 +201,39 @@ public class BioDeskContext : DbContext
                 Valor = 70.00m,
                 Status = "Agendada",
                 DataCriacao = agora.AddDays(-3)
+            },
+            new Consulta
+            {
+                Id = 5,
+                PacienteId = 4,
+                DataConsulta = agora.AddDays(-5),
+                TipoConsulta = "Primeira", 
+                Notas = "Primeira consulta naturopática. Avaliação stress laboral.",
+                Valor = 65.00m,
+                Status = "Realizada",
+                DataCriacao = agora.AddDays(-8)
+            },
+            new Consulta
+            {
+                Id = 6,
+                PacienteId = 4,
+                DataConsulta = agora.AddDays(3),
+                TipoConsulta = "Seguimento",
+                Notas = "Seguimento - avaliar progresso do tratamento para ansiedade.",
+                Valor = 50.00m,
+                Status = "Agendada", 
+                DataCriacao = agora.AddDays(-2)
+            },
+            new Consulta
+            {
+                Id = 7,
+                PacienteId = 4,
+                DataConsulta = agora.AddDays(10),
+                TipoConsulta = "Seguimento",
+                Notas = "Reavaliação geral e ajuste de tratamento.",
+                Valor = 50.00m,
+                Status = "Agendada",
+                DataCriacao = agora.AddDays(-1)
             }
         };
 

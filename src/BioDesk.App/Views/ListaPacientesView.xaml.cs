@@ -15,12 +15,8 @@ public partial class ListaPacientesView : UserControl
     {
         InitializeComponent();
         
-        // Configurar ViewModel através do DI
-        var app = Application.Current as App;
-        if (app?.ServiceProvider != null)
-        {
-            DataContext = app.ServiceProvider.GetService<ListaPacientesViewModel>();
-        }
+        // Não definir DataContext aqui - deixar o MainWindow fazer isso
+        // para evitar conflitos com a navegação
         
         Loaded += OnLoaded;
     }

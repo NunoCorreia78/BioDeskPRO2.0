@@ -42,6 +42,11 @@ public class TestPacienteService : IPacienteService
         PacienteAtivoChanged?.Invoke(this, paciente);
     }
 
+    public void SetPacienteAtivoDirecto(Paciente paciente)
+    {
+        SetPacienteAtivo(paciente); // No teste, comportamento igual
+    }
+
     public Paciente? GetPacienteAtivo()
     {
         return _pacienteAtivo;

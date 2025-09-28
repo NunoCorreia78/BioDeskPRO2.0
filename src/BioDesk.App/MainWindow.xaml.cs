@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using BioDesk.Services.Navigation;
+using BioDesk.Services.Pacientes;
 using BioDesk.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -101,6 +102,15 @@ namespace BioDesk.App
                     else if (fe.DataContext is ConsultasViewModel consultasVm) // 🩺 Carregar Consultas
                     {
                         _ = consultasVm.CarregarDadosAsync();
+                    }
+                    else if (fe.DataContext is FichaPacienteViewModel fichaVm) // 🩺 Forçar reload do paciente ativo
+                    {
+                        // Forçar carregamento do paciente ativo (fix para problema de navegação)
+                        var pacienteAtivo = _serviceProvider.GetRequiredService<IPacienteService>().GetPacienteAtivo();
+                        if (pacienteAtivo != null)
+                        {
+                            fichaVm.CarregarPaciente(pacienteAtivo);
+                        }
                     }
                 }
             }

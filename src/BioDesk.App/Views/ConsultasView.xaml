@@ -4,11 +4,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             xmlns:local="clr-namespace:BioDesk.App.Converters"
              d:DataContext="{d:DesignInstance Type=viewmodels:ConsultasViewModel}"
              mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1200">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <local:StringParameterToVisibilityConverter x:Key="StringParameterToVisibilityConverter"/>
+        <local:StatusToVisibilityConverter x:Key="StatusToVisibilityConverter"/>
         
         <!-- 🩺 ESTILOS CONSULTAS MÉDICAS -->
         <Style x:Key="ConsultaCard" TargetType="Border">
@@ -82,7 +85,7 @@
                        Style="{StaticResource ActionButton}" Margin="0,0,10,0"/>
                        
                 <Button Grid.Column="2" Content="+ Nova Consulta" 
-                       Command="{Binding AbrirNovaConsultaCommand}"
+                       Command="{Binding AbrirNovaConsultaAsyncCommand}"
                        Style="{StaticResource ActionButton}" 
                        Background="#7A9471"/>
             </Grid>
@@ -135,14 +138,14 @@
                             </ComboBox>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="4" Visibility="{Binding FiltroData, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel Grid.Column="4" Visibility="{Binding FiltroData, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=Personalizado}">
                             <TextBlock Text="Data Início:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                             <!-- DatePicker removido conforme solicitado -->
                             <TextBox Text="Filtro por data desabilitado" Width="140" IsReadOnly="True"/>
                         </StackPanel>
 
                         <Button Grid.Column="6" Content="Aplicar" 
-                               Command="{Binding AplicarFiltrosCommand}"
+                               Command="{Binding AplicarFiltrosAsyncCommand}"
                                Style="{StaticResource ActionButton}" 
                                VerticalAlignment="Bottom"/>
                     </Grid>
@@ -261,7 +264,7 @@
                                            CommandParameter="{Binding}"
                                            Style="{StaticResource ActionButton}" FontSize="11"
                                            Background="#7A9471"
-                                           Visibility="{Binding Status, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                           Visibility="{Binding Status, Converter={StaticResource StatusToVisibilityConverter}, ConverterParameter=Agendada}"/>
                                     
                                     <Button Content="Cancelar" 
                                            Command="{Binding DataContext.CancelarConsultaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -311,9 +314,9 @@
                             <StackPanel Grid.Row="0" Grid.ColumnSpan="3">
                                 <TextBlock Text="Paciente:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                                 <ComboBox SelectedValue="{Binding NovaConsulta.PacienteId}" 
-                                         DisplayMemberPath="Nome" SelectedValuePath="Id">
-                                    <!-- Binding seria feito no code-behind ou converter -->
-                                </ComboBox>
+                                         ItemsSource="{Binding PacientesDisponiveis}"
+                                         DisplayMemberPath="Nome" 
+                                         SelectedValuePath="Id"/>
                             </StackPanel>
 
                             <!-- Data -->
@@ -365,7 +368,7 @@
                                        Style="{StaticResource ActionButton}" 
                                        Background="#9E9E9E" Margin="0,0,10,0"/>
                                 <Button Content="Gravar Consulta" 
-                                       Command="{Binding GravarConsultaCommand}"
+                                       Command="{Binding GravarConsultaAsyncCommand}"
                                        Style="{StaticResource ActionButton}"/>
                             </StackPanel>
                         </Grid>

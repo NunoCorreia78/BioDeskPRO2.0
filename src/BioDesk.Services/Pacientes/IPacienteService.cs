@@ -18,6 +18,12 @@ public interface IPacienteService
     void SetPacienteAtivo(Paciente paciente);
 
     /// <summary>
+    /// Define o paciente ativo DIRETAMENTE sem recarregar da BD
+    /// Garante consistência total com dados da Lista
+    /// </summary>
+    void SetPacienteAtivoDirecto(Paciente paciente);
+
+    /// <summary>
     /// Obtém o paciente atualmente ativo
     /// </summary>
     Paciente? GetPacienteAtivo();

@@ -3,6 +3,7 @@ using System;
 using BioDesk.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BioDesk.Data.Migrations
 {
     [DbContext(typeof(BioDeskContext))]
-    partial class BioDeskContextModelSnapshot : ModelSnapshot
+    [Migration("20250927070108_AdicionarPacienteTeste")]
+    partial class AdicionarPacienteTeste
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -70,8 +73,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 1,
-                            DataConsulta = new DateTime(2025, 9, 13, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            DataCriacao = new DateTime(2025, 9, 13, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            DataConsulta = new DateTime(2025, 9, 13, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            DataCriacao = new DateTime(2025, 9, 13, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             Notas = "Primeira consulta de naturopatia. Paciente apresenta sintomas de stress.",
                             PacienteId = 1,
                             Status = "Realizada",
@@ -81,8 +84,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 2,
-                            DataConsulta = new DateTime(2025, 9, 20, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            DataCriacao = new DateTime(2025, 9, 20, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            DataConsulta = new DateTime(2025, 9, 20, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            DataCriacao = new DateTime(2025, 9, 20, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             Notas = "Seguimento - melhoria dos sintomas de stress.",
                             PacienteId = 1,
                             Status = "Realizada",
@@ -92,8 +95,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 3,
-                            DataConsulta = new DateTime(2025, 9, 17, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            DataCriacao = new DateTime(2025, 9, 17, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            DataConsulta = new DateTime(2025, 9, 17, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            DataCriacao = new DateTime(2025, 9, 17, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             Notas = "Primeira consulta de osteopatia. Dores lombares.",
                             PacienteId = 2,
                             Status = "Realizada",
@@ -103,8 +106,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 4,
-                            DataConsulta = new DateTime(2025, 9, 29, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            DataCriacao = new DateTime(2025, 9, 24, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            DataConsulta = new DateTime(2025, 9, 29, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            DataCriacao = new DateTime(2025, 9, 24, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             Notas = "Consulta agendada para medicina quântica.",
                             PacienteId = 3,
                             Status = "Agendada",
@@ -114,8 +117,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 5,
-                            DataConsulta = new DateTime(2025, 9, 22, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            DataCriacao = new DateTime(2025, 9, 19, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            DataConsulta = new DateTime(2025, 9, 22, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            DataCriacao = new DateTime(2025, 9, 19, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             Notas = "Primeira consulta naturopática. Avaliação stress laboral.",
                             PacienteId = 4,
                             Status = "Realizada",
@@ -125,8 +128,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 6,
-                            DataConsulta = new DateTime(2025, 9, 30, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            DataCriacao = new DateTime(2025, 9, 25, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            DataConsulta = new DateTime(2025, 9, 30, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            DataCriacao = new DateTime(2025, 9, 25, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             Notas = "Seguimento - avaliar progresso do tratamento para ansiedade.",
                             PacienteId = 4,
                             Status = "Agendada",
@@ -136,8 +139,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 7,
-                            DataConsulta = new DateTime(2025, 10, 7, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            DataCriacao = new DateTime(2025, 9, 26, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            DataConsulta = new DateTime(2025, 10, 7, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            DataCriacao = new DateTime(2025, 9, 26, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             Notas = "Reavaliação geral e ajuste de tratamento.",
                             PacienteId = 4,
                             Status = "Agendada",
@@ -165,7 +168,7 @@ namespace BioDesk.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal?>("Altura")
-                        .HasColumnType("decimal(5,2)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("AmplitudeMovimento")
                         .HasMaxLength(1000)
@@ -388,7 +391,7 @@ namespace BioDesk.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal?>("Peso")
-                        .HasColumnType("decimal(5,2)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PontosTensao")
                         .HasMaxLength(1000)
@@ -517,8 +520,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 1,
-                            AtualizadoEm = new DateTime(2025, 9, 25, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            CriadoEm = new DateTime(2025, 8, 28, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            AtualizadoEm = new DateTime(2025, 9, 25, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            CriadoEm = new DateTime(2025, 8, 28, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             DataNascimento = new DateTime(1985, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "ana.silva@email.com",
                             Fumador = false,
@@ -529,8 +532,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 2,
-                            AtualizadoEm = new DateTime(2025, 9, 22, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            CriadoEm = new DateTime(2025, 9, 2, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            AtualizadoEm = new DateTime(2025, 9, 22, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            CriadoEm = new DateTime(2025, 9, 2, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             DataNascimento = new DateTime(1990, 7, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "joao.ferreira@email.com",
                             Fumador = false,
@@ -541,8 +544,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 3,
-                            AtualizadoEm = new DateTime(2025, 9, 26, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            CriadoEm = new DateTime(2025, 9, 7, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            AtualizadoEm = new DateTime(2025, 9, 26, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            CriadoEm = new DateTime(2025, 9, 7, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             DataNascimento = new DateTime(1988, 11, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "maria.costa@email.com",
                             Fumador = false,
@@ -553,8 +556,8 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 4,
-                            AtualizadoEm = new DateTime(2025, 9, 26, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
-                            CriadoEm = new DateTime(2025, 9, 12, 8, 12, 7, 93, DateTimeKind.Local).AddTicks(5146),
+                            AtualizadoEm = new DateTime(2025, 9, 26, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
+                            CriadoEm = new DateTime(2025, 9, 12, 8, 1, 8, 14, DateTimeKind.Local).AddTicks(1237),
                             DataNascimento = new DateTime(1975, 6, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DuracaoSintomas = "6 meses",
                             Email = "carlos.teste@email.com",

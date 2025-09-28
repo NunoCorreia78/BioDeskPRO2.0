@@ -49,6 +49,9 @@ public partial class ConsultasViewModel : NavigationViewModelBase
     [ObservableProperty]
     private DateTime _dataFim = DateTime.Today.AddDays(30);
 
+    [ObservableProperty]
+    private List<Paciente> _pacientesDisponiveis = new();
+
     public List<string> TiposConsulta { get; } = new() { "Primeira", "Seguimento", "Revisão", "Urgente" };
     public List<string> StatusConsulta { get; } = new() { "Agendada", "Realizada", "Cancelada", "Faltou" };
 
@@ -112,10 +115,17 @@ public partial class ConsultasViewModel : NavigationViewModelBase
     /// Abre diálogo para nova consulta
     /// </summary>
     [RelayCommand]
-    private void AbrirNovaConsulta()
+    private async Task AbrirNovaConsultaAsync()
     {
-        ResetarNovaConsulta();
-        MostrarDialogoNovaConsulta = true;
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            // Carregar pacientes disponíveis
+            var pacientes = await PacienteService.GetRecentesAsync();
+            PacientesDisponiveis = pacientes.ToList();
+
+            ResetarNovaConsulta();
+            MostrarDialogoNovaConsulta = true;
+        }, "ao abrir diálogo de nova consulta");
     }
 
     /// <summary>
@@ -193,6 +203,32 @@ public partial class ConsultasViewModel : NavigationViewModelBase
         if (consulta?.Paciente == null) return;
 
         await NavegarParaFichaPacienteAsync(consulta.Paciente);
+    }
+
+    /// <summary>
+    /// Inicia fluxo para criação de um novo paciente a partir da área de consultas
+    /// </summary>
+    [RelayCommand]
+    private async Task NovoPacienteAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(() =>
+        {
+            var novoPaciente = new Paciente
+            {
+                Id = 0,
+                Nome = string.Empty,
+                Email = string.Empty,
+                Telefone = string.Empty,
+                CriadoEm = DateTime.Now
+            };
+
+            PacienteService.SetPacienteAtivo(novoPaciente);
+            NavigationService.NavigateTo("FichaPaciente");
+
+            _logger.LogInformation("Novo paciente iniciado a partir de Consultas");
+
+            return Task.CompletedTask;
+        }, "ao iniciar criação de novo paciente a partir de Consultas");
     }
 
     /// <summary>

@@ -526,16 +526,12 @@
 
                 <!-- Informações do Paciente à Direita -->
                 <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding PacienteAtual.Nome}" 
+                    <TextBlock Text="{Binding Nome}" 
                              FontWeight="SemiBold" FontSize="16" 
                              Foreground="#3F4A3D" 
                              HorizontalAlignment="Right"/>
                     <TextBlock Text="{Binding IdadeCalculada}" 
                              FontSize="14" 
-                             Foreground="#5A6558"
-                             HorizontalAlignment="Right"/>
-                    <TextBlock Text="{Binding PacienteAtual.NumeroUtente, StringFormat='Nº {0}'}" 
-                             FontSize="12" 
                              Foreground="#5A6558"
                              HorizontalAlignment="Right"/>
                 </StackPanel>
@@ -574,7 +570,7 @@
                                         <!-- Linha 1: Nome Completo -->
                                         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,15">
                                             <TextBlock Text="Nome Completo *" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteAtual.Nome, UpdateSourceTrigger=PropertyChanged}"
+                                            <TextBox Text="{Binding PacienteWrapper.Nome, UpdateSourceTrigger=PropertyChanged}"
                                                    Style="{StaticResource FieldInput}" FontSize="14"/>
                                         </StackPanel>
                                         
@@ -582,7 +578,7 @@
                                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,20,15">
                                             <TextBlock Text="Data de Nascimento *" Style="{StaticResource FieldLabel}"/>
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <DatePicker SelectedDate="{Binding DataNascimento, UpdateSourceTrigger=PropertyChanged}" 
+                                                <DatePicker SelectedDate="{Binding PacienteWrapper.DataNascimento, UpdateSourceTrigger=PropertyChanged}" 
                                                           SelectedDateFormat="Short"
                                                           DisplayDateStart="1900-01-01"
                                                           DisplayDateEnd="{x:Static system:DateTime.Now}"
@@ -599,7 +595,7 @@
                                         
                                         <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,10,15">
                                             <TextBlock Text="Género" Style="{StaticResource FieldLabel}"/>
-                                            <ComboBox Style="{StaticResource FieldComboBox}">
+                                            <ComboBox SelectedItem="{Binding PacienteWrapper.Genero, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FieldComboBox}">
                                                 <ComboBoxItem Content="Masculino"/>
                                                 <ComboBoxItem Content="Feminino"/>
                                                 <ComboBoxItem Content="Outro"/>
@@ -609,7 +605,7 @@
                                         
                                         <StackPanel Grid.Row="1" Grid.Column="2" Margin="20,0,0,15">
                                             <TextBlock Text="Estado Civil" Style="{StaticResource FieldLabel}"/>
-                                            <ComboBox Style="{StaticResource FieldComboBox}">
+                                            <ComboBox SelectedItem="{Binding PacienteWrapper.EstadoCivil, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FieldComboBox}">
                                                 <ComboBoxItem Content="Solteiro/a"/>
                                                 <ComboBoxItem Content="Casado/a"/>
                                                 <ComboBoxItem Content="União de facto"/>
@@ -622,7 +618,7 @@
                                         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,15,0">
                                             <TextBlock Text="Profissão *" Style="{StaticResource FieldLabel}"/>
                                             <ComboBox IsEditable="True" 
-                                                    Text="{Binding PacienteAtual.Profissao, UpdateSourceTrigger=PropertyChanged}"
+                                                    Text="{Binding PacienteWrapper.Profissao, UpdateSourceTrigger=PropertyChanged}"
                                                     Style="{StaticResource FieldComboBox}"
                                                     ToolTip="Digite ou selecione uma profissão">
                                                 <ComboBoxItem Content="Administrador(a)"/>
@@ -822,7 +818,7 @@
                                         <!-- Linha 3: NIF -->
                                         <StackPanel Grid.Row="2" Grid.Column="2" Margin="15,0,0,0">
                                             <TextBlock Text="NIF" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteAtual.NIF, UpdateSourceTrigger=PropertyChanged}"
+                                            <TextBox Text="{Binding PacienteWrapper.NIF, UpdateSourceTrigger=PropertyChanged}"
                                                    Style="{StaticResource FieldInput}"
                                                    MaxLength="9"
                                                    ToolTip="Número de Identificação Fiscal (9 dígitos)"/>
@@ -851,21 +847,22 @@
                                         <!-- Linha 1: Telemóvel e Email -->
                                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,20,15">
                                             <TextBlock Text="Telemóvel *" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteAtual.Telefone, UpdateSourceTrigger=PropertyChanged}"
+                                            <TextBox Text="{Binding PacienteWrapper.Telefone, UpdateSourceTrigger=PropertyChanged}"
                                                    Style="{StaticResource FieldInput}"
                                                    ToolTip="Formato: +351 9XX XXX XXX"/>
                                         </StackPanel>
                                         
                                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,15">
                                             <TextBlock Text="Email *" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteAtual.Email, UpdateSourceTrigger=PropertyChanged}"
+                                            <TextBox Text="{Binding PacienteWrapper.Email, UpdateSourceTrigger=PropertyChanged}"
                                                    Style="{StaticResource FieldInput}"/>
                                         </StackPanel>
                                         
                                         <!-- Linha 2: Morada -->
                                         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
                                             <TextBlock Text="Rua/Avenida" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Style="{StaticResource FieldInput}" Margin="0,0,0,10"/>
+                                            <TextBox Text="{Binding PacienteWrapper.Morada, UpdateSourceTrigger=PropertyChanged}" 
+                                                   Style="{StaticResource FieldInput}" Margin="0,0,0,10"/>
                                             
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -955,7 +952,7 @@
                                     <!-- Botões de Ação -->
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                                         <Button Content="💾 Guardar" Style="{StaticResource PrimaryButton}" 
-                                              Command="{Binding GravarCommand}" Margin="0,0,0,0"/>
+                                              Command="{Binding GravarAsyncCommand}" Margin="0,0,0,0"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -1397,7 +1394,7 @@
                             <!-- Botões de Ação da Declaração & Anamnese -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                                 <Button Content="💾 Guardar Declaração" Style="{StaticResource PrimaryButton}" 
-                                      Command="{Binding GravarCommand}"
+                                      Command="{Binding GravarAsyncCommand}"
                                       ToolTip="Guardar todas as informações da declaração e anamnese"/>
                             </StackPanel>
                         </StackPanel>
@@ -1871,12 +1868,12 @@
                                 <TextBlock Text="📋 Dados do Paciente" FontSize="12" FontWeight="SemiBold" 
                                          Foreground="#3F4A3D" Margin="0,0,0,8"/>
                                 <TextBlock FontSize="11" Foreground="#5A6558" TextWrapping="Wrap">
-                                    <Run Text="Nome:"/> <Run Text="{Binding PacienteAtual.Nome}" FontWeight="Medium"/>
+                                    <Run Text="Nome:"/> <Run Text="{Binding Nome}" FontWeight="Medium"/>
                                     <LineBreak/>
                                     <Run Text="Idade:"/> <Run Text="{Binding IdadeCalculada, Mode=OneWay}" FontWeight="Medium"/>
                                     <LineBreak/>
-                                    <Run Text="Contacto:"/> <Run Text="{Binding PacienteAtual.Email}" FontWeight="Medium"/>
-                                    <Run Text=" | "/> <Run Text="{Binding PacienteAtual.Telefone}" FontWeight="Medium"/>
+                                    <Run Text="Contacto:"/> <Run Text="{Binding Email}" FontWeight="Medium"/>
+                                    <Run Text=" | "/> <Run Text="{Binding Telefone}" FontWeight="Medium"/>
                                 </TextBlock>
                             </StackPanel>
                         </Border>
