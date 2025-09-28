@@ -3,9 +3,19 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using BioDesk.Services.Notifications;
 
 namespace BioDesk.App.Controls;
+
+/// <summary>
+/// Tipos de notificação para o sistema limpo
+/// </summary>
+public enum NotificationType
+{
+    Success,
+    Error,
+    Warning,
+    Info
+}
 
 /// <summary>
 /// UserControl para notificações toast no BioDeskPro2
@@ -96,7 +106,7 @@ public partial class ToastNotification : UserControl
         return type switch
         {
             NotificationType.Success => "✓", // &#xE73E; for Segoe MDL2
-            NotificationType.Error => "✗",   // &#xE711; for Segoe MDL2  
+            NotificationType.Error => "✗",   // &#xE711; for Segoe MDL2
             NotificationType.Warning => "⚠", // &#xE7BA; for Segoe MDL2
             NotificationType.Info => "ℹ",    // &#xE946; for Segoe MDL2
             _ => "ℹ"

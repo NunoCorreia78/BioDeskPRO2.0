@@ -1,419 +1,294 @@
 <UserControl x:Class="BioDesk.App.Views.DashboardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:oxy="http://oxyplot.org/wpf">
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=viewmodels:DashboardViewModel}">
 
     <UserControl.Resources>
-        <ResourceDictionary>
-            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-            <Style x:Key="StatCard" TargetType="Border">
-                <Setter Property="Background" Value="#F7F9F6"/>
-                <Setter Property="BorderBrush" Value="#E3E9DE"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="CornerRadius" Value="8"/>
-                <Setter Property="Padding" Value="20,15"/>
-                <Setter Property="Margin" Value="0,0,0,15"/>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#879B83"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-            
-            <Style x:Key="ModernTabItem" TargetType="TabItem">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="TabItem">
-                            <Grid>
-                                <Border Name="Border" Background="#F7F9F6" BorderBrush="#E3E9DE" 
-                                        BorderThickness="1,1,1,0" CornerRadius="8,8,0,0" 
-                                        Margin="2,0,2,0" Padding="12,8">
-                                    <ContentPresenter ContentSource="Header"/>
-                                </Border>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#9CAF97"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#879B83"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-        </ResourceDictionary>
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#9CAF97"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="8" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#879B83"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#6B7F67"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#C8D4C5"/>
+                                <Setter Property="Foreground" Value="#9B9B9B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionCardStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <!-- Gradiente de fundo terroso -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#FCFDFB" Offset="0"/>
+                <GradientStop Color="#F2F5F0" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
 
-        <!-- Navigation Cards Row -->
-        <Grid Grid.Row="0" Margin="20,20,20,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Novo Paciente Card -->
-            <Border Grid.Column="0" Style="{StaticResource StatCard}" Margin="0,0,10,0"
-                    Background="#9CAF97" BorderBrush="#879B83" Cursor="Hand">
-                <Border.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{Binding NovoPacienteCommand}"/>
-                </Border.InputBindings>
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="➕" FontSize="32" HorizontalAlignment="Center" Foreground="White" Margin="0,0,0,8"/>
-                    <TextBlock Text="Novo Paciente" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center" Foreground="White"/>
+        <!-- Header -->
+        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="0,0,0,1" Height="60" VerticalAlignment="Top">
+            <Grid Margin="30,0">
+                <TextBlock Text="BioDeskPro2 - Dashboard" FontSize="22" FontWeight="Bold" 
+                          Foreground="#3F4A3D" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="🕐" FontSize="16" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Text="{Binding DataAtual, StringFormat='dd/MM/yyyy HH:mm'}" 
+                              FontSize="14" Foreground="#5A6558" VerticalAlignment="Center"/>
                 </StackPanel>
-            </Border>
+            </Grid>
+        </Border>
 
-            <!-- Lista Pacientes Card -->
-            <Border Grid.Column="1" Style="{StaticResource StatCard}" Margin="10,0,0,0"
-                    Background="#9CAF97" BorderBrush="#879B83" Cursor="Hand">
-                <Border.InputBindings>
-                    <MouseBinding MouseAction="LeftClick" Command="{Binding AbrirListaPacientesCommand}"/>
-                </Border.InputBindings>
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="📋" FontSize="32" HorizontalAlignment="Center" Foreground="White" Margin="0,0,0,8"/>
-                    <TextBlock Text="Lista Pacientes" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center" Foreground="White"/>
-                </StackPanel>
-            </Border>
-        </Grid>
+        <ScrollViewer Margin="0,60,0,0" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="30">
+                <StackPanel>
+                    <!-- Ações Rápidas Cards Melhorados -->
+                    <TextBlock Text="⚡ Ações Rápidas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
+                    
+                    <UniformGrid Rows="1" Columns="2" Margin="0,0,0,40">
+                        <!-- Card Novo Paciente - Melhorado -->
+                        <Button Command="{Binding NovoPacienteCommand}" 
+                                Style="{StaticResource ActionCardStyle}"
+                                Margin="0,0,15,0">
+                            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="16" 
+                                    Padding="30,25">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#E0E0E0" BlurRadius="10" ShadowDepth="3" Opacity="0.4"/>
+                                </Border.Effect>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Border Background="#9CAF97" Width="65" Height="65" CornerRadius="32" 
+                                            HorizontalAlignment="Center" Margin="0,0,0,15">
+                                        <TextBlock Text="👤" FontSize="30" HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Novo Paciente" FontSize="18" FontWeight="Bold" 
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock Text="Criar nova ficha médica" FontSize="13" 
+                                             Foreground="#5A6558" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
 
-        <!-- Main TabControl -->
-        <TabControl Grid.Row="1" 
-                    Background="Transparent"
-                    BorderThickness="0"
-                    SelectedIndex="{Binding SelectedTabIndex}"
-                    Margin="20,0,20,20">
+                        <!-- Card Lista de Pacientes - Melhorado -->
+                        <Button Style="{StaticResource ActionCardStyle}" 
+                                IsEnabled="False"
+                                Margin="15,0,0,0">
+                            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="16" 
+                                    Padding="30,25" Opacity="0.7">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#E0E0E0" BlurRadius="10" ShadowDepth="3" Opacity="0.3"/>
+                                </Border.Effect>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Border Background="#C8D4C5" Width="65" Height="65" CornerRadius="32" 
+                                            HorizontalAlignment="Center" Margin="0,0,0,15">
+                                        <TextBlock Text="📋" FontSize="30" HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Lista de Pacientes" FontSize="18" FontWeight="Bold" 
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock Text="Em desenvolvimento..." FontSize="13" 
+                                             Foreground="#9B9B9B" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
+                    </UniformGrid>
 
-            <!-- Activity Tab (FIRST - with statistics cards) -->
-            <TabItem Header="⚡ Atividade Recente" Style="{StaticResource ModernTabItem}">
-                <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="0,8,8,8">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+                    <!-- Estatísticas Expandidas -->
+                    <TextBlock Text="📊 Estatísticas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
+                    
+                    <UniformGrid Rows="1" Columns="4" Margin="0,0,0,40">
+                        <!-- Total Pacientes -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" 
+                                Padding="20" Margin="0,0,8,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="👥" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="0" FontSize="22" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Pacientes" FontSize="12" 
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Consultas Hoje -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" 
+                                Padding="20" Margin="8,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="📅" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="0" FontSize="22" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Hoje" FontSize="12" 
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Consultas Esta Semana -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" 
+                                Padding="20" Margin="8,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="🗓️" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="0" FontSize="22" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Esta Semana" FontSize="12" 
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Consultas Este Mês -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" 
+                                Padding="20" Margin="8,0,0,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="📊" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="0" FontSize="22" FontWeight="Bold" 
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Este Mês" FontSize="12" 
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Estado da Aplicação - Expandido -->
+                    <TextBlock Text="⚙️ Estado da Aplicação" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
+                    
+                    <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" Padding="25">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#E0E0E0" BlurRadius="8" ShadowDepth="3" Opacity="0.3"/>
+                        </Border.Effect>
                         <StackPanel>
-                            <!-- Statistics Cards (general stats only) -->
-                            <TextBlock Text="Estatísticas do Sistema" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
-                            
-                            <Grid Margin="0,0,0,30">
+                            <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Total Pacientes Card -->
-                                <Border Grid.Column="0" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Total Pacientes" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding TotalPacientes}" FontSize="24" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Pacientes Hoje Card -->
-                                <Border Grid.Column="1" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Registros Hoje" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding PacientesHoje}" FontSize="24" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Emails Card -->
-                                <Border Grid.Column="2" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Emails Hoje" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding EmailStats.EmailsHoje}" FontSize="24" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Pendentes Card -->
-                                <Border Grid.Column="3" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Emails Pendentes" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding EmailStats.EmailsPendentes}" FontSize="24" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-
-                            <!-- Activity Content -->
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Pacientes Recentes -->
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Pacientes Recentes" FontSize="18" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,15"/>
-                                    
-                                    <ItemsControl ItemsSource="{Binding PacientesRecentes}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Style="{StaticResource StatCard}" Margin="0,0,0,10">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        
-                                                        <StackPanel Grid.Column="0">
-                                                            <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" FontSize="14" Foreground="#3F4A3D"/>
-                                                            <TextBlock Text="{Binding Email}" FontSize="12" Foreground="#5A6558"/>
-                                                            <TextBlock Text="{Binding TempoRelativo}" FontSize="11" Foreground="#879B83"/>
-                                                        </StackPanel>
-                                                        
-                                                        <TextBlock Grid.Column="1" Text="👤" FontSize="16" VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                <!-- Base de Dados -->
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                    <Border Background="#4CAF50" Width="50" Height="50" CornerRadius="25" 
+                                            HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="💾" FontSize="24" HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Base de Dados" FontSize="14" FontWeight="SemiBold" 
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                                    <TextBlock Text="✅ Conectada" FontSize="12" 
+                                             Foreground="#4CAF50" HorizontalAlignment="Center"/>
                                 </StackPanel>
 
-                                <!-- Atividade do Sistema -->
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Atividade do Sistema" FontSize="18" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,15"/>
-                                    
-                                    <ItemsControl ItemsSource="{Binding AtividadeRecente}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Style="{StaticResource StatCard}" Margin="0,0,0,10">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        
-                                                        <TextBlock Grid.Column="0" Text="{Binding Icone}" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Top"/>
-                                                        
-                                                        <StackPanel Grid.Column="1">
-                                                            <TextBlock Text="{Binding Descricao}" FontWeight="SemiBold" FontSize="13" Foreground="#3F4A3D" TextWrapping="Wrap"/>
-                                                            <TextBlock Text="{Binding TempoRelativo}" FontSize="11" Foreground="#879B83"/>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                <!-- Iridoscópio -->
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                    <Border Background="#FF9800" Width="50" Height="50" CornerRadius="25" 
+                                            HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="👁️" FontSize="24" HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Iridoscópio" FontSize="14" FontWeight="SemiBold" 
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                                    <TextBlock Text="⚠️ Desconectado" FontSize="12" 
+                                             Foreground="#FF9800" HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Medicina Quântica -->
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                    <Border Background="#9C27B0" Width="50" Height="50" CornerRadius="25" 
+                                            HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="🔬" FontSize="24" HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Med. Quântica" FontSize="14" FontWeight="SemiBold" 
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                                    <TextBlock Text="⚠️ Aguardando" FontSize="12" 
+                                             Foreground="#9C27B0" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Grid>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Border>
-            </TabItem>
 
-            <!-- Charts Tab -->
-            <TabItem Header="📈 Gráficos" Style="{StaticResource ModernTabItem}">
-                <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="0,8,8,8">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-                        <StackPanel>
-                            <TextBlock Text="Análise Gráfica" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
-                            
-                            <!-- Charts Grid -->
+                            <!-- Informações do Sistema -->
+                            <Separator Margin="0,10" Background="#E3E9DE"/>
                             <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="300"/>
-                                    <RowDefinition Height="20"/>
-                                    <RowDefinition Height="300"/>
-                                    <RowDefinition Height="20"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="300"/>
-                                    <RowDefinition Height="20"/>
-                                    <RowDefinition Height="300"/>
-                                </Grid.RowDefinitions>
-
-                                <!-- Registros por Dia -->
-                                <Border Grid.Row="0" Style="{StaticResource StatCard}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        
-                                        <TextBlock Grid.Row="0" Text="Registros por Dia (Últimos 7 dias)" 
-                                                   FontSize="16" FontWeight="SemiBold" 
-                                                   Foreground="#3F4A3D" 
-                                                   Margin="0,0,0,10"/>
-                                        
-                                        <oxy:PlotView Grid.Row="1" 
-                                                      Model="{Binding GraficoRegistrosPorDia}"
-                                                      Background="Transparent"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Evolução Mensal -->
-                                <Border Grid.Row="2" Style="{StaticResource StatCard}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        
-                                        <TextBlock Grid.Row="0" Text="Evolução Mensal" 
-                                                   FontSize="16" FontWeight="SemiBold" 
-                                                   Foreground="#3F4A3D" 
-                                                   Margin="0,0,0,10"/>
-                                        
-                                        <oxy:PlotView Grid.Row="1" 
-                                                      Model="{Binding GraficoEvolucaoMensal}"
-                                                      Background="Transparent"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Separador Consultas -->
-                                <TextBlock Grid.Row="4" Text="📅 Estatísticas de Consultas" 
-                                           FontSize="18" FontWeight="SemiBold" 
-                                           Foreground="#9CAF97" 
-                                           Margin="0,20,0,20" HorizontalAlignment="Center"/>
-
-                                <!-- Consultas por Semana -->
-                                <Border Grid.Row="5" Style="{StaticResource StatCard}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        
-                                        <TextBlock Grid.Row="0" Text="Consultas Realizadas por Semana (Últimas 8 Semanas)" 
-                                                   FontSize="16" FontWeight="SemiBold" 
-                                                   Foreground="#3F4A3D" 
-                                                   Margin="0,0,0,10"/>
-                                        
-                                        <oxy:PlotView Grid.Row="1" 
-                                                      Model="{Binding ConsultasPorSemanaChart}"
-                                                      Background="Transparent"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Tipos de Consulta -->
-                                <Border Grid.Row="7" Style="{StaticResource StatCard}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        
-                                        <TextBlock Grid.Row="0" Text="Distribuição por Tipo de Consulta" 
-                                                   FontSize="16" FontWeight="SemiBold" 
-                                                   Foreground="#3F4A3D" 
-                                                   Margin="0,0,0,10"/>
-                                        
-                                        <oxy:PlotView Grid.Row="1" 
-                                                      Model="{Binding TiposConsultaChart}"
-                                                      Background="Transparent"/>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Border>
-            </TabItem>
-
-            <!-- Statistics Tab -->
-            <TabItem Header="📊 Estatísticas" Style="{StaticResource ModernTabItem}">
-                <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="0,8,8,8">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-                        <StackPanel>
-                            <TextBlock Text="Resumo Estatístico Detalhado" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
-                            
-                            <!-- Estatísticas de Pacientes -->
-                            <TextBlock Text="👥 Pacientes" FontSize="16" FontWeight="SemiBold" Foreground="#9CAF97" Margin="0,0,0,15"/>
-                            <Grid Margin="0,0,0,30">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <!-- Registros por Semana -->
-                                <Border Grid.Column="0" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Esta Semana" FontWeight="SemiBold" Foreground="#5A6558" FontSize="16" Margin="0,0,0,10"/>
-                                        <TextBlock Text="{Binding PacientesSemana}" FontSize="32" FontWeight="Bold" Foreground="#9CAF97"/>
-                                        <TextBlock Text="novos registros" FontSize="12" Foreground="#5A6558"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Registros por Mês -->
-                                <Border Grid.Column="1" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Este Mês" FontWeight="SemiBold" Foreground="#5A6558" FontSize="16" Margin="0,0,0,10"/>
-                                        <TextBlock Text="{Binding PacientesMes}" FontSize="32" FontWeight="Bold" Foreground="#9CAF97"/>
-                                        <TextBlock Text="novos registros" FontSize="12" Foreground="#5A6558"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-
-                            <!-- Estatísticas de Consultas -->
-                            <TextBlock Text="📅 Consultas" FontSize="16" FontWeight="SemiBold" Foreground="#9CAF97" Margin="0,25,0,15"/>
-                            <Grid Margin="0,0,0,20">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Total Consultas Card -->
-                                <Border Grid.Column="0" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Total Consultas" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding ConsultaStats.TotalConsultas}" FontSize="24" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Consultas Esta Semana Card -->
-                                <Border Grid.Column="2" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Esta Semana" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding ConsultaStats.ConsultasEstaSemana}" FontSize="24" FontWeight="Bold" Foreground="#9CAF97" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Primeiras Consultas Card -->
-                                <Border Grid.Column="4" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Primeiras Consultas" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding ConsultaStats.PrimeirasConsultas}" FontSize="24" FontWeight="Bold" Foreground="#879B83" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Valor Semana Card -->
-                                <Border Grid.Column="6" Style="{StaticResource StatCard}">
-                                    <StackPanel>
-                                        <TextBlock Text="Valor Esta Semana" FontWeight="SemiBold" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="{Binding ConsultaStats.ValorTotalSemana, StringFormat='{}{0:C}'}" FontSize="20" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,5,0,0"/>
-                                    </StackPanel>
-                                </Border>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="💻 Sistema:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,3"/>
+                                    <TextBlock Text="BioDeskPro2 v1.0.0" FontSize="12" FontWeight="SemiBold" Foreground="#3F4A3D"/>
+                                </StackPanel>
+                                
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="🔄 Última Sincronização:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,3"/>
+                                    <TextBlock Text="{Binding DataAtual, StringFormat='dd/MM HH:mm'}" FontSize="12" FontWeight="SemiBold" Foreground="#3F4A3D"/>
+                                </StackPanel>
                             </Grid>
                         </StackPanel>
-                    </ScrollViewer>
-                </Border>
-            </TabItem>
-        </TabControl>
+                    </Border>
 
-        <!-- Loading Overlay -->
-        <Border Grid.RowSpan="2" 
-                Background="#80FFFFFF" 
-                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <ProgressBar IsIndeterminate="True" Width="200" Height="8" 
-                           Foreground="#9CAF97" Background="#E3E9DE"/>
-                <TextBlock Text="A carregar dashboard..." 
-                         FontSize="14" Foreground="#5A6558" 
-                         HorizontalAlignment="Center" 
-                         Margin="0,10,0,0"/>
-            </StackPanel>
-        </Border>
+                    <!-- Espaçamento final -->
+                    <Border Height="30"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </UserControl>

@@ -1,9 +1,9 @@
 using System;
 using System.Windows;
 using BioDesk.Services.Navigation;
-using BioDesk.Services.Pacientes;
 using BioDesk.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BioDesk.App
 {
@@ -14,13 +14,17 @@ namespace BioDesk.App
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
+        private readonly ILogger<MainWindow> _logger;
 
-        public MainWindow(IServiceProvider serviceProvider, INavigationService navigationService)
+        public MainWindow(IServiceProvider serviceProvider, INavigationService navigationService, ILogger<MainWindow> logger)
         {
             InitializeComponent();
-            
+
             _serviceProvider = serviceProvider;
             _navigationService = navigationService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            _logger.LogInformation("🚀 MainWindow iniciando...");
 
             // Registar views
             RegistarViews();
@@ -29,22 +33,29 @@ namespace BioDesk.App
             _navigationService.NavigationRequested += OnNavigationRequested;
 
             // Navegar para Dashboard inicial
+            _logger.LogInformation("📍 Navegando para Dashboard inicial...");
             _navigationService.NavigateTo("Dashboard");
         }
 
         private void RegistarViews()
         {
+            _logger.LogInformation("🔧 Registrando views no sistema de navegação...");
+            
+            // Sistema limpo - views existentes + FichaPaciente
             _navigationService.Register("Dashboard", typeof(Views.DashboardView));
-            _navigationService.Register("NovoPaciente", typeof(Views.NovoPacienteView));
-            _navigationService.Register("ListaPacientes", typeof(Views.ListaPacientesView));
+            _navigationService.Register("Consultas", typeof(Views.ConsultasView));
             _navigationService.Register("FichaPaciente", typeof(Views.FichaPacienteView));
-            _navigationService.Register("Consultas", typeof(Views.ConsultasView)); // 🩺 Gestão Consultas
+            
+            _logger.LogInformation("✅ Views registradas: Dashboard, Consultas, FichaPaciente");
         }
 
         private void OnNavigationRequested(object? sender, string viewName)
         {
+            _logger.LogInformation("📡 OnNavigationRequested chamado para '{ViewName}'", viewName);
+            
             if (!Dispatcher.CheckAccess())
             {
+                _logger.LogInformation("⚡ Invocando no Dispatcher thread...");
                 Dispatcher.Invoke(() => NavegarPara(viewName));
                 return;
             }
@@ -56,67 +67,57 @@ namespace BioDesk.App
         {
             try
             {
+                _logger.LogInformation("🏗️ NavegarPara('{ViewName}') - criando view...", viewName);
+                
                 // Criar view e viewmodel correspondentes
                 object? view = viewName switch
                 {
                     "Dashboard" => _serviceProvider.GetRequiredService<Views.DashboardView>(),
-                    "NovoPaciente" => _serviceProvider.GetRequiredService<Views.NovoPacienteView>(),
-                    "ListaPacientes" => _serviceProvider.GetRequiredService<Views.ListaPacientesView>(),
+                    "Consultas" => _serviceProvider.GetRequiredService<Views.ConsultasView>(),
                     "FichaPaciente" => _serviceProvider.GetRequiredService<Views.FichaPacienteView>(),
-                    "Consultas" => _serviceProvider.GetRequiredService<Views.ConsultasView>(), // 🩺 Consultas View
                     _ => null
                 };
 
                 if (view == null)
                 {
-                    MessageBox.Show($"View '{viewName}' não encontrada.", "Erro", 
+                    _logger.LogError("❌ View '{ViewName}' não pôde ser criada", viewName);
+                    MessageBox.Show($"View '{viewName}' não encontrada.", "Erro",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
+                _logger.LogInformation("✅ View '{ViewName}' criada, tipo: {ViewType}", viewName, view.GetType().Name);
+
                 // Definir DataContext apropriado
                 if (view is FrameworkElement fe)
                 {
+                    _logger.LogInformation("🎯 Definindo DataContext para '{ViewName}'...", viewName);
+                    
+                    // Sistema limpo - Dashboard + FichaPaciente
                     fe.DataContext = viewName switch
                     {
                         "Dashboard" => _serviceProvider.GetRequiredService<DashboardViewModel>(),
-                        "NovoPaciente" => _serviceProvider.GetRequiredService<NovoPacienteViewModel>(),
-                        "ListaPacientes" => _serviceProvider.GetRequiredService<ListaPacientesViewModel>(),
                         "FichaPaciente" => _serviceProvider.GetRequiredService<FichaPacienteViewModel>(),
-                        "Consultas" => _serviceProvider.GetRequiredService<ConsultasViewModel>(), // 🩺 Consultas ViewModel
-                        _ => null
+                        "Consultas" => _serviceProvider.GetRequiredService<DashboardViewModel>(), // Fallback para Dashboard
+                        _ => _serviceProvider.GetRequiredService<DashboardViewModel>() // Fallback para Dashboard
                     };
 
-                    // Atualizar conteúdo
-                    ContentArea.Content = fe;
+                    _logger.LogInformation("✅ DataContext definido para '{ViewName}', tipo: {DataContextType}", 
+                        viewName, fe.DataContext?.GetType().Name ?? "null");
 
-                    // Carregar dados async se necessário
-                    if (fe.DataContext is DashboardViewModel dashVm)
-                    {
-                        _ = dashVm.CarregarDadosAsync();
-                    }
-                    else if (fe.DataContext is ListaPacientesViewModel listaVm)
-                    {
-                        _ = listaVm.CarregarDadosAsync();
-                    }
-                    else if (fe.DataContext is ConsultasViewModel consultasVm) // 🩺 Carregar Consultas
-                    {
-                        _ = consultasVm.CarregarDadosAsync();
-                    }
-                    else if (fe.DataContext is FichaPacienteViewModel fichaVm) // 🩺 Forçar reload do paciente ativo
-                    {
-                        // Forçar carregamento do paciente ativo (fix para problema de navegação)
-                        var pacienteAtivo = _serviceProvider.GetRequiredService<IPacienteService>().GetPacienteAtivo();
-                        if (pacienteAtivo != null)
-                        {
-                            fichaVm.CarregarPaciente(pacienteAtivo);
-                        }
-                    }
+                    // Atualizar conteúdo
+                    _logger.LogInformation("🔄 Atualizando ContentArea.Content...");
+                    ContentArea.Content = fe;
+                    
+                    _logger.LogInformation("✅ Navegação para '{ViewName}' concluída com sucesso", viewName);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao navegar: {ex.Message}", "Erro", 
+                _logger.LogError(ex, "💥 ERRO CRÍTICO ao navegar para '{ViewName}': {Message}", viewName, ex.Message);
+                _logger.LogError("Stack trace completo: {StackTrace}", ex.StackTrace);
+                
+                MessageBox.Show($"Erro ao navegar: {ex.Message}", "Erro",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

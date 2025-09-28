@@ -3,1904 +3,360 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
-             xmlns:views="clr-namespace:BioDesk.App.Views"
-             xmlns:system="clr-namespace:System;assembly=mscorlib"
-             d:DataContext="{d:DesignInstance Type=viewmodels:FichaPacienteViewModel}"
-             mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1200">
+             xmlns:converters="clr-namespace:BioDesk.App.Converters"
+             xmlns:abas="clr-namespace:BioDesk.App.Views.Abas"
+             d:DesignHeight="800" d:DesignWidth="1200"
+             mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!-- Converters -->
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        
-        <!-- 🩺 ESTILOS MÉDICOS PROFISSIONAIS -->
-        
-        <!-- Estilo para Expanders Médicos -->
-        <Style x:Key="ModernExpander" TargetType="Expander">
-            <Setter Property="Background" Value="#F7F9F6"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+        <!-- Cores do tema -->
+        <SolidColorBrush x:Key="TextoPrincipal">#3F4A3D</SolidColorBrush>
+        <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
+
+        <!-- Converter para progresso das abas -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:TabStyleConverter x:Key="TabStyleConverter"/>
+
+        <!-- DataTemplate para Aba 1: Dados Biográficos -->
+        <DataTemplate x:Key="DadosBiograficosTemplate">
+            <abas:DadosBiograficosUserControl/>
+        </DataTemplate>
+
+        <!-- DataTemplate para conteúdo de texto simples (outras abas) -->
+        <DataTemplate x:Key="ConteudoTextoTemplate">
+            <TextBlock Text="{Binding}" FontSize="16" Margin="20"
+                       Foreground="{StaticResource TextoPrincipal}"
+                       TextWrapping="Wrap"/>
+        </DataTemplate>
+
+        <!-- Style para separadores INATIVOS - CARTÕES FLUTUANTES MODERNOS -->
+        <Style x:Key="TabButtonStyle" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="White" Offset="0"/>
+                        <GradientStop Color="#F8FAF7" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="{StaticResource TextoSecundario}"/>
+            <Setter Property="BorderBrush" Value="#D6E2D3"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="24,16,24,16"/>
+            <Setter Property="Margin" Value="8,8,8,0"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="#3F4A3D"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Expander">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="8">
-                            <DockPanel>
-                                <ToggleButton x:Name="HeaderSite"
-                                              DockPanel.Dock="Top"
-                                              IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
-                                              Template="{DynamicResource ExpanderHeaderTemplate}"
-                                              Content="{TemplateBinding Header}"
-                                              Foreground="{TemplateBinding Foreground}"
-                                              FontWeight="{TemplateBinding FontWeight}"
-                                              FontSize="{TemplateBinding FontSize}"
-                                              Padding="15,12"/>
-                                <ContentPresenter x:Name="ExpandSite"
-                                                  Visibility="Collapsed"
-                                                  DockPanel.Dock="Bottom"/>
-                            </DockPanel>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsExpanded" Value="True">
-                                <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Template para Header do Expander -->
-        <ControlTemplate x:Key="ExpanderHeaderTemplate" TargetType="ToggleButton">
-            <Border Background="Transparent">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <ContentPresenter Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                    <Path x:Name="Arrow" Grid.Column="1" 
-                          Fill="#5A6558" Stroke="#5A6558" StrokeThickness="1" 
-                          Data="M 4,6 L 6,4 L 8,6 Z" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Grid>
-            </Border>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsChecked" Value="True">
-                    <Setter TargetName="Arrow" Property="Data" Value="M 4,4 L 6,6 L 8,4 Z"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#E8F5E8"/>
-                </Trigger>
-            </ControlTemplate.Triggers>
-        </ControlTemplate>
-
-        <!-- Estilo para Conteúdo dos Expanders -->
-        <Style x:Key="ExpanderContent" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="0,1,0,0"/>
-            <Setter Property="Padding" Value="20"/>
-        </Style>
-
-        <!-- Estilo para CheckBox como Chips -->
-        <Style x:Key="ChipCheckBox" TargetType="CheckBox">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="CheckBox">
-                        <Border x:Name="ChipBorder" 
-                                Background="#F7F9F6" 
-                                BorderBrush="#E3E9DE" 
-                                BorderThickness="1" 
-                                CornerRadius="15" 
-                                Padding="12,6" 
-                                Margin="0,0,8,8"
-                                Cursor="Hand">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="#9CAF97"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="#879B83"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Estilo para RadioButton como Chips -->
-        <Style x:Key="ChipRadioButton" TargetType="RadioButton">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="ChipBorder" 
-                                Background="#F7F9F6" 
-                                BorderBrush="#E3E9DE" 
-                                BorderThickness="1" 
-                                CornerRadius="15" 
-                                Padding="12,6" 
-                                Margin="0,0,8,8"
-                                Cursor="Hand">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="#9CAF97"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="#879B83"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Estilo para TextArea -->
-        <Style x:Key="FieldTextArea" TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="TextWrapping" Value="Wrap"/>
-            <Setter Property="AcceptsReturn" Value="True"/>
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
-        </Style>
-
-        <!-- DatePicker styles removidos conforme solicitado -->
-        
-        <!-- Estilos dos Separadores -->
-        <Style x:Key="NaturoTabItem" TargetType="TabItem">
-            <Setter Property="Background" Value="#F7F9F6"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="Foreground" Value="#3F4A3D"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TabItem">
-                        <Border Name="Border" Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="1,1,1,0" CornerRadius="8,8,0,0">
-                            <ContentPresenter x:Name="ContentSite" 
-                                            VerticalAlignment="Center" 
-                                            HorizontalAlignment="Center"
-                                            ContentSource="Header" 
-                                            Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Panel.ZIndex" Value="100"/>
-                                <Setter TargetName="Border" Property="Background" Value="#9CAF97"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="#879B83"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <!-- Estilo das Secções -->
-        <Style x:Key="SectionCard" TargetType="Border">
-            <Setter Property="Background" Value="#F7F9F6"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="15"/>
-            <Setter Property="Margin" Value="0,0,0,15"/>
-        </Style>
-        
-        <!-- Estilos dos Campos -->
-        <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#3F4A3D"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
-        </Style>
-        
-        <Style x:Key="FieldInput" TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
-        </Style>
-        
-        <!-- Estilo específico para DatePicker -->
-        <Style x:Key="FieldDatePicker" TargetType="DatePicker">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
-        </Style>
-        
-        <!-- Estilo para ComboBox -->
-        <Style x:Key="FieldComboBox" TargetType="ComboBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
-        </Style>
-        
-        <!-- Estilos de Botões -->
-        <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#9CAF97"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#879B83"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                            VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#879B83"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#7A8A76"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <Style x:Key="SecondaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#F7F9F6"/>
-            <Setter Property="Foreground" Value="#3F4A3D"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                            VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#E3E9DE"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#D5DBD0"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <!-- Estilo dos Chips de Ação -->
-        <Style x:Key="ActionChip" TargetType="ToggleButton">
-            <Setter Property="Background" Value="#E8F5E8"/>
-            <Setter Property="Foreground" Value="#4A7C59"/>
-            <Setter Property="BorderBrush" Value="#9CAF97"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="12" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                            VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#9CAF97"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="#6B8E5A"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="BorderBrush" Value="#5A7349"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#879B83"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <!-- Estilo do Botão Outline -->
-        <Style x:Key="OutlineButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#9CAF97"/>
-            <Setter Property="BorderBrush" Value="#9CAF97"/>
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinWidth" Value="160"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
+                        <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                            VerticalAlignment="Center"/>
+                                CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C0C8C0" ShadowDepth="2" BlurRadius="8" Opacity="0.25"/>
+                            </Border.Effect>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#9CAF97"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="White" Offset="0"/>
+                                            <GradientStop Color="#F0F6EE" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource BotaoPrincipal}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Style para separador ATIVO - CARTÃO PREMIUM DESTAQUE -->
+        <Style x:Key="TabButtonActiveStyle" TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#9CAF97" Offset="0"/>
+                        <GradientStop Color="#87A082" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#7A9074"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="8,4,8,0"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#9CAF97" ShadowDepth="3" BlurRadius="12" Opacity="0.4"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Style para botões de navegação no rodapé - DESIGN MODERNO -->
+        <Style x:Key="NavigationButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource BotaoPrincipal}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="Margin" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="MinWidth" Value="140"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="25">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                            <Border.Effect>
+                                <DropShadowEffect Color="#B8C5B3" ShadowDepth="3" BlurRadius="12" Opacity="0.2"/>
+                            </Border.Effect>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BotaoHover}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#879B83"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Background" Value="#7A8D76"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#D5DDD2"/>
+                                <Setter Property="Foreground" Value="#8A9487"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        
-        <!-- Estilo para TextBox Moderno -->
-        <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Height" Value="45"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="BorderBrush" Value="#9CAF97"/>
-                            </Trigger>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#9CAF97"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <!-- Estilo para ComboBox Moderno -->
-        <Style x:Key="ModernComboBox" TargetType="ComboBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#E3E9DE"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Height" Value="45"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <Grid>
-                                <ToggleButton x:Name="ToggleButton"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
-                                            Focusable="False"
-                                            ClickMode="Press">
-                                    <Grid>
-                                        <ContentPresenter x:Name="ContentSite"
-                                                        Content="{TemplateBinding SelectedItem}"
-                                                        ContentTemplate="{TemplateBinding ItemTemplate}"
-                                                        Margin="{TemplateBinding Padding}"
-                                                        VerticalAlignment="Center"
-                                                        HorizontalAlignment="Left"/>
-                                        <Path x:Name="Arrow" HorizontalAlignment="Right"
-                                            VerticalAlignment="Center" Margin="0,0,12,0"
-                                            Data="M 0 0 L 4 4 L 8 0 Z" Fill="#5A6558"/>
-                                    </Grid>
-                                </ToggleButton>
-                                <Popup x:Name="Popup" IsOpen="{TemplateBinding IsDropDownOpen}"
-                                     AllowsTransparency="True" Focusable="False"
-                                     PopupAnimation="Slide">
-                                    <Border Background="White" BorderBrush="#E3E9DE"
-                                          BorderThickness="1" CornerRadius="8"
-                                          MaxHeight="200" MinWidth="{TemplateBinding ActualWidth}">
-                                        <ScrollViewer>
-                                            <ItemsPresenter/>
-                                        </ScrollViewer>
-                                    </Border>
-                                </Popup>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="BorderBrush" Value="#9CAF97"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <!-- DatePicker styles removidos conforme solicitado -->
-        
-        <!-- Estilo para Section Header -->
-        <Style x:Key="SectionHeader" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#3F4A3D"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
-        </Style>
-        
-        <!-- Estilo para Field CheckBox -->
-        <Style x:Key="FieldCheckBox" TargetType="CheckBox">
-            <Setter Property="Foreground" Value="#3F4A3D"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+        <!-- Style para botão secundário (Guardar Rascunho) -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
+            <Setter Property="Background" Value="#E8F2E5"/>
+            <Setter Property="Foreground" Value="{StaticResource BotaoPrincipal}"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="{StaticResource FundoPrincipal}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/> <!-- Cabeçalho -->
+            <RowDefinition Height="Auto"/> <!-- Barra de Progresso -->
+            <RowDefinition Height="Auto"/> <!-- Separadores/Abas -->
+            <RowDefinition Height="*"/>    <!-- Conteúdo da Aba -->
+            <RowDefinition Height="Auto"/> <!-- Rodapé de Navegação -->
         </Grid.RowDefinitions>
 
-        <!-- Gradiente de Fundo -->
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#FCFDFB" Offset="0"/>
-                <GradientStop Color="#F2F5F0" Offset="1"/>
-            </LinearGradientBrush>
-        </Grid.Background>
-
-        <!-- Cabeçalho com Navegação -->
-        <Border Grid.Row="0" Background="Transparent" Padding="20">
+        <!-- === CABEÇALHO DO PACIENTE === -->
+        <Border Grid.Row="0" Background="{StaticResource CartaoBrush}"
+                BorderBrush="{StaticResource BordaBrush}" BorderThickness="0,0,0,2"
+                Padding="20">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Botões de Navegação à Esquerda -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="← Dashboard" Command="{Binding VoltarDashboardCommand}" 
-                            Style="{StaticResource OutlineButton}" Margin="0,0,10,0"/>
-                    <Button Content="← Lista Pacientes" Command="{Binding VoltarListaCommand}" 
-                            Style="{StaticResource OutlineButton}"/>
+                <!-- Informações do Paciente -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="📋" FontSize="24" Margin="0,0,10,0"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding NomePaciente, FallbackValue='Nome do Paciente'}"
+                                   FontSize="20" FontWeight="Bold"
+                                   Foreground="{StaticResource TextoPrincipal}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="Processo: " FontSize="12"
+                                       Foreground="{StaticResource TextoSecundario}"/>
+                            <TextBlock Text="{Binding NumeroProcesso, FallbackValue='PAC-2025-001'}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextoPrincipal}"/>
+                            <TextBlock Text=" • " Margin="8,0" FontSize="12"
+                                       Foreground="{StaticResource TextoSecundario}"/>
+                            <TextBlock Text="{Binding IdadePaciente, FallbackValue='45 anos'}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextoPrincipal}"/>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
 
-                <!-- Título Central -->
-                <TextBlock Grid.Column="1" Text="Ficha do Paciente" 
-                         FontSize="24" FontWeight="Bold" 
-                         Foreground="#3F4A3D" 
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"/>
-
-                <!-- Informações do Paciente à Direita -->
-                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding Nome}" 
-                             FontWeight="SemiBold" FontSize="16" 
-                             Foreground="#3F4A3D" 
-                             HorizontalAlignment="Right"/>
-                    <TextBlock Text="{Binding IdadeCalculada}" 
-                             FontSize="14" 
-                             Foreground="#5A6558"
-                             HorizontalAlignment="Right"/>
+                <!-- Estado e Data -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                    <Border Background="{Binding EstadoCorHex, FallbackValue=#9CAF97}"
+                            CornerRadius="12" Padding="8,4">
+                        <TextBlock Text="{Binding EstadoRegisto, FallbackValue='Em Progresso'}"
+                                   Foreground="White" FontSize="12" FontWeight="Bold"/>
+                    </Border>
+                    <TextBlock Text="{Binding DataCriacao, FallbackValue='28/09/2025', StringFormat='Criado: {0:dd/MM/yyyy}'}"
+                               FontSize="11" HorizontalAlignment="Right" Margin="0,4,0,0"
+                               Foreground="{StaticResource TextoSecundario}"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Conteúdo Principal -->
-        <Border Grid.Row="1" Background="Transparent" Padding="20,0">
-            
-            <!-- TabControl Principal -->
-            <TabControl Background="Transparent" BorderThickness="0">
-                
-                <!-- TAB 1: DADOS PESSOAIS -->
-                <TabItem Header="👤 Dados Pessoais" Style="{StaticResource NaturoTabItem}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-                        <StackPanel>
-                            
-                            <!-- ============= IDENTIFICAÇÃO ============= -->
-                            <Border Style="{StaticResource SectionCard}">
-                                <StackPanel>
-                                    <TextBlock Text="🆔 IDENTIFICAÇÃO" FontWeight="Bold" 
-                                             Foreground="#3F4A3D" Margin="0,0,0,20" FontSize="16"/>
-                                    
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <!-- Linha 1: Nome Completo -->
-                                        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,15">
-                                            <TextBlock Text="Nome Completo *" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteWrapper.Nome, UpdateSourceTrigger=PropertyChanged}"
-                                                   Style="{StaticResource FieldInput}" FontSize="14"/>
-                                        </StackPanel>
-                                        
-                                        <!-- Linha 2: Data Nascimento e Género -->
-                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,20,15">
-                                            <TextBlock Text="Data de Nascimento *" Style="{StaticResource FieldLabel}"/>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                <DatePicker SelectedDate="{Binding PacienteWrapper.DataNascimento, UpdateSourceTrigger=PropertyChanged}" 
-                                                          SelectedDateFormat="Short"
-                                                          DisplayDateStart="1900-01-01"
-                                                          DisplayDateEnd="{x:Static system:DateTime.Now}"
-                                                          Width="150" 
-                                                          Style="{StaticResource FieldDatePicker}"
-                                                          Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding IdadeCalculada}" 
-                                                         VerticalAlignment="Center" 
-                                                         Margin="10,0,0,0" 
-                                                         FontWeight="Medium"
-                                                         Foreground="#5A6558"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,10,15">
-                                            <TextBlock Text="Género" Style="{StaticResource FieldLabel}"/>
-                                            <ComboBox SelectedItem="{Binding PacienteWrapper.Genero, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FieldComboBox}">
-                                                <ComboBoxItem Content="Masculino"/>
-                                                <ComboBoxItem Content="Feminino"/>
-                                                <ComboBoxItem Content="Outro"/>
-                                                <ComboBoxItem Content="Prefiro não dizer"/>
-                                            </ComboBox>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="20,0,0,15">
-                                            <TextBlock Text="Estado Civil" Style="{StaticResource FieldLabel}"/>
-                                            <ComboBox SelectedItem="{Binding PacienteWrapper.EstadoCivil, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FieldComboBox}">
-                                                <ComboBoxItem Content="Solteiro/a"/>
-                                                <ComboBoxItem Content="Casado/a"/>
-                                                <ComboBoxItem Content="União de facto"/>
-                                                <ComboBoxItem Content="Divorciado/a"/>
-                                                <ComboBoxItem Content="Viúvo/a"/>
-                                            </ComboBox>
-                                        </StackPanel>
-                                        
-                                        <!-- Linha 3: Profissão expandida -->
-                                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,15,0">
-                                            <TextBlock Text="Profissão *" Style="{StaticResource FieldLabel}"/>
-                                            <ComboBox IsEditable="True" 
-                                                    Text="{Binding PacienteWrapper.Profissao, UpdateSourceTrigger=PropertyChanged}"
-                                                    Style="{StaticResource FieldComboBox}"
-                                                    ToolTip="Digite ou selecione uma profissão">
-                                                <ComboBoxItem Content="Administrador(a)"/>
-                                                <ComboBoxItem Content="Administrador(a) de Sistemas"/>
-                                                <ComboBoxItem Content="Advogado(a)"/>
-                                                <ComboBoxItem Content="Agente da Polícia"/>
-                                                <ComboBoxItem Content="Agente Imobiliário(a)"/>
-                                                <ComboBoxItem Content="Agricultor(a)"/>
-                                                <ComboBoxItem Content="Ajudante de Ação Direta"/>
-                                                <ComboBoxItem Content="Alfaiate"/>
-                                                <ComboBoxItem Content="Analista de Dados"/>
-                                                <ComboBoxItem Content="Analista Financeiro(a)"/>
-                                                <ComboBoxItem Content="Analista de Sistemas"/>
-                                                <ComboBoxItem Content="Animador(a) Sociocultural"/>
-                                                <ComboBoxItem Content="Antropólogo(a)"/>
-                                                <ComboBoxItem Content="Arqueólogo(a)"/>
-                                                <ComboBoxItem Content="Arquiteto(a)"/>
-                                                <ComboBoxItem Content="Artesão / Artesã"/>
-                                                <ComboBoxItem Content="Artista"/>
-                                                <ComboBoxItem Content="Assistente Administrativo(a)"/>
-                                                <ComboBoxItem Content="Assistente Operacional"/>
-                                                <ComboBoxItem Content="Assistente Social"/>
-                                                <ComboBoxItem Content="Astrónomo(a)"/>
-                                                <ComboBoxItem Content="Ator / Atriz"/>
-                                                <ComboBoxItem Content="Auditor(a)"/>
-                                                <ComboBoxItem Content="Auxiliar de Ação Médica"/>
-                                                <ComboBoxItem Content="Auxiliar de Educação"/>
-                                                <ComboBoxItem Content="Bailarino(a)"/>
-                                                <ComboBoxItem Content="Bancário(a)"/>
-                                                <ComboBoxItem Content="Barbeiro(a)"/>
-                                                <ComboBoxItem Content="Barman / Barmaid"/>
-                                                <ComboBoxItem Content="Bibliotecário(a)"/>
-                                                <ComboBoxItem Content="Biólogo(a)"/>
-                                                <ComboBoxItem Content="Biotecnólogo(a)"/>
-                                                <ComboBoxItem Content="Bombeiro(a)"/>
-                                                <ComboBoxItem Content="Cabeleireiro(a)"/>
-                                                <ComboBoxItem Content="Calceteiro(a)"/>
-                                                <ComboBoxItem Content="Cantor(a)"/>
-                                                <ComboBoxItem Content="Carpinteiro(a)"/>
-                                                <ComboBoxItem Content="Cartógrafo(a)"/>
-                                                <ComboBoxItem Content="Cenógrafo(a)"/>
-                                                <ComboBoxItem Content="Cervejeiro(a)"/>
-                                                <ComboBoxItem Content="Chef de Cozinha"/>
-                                                <ComboBoxItem Content="Chefe de Equipa"/>
-                                                <ComboBoxItem Content="Cientista"/>
-                                                <ComboBoxItem Content="Cientista de Dados"/>
-                                                <ComboBoxItem Content="Cirurgião / Cirurgiã"/>
-                                                <ComboBoxItem Content="Comerciante"/>
-                                                <ComboBoxItem Content="Comissário(a) de Bordo"/>
-                                                <ComboBoxItem Content="Comprador(a)"/>
-                                                <ComboBoxItem Content="Condutor(a) de Pesados"/>
-                                                <ComboBoxItem Content="Conselheiro(a) de Orientação"/>
-                                                <ComboBoxItem Content="Contabilista"/>
-                                                <ComboBoxItem Content="Controlador(a) de Tráfego Aéreo"/>
-                                                <ComboBoxItem Content="Costureiro(a)"/>
-                                                <ComboBoxItem Content="Cozinheiro(a)"/>
-                                                <ComboBoxItem Content="Criador(a) de Conteúdo"/>
-                                                <ComboBoxItem Content="Cuidador(a) de Crianças"/>
-                                                <ComboBoxItem Content="Cuidador(a) de Idosos"/>
-                                                <ComboBoxItem Content="Dançarino(a)"/>
-                                                <ComboBoxItem Content="Decorador(a) de Interiores"/>
-                                                <ComboBoxItem Content="Dentista"/>
-                                                <ComboBoxItem Content="Designer"/>
-                                                <ComboBoxItem Content="Designer de Interiores"/>
-                                                <ComboBoxItem Content="Designer de Moda"/>
-                                                <ComboBoxItem Content="Designer de UX/UI"/>
-                                                <ComboBoxItem Content="Detetive"/>
-                                                <ComboBoxItem Content="Diretor(a)"/>
-                                                <ComboBoxItem Content="Dono(a) de Casa"/>
-                                                <ComboBoxItem Content="Economista"/>
-                                                <ComboBoxItem Content="Editor(a)"/>
-                                                <ComboBoxItem Content="Educador(a) de Infância"/>
-                                                <ComboBoxItem Content="Eletricista"/>
-                                                <ComboBoxItem Content="Empregado(a) de Limpeza"/>
-                                                <ComboBoxItem Content="Empregado(a) de Mesa"/>
-                                                <ComboBoxItem Content="Empregado(a) de Bar"/>
-                                                <ComboBoxItem Content="Empresário(a)"/>
-                                                <ComboBoxItem Content="Engenheiro(a)"/>
-                                                <ComboBoxItem Content="Engenheiro(a) Civil"/>
-                                                <ComboBoxItem Content="Engenheiro(a) Eletrotécnico(a)"/>
-                                                <ComboBoxItem Content="Engenheiro(a) Informático(a)"/>
-                                                <ComboBoxItem Content="Engenheiro(a) Mecânico(a)"/>
-                                                <ComboBoxItem Content="Enólogo(a)"/>
-                                                <ComboBoxItem Content="Enfermeiro(a)"/>
-                                                <ComboBoxItem Content="Encarregado(a) de Obras"/>
-                                                <ComboBoxItem Content="Escultor(a)"/>
-                                                <ComboBoxItem Content="Escritor(a)"/>
-                                                <ComboBoxItem Content="Estafeta"/>
-                                                <ComboBoxItem Content="Esteticista"/>
-                                                <ComboBoxItem Content="Estudante"/>
-                                                <ComboBoxItem Content="Farmacêutico(a)"/>
-                                                <ComboBoxItem Content="Físico(a)"/>
-                                                <ComboBoxItem Content="Fisioterapeuta"/>
-                                                <ComboBoxItem Content="Fotógrafo(a)"/>
-                                                <ComboBoxItem Content="Gestor(a)"/>
-                                                <ComboBoxItem Content="Gestor(a) de Marketing"/>
-                                                <ComboBoxItem Content="Gestor(a) de Produto"/>
-                                                <ComboBoxItem Content="Gestor(a) de Projeto"/>
-                                                <ComboBoxItem Content="Gestor(a) de Tráfego Pago"/>
-                                                <ComboBoxItem Content="Geógrafo(a)"/>
-                                                <ComboBoxItem Content="Geólogo(a)"/>
-                                                <ComboBoxItem Content="Ilustrador(a)"/>
-                                                <ComboBoxItem Content="Impressor(a)"/>
-                                                <ComboBoxItem Content="Instrutor(a) de Condução"/>
-                                                <ComboBoxItem Content="Instrutor(a) de Fitness"/>
-                                                <ComboBoxItem Content="Instrumentador(a) Cirúrgico(a)"/>
-                                                <ComboBoxItem Content="Intérprete"/>
-                                                <ComboBoxItem Content="Investigador(a)"/>
-                                                <ComboBoxItem Content="Jardineiro(a)"/>
-                                                <ComboBoxItem Content="Joalheiro(a)"/>
-                                                <ComboBoxItem Content="Jornalista"/>
-                                                <ComboBoxItem Content="Juiz(a)"/>
-                                                <ComboBoxItem Content="Jurista"/>
-                                                <ComboBoxItem Content="Lojista"/>
-                                                <ComboBoxItem Content="Maçon(a)"/>
-                                                <ComboBoxItem Content="Maestro(a)"/>
-                                                <ComboBoxItem Content="Mágico(a)"/>
-                                                <ComboBoxItem Content="Marceneiro(a)"/>
-                                                <ComboBoxItem Content="Marinheiro(a)"/>
-                                                <ComboBoxItem Content="Massagista"/>
-                                                <ComboBoxItem Content="Mecânico(a)"/>
-                                                <ComboBoxItem Content="Médico(a)"/>
-                                                <ComboBoxItem Content="Meteorologista"/>
-                                                <ComboBoxItem Content="Modelo"/>
-                                                <ComboBoxItem Content="Motorista"/>
-                                                <ComboBoxItem Content="Músico(a)"/>
-                                                <ComboBoxItem Content="Naturopata"/>
-                                                <ComboBoxItem Content="Nutricionista"/>
-                                                <ComboBoxItem Content="Oceanógrafo(a)"/>
-                                                <ComboBoxItem Content="Oficial de Justiça"/>
-                                                <ComboBoxItem Content="Operador(a) de Caixa"/>
-                                                <ComboBoxItem Content="Operador(a) de Loja"/>
-                                                <ComboBoxItem Content="Operador(a) de Máquinas"/>
-                                                <ComboBoxItem Content="Operário(a) Fabril"/>
-                                                <ComboBoxItem Content="Ourives"/>
-                                                <ComboBoxItem Content="Osteopata"/>
-                                                <ComboBoxItem Content="Padeiro(a)"/>
-                                                <ComboBoxItem Content="Paleontólogo(a)"/>
-                                                <ComboBoxItem Content="Paramédico(a)"/>
-                                                <ComboBoxItem Content="Pasteleiro(a)"/>
-                                                <ComboBoxItem Content="Pediatra"/>
-                                                <ComboBoxItem Content="Pedreiro(a)"/>
-                                                <ComboBoxItem Content="Perito(a) Avaliador(a)"/>
-                                                <ComboBoxItem Content="Pescador(a)"/>
-                                                <ComboBoxItem Content="Pintor(a)"/>
-                                                <ComboBoxItem Content="Pirotécnico(a)"/>
-                                                <ComboBoxItem Content="Político(a)"/>
-                                                <ComboBoxItem Content="Porteiro(a)"/>
-                                                <ComboBoxItem Content="Produtor(a)"/>
-                                                <ComboBoxItem Content="Professor(a)"/>
-                                                <ComboBoxItem Content="Programador(a)"/>
-                                                <ComboBoxItem Content="Programador(a) Web"/>
-                                                <ComboBoxItem Content="Projetista"/>
-                                                <ComboBoxItem Content="Promotor(a) de Vendas"/>
-                                                <ComboBoxItem Content="Psicólogo(a)"/>
-                                                <ComboBoxItem Content="Psiquiatra"/>
-                                                <ComboBoxItem Content="Publicitário(a)"/>
-                                                <ComboBoxItem Content="Químico(a)"/>
-                                                <ComboBoxItem Content="Rececionista"/>
-                                                <ComboBoxItem Content="Relações Públicas"/>
-                                                <ComboBoxItem Content="Reparador(a) de Equipamentos"/>
-                                                <ComboBoxItem Content="Sapateiro(a)"/>
-                                                <ComboBoxItem Content="Secretário(a)"/>
-                                                <ComboBoxItem Content="Segurança"/>
-                                                <ComboBoxItem Content="Serralheiro(a)"/>
-                                                <ComboBoxItem Content="Servente de Construção"/>
-                                                <ComboBoxItem Content="Sociólogo(a)"/>
-                                                <ComboBoxItem Content="Soldador(a)"/>
-                                                <ComboBoxItem Content="Soldado(a)"/>
-                                                <ComboBoxItem Content="Sommelier / Escanção"/>
-                                                <ComboBoxItem Content="Técnico(a) Administrativo(a)"/>
-                                                <ComboBoxItem Content="Técnico(a) Auxiliar de Saúde"/>
-                                                <ComboBoxItem Content="Técnico(a) de Contabilidade"/>
-                                                <ComboBoxItem Content="Técnico(a) de Informática"/>
-                                                <ComboBoxItem Content="Técnico(a) de Laboratório"/>
-                                                <ComboBoxItem Content="Técnico(a) de Manutenção"/>
-                                                <ComboBoxItem Content="Técnico(a) de Radiologia"/>
-                                                <ComboBoxItem Content="Técnico(a) de Segurança no Trabalho"/>
-                                                <ComboBoxItem Content="Técnico(a) Superior"/>
-                                                <ComboBoxItem Content="Terapeuta"/>
-                                                <ComboBoxItem Content="Terapeuta da Fala"/>
-                                                <ComboBoxItem Content="Terapeuta Ocupacional"/>
-                                                <ComboBoxItem Content="Tesoureiro(a)"/>
-                                                <ComboBoxItem Content="Torneiro(a)-mecânico(a)"/>
-                                                <ComboBoxItem Content="Tradutor(a)"/>
-                                                <ComboBoxItem Content="Treinador(a) Desportivo(a)"/>
-                                                <ComboBoxItem Content="Urbanista"/>
-                                                <ComboBoxItem Content="Vendedor(a)"/>
-                                                <ComboBoxItem Content="Veterinário(a)"/>
-                                                <ComboBoxItem Content="Vidraceiro(a)"/>
-                                                <ComboBoxItem Content="Vigilante"/>
-                                                <ComboBoxItem Content="Videógrafo(a)"/>
-                                                <ComboBoxItem Content="Web Designer"/>
-                                            </ComboBox>
-                                        </StackPanel>
-                                        
-                                        <!-- Linha 3: NIF -->
-                                        <StackPanel Grid.Row="2" Grid.Column="2" Margin="15,0,0,0">
-                                            <TextBlock Text="NIF" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteWrapper.NIF, UpdateSourceTrigger=PropertyChanged}"
-                                                   Style="{StaticResource FieldInput}"
-                                                   MaxLength="9"
-                                                   ToolTip="Número de Identificação Fiscal (9 dígitos)"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- ============= CONTACTOS ============= -->
-                            <Border Style="{StaticResource SectionCard}">
-                                <StackPanel>
-                                    <TextBlock Text="📞 CONTACTOS" FontWeight="Bold" 
-                                             Foreground="#3F4A3D" Margin="0,0,0,20" FontSize="16"/>
-                                    
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <!-- Linha 1: Telemóvel e Email -->
-                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,20,15">
-                                            <TextBlock Text="Telemóvel *" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteWrapper.Telefone, UpdateSourceTrigger=PropertyChanged}"
-                                                   Style="{StaticResource FieldInput}"
-                                                   ToolTip="Formato: +351 9XX XXX XXX"/>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,15">
-                                            <TextBlock Text="Email *" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteWrapper.Email, UpdateSourceTrigger=PropertyChanged}"
-                                                   Style="{StaticResource FieldInput}"/>
-                                        </StackPanel>
-                                        
-                                        <!-- Linha 2: Morada -->
-                                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
-                                            <TextBlock Text="Rua/Avenida" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding PacienteWrapper.Morada, UpdateSourceTrigger=PropertyChanged}" 
-                                                   Style="{StaticResource FieldInput}" Margin="0,0,0,10"/>
-                                            
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="2*"/>
-                                                </Grid.ColumnDefinitions>
-                                                
-                                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                                                    <TextBlock Text="Código Postal" Style="{StaticResource FieldLabel}"/>
-                                                    <TextBox Style="{StaticResource FieldInput}" 
-                                                           ToolTip="Formato: XXXX-XXX"/>
-                                                </StackPanel>
-                                                
-                                                <StackPanel Grid.Column="1" Margin="15,0,0,0">
-                                                    <TextBlock Text="Localidade" Style="{StaticResource FieldLabel}"/>
-                                                    <TextBox Style="{StaticResource FieldInput}" IsReadOnly="True"
-                                                           Background="#F0F0F0" ToolTip="Preenchimento automático"/>
-                                                </StackPanel>
-                                            </Grid>
-                                        </StackPanel>
-                                        
-                                        <!-- Linha 3: Preferências de Contacto -->
-                                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
-                                            <TextBlock Text="Preferência de Contacto (múltipla escolha)" Style="{StaticResource FieldLabel}"/>
-                                            <WrapPanel Margin="0,5">
-                                                <CheckBox Content="📱 WhatsApp" Margin="0,0,20,5"/>
-                                                <CheckBox Content="📧 Email" Margin="0,0,20,5"/>
-                                                <CheckBox Content="💬 SMS" Margin="0,0,20,5"/>
-                                                <CheckBox Content="📞 Chamada" Margin="0,0,20,5"/>
-                                            </WrapPanel>
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- ============= CANAL DE REFERÊNCIA ============= -->
-                            <Border Style="{StaticResource SectionCard}">
-                                <StackPanel>
-                                    <TextBlock Text="🔗 CANAL DE REFERÊNCIA" FontWeight="Bold" 
-                                             Foreground="#3F4A3D" Margin="0,0,0,20" FontSize="16"/>
-                                    
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,20,15">
-                                            <TextBlock Text="Origem do Paciente" Style="{StaticResource FieldLabel}"/>
-                                            <ComboBox Style="{StaticResource FieldComboBox}">
-                                                <ComboBoxItem Content="🔍 Google"/>
-                                                <ComboBoxItem Content="📸 Instagram"/>
-                                                <ComboBoxItem Content="👥 Facebook"/>
-                                                <ComboBoxItem Content="🩺 Referenciação Médica"/>
-                                                <ComboBoxItem Content="👨‍👩‍👧‍👦 Amigo/Familiar"/>
-                                                <ComboBoxItem Content="📰 Publicidade"/>
-                                                <ComboBoxItem Content="🎯 Outro"/>
-                                            </ComboBox>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="20,0,0,15">
-                                            <TextBlock Text="Observação/Descrição" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Style="{StaticResource FieldInput}"
-                                                   ToolTip="Ex: 'referido pelo Dr. Silva', 'viu post sobre dor lombar'"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- ============= NOTAS GERAIS ============= -->
-                            <Border Style="{StaticResource SectionCard}">
-                                <StackPanel>
-                                    <TextBlock Text="📝 NOTAS GERAIS" FontWeight="Bold" 
-                                             Foreground="#3F4A3D" Margin="0,0,0,20" FontSize="16"/>
-                                    
-                                    <TextBlock Text="Observações Rápidas" Style="{StaticResource FieldLabel}"
-                                             Margin="0,0,0,5"/>
-                                    <TextBox Style="{StaticResource FieldInput}" Height="80" 
-                                           TextWrapping="Wrap" AcceptsReturn="True" 
-                                           VerticalScrollBarVisibility="Auto"
-                                           ToolTip="Ex: 'tem preferência por manhãs', 'sensível a agulhas', etc."/>
-                                    
-                                    <!-- Botões de Ação -->
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                        <Button Content="💾 Guardar" Style="{StaticResource PrimaryButton}" 
-                                              Command="{Binding GravarAsyncCommand}" Margin="0,0,0,0"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
+        <!-- === BARRA DE PROGRESSO === -->
+        <Border Grid.Row="1" Background="{StaticResource FundoSecundario}"
+                BorderBrush="{StaticResource BordaBrush}" BorderThickness="0,0,0,1"
+                Padding="20,12">
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- TAB 2: DECLARAÇÃO/ANAMNESE INTELIGENTE -->
-                <TabItem Header="📋 Declaração &amp; Anamnese" Style="{StaticResource NaturoTabItem}">
-                    <!-- Versão Simplificada do Sistema Revolucionário -->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-                        <StackPanel>
-                            <!-- Header do Sistema Revolucionário -->
-                            <Border Style="{StaticResource SectionCard}" Margin="0,0,0,20">
-                                <StackPanel>
-                                    <TextBlock Text="🎯 SISTEMA DE ANAMNESE REVOLUCIONÁRIO" 
-                                              FontWeight="Bold" FontSize="18" 
-                                              Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,15"/>
-                                    
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
-                                        <Button Content="📝 Modo Edição" Style="{StaticResource PrimaryButton}" Margin="0,0,10,0"
-                                               Command="{Binding AnamneseViewModelIntegrado.AlternarModoCommand}"/>
-                                        <Button Content="🔄 Reconciliação" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
-                                               Command="{Binding AnamneseViewModelIntegrado.AbrirReconciliacaoCommand}"/>
-                                        <Button Content="📄 Gerar PDF" Style="{StaticResource OutlineButton}"
-                                               Command="{Binding AnamneseViewModelIntegrado.GerarPdfCommand}"/>
-                                    </StackPanel>
-                                    
-                                    <TextBlock Text="✅ Sistema funcionando: flags, hierarquia, modos e comandos ativos" 
-                                              FontSize="12" Foreground="#2E7D2E" HorizontalAlignment="Center"
-                                              TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 🩺 QUESTIONÁRIO MÉDICO COMPLETO - 11 EXPANDERS -->
-                            
-                            <!-- EXPANDER 1: IDENTIFICAÇÃO -->
-                            <Expander Header="🆔 1. IDENTIFICAÇÃO" IsExpanded="True" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="2*"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,15">
-                                            <TextBlock Text="Nome Completo" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Identificacao.Nome}" Style="{StaticResource FieldInput}"/>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,15">
-                                            <TextBlock Text="Email" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Identificacao.Email}" Style="{StaticResource FieldInput}"/>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5,0,5,15">
-                                            <TextBlock Text="Telefone" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Identificacao.Telefone}" Style="{StaticResource FieldInput}"/>
-                                        </StackPanel>
-                                        
-                                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="10,0,0,15">
-                                            <!-- Data de nascimento removida conforme solicitado -->
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </Expander>
+                    <TextBlock Text="Progresso da Ficha" FontSize="14" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextoPrincipal}"/>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding PercentagemProgresso, FallbackValue='4/6 etapas completas (67%)'}"
+                               FontSize="12" Foreground="{StaticResource TextoSecundario}"/>
+                </Grid>
 
-                            <!-- EXPANDER 2: MOTIVO DA CONSULTA -->
-                            <Expander Header="🎯 2. MOTIVO DA CONSULTA" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <TextBlock Text="Principais Motivos (selecionar)" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Dor lombar" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Cervicalgia" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Cefaleias" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Ansiedade" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Stress" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Fadiga" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Refluxo" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Dispepsia" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Obstipação" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Insónia" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBlock Text="Intensidade da Dor (0-10)" Style="{StaticResource FieldLabel}"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,15">
-                                            <Slider Value="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Motivo.IntensidadeDor}" 
-                                                   Minimum="0" Maximum="10" Width="200" Margin="0,0,10,0"/>
-                                            <TextBlock Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Motivo.IntensidadeDor, StringFormat='{}{0:F0}'}" 
-                                                      VerticalAlignment="Center" FontWeight="Bold"/>
-                                        </StackPanel>
-                                        
-                                        <TextBlock Text="Descrição Adicional" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Motivo.DescricaoAdicional}" 
-                                                Style="{StaticResource FieldTextArea}" Height="60"/>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 3: HISTÓRIA CLÍNICA ATUAL -->
-                            <Expander Header="📋 3. HISTÓRIA CLÍNICA ATUAL" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <TextBlock Text="Como começou o problema?" Style="{StaticResource FieldLabel}"/>
-                                        <ComboBox SelectedItem="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.HQA.ComoComecou}" Style="{StaticResource FieldComboBox}">
-                                            <ComboBoxItem Content="Gradualmente"/>
-                                            <ComboBoxItem Content="Súbito"/>
-                                            <ComboBoxItem Content="Após esforço"/>
-                                            <ComboBoxItem Content="Após trauma"/>
-                                            <ComboBoxItem Content="Stress emocional"/>
-                                        </ComboBox>
-                                        
-                                        <TextBlock Text="Evolução" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
-                                        <WrapPanel>
-                                            <RadioButton Content="Melhora" GroupName="Evolucao" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Piora" GroupName="Evolucao" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Estável" GroupName="Evolucao" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Intermitente" GroupName="Evolucao" Style="{StaticResource ChipRadioButton}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBlock Text="Observações" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.HQA.Observacoes}" 
-                                                Style="{StaticResource FieldTextArea}" Height="60"/>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 4: SINTOMAS ASSOCIADOS -->
-                            <Expander Header="⚕️ 4. SINTOMAS ASSOCIADOS" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <TextBlock Text="Sintomas Atuais" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Náuseas" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Vómitos" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Tonturas" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Palpitações" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Sudorese" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Falta de ar" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Formigueiro" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Fraqueza muscular" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBlock Text="Frequência dos Sintomas" Style="{StaticResource FieldLabel}"/>
-                                        <ComboBox Style="{StaticResource FieldComboBox}">
-                                            <ComboBoxItem Content="Diário"/>
-                                            <ComboBoxItem Content="Semanal"/>
-                                            <ComboBoxItem Content="Mensal"/>
-                                            <ComboBoxItem Content="Esporádico"/>
-                                        </ComboBox>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 5: ALERGIAS E INTOLERÂNCIAS -->
-                            <Expander Header="🚨 5. ALERGIAS E INTOLERÂNCIAS" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <CheckBox Content="Sem alergias conhecidas" Style="{StaticResource ChipCheckBox}" Margin="0,0,0,10"/>
-                                        
-                                        <TextBlock Text="Alergias Medicamentosas" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Penicilina" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Aspirina" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Anti-inflamatórios" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Anestésicos" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBlock Text="Alergias Alimentares" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Glúten" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Lactose" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Frutos secos" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Marisco" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Ovos" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBlock Text="Outras Alergias/Intolerâncias" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Alergias.Outras}" 
-                                                Style="{StaticResource FieldTextArea}" Height="50"/>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 6: CONDIÇÕES CRÓNICAS -->
-                            <Expander Header="🏥 6. CONDIÇÕES CRÓNICAS" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <CheckBox Content="Sem doenças crónicas" Style="{StaticResource ChipCheckBox}" Margin="0,0,0,10"/>
-                                        
-                                        <TextBlock Text="Doenças Diagnosticadas" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Diabetes" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Hipertensão" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Colesterol alto" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Problemas cardíacos" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Asma" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Artrite" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Depressão" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Ansiedade" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBlock Text="Data do Diagnóstico / Observações" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.CondicoesCronicas.Observacoes}" 
-                                                Style="{StaticResource FieldTextArea}" Height="60"/>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 7: MEDICAÇÃO ATUAL -->
-                            <Expander Header="💊 7. MEDICAÇÃO ATUAL" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <CheckBox Content="Não toma medicação regular" Style="{StaticResource ChipCheckBox}" Margin="0,0,0,15"/>
-                                        
-                                        <TextBlock Text="Medicamentos Prescritos" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Medicacao.Prescritos}" 
-                                                Style="{StaticResource FieldTextArea}" Height="80" 
-                                                TextWrapping="Wrap" AcceptsReturn="True"
-                                                ToolTip="Liste os medicamentos com dosagem e frequência"/>
-                                        
-                                        <TextBlock Text="Suplementos Alimentares" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Vitamina D" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Vitamina B12" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Ómega 3" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Magnésio" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Probióticos" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Ferro" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Medicacao.Suplementos}" 
-                                                Style="{StaticResource FieldTextArea}" Height="50" 
-                                                ToolTip="Outros suplementos ou detalhes"/>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 8: CIRURGIAS E HOSPITALIZAÇÕES -->
-                            <Expander Header="🏥 8. CIRURGIAS E HOSPITALIZAÇÕES" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <CheckBox Content="Nunca foi operado/hospitalizado" Style="{StaticResource ChipCheckBox}" Margin="0,0,0,15"/>
-                                        
-                                        <TextBlock Text="Cirurgias Realizadas" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Cirurgias.Realizadas}" 
-                                                Style="{StaticResource FieldTextArea}" Height="80"
-                                                TextWrapping="Wrap" AcceptsReturn="True"
-                                                ToolTip="Tipo de cirurgia, ano e complicações (se houver)"/>
-                                        
-                                        <TextBlock Text="Hospitalizações" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.Cirurgias.Hospitalizacoes}" 
-                                                Style="{StaticResource FieldTextArea}" Height="60"
-                                                TextWrapping="Wrap" AcceptsReturn="True"
-                                                ToolTip="Motivo, duração e ano da hospitalização"/>
-                                        
-                                        <TextBlock Text="Anestesias Anteriores" Style="{StaticResource FieldLabel}" Margin="0,15,0,5"/>
-                                        <WrapPanel>
-                                            <RadioButton Content="Sem problemas" GroupName="Anestesia" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Reações adversas" GroupName="Anestesia" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Nunca foi anestesiado" GroupName="Anestesia" Style="{StaticResource ChipRadioButton}"/>
-                                        </WrapPanel>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 9: HISTÓRIA FAMILIAR -->
-                            <Expander Header="👨‍👩‍👧‍👦 9. HISTÓRIA FAMILIAR" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <TextBlock Text="Antecedentes Familiares Relevantes" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Diabetes" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Hipertensão" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Problemas cardíacos" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Cancro" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="AVC" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Demência" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Doenças autoimunes" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Problemas mentais" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <TextBlock Text="Detalhes e Parentesco" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.HistoriaFamiliar.Detalhes}" 
-                                                Style="{StaticResource FieldTextArea}" Height="80"
-                                                TextWrapping="Wrap" AcceptsReturn="True"
-                                                ToolTip="Ex: Pai - diabetes tipo 2, Mãe - hipertensão"/>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 10: ESTILO DE VIDA -->
-                            <Expander Header="🌱 10. ESTILO DE VIDA" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <!-- Tabaco -->
-                                        <TextBlock Text="Tabaco" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <RadioButton Content="Nunca fumou" GroupName="Tabaco" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Ex-fumador" GroupName="Tabaco" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Fumador atual" GroupName="Tabaco" Style="{StaticResource ChipRadioButton}"/>
-                                        </WrapPanel>
-                                        
-                                        <!-- Álcool -->
-                                        <TextBlock Text="Álcool" Style="{StaticResource FieldLabel}"/>
-                                        <ComboBox Style="{StaticResource FieldComboBox}" Width="200" HorizontalAlignment="Left" Margin="0,5,0,15">
-                                            <ComboBoxItem Content="Não bebe"/>
-                                            <ComboBoxItem Content="Ocasionalmente"/>
-                                            <ComboBoxItem Content="1-2 copos/dia"/>
-                                            <ComboBoxItem Content=">3 copos/dia"/>
-                                        </ComboBox>
-                                        
-                                        <!-- Exercício -->
-                                        <TextBlock Text="Atividade Física" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <CheckBox Content="Sedentário" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Caminhadas regulares" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Ginásio 2-3x/semana" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Desporto regular" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Atividade intensa diária" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                        
-                                        <!-- Sono -->
-                                        <TextBlock Text="Padrão de Sono" Style="{StaticResource FieldLabel}"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                            <TextBlock Text="Horas de sono:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                            <Slider Value="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.EstiloVida.HorasSono}" 
-                                                   Minimum="4" Maximum="12" Width="150" Margin="0,0,10,0"/>
-                                            <TextBlock Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.EstiloVida.HorasSono, StringFormat='{}{0:F0}h'}" 
-                                                      VerticalAlignment="Center" FontWeight="Bold"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-
-                            <!-- EXPANDER 11: FUNÇÕES BIOLÓGICAS -->
-                            <Expander Header="🔄 11. FUNÇÕES BIOLÓGICAS" Style="{StaticResource ModernExpander}">
-                                <Border Style="{StaticResource ExpanderContent}">
-                                    <StackPanel>
-                                        <!-- Apetite -->
-                                        <TextBlock Text="Apetite" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <RadioButton Content="Normal" GroupName="Apetite" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Diminuído" GroupName="Apetite" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Aumentado" GroupName="Apetite" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Sem apetite" GroupName="Apetite" Style="{StaticResource ChipRadioButton}"/>
-                                        </WrapPanel>
-                                        
-                                        <!-- Peso -->
-                                        <Grid Margin="0,0,0,15">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            
-                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                                <TextBlock Text="Peso (kg)" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.FuncoesBiologicas.Peso}" Style="{StaticResource FieldInput}"/>
-                                            </StackPanel>
-                                            
-                                            <StackPanel Grid.Column="1" Margin="5,0,5,0">
-                                                <TextBlock Text="Altura (cm)" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.FuncoesBiologicas.Altura}" Style="{StaticResource FieldInput}"/>
-                                            </StackPanel>
-                                            
-                                            <StackPanel Grid.Column="2" Margin="10,0,0,0">
-                                                <TextBlock Text="IMC" Style="{StaticResource FieldLabel}"/>
-                                                <TextBox Text="{Binding AnamneseViewModelIntegrado.QuestionarioCompleto.FuncoesBiologicas.IMC, StringFormat='{}{0:F1}'}" 
-                                                        Style="{StaticResource FieldInput}" IsReadOnly="True" Background="#F0F0F0"/>
-                                            </StackPanel>
-                                        </Grid>
-                                        
-                                        <!-- Função Intestinal -->
-                                        <TextBlock Text="Função Intestinal" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,15">
-                                            <RadioButton Content="Normal (1x/dia)" GroupName="Intestinal" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Obstipação" GroupName="Intestinal" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Diarreia" GroupName="Intestinal" Style="{StaticResource ChipRadioButton}"/>
-                                            <RadioButton Content="Alternante" GroupName="Intestinal" Style="{StaticResource ChipRadioButton}"/>
-                                        </WrapPanel>
-                                        
-                                        <!-- Função Urinária -->
-                                        <TextBlock Text="Função Urinária" Style="{StaticResource FieldLabel}"/>
-                                        <WrapPanel Margin="0,5,0,0">
-                                            <CheckBox Content="Normal" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Urgência" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Frequência aumentada" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Dor ao urinar" Style="{StaticResource ChipCheckBox}"/>
-                                            <CheckBox Content="Incontinência" Style="{StaticResource ChipCheckBox}"/>
-                                        </WrapPanel>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-                            
-                            <!-- EXPANDER 10: CONSENTIMENTOS E RGPD -->
-                            <Expander Header="📋 10. CONSENTIMENTOS E PRIVACIDADE" Style="{StaticResource ModernExpander}" 
-                                    IsExpanded="False" Margin="0,0,0,10">
-                                <Border Background="#F7F9F6" CornerRadius="8" Padding="20" Margin="10">
-                                    <StackPanel>
-                                        <!-- Consentimento Informado -->
-                                        <TextBlock Text="🏥 Consentimento Informado" Style="{StaticResource SectionHeader}" Margin="0,0,0,10"/>
-                                        <CheckBox Content="Declaro que fui informado(a) sobre os tratamentos de Naturopatia e Medicina Complementar"
-                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
-                                        <CheckBox Content="Compreendo os benefícios e possíveis limitações dos tratamentos naturais"
-                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
-                                        <CheckBox Content="Autorizo a realização de tratamentos de medicina complementar"
-                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,15"/>
-                                        
-                                        <!-- RGPD -->
-                                        <TextBlock Text="🔒 Proteção de Dados (RGPD)" Style="{StaticResource SectionHeader}" Margin="0,0,0,10"/>
-                                        <CheckBox Content="Consinto o tratamento dos meus dados pessoais para fins de prestação de cuidados de saúde"
-                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
-                                        <CheckBox Content="Autorizo o contacto por telefone/email para agendamentos e informações clínicas"
-                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,5"/>
-                                        <CheckBox Content="Aceito receber informações sobre tratamentos e promoções (opcional)"
-                                                Style="{StaticResource FieldCheckBox}" Margin="0,0,0,15"/>
-                                        
-                                        <!-- Assinatura Digital -->
-                                        <TextBlock Text="✍️ Confirmação" Style="{StaticResource SectionHeader}" Margin="0,0,0,10"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                            <!-- Data de consentimento removida conforme solicitado -->
-                                        </StackPanel>
-                                        <CheckBox Content="Confirmo que li e aceito todos os consentimentos acima indicados"
-                                                Style="{StaticResource FieldCheckBox}" 
-                                                FontWeight="SemiBold" Foreground="#3F4A3D"/>
-                                    </StackPanel>
-                                </Border>
-                            </Expander>
-                            
-                            <!-- Botões de Ação da Declaração & Anamnese -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                                <Button Content="💾 Guardar Declaração" Style="{StaticResource PrimaryButton}" 
-                                      Command="{Binding GravarAsyncCommand}"
-                                      ToolTip="Guardar todas as informações da declaração e anamnese"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <!-- TAB 3: MEDICINA COMPLEMENTAR -->
-                <TabItem Header="🌿 Medicina Complementar" Style="{StaticResource NaturoTabItem}">
-                    <!-- Sub-TabControl para Medicina Complementar -->
-                    <TabControl Background="Transparent" BorderThickness="0" Margin="10,0">
-                        
-                        <!-- SUB-TAB 3.1: NATUROPATIA -->
-                        <TabItem Header="🌱 Naturopatia" Style="{StaticResource NaturoTabItem}">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-                                <StackPanel>
-                                    
-                                    <!-- Templates de Exercícios -->
-                                    <Border Style="{StaticResource SectionCard}">
-                                        <StackPanel>
-                                            <TextBlock Text="🏃‍♂️ EXERCÍCIOS E ATIVIDADE FÍSICA" FontWeight="Bold" 
-                                                     Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
-                                            
-                                            <CheckBox Content="Caminhada diária (30 min)" Margin="0,2"/>
-                                            <CheckBox Content="Exercícios de respiração" Margin="0,2"/>
-                                            <CheckBox Content="Alongamentos matinais" Margin="0,2"/>
-                                            <CheckBox Content="Yoga ou Pilates" Margin="0,2"/>
-                                        </StackPanel>
-                                    </Border>
-                                    
-                                    <!-- Templates de Dieta -->
-                                    <Border Style="{StaticResource SectionCard}">
-                                        <StackPanel>
-                                            <TextBlock Text="🥗 RECOMENDAÇÕES DIETÉTICAS" FontWeight="Bold" 
-                                                     Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
-                                            
-                                            <CheckBox Content="Dieta mediterrânica" Margin="0,2"/>
-                                            <CheckBox Content="Redução de açúcares refinados" Margin="0,2"/>
-                                            <CheckBox Content="Aumento de fibras" Margin="0,2"/>
-                                            <CheckBox Content="Hidratação adequada (2L/dia)" Margin="0,2"/>
-                                        </StackPanel>
-                                    </Border>
-                                    
-                                    <!-- Templates de Meditação -->
-                                    <Border Style="{StaticResource SectionCard}">
-                                        <StackPanel>
-                                            <TextBlock Text="🧘‍♀️ TÉCNICAS DE MEDITAÇÃO E RELAXAMENTO" FontWeight="Bold" 
-                                                     Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
-                                            
-                                            <CheckBox Content="Meditação mindfulness (10 min)" Margin="0,2"/>
-                                            <CheckBox Content="Técnicas de respiração profunda" Margin="0,2"/>
-                                            <CheckBox Content="Relaxamento muscular progressivo" Margin="0,2"/>
-                                            <CheckBox Content="Visualização guiada" Margin="0,2"/>
-                                        </StackPanel>
-                                    </Border>
-                                    
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-                        
-                        <!-- SUB-TAB 3.2: IRISDIAGNÓSTICO -->
-                        <TabItem Header="👁️ Irisdiagnóstico" Style="{StaticResource NaturoTabItem}">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-                                <StackPanel>
-                                    
-                                    <!-- Análise da Íris -->
-                                    <Border Style="{StaticResource SectionCard}">
-                                        <StackPanel>
-                                            <TextBlock Text="ANÁLISE DA ÍRIS" FontWeight="Bold" 
-                                                     Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
-                                            
-                                            <TextBlock Text="Observações da Íris" Style="{StaticResource FieldLabel}"/>
-                                            <TextBox AcceptsReturn="True" Height="100"
-                                                   Style="{StaticResource FieldInput}"/>
-                                        </StackPanel>
-                                    </Border>
-                                    
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-                        
-                        <!-- SUB-TAB 3.3: TERAPIA BIOENERGÉTICA -->
-                        <TabItem Header="⚡ Terapia Bioenergética" Style="{StaticResource NaturoTabItem}">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-                                <StackPanel>
-                                    
-                                    <!-- Equilíbrio Energético -->
-                                    <Border Style="{StaticResource SectionCard}">
-                                        <StackPanel>
-                                            <TextBlock Text="EQUILÍBRIO ENERGÉTICO" FontWeight="Bold" 
-                                                     Foreground="#3F4A3D" Margin="0,0,0,15" FontSize="16"/>
-                                            
-                                            <CheckBox Content="Reiki" Margin="0,2"/>
-                                            <CheckBox Content="Acupuntura" Margin="0,2"/>
-                                            <CheckBox Content="Terapia dos chakras" Margin="0,2"/>
-                                            <CheckBox Content="Cristaloterapia" Margin="0,2"/>
-                                        </StackPanel>
-                                    </Border>
-                                    
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-                        
-                    </TabControl>
-                </TabItem>
-
-                <!-- TAB 4: CONSULTAS E SEGUIMENTO -->
-                <TabItem Header="🩺 Consultas" Style="{StaticResource NaturoTabItem}">
-                    <Grid Margin="10">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/> <!-- Header -->
-                            <RowDefinition Height="200"/>  <!-- Timeline Cards -->
-                            <RowDefinition Height="*"/>    <!-- Painel de Detalhes -->
-                        </Grid.RowDefinitions>
-
-                        <!-- Header com Nova Consulta -->
-                        <Border Grid.Row="0" Style="{StaticResource SectionCard}" Background="#7A9471" Margin="0,0,0,15">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                    <TextBlock Text="🎯" FontSize="24" Margin="0,0,10,0" Foreground="White"/>
-                                    <StackPanel>
-                                        <TextBlock Text="Timeline de Consultas" FontWeight="Bold" 
-                                                  Foreground="White" FontSize="16"/>
-                                        <TextBlock Text="Histórico visual com detalhes dinâmicos" 
-                                                  Foreground="#E8F5E8" FontSize="12"/>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <Button Grid.Column="1" Content="🔄 Repetir Última" 
-                                       Background="#6B8563" Foreground="White" BorderThickness="0"
-                                       Padding="12,8" Margin="0,0,10,0"
-                                       Command="{Binding RepetirConsultaCommand}"/>
-                                       
-                                <Button Grid.Column="2" Content="➕ Nova Consulta" 
-                                       Background="#5A7A52" Foreground="White" BorderThickness="0"
-                                       Padding="15,8"
-                                       Command="{Binding NovaConsultaCommand}"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Timeline Horizontal de Cards -->
-                        <Border Grid.Row="1" Style="{StaticResource SectionCard}" Padding="15">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                
-                                <!-- Label da Timeline -->
-                                <TextBlock Grid.Row="0" Text="📅 Timeline de Consultas" FontWeight="SemiBold" 
-                                          Foreground="#3F4A3D" Margin="0,0,0,10" FontSize="14"/>
-                                
-                                <!-- Scroll Horizontal com Cards -->
-                                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                                    <ItemsControl ItemsSource="{Binding ConsultasPaciente}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <!-- Card/Balão da Consulta -->
-                                                <Border Width="160" Height="120" Margin="0,0,15,0" CornerRadius="12"
-                                                       Cursor="Hand" Background="{Binding Status, Converter={StaticResource StatusToColorConverter}}"
-                                                       BorderBrush="#E3E9DE" BorderThickness="1">
-                                                    <Border.Effect>
-                                                        <DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="8" ShadowDepth="2"/>
-                                                    </Border.Effect>
-                                                    <Border.InputBindings>
-                                                        <MouseBinding MouseAction="LeftClick" 
-                                                                    Command="{Binding DataContext.SelecionarConsultaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                    CommandParameter="{Binding}"/>
-                                                    </Border.InputBindings>
-                                                    
-                                                    <Grid Margin="12">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="*"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-                                                        
-                                                        <!-- Data e Tipo -->
-                                                        <StackPanel Grid.Row="0">
-                                                            <TextBlock Text="{Binding DataConsulta, StringFormat='{}{0:dd/MM/yyyy}'}" 
-                                                                      FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                                                            <TextBlock Text="{Binding DataConsulta, StringFormat='{}{0:HH:mm}'}" 
-                                                                      FontSize="10" Foreground="#EEEEEE" HorizontalAlignment="Center"/>
-                                                        </StackPanel>
-                                                        
-                                                        <!-- Tipo e Resumo -->
-                                                        <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding TipoConsulta}" FontWeight="SemiBold" 
-                                                                      FontSize="13" Foreground="White" HorizontalAlignment="Center" TextWrapping="Wrap"/>
-                                                            <TextBlock Text="{Binding Notas}" FontSize="9" 
-                                                                      Foreground="#E8E8E8" HorizontalAlignment="Center" 
-                                                                      TextWrapping="Wrap" MaxHeight="30" TextTrimming="CharacterEllipsis"/>
-                                                        </StackPanel>
-                                                        
-                                                        <!-- Status Badge -->
-                                                        <Border Grid.Row="2" Background="#FFFFFF" CornerRadius="8" 
-                                                               Padding="6,2" HorizontalAlignment="Center" Opacity="0.9">
-                                                            <TextBlock Text="{Binding Status}" FontSize="9" 
-                                                                      Foreground="#333333" FontWeight="SemiBold"/>
-                                                        </Border>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                                
-                                <!-- Mensagem quando não há consultas -->
-                                <Border Grid.Row="1" Background="#F8F9FA" CornerRadius="8" Padding="20" 
-                                       Visibility="{Binding HasConsultas, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="🗓️" FontSize="32" HorizontalAlignment="Center" 
-                                                  Foreground="#9CAF97" Margin="0,0,0,8"/>
-                                        <TextBlock Text="Nenhuma consulta registrada" FontWeight="SemiBold" 
-                                                  HorizontalAlignment="Center" Foreground="#5A6558" FontSize="14"/>
-                                        <TextBlock Text="Clique em 'Nova Consulta' para começar" 
-                                                  HorizontalAlignment="Center" Foreground="#7A9471" 
-                                                  FontSize="11" Margin="0,4,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Border>
-
-                        <!-- Painel de Detalhes Dinâmico -->
-                        <Border Grid.Row="2" Style="{StaticResource SectionCard}" Margin="0,15,0,0"
-                               Visibility="{Binding ConsultaSelecionada, Converter={StaticResource NullToVisibilityConverter}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="2*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <!-- Painel Esquerdo: Detalhes e Notas -->
-                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                                    <!-- Header da Consulta Selecionada -->
-                                    <Grid Margin="0,0,0,15">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{Binding ConsultaSelecionada.TipoConsulta}" FontSize="18" FontWeight="Bold" 
-                                                      Foreground="#3F4A3D"/>
-                                            <TextBlock Text="{Binding ConsultaSelecionada.DataConsulta, StringFormat='📅 {0:dd/MM/yyyy HH:mm}'}" 
-                                                      Foreground="#7A9471" FontSize="12" Margin="0,2,0,0"/>
-                                        </StackPanel>
-                                        
-                                        <Button Grid.Column="1" Content="✖️" Width="30" Height="30" 
-                                               Background="Transparent" BorderThickness="0" 
-                                               Command="{Binding FecharDetalhesCommand}"
-                                               ToolTip="Fechar detalhes"/>
-                                    </Grid>
-                                    
-                                    <!-- Resumo Automático -->
-                                    <Border Background="#F8F9FA" CornerRadius="8" Padding="15" Margin="0,0,0,15">
-                                        <StackPanel>
-                                            <TextBlock Text="📋 Resumo da Anamnese" FontWeight="SemiBold" 
-                                                      Foreground="#3F4A3D" FontSize="14" Margin="0,0,0,8"/>
-                                            <TextBlock Text="{Binding ResumoAnamnese}" TextWrapping="Wrap" 
-                                                      Foreground="#5A6558" FontSize="12" LineHeight="16"/>
-                                        </StackPanel>
-                                    </Border>
-                                    
-                                    <!-- Notas Editáveis -->
-                                    <StackPanel Margin="0,0,0,15">
-                                        <TextBlock Text="📝 Notas e Evolução Clínica" FontWeight="SemiBold" 
-                                                  Foreground="#3F4A3D" FontSize="14" Margin="0,0,0,8"/>
-                                        <TextBox Text="{Binding ConsultaSelecionada.Notas, UpdateSourceTrigger=PropertyChanged}" 
-                                                AcceptsReturn="True" Height="120" TextWrapping="Wrap"
-                                                Style="{StaticResource FieldInput}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                
-                                <!-- Painel Direito: Prescrição -->
-                                <Border Grid.Column="1" Background="#F8F9FA" CornerRadius="8" Padding="15">
-                                    <StackPanel>
-                                        <TextBlock Text="💊 Área de Prescrição" FontWeight="Bold" 
-                                                  Foreground="#3F4A3D" FontSize="14" Margin="0,0,0,15"/>
-                                        
-                                        <!-- Busca de Templates -->
-                                        <TextBlock Text="🔍 Buscar Template:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,5"/>
-                                        <TextBox x:Name="BuscaTemplate" Height="32" Margin="0,0,0,10"
-                                                Text="{Binding BuscaTemplate, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource FieldInput}"/>
-                                        
-                                        <!-- Sugestões de Templates -->
-                                        <ItemsControl ItemsSource="{Binding TemplatesSugeridos}" Margin="0,0,0,15">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Button Content="{Binding Nome}" Margin="0,2" HorizontalAlignment="Stretch"
-                                                           Background="#E8F5E8" BorderBrush="#9CAF97" Padding="8,4"
-                                                           Command="{Binding DataContext.SelecionarTemplateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                           CommandParameter="{Binding}"/>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                        
-                                        <!-- Prescrição Atual -->
-                                        <TextBlock Text="📄 Prescrição:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,5"/>
-                                        <TextBox Text="{Binding ConsultaSelecionada.Prescricao, UpdateSourceTrigger=PropertyChanged}" 
-                                                AcceptsReturn="True" Height="150" TextWrapping="Wrap"
-                                                Style="{StaticResource FieldInput}" Margin="0,0,0,15"/>
-                                        
-                                        <!-- Botões de Ação -->
-                                        <StackPanel>
-                                            <Button Content="💾 Guardar Alterações" 
-                                                   Background="#9CAF97" Foreground="White" BorderThickness="0"
-                                                   Padding="10,6" Margin="0,0,0,8" HorizontalAlignment="Stretch"
-                                                   Command="{Binding GuardarConsultaCommand}"/>
-                                            
-                                            <Button Content="📄 Gerar PDF" 
-                                                   Background="#7A9471" Foreground="White" BorderThickness="0"
-                                                   Padding="10,6" HorizontalAlignment="Stretch"
-                                                   Command="{Binding GerarPdfConsultaCommand}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </TabItem>
-                
-            </TabControl>
-            
-        </Border>
-
-        <!-- Footer com Botões -->
-        <Border Grid.Row="2" Background="Transparent" Padding="20">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="← Voltar" Command="{Binding VoltarDashboardCommand}" 
-                        Background="Transparent" Foreground="#5A6558" BorderBrush="#E3E9DE"
-                        Padding="20,10"/>
+                <ProgressBar Height="8" Background="#E0E0E0"
+                             Foreground="{StaticResource BotaoPrincipal}"
+                             Value="{Binding ProgressoNumerico, FallbackValue=67}"
+                             Maximum="100"/>
             </StackPanel>
         </Border>
 
-        <!-- Loading overlay -->
-        <Border Grid.RowSpan="3" Background="#80FFFFFF" 
-                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <ProgressBar IsIndeterminate="True" Width="200" Height="8" 
-                           Foreground="#9CAF97" Background="#E3E9DE"/>
-                <TextBlock Text="A processar..." 
-                         FontSize="14" Foreground="#5A6558" 
-                         HorizontalAlignment="Center" 
-                         Margin="0,10,0,0"/>
-            </StackPanel>
+        <!-- === SEPARADORES/ABAS - DESIGN CARTÕES FLUTUANTES PREMIUM === -->
+        <Border Grid.Row="2" Padding="24,16,24,8">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#F5F8F4" Offset="0"/>
+                    <GradientStop Color="#EDF2EB" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                         Background="Transparent" BorderThickness="0">
+                <StackPanel Orientation="Horizontal">
+                <Button x:Name="BtnAba1" Content="👤 Dados Biográficos"
+                        Style="{StaticResource TabButtonActiveStyle}"
+                        Command="{Binding NavegarParaAbaCommand}"
+                        CommandParameter="1"/>
+
+                <Button x:Name="BtnAba2" Content="📋 Declaração de Saúde"
+                        Style="{StaticResource TabButtonStyle}"
+                        Command="{Binding NavegarParaAbaCommand}"
+                        CommandParameter="2"/>
+
+                <Button x:Name="BtnAba3" Content="📜 Consentimentos"
+                        Style="{StaticResource TabButtonStyle}"
+                        Command="{Binding NavegarParaAbaCommand}"
+                        CommandParameter="3"/>
+
+                <Button x:Name="BtnAba4" Content="🩺 Consultas"
+                        Style="{StaticResource TabButtonStyle}"
+                        Command="{Binding NavegarParaAbaCommand}"
+                        CommandParameter="4"/>
+
+                <Button x:Name="BtnAba5" Content="👁️ Íris"
+                        Style="{StaticResource TabButtonStyle}"
+                        Command="{Binding NavegarParaAbaCommand}"
+                        CommandParameter="5"/>
+
+                <Button x:Name="BtnAba6" Content="🌿 Terapias"
+                        Style="{StaticResource TabButtonStyle}"
+                        Command="{Binding NavegarParaAbaCommand}"
+                        CommandParameter="6"
+                        IsEnabled="False"
+                        ToolTip="Módulo em desenvolvimento futuro"/>
+                </StackPanel>
+            </ScrollViewer>
         </Border>
 
-        <!-- 🆕 Modal Nova Consulta Avançado (inspirado no React) -->
-        <Border Grid.RowSpan="3" Background="#B0000000" 
-                Visibility="{Binding MostrarModalNovaConsulta, Converter={StaticResource BoolToVisibilityConverter}}"
-                MouseLeftButtonDown="Modal_MouseLeftButtonDown">
-            <Border Background="White" MaxWidth="600" MaxHeight="500" 
-                    CornerRadius="15" Margin="50" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    MouseLeftButtonDown="Border_MouseLeftButtonDown">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="30">
-                    <StackPanel>
-                        <!-- Header -->
-                        <Grid Margin="0,0,0,20">
-                            <StackPanel>
-                                <TextBlock Text="🩺 Nova Consulta" FontSize="22" FontWeight="SemiBold" 
-                                         Foreground="#3F4A3D" Margin="0,0,0,5"/>
-                                <TextBlock Text="Preenche os dados para agendar uma nova consulta" 
-                                         FontSize="13" Foreground="#5A6558"/>
-                            </StackPanel>
-                            <Button HorizontalAlignment="Right" VerticalAlignment="Top" 
-                                    Command="{Binding FecharModalCommand}" 
-                                    Style="{StaticResource OutlineButton}"
-                                    Width="35" Height="35" Content="✕" 
-                                    Background="#F7F9F6" Foreground="#5A6558"/>
-                        </Grid>
+        <!-- === CONTEÚDO DA ABA ATIVA === -->
+        <Border Grid.Row="3" Background="{StaticResource FundoPrincipal}"
+                Padding="20">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          PanningMode="VerticalOnly"
+                          CanContentScroll="False">
 
-                        <!-- Form Grid -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="15"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="15"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="15"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="15"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
+                <!-- Conteúdo dinâmico baseado na aba ativa -->
+                <Grid>
+                    <!-- UserControl para Aba 1: Dados Biográficos -->
+                    <abas:DadosBiograficosUserControl
+                        Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=1}"/>
 
-                            <!-- Tipo de Consulta -->
-                            <StackPanel Grid.Column="0" Grid.Row="0">
-                                <TextBlock Text="Tipo de Consulta *" FontSize="11" Foreground="#5A6558" 
-                                         FontWeight="Medium" Margin="0,0,0,5"/>
-                                <ComboBox ItemsSource="{Binding TiposConsultaDisponiveis}" 
-                                        SelectedItem="{Binding NovaConsultaTipo}" 
-                                        Style="{StaticResource ModernComboBox}"/>
-                            </StackPanel>
+                    <!-- Texto para outras abas (Abas 2-6) -->
+                    <TextBlock Text="{Binding ConteudoAbaAtiva}" FontSize="16" Margin="20"
+                              Foreground="{StaticResource TextoPrincipal}"
+                              TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="2">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="3">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="4">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="5">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="6">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
 
-                            <!-- Data -->
-                            <StackPanel Grid.Column="2" Grid.Row="0">
-                                <TextBlock Text="Data *" FontSize="11" Foreground="#5A6558" 
-                                         FontWeight="Medium" Margin="0,0,0,5"/>
-                                <!-- DatePicker removido conforme solicitado -->
-                                <TextBox Text="Data será gerada automaticamente" 
-                                        Style="{StaticResource ModernTextBox}" IsReadOnly="True"/>
-                            </StackPanel>
-
-                            <!-- Hora -->
-                            <StackPanel Grid.Column="0" Grid.Row="2">
-                                <TextBlock Text="Hora *" FontSize="11" Foreground="#5A6558" 
-                                         FontWeight="Medium" Margin="0,0,0,5"/>
-                                <ComboBox ItemsSource="{Binding HorariosDisponiveis}" 
-                                        SelectedItem="{Binding NovaConsultaHora}" 
-                                        Style="{StaticResource ModernComboBox}"/>
-                            </StackPanel>
-
-                            <!-- Duração Estimada -->
-                            <StackPanel Grid.Column="2" Grid.Row="2">
-                                <TextBlock Text="Duração (min)" FontSize="11" Foreground="#5A6558" 
-                                         FontWeight="Medium" Margin="0,0,0,5"/>
-                                <ComboBox ItemsSource="{Binding DuracoesDisponiveis}" 
-                                        SelectedItem="{Binding NovaConsultaDuracao}" 
-                                        Style="{StaticResource ModernComboBox}"/>
-                            </StackPanel>
-
-                            <!-- Valor -->
-                            <StackPanel Grid.Column="0" Grid.Row="4">
-                                <TextBlock Text="Valor (€)" FontSize="11" Foreground="#5A6558" 
-                                         FontWeight="Medium" Margin="0,0,0,5"/>
-                                <TextBox Text="{Binding NovaConsultaValor, StringFormat=N2}" 
-                                       Style="{StaticResource ModernTextBox}" 
-                                       HorizontalContentAlignment="Right"/>
-                            </StackPanel>
-
-                            <!-- Status -->
-                            <StackPanel Grid.Column="2" Grid.Row="4">
-                                <TextBlock Text="Estado Inicial" FontSize="11" Foreground="#5A6558" 
-                                         FontWeight="Medium" Margin="0,0,0,5"/>
-                                <ComboBox ItemsSource="{Binding StatusDisponiveis}" 
-                                        SelectedItem="{Binding NovaConsultaStatus}" 
-                                        Style="{StaticResource ModernComboBox}"/>
-                            </StackPanel>
-
-                            <!-- Notas/Motivo -->
-                            <StackPanel Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3">
-                                <TextBlock Text="Notas Iniciais / Motivo da Consulta" FontSize="11" Foreground="#5A6558" 
-                                         FontWeight="Medium" Margin="0,0,0,5"/>
-                                <TextBox Text="{Binding NovaConsultaNotas}" 
-                                       Style="{StaticResource ModernTextBox}" 
-                                       AcceptsReturn="True" TextWrapping="Wrap" 
-                                       MinHeight="80" MaxHeight="120"
-                                       VerticalScrollBarVisibility="Auto"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Resumo automático do paciente -->
-                        <Border Background="#F0F7EE" BorderBrush="#9CAF97" BorderThickness="1" 
-                                CornerRadius="8" Padding="15" Margin="0,20,0,0">
-                            <StackPanel>
-                                <TextBlock Text="📋 Dados do Paciente" FontSize="12" FontWeight="SemiBold" 
-                                         Foreground="#3F4A3D" Margin="0,0,0,8"/>
-                                <TextBlock FontSize="11" Foreground="#5A6558" TextWrapping="Wrap">
-                                    <Run Text="Nome:"/> <Run Text="{Binding Nome}" FontWeight="Medium"/>
-                                    <LineBreak/>
-                                    <Run Text="Idade:"/> <Run Text="{Binding IdadeCalculada, Mode=OneWay}" FontWeight="Medium"/>
-                                    <LineBreak/>
-                                    <Run Text="Contacto:"/> <Run Text="{Binding Email}" FontWeight="Medium"/>
-                                    <Run Text=" | "/> <Run Text="{Binding Telefone}" FontWeight="Medium"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Botões de ação -->
-                        <Grid Margin="0,25,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="15"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <Button Grid.Column="0" Content="❌ Cancelar" 
-                                    Command="{Binding FecharModalCommand}"
-                                    Style="{StaticResource SecondaryButton}" 
-                                    Background="#F7F9F6" Foreground="#5A6558" 
-                                    BorderBrush="#E3E9DE" Height="45"/>
-                            
-                            <Button Grid.Column="2" Content="✅ Confirmar Consulta" 
-                                    Command="{Binding CriarNovaConsultaCommand}"
-                                    Style="{StaticResource PrimaryButton}" Height="45" 
-                                    IsEnabled="{Binding PodeConfirmarNovaConsulta}"/>
-                        </Grid>
-                    </StackPanel>
-                </ScrollViewer>
-            </Border>
+            </ScrollViewer>
         </Border>
 
+        <!-- === RODAPÉ DE NAVEGAÇÃO === -->
+        <Border Grid.Row="4" Background="{StaticResource CartaoBrush}"
+                BorderBrush="{StaticResource BordaBrush}" BorderThickness="0,2,0,0"
+                Padding="20,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Botões Esquerda -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="⬅️ Anterior"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Command="{Binding AbaAnteriorCommand}"/>
+                </StackPanel>
+
+                <!-- Botões Centro - SISTEMA AUTO-SAVE RESTAURADO -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="💾 Guardar Rascunho"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Command="{Binding GuardarRascunhoCommand}"/>
+                    <TextBlock Text="{Binding StatusAutoSave, FallbackValue='Pronto'}"
+                               FontSize="11" Margin="12,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource TextoSecundario}"/>
+                </StackPanel>
+
+                <!-- Botões Direita -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Seguinte ➡️"
+                            Style="{StaticResource NavigationButtonStyle}"
+                            Command="{Binding ProximaAbaCommand}"
+                            IsEnabled="{Binding PodeAvancarAba}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

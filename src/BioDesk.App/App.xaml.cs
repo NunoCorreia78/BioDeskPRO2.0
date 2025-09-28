@@ -4,21 +4,10 @@ using System.Threading;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
-using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using BioDesk.Data;
 using BioDesk.Services.Navigation;
-using BioDesk.Services.Pacientes;
-using BioDesk.Services.Notifications;
-using BioDesk.Services.AutoSave;
-using BioDesk.Services.Cache;
-using BioDesk.Services.FuzzySearch;
-using BioDesk.Services.Dashboard;
-using BioDesk.Services.Activity;
-using BioDesk.Services.Consultas;
 using BioDesk.ViewModels;
 
 namespace BioDesk.App;
@@ -41,18 +30,18 @@ public partial class App : Application
         try
         {
             Console.WriteLine("🔧 OnStartup iniciado...");
-            
+
             // Configurar cultura portuguesa para toda a aplicação
             var culture = new CultureInfo("pt-PT");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
-            
+
             // Importante: definir para novos threads também
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
-            
+
             Console.WriteLine("✅ Cultura portuguesa configurada");
-            
+
             // Forçar o WPF a usar a cultura definida
             FrameworkElement.LanguageProperty.OverrideMetadata(
                 typeof(FrameworkElement),
@@ -71,9 +60,7 @@ public partial class App : Application
                 })
                 .Build();
 
-            Console.WriteLine("🗄️ Inicializando base de dados...");
-            // Inicializar a base de dados
-            await InicializarBaseDadosAsync();
+            Console.WriteLine("✅ Sistema limpo iniciado com sucesso...");
 
             Console.WriteLine("🚀 Iniciando host...");
             // Iniciar o host
@@ -82,11 +69,11 @@ public partial class App : Application
             Console.WriteLine("🪟 Criando MainWindow...");
             // Criar e mostrar a janela principal
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-            
+
             // Log para confirmar inicialização
             var logger = _host.Services.GetRequiredService<ILogger<App>>();
             logger.LogInformation("🚀 BioDeskPro2 inicializado com sucesso!");
-            
+
             Console.WriteLine("📺 Mostrando MainWindow...");
             mainWindow.Show();
             logger.LogInformation("✅ MainWindow apresentada - aplicação pronta!");
@@ -115,57 +102,18 @@ public partial class App : Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // Entity Framework
-        services.AddDbContext<BioDeskContext>(options =>
-            options.UseSqlite("Data Source=biodesk.db"));
-
-        // Serviços
+        // SISTEMA COMPLETAMENTE LIMPO - SEM BASE DE DADOS
+        // Serviços MÍNIMOS
         services.AddSingleton<INavigationService, NavigationService>();
-        services.AddSingleton<IPacienteService, PacienteService>(); // 🔧 FIXE: Mudado para Singleton para manter estado PacienteAtivo
-        services.AddSingleton<INotificationService, NotificationService>();
-        services.AddSingleton<BioDesk.Services.Settings.ISettingsService, BioDesk.Services.Settings.SettingsService>();
-        services.AddSingleton(typeof(IAutoSaveService<>), typeof(AutoSaveService<>));
-        services.AddMemoryCache(); // Para IMemoryCache
-        services.AddSingleton<ICacheService, CacheService>();
-        services.AddSingleton<IFuzzySearchService, FuzzySearchService>(); // 🔍 Fuzzy Search
-        services.AddTransient<IDashboardStatsService, DashboardStatsService>(); // 📊 Dashboard Charts - Transient
-        services.AddTransient<IActivityService, ActivityService>(); // 🔔 Activity Service - Transient
-        services.AddTransient<IConsultaService, ConsultaService>(); // 🩺 Consulta Service - Transient
 
-        // ViewModels - Como Transient para evitar problemas de scoping
+        // ViewModels - DASHBOARD + FICHA PACIENTE
         services.AddTransient<DashboardViewModel>();
-        services.AddTransient<NovoPacienteViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
-        services.AddTransient<ListaPacientesViewModel>();
-        services.AddTransient<ConsultasViewModel>(); // 🩺 Gestão Consultas
 
-        // Views
+        // Views - SISTEMA LIMPO
         services.AddSingleton<MainWindow>();
         services.AddTransient<Views.DashboardView>();
-        services.AddTransient<Views.NovoPacienteView>();
+        services.AddTransient<Views.ConsultasView>();
         services.AddTransient<Views.FichaPacienteView>();
-        services.AddTransient<Views.ListaPacientesView>();
-        services.AddTransient<Views.ConsultasView>(); // 🩺 View Consultas
-    }
-
-    private async Task InicializarBaseDadosAsync()
-    {
-        try
-        {
-            var serviceScope = _host!.Services.CreateScope();
-            var context = serviceScope.ServiceProvider.GetRequiredService<BioDeskContext>();
-            
-            // Criar a base de dados e aplicar migrações
-            await context.Database.EnsureCreatedAsync();
-            
-            var logger = _host.Services.GetRequiredService<ILogger<App>>();
-            logger.LogInformation("Base de dados inicializada com sucesso");
-        }
-        catch (Exception ex)
-        {
-            var logger = _host!.Services.GetRequiredService<ILogger<App>>();
-            logger.LogError(ex, "Erro ao inicializar a base de dados");
-            throw;
-        }
     }
 }

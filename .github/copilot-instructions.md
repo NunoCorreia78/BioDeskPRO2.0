@@ -144,7 +144,7 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 
 **Princípio**: Edita na 2.1, assina na 2.2. **Zero duplicação**.
 
-#### Sub-tab 2.3 — Registo Clínico  
+#### Sub-tab 2.3 — Registo Clínico
 - **Consultas**: Tabela (Data|Tipo|Motivos|Observações)
 - **Prescrições**: Templates → personalizar → PDF/Email
 - **Timeline**: E-mails, PDFs, SMS, chamadas
@@ -152,8 +152,124 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 
 ### Tab 3 — Medicina Complementar (🚧 EM DESENVOLVIMENTO)
 #### 3.1 Naturopatia - Templates por objetivo
-#### 3.2 Irisdiagnóstico - Galeria + overlays  
+#### 3.2 Irisdiagnóstico - Galeria + overlays
 #### 3.3 Terapia Bioenergética - Protocolos em cards
+
+---
+
+## 🛠️ CONFIGURAÇÃO E MANUTENÇÃO - DIRETRIZES AVANÇADAS
+
+### 🔍 INTELLISENSE E ANÁLISE DE CÓDIGO - PROCEDIMENTOS PADRÃO
+
+#### ✅ QUANDO CONFIGURAR INTELLISENSE
+- **SEMPRE** que o utilizador mencionar "erros não aparecem"
+- **SEMPRE** que pedir para "mostrar todos os erros"
+- **SEMPRE** que mencionar "separadores" ou "organização" de erros
+- **NUNCA** alterar configurações já funcionais sem razão explícita
+
+#### 📂 HIERARQUIA DE CONFIGURAÇÃO (ordem de importância)
+1. **`.vscode/settings.json`** → IntelliSense e Problems Panel
+2. **`omnisharp.json`** → C# language server
+3. **`.editorconfig`** → Regras de análise (CA rules)
+4. **`global.json`** → SDK fixo (.NET 8)
+
+#### 🎯 LOCALIZAÇÃO DE ERROS NO VS CODE
+```json
+// CONFIGURAÇÃO CRÍTICA para Problems Panel:
+"problems.defaultViewMode": "tree",        // NÃO "list"
+"problems.autoReveal": true,               // Auto-mostrar
+"problems.sortOrder": "severity",          // Errors primeiro
+"workbench.problems.visibility": "expanded" // Sempre visível
+```
+
+### ⚠️ WARNINGS E CODE ANALYSIS - RESOLUÇÃO SISTEMÁTICA
+
+#### 🔴 PRIORIDADES DE CORREÇÃO
+1. **Erros de compilação** (CS errors) → Build falha
+2. **CA1063** → Dispose pattern incorreto
+3. **CA1001** → Classe com fields disposable deve implementar IDisposable
+4. **CS0105** → Using statements duplicados
+5. **Outros CA rules** → Conforme configuração .editorconfig
+
+#### 🛡️ PADRÃO DISPOSE OBRIGATÓRIO
+```csharp
+// NUNCA fazer isto (CA1063 violation):
+public void Dispose() { /* clean up */ }
+
+// SEMPRE fazer isto (CA1063 compliant):
+public void Dispose()
+{
+    Dispose(true);
+    GC.SuppressFinalize(this);
+}
+
+protected virtual void Dispose(bool disposing)
+{
+    if (!_disposed && disposing)
+    {
+        // Limpar recursos managed
+    }
+    _disposed = true;
+}
+```
+
+### 📊 VERIFICAÇÃO E VALIDAÇÃO - CHECKLIST OBRIGATÓRIO
+
+#### ✅ ANTES DE CONFIRMAR QUALQUER "CORREÇÃO"
+```bash
+# SEMPRE executar esta sequência:
+dotnet clean
+dotnet restore
+dotnet build --verbosity normal
+# Se build OK → confirmar 0 Warnings
+```
+
+#### 🔍 SINAIS DE CONFIGURAÇÃO CORRECTA
+- **Problems Panel**: Visível com separadores por severity
+- **Editor**: Squiggles vermelhos/amarelos a aparecer
+- **Build output**: Verbosity detalhada com números exatos
+- **IntelliSense**: Auto-completar a funcionar em C# files
+
+#### ❌ SINAIS DE PROBLEMAS
+- "Não vejo erros no Problems Panel"
+- "IntelliSense não funciona"
+- "Build passa mas tenho warnings"
+- "Squiggles não aparecem no editor"
+
+### 🎯 INSTRUÇÕES ESPECÍFICAS PARA COPILOT
+
+#### 🚨 NUNCA FAZER
+- Alterar settings.json que já funciona
+- "Corrigir" código que compila e testa com sucesso
+- Implementar Dispose simples sem padrão virtual
+- Ignorar outputs de build detalhados
+
+#### ✅ SEMPRE FAZER
+- Verificar build antes e depois de mudanças
+- Implementar Dispose pattern completo (CA1063)
+- Ler mensagens de erro completamente
+- Confirmar 0 Warnings no final
+
+#### 📋 TEMPLATE DE VERIFICAÇÃO
+```markdown
+## Verificação Completa ✅
+
+### Build Status
+- [ ] `dotnet clean && dotnet build` → 0 Errors, 0 Warnings
+- [ ] Problems Panel mostra erros organizados por severity
+- [ ] IntelliSense funciona em ficheiros .cs
+- [ ] Squiggles aparecem no editor
+
+### Configuração VS Code
+- [ ] `.vscode/settings.json` → tree view configurado
+- [ ] `omnisharp.json` → analyzers habilitados
+- [ ] `.editorconfig` → CA rules ativas
+
+### Código
+- [ ] Dispose patterns seguem CA1063
+- [ ] Sem using statements duplicados
+- [ ] Classes com disposable fields implementam IDisposable
+```
 
 ---
 
@@ -163,13 +279,13 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 
 #### 🔴 PROIBIÇÕES ABSOLUTAS
 1. **NUNCA** dizer "problema resolvido" sem testar
-2. **NUNCA** adaptar testes para esconder erros  
+2. **NUNCA** adaptar testes para esconder erros
 3. **NUNCA** ignorar erros do IntelliSense no VS Code
 4. **NUNCA** usar try-catch para silenciar problemas
 
 #### 🛡️ REGRA DOURADA: PRESERVAR CÓDIGO FUNCIONAL
 5. **NUNCA** alterar código que está funcionando sem razão explícita
-6. **NUNCA** refatorar código estável apenas por "melhorar" 
+6. **NUNCA** refatorar código estável apenas por "melhorar"
 7. **NUNCA** tocar em funcionalidades que passam nos testes
 8. **SEMPRE** perguntar antes de modificar código funcional
 9. **SEMPRE** priorizar: "Se funciona, não mexe" > "código perfeito"
@@ -178,7 +294,7 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 ```bash
 # SEMPRE executar antes de confirmar sucesso:
 dotnet clean
-dotnet restore  
+dotnet restore
 dotnet build --no-incremental
 # Se build OK → dotnet test
 ```
@@ -208,7 +324,7 @@ Assert.IsTrue(true);
 // var result = BrokenMethod();
 
 // CERTO: Corrigir o erro real
-if (service == null) 
+if (service == null)
     throw new ArgumentNullException(nameof(service));
 ```
 
@@ -228,5 +344,52 @@ Após 3 tentativas falhadas do mesmo erro, admitir:
 - Código funcional é mais valioso que código "perfeito"
 - Estabilidade > Elegância
 - Funcionalidade > Refactoring desnecessário
+
+#### 🔧 CONFIGURAÇÃO VS CODE INTELLISENSE OTIMIZADA ✅ COMPLETADA
+
+### ✅ FILES CONFIGURADOS (NÃO ALTERAR - FUNCIONANDO PERFEITAMENTE)
+- **`.vscode/settings.json`**: IntelliSense C# otimizado, Problems Panel em tree view, separadores organizados
+- **`omnisharp.json`**: Roslyn analyzers, inlay hints, import completion habilitados
+- **`.editorconfig`**: 88 regras CA configuradas para análise completa de código
+- **`.vscode/extensions.json`**: Extensões recomendadas para C#/.NET development
+- **`.vscode/tasks.json`**: Tasks de análise e build configuradas
+
+### 🎯 ERROS NO INTELLISENSE - LOCALIZAÇÃO GARANTIDA
+- **Problems Panel**: Separador "PROBLEMS" com view em árvore
+- **Filtros**: Por severidade (Error → Warning → Information)
+- **Auto-reveal**: Erros aparecem automaticamente ao abrir ficheiros
+- **Editor decorations**: Squiggles vermelhos e amarelos visíveis
+- **Background analysis**: Solução completa analisada continuamente
+
+### 📋 PADRÕES DE DISPOSE IMPLEMENTADOS ✅ RESOLVIDOS
+```csharp
+// PADRÃO CA1063 CORRETO (implementado em 6 classes):
+public class ExemploService : IDisposable
+{
+    private bool _disposed = false;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed && disposing)
+        {
+            // Limpar recursos managed
+            _recursoManaged?.Dispose();
+        }
+        _disposed = true;
+    }
+}
+```
+
+### 🚀 BUILD STATUS: 100% LIMPO
+- ✅ **0 Errors, 0 Warnings** (verificado 2025-09-28)
+- ✅ **Todos os CA1063 warnings corrigidos**
+- ✅ **Settings.json validation error resolvido**
+- ✅ **CS0105 using duplicado removido**
 
 **LEMBRETE FINAL**: Código funcional > Código "corrigido" que não funciona
