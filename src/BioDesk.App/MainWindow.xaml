@@ -4,13 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="BioDeskPro 2.0" 
-        Height="768" 
+        Title="BioDeskPro 2.0"
+        Height="768"
         Width="1366"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Background="#FCFDFB">
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,17 +18,25 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" 
-                Background="#9CAF97" 
+        <Border Grid.Row="0"
+                Background="#9CAF97"
                 Padding="20">
-            <TextBlock Text="BioDeskPro 2.0" 
-                      FontSize="24" 
-                      FontWeight="Bold" 
-                      Foreground="White"/>
+            <Grid>
+                <TextBlock Text="BioDeskPro 2.0"
+                          FontSize="24"
+                          FontWeight="Bold"
+                          Foreground="White"
+                          VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="🕐" FontSize="16" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="White"/>
+                    <TextBlock Text="{Binding DataAtual, StringFormat='dd/MM/yyyy HH:mm'}"
+                              FontSize="14" Foreground="White" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- Content Area -->
-        <ContentControl Grid.Row="1" 
+        <ContentControl Grid.Row="1"
                        x:Name="ContentArea"
                        Margin="20"/>
 

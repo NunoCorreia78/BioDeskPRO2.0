@@ -53,7 +53,8 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="30">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+        <Grid Margin="10">
         <StackPanel>
 
             <!-- === CABEÇALHO === -->
@@ -547,5 +548,6 @@
             </Border>
 
         </StackPanel>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

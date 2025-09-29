@@ -8,7 +8,8 @@
 
     <!-- UserControl.Resources removidos para usar apenas estilos globais do App.xaml -->
 
-    <Grid Margin="30">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+        <Grid Margin="10">
         <StackPanel>
             <!-- Identificação Pessoal -->
             <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="12" Padding="25" Margin="0,0,0,20">
@@ -165,5 +166,6 @@
                 </StackPanel>
             </Border>
         </StackPanel>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
