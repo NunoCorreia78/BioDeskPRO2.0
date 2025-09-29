@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using BioDesk.Services.Navigation;
 using BioDesk.ViewModels;
+using BioDesk.ViewModels.Abas;
 
 namespace BioDesk.App;
 
@@ -109,6 +110,10 @@ public partial class App : Application
         // ViewModels - DASHBOARD + FICHA PACIENTE
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
+
+        // ViewModels das Abas
+        services.AddTransient<DeclaracaoSaudeViewModel>();
+        services.AddTransient<ConsentimentosViewModel>();
 
         // Views - SISTEMA LIMPO
         services.AddSingleton<MainWindow>();

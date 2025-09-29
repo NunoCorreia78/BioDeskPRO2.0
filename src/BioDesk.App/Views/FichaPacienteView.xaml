@@ -16,6 +16,7 @@
         <!-- Converter para progresso das abas -->
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
         <converters:TabStyleConverter x:Key="TabStyleConverter"/>
+        <converters:StringParameterToVisibilityConverter x:Key="StringParameterToVisibilityConverter"/>
 
         <!-- DataTemplate para Aba 1: Dados Biográficos -->
         <DataTemplate x:Key="DadosBiograficosTemplate">
@@ -151,7 +152,6 @@
     <Grid Background="{StaticResource FundoPrincipal}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Cabeçalho -->
-            <RowDefinition Height="Auto"/> <!-- Barra de Progresso -->
             <RowDefinition Height="Auto"/> <!-- Separadores/Abas -->
             <RowDefinition Height="*"/>    <!-- Conteúdo da Aba -->
             <RowDefinition Height="Auto"/> <!-- Rodapé de Navegação -->
@@ -203,33 +203,10 @@
             </Grid>
         </Border>
 
-        <!-- === BARRA DE PROGRESSO === -->
-        <Border Grid.Row="1" Background="{StaticResource FundoSecundario}"
-                BorderBrush="{StaticResource BordaBrush}" BorderThickness="0,0,0,1"
-                Padding="20,12">
-            <StackPanel>
-                <Grid Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Progresso da Ficha" FontSize="14" FontWeight="SemiBold"
-                               Foreground="{StaticResource TextoPrincipal}"/>
-                    <TextBlock Grid.Column="1"
-                               Text="{Binding PercentagemProgresso, FallbackValue='4/6 etapas completas (67%)'}"
-                               FontSize="12" Foreground="{StaticResource TextoSecundario}"/>
-                </Grid>
-
-                <ProgressBar Height="8" Background="#E0E0E0"
-                             Foreground="{StaticResource BotaoPrincipal}"
-                             Value="{Binding ProgressoNumerico, FallbackValue=67}"
-                             Maximum="100"/>
-            </StackPanel>
-        </Border>
+        <!-- Barra de progresso removida para dar mais espaço ao conteúdo -->
 
         <!-- === SEPARADORES/ABAS - DESIGN CARTÕES FLUTUANTES PREMIUM === -->
-        <Border Grid.Row="2" Padding="24,16,24,8">
+        <Border Grid.Row="1" Padding="24,16,24,8">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                     <GradientStop Color="#F5F8F4" Offset="0"/>
@@ -240,55 +217,173 @@
                          Background="Transparent" BorderThickness="0">
                 <StackPanel Orientation="Horizontal">
                 <Button x:Name="BtnAba1" Content="👤 Dados Biográficos"
-                        Style="{StaticResource TabButtonActiveStyle}"
                         Command="{Binding NavegarParaAbaCommand}"
-                        CommandParameter="1"/>
+                        CommandParameter="1">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AbaAtiva}" Value="1">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#9CAF97" Offset="0"/>
+                                                <GradientStop Color="#87A082" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
                 <Button x:Name="BtnAba2" Content="📋 Declaração de Saúde"
-                        Style="{StaticResource TabButtonStyle}"
                         Command="{Binding NavegarParaAbaCommand}"
-                        CommandParameter="2"/>
+                        CommandParameter="2">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AbaAtiva}" Value="2">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#9CAF97" Offset="0"/>
+                                                <GradientStop Color="#87A082" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
                 <Button x:Name="BtnAba3" Content="📜 Consentimentos"
-                        Style="{StaticResource TabButtonStyle}"
                         Command="{Binding NavegarParaAbaCommand}"
-                        CommandParameter="3"/>
+                        CommandParameter="3">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AbaAtiva}" Value="3">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#9CAF97" Offset="0"/>
+                                                <GradientStop Color="#87A082" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
                 <Button x:Name="BtnAba4" Content="🩺 Consultas"
-                        Style="{StaticResource TabButtonStyle}"
                         Command="{Binding NavegarParaAbaCommand}"
-                        CommandParameter="4"/>
+                        CommandParameter="4">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AbaAtiva}" Value="4">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#9CAF97" Offset="0"/>
+                                                <GradientStop Color="#87A082" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
                 <Button x:Name="BtnAba5" Content="👁️ Íris"
-                        Style="{StaticResource TabButtonStyle}"
                         Command="{Binding NavegarParaAbaCommand}"
-                        CommandParameter="5"/>
+                        CommandParameter="5">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AbaAtiva}" Value="5">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#9CAF97" Offset="0"/>
+                                                <GradientStop Color="#87A082" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
                 <Button x:Name="BtnAba6" Content="🌿 Terapias"
-                        Style="{StaticResource TabButtonStyle}"
                         Command="{Binding NavegarParaAbaCommand}"
                         CommandParameter="6"
                         IsEnabled="False"
-                        ToolTip="Módulo em desenvolvimento futuro"/>
+                        ToolTip="Módulo em desenvolvimento futuro">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AbaAtiva}" Value="6">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#9CAF97" Offset="0"/>
+                                                <GradientStop Color="#87A082" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 </StackPanel>
             </ScrollViewer>
         </Border>
 
         <!-- === CONTEÚDO DA ABA ATIVA === -->
-        <Border Grid.Row="3" Background="{StaticResource FundoPrincipal}"
-                Padding="20">
-            <ScrollViewer VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled"
-                          PanningMode="VerticalOnly"
-                          CanContentScroll="False">
+        <Border Grid.Row="2" Background="{StaticResource FundoPrincipal}"
+                Padding="0">
 
                 <!-- Conteúdo dinâmico baseado na aba ativa -->
                 <Grid>
                     <!-- UserControl para Aba 1: Dados Biográficos -->
                     <abas:DadosBiograficosUserControl
+                        x:Name="DadosBiograficosUserControl"
+                        Panel.ZIndex="100"
                         Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=1}"/>
 
-                    <!-- Texto para outras abas (Abas 2-6) -->
+                    <!-- UserControl para Aba 2: Declaração de Saúde -->
+                    <abas:DeclaracaoSaudeUserControl
+                        x:Name="DeclaracaoSaudeUserControl"
+                        Panel.ZIndex="50"
+                        Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=2}"/>
+
+                    <!-- UserControl para Aba 3: Consentimentos -->
+                    <abas:ConsentimentosUserControl
+                        x:Name="ConsentimentosUserControl"
+                        Panel.ZIndex="25"
+                        Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=3}"/>
+
+                    <!-- Texto para outras abas (Abas 4-6) -->
                     <TextBlock Text="{Binding ConteudoAbaAtiva}" FontSize="16" Margin="20"
                               Foreground="{StaticResource TextoPrincipal}"
                               TextWrapping="Wrap">
@@ -296,12 +391,6 @@
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="2">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="3">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding AbaAtiva}" Value="4">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
@@ -317,7 +406,6 @@
                     </TextBlock>
                 </Grid>
 
-            </ScrollViewer>
         </Border>
 
         <!-- === RODAPÉ DE NAVEGAÇÃO === -->

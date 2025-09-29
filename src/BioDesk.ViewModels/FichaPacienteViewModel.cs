@@ -45,6 +45,8 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             // Inicializar estado das abas
             AtualizarProgresso();
 
+            _logger.LogInformation("🔍 VALOR INICIAL: AbaAtiva = {AbaAtiva}", AbaAtiva);
+
             _logger.LogInformation("✅ FichaPacienteViewModel - Construtor concluído com sucesso!");
         }
         catch (Exception ex)
@@ -99,6 +101,12 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
 
     [ObservableProperty]
     private int _abaAtiva = 1;
+
+    partial void OnAbaAtivaChanged(int value)
+    {
+        _logger.LogInformation("🔄 ABA MUDOU: Aba ativa agora é {NovaAba}", value);
+        AtualizarProgresso();
+    }
 
     [ObservableProperty]
     private string _percentagemProgresso = "1/6 etapas completas (17%)";

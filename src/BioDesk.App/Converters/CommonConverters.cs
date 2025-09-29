@@ -150,3 +150,49 @@ public class StatusToColorConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+/// <summary>
+/// Converte bool para cor (para indicadores de status)
+/// True = Verde (sucesso), False = Vermelho (erro)
+/// </summary>
+public class BoolToColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool boolValue)
+        {
+            return boolValue
+                ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50")) // Verde
+                : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336")); // Vermelho
+        }
+        return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9E9E9E")); // Cinzento default
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+/// <summary>
+/// Converte bool para texto de status
+/// True = "✅ Consentimentos Completos", False = "⚠️ Consentimentos Pendentes"
+/// </summary>
+public class BoolToTextConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is bool boolValue)
+        {
+            return boolValue
+                ? "✅ Consentimentos Completos"
+                : "⚠️ Consentimentos Pendentes";
+        }
+        return "❓ Estado Desconhecido";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

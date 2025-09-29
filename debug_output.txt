@@ -1,0 +1,116 @@
+?? OnStartup iniciado...
+? Cultura portuguesa configurada
+??? Configurando host com DI...
+? Sistema limpo iniciado com sucesso...
+?? Iniciando host...
+dbug: Microsoft.Extensions.Hosting.Internal.Host[1]
+      Hosting starting
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+?? Criando MainWindow...
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2
+dbug: Microsoft.Extensions.Hosting.Internal.Host[2]
+      Hosting started
+info: BioDesk.App.MainWindow[0]
+      ?? MainWindow iniciando...
+info: BioDesk.App.MainWindow[0]
+      ?? Registrando views no sistema de navegação...
+dbug: BioDesk.Services.Navigation.NavigationService[0]
+      ?? View 'Dashboard' registrada como 'DashboardView'
+dbug: BioDesk.Services.Navigation.NavigationService[0]
+      ?? View 'Consultas' registrada como 'ConsultasView'
+dbug: BioDesk.Services.Navigation.NavigationService[0]
+      ?? View 'FichaPaciente' registrada como 'FichaPacienteView'
+info: BioDesk.App.MainWindow[0]
+      ? Views registradas: Dashboard, Consultas, FichaPaciente
+info: BioDesk.App.MainWindow[0]
+      ?? Navegando para Dashboard inicial...
+info: BioDesk.Services.Navigation.NavigationService[0]
+      ?? NavigateTo('Dashboard') chamado
+info: BioDesk.Services.Navigation.NavigationService[0]
+      ? View 'Dashboard' encontrada, disparando NavigationRequested...
+info: BioDesk.App.MainWindow[0]
+      ?? OnNavigationRequested chamado para 'Dashboard'
+info: BioDesk.App.MainWindow[0]
+      ??? NavegarPara('Dashboard') - criando view...
+info: BioDesk.App.MainWindow[0]
+      ? View 'Dashboard' criada, tipo: DashboardView
+info: BioDesk.App.MainWindow[0]
+      ?? Definindo DataContext para 'Dashboard'...
+info: BioDesk.ViewModels.DashboardViewModel[0]
+      DashboardViewModel inicializado com dashboard melhorado
+info: BioDesk.App.MainWindow[0]
+      ? DataContext definido para 'Dashboard', tipo: DashboardViewModel
+info: BioDesk.App.MainWindow[0]
+      ?? Atualizando ContentArea.Content...
+info: BioDesk.App.MainWindow[0]
+      ? Navegação para 'Dashboard' concluída com sucesso
+info: BioDesk.Services.Navigation.NavigationService[0]
+      ? NavigationRequested disparado com sucesso para 'Dashboard'
+?? Mostrando MainWindow...
+info: BioDesk.App.App[0]
+      ?? BioDeskPro2 inicializado com sucesso!
+info: BioDesk.App.App[0]
+      ? MainWindow apresentada - aplicação pronta!
+?? OnStartup completado!
+info: BioDesk.ViewModels.DashboardViewModel[0]
+      ?? INÍCIO: Comando NovoPaciente executado com ExecuteWithErrorHandlingAsync
+info: BioDesk.ViewModels.DashboardViewModel[0]
+      ? NavigationService existe, tipo: NavigationService
+info: BioDesk.ViewModels.DashboardViewModel[0]
+      ?? Tentando navegar para 'FichaPaciente'...
+info: BioDesk.Services.Navigation.NavigationService[0]
+      ?? NavigateTo('FichaPaciente') chamado
+info: BioDesk.Services.Navigation.NavigationService[0]
+      ? View 'FichaPaciente' encontrada, disparando NavigationRequested...
+info: BioDesk.App.MainWindow[0]
+      ?? OnNavigationRequested chamado para 'FichaPaciente'
+info: BioDesk.App.MainWindow[0]
+      ??? NavegarPara('FichaPaciente') - criando view...
+info: BioDesk.ViewModels.Abas.DeclaracaoSaudeViewModel[0]
+      DeclaracaoSaudeViewModel inicializado
+info: BioDesk.App.MainWindow[0]
+      ? View 'FichaPaciente' criada, tipo: FichaPacienteView
+info: BioDesk.App.MainWindow[0]
+      ?? Definindo DataContext para 'FichaPaciente'...
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      ?? FichaPacienteViewModel - INICIANDO construtor...
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      ?? FichaPacienteViewModel - Inicializando dados de exemplo...
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      Dados de exemplo inicializados: PacienteAtual e ContactoAtual
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      ?? FichaPacienteViewModel - Configurando auto-save...
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      Auto-save configurado com intervalo de 30000ms
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      ?? FichaPacienteViewModel - Atualizando progresso...
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      ?? VALOR INICIAL: AbaAtiva = 1
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      ? FichaPacienteViewModel - Construtor concluído com sucesso!
+info: BioDesk.App.MainWindow[0]
+      ? DataContext definido para 'FichaPaciente', tipo: FichaPacienteViewModel
+info: BioDesk.App.MainWindow[0]
+      ?? Atualizando ContentArea.Content...
+info: BioDesk.App.MainWindow[0]
+      ? Navegação para 'FichaPaciente' concluída com sucesso
+info: BioDesk.Services.Navigation.NavigationService[0]
+      ? NavigationRequested disparado com sucesso para 'FichaPaciente'
+info: BioDesk.ViewModels.DashboardViewModel[0]
+      ? NavigateTo('FichaPaciente') executado - aguardando resultado...
+?? CONVERTER DEBUG: value='1' (type=Int32), parameter='1' (type=String)
+?? STRING MATCH: '1' == '1' = True ? Visible
+info: BioDesk.ViewModels.DashboardViewModel[0]
+      ? Navegação concluída sem crash imediato
+dbug: Microsoft.Extensions.Hosting.Internal.Host[3]
+      Hosting stopping
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+dbug: Microsoft.Extensions.Hosting.Internal.Host[4]
+      Hosting stopped
+info: BioDesk.ViewModels.FichaPacienteViewModel[0]
+      FichaPacienteViewModel disposed
