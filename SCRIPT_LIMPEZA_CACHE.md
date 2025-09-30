@@ -1,4 +1,4 @@
-# 🧹 SCRIPT DE LIMPEZA CACHE WPF - PREVENÇÃO AUTOMÁTICA
+# 🧹 SCRIPT DE LIMPEZA CACHE - PREVENÇÃO AUTOMÁTICA
 
 ## Para adicionar ao .vscode/tasks.json
 
@@ -20,22 +20,24 @@
 }
 ```
 
-## USAR quando suspeitar de problemas de cache:
+## USAR quando suspeitar de problemas de cache
 
 1. **Comando manual rápido:**
-```powershell
-Remove-Item -Recurse -Force 'src/*/bin/', 'src/*/obj/'
-```
+
+   ```powershell
+   Remove-Item -Recurse -Force 'src/*/bin/', 'src/*/obj/'
+   ```
 
 2. **Build limpo completo:**
-```powershell
-dotnet clean
-Remove-Item -Recurse -Force 'src/*/bin/', 'src/*/obj/'
-dotnet restore
-dotnet build
-```
 
-## 🚨 SINAIS DE PROBLEMAS DE CACHE:
+   ```powershell
+   dotnet clean
+   Remove-Item -Recurse -Force 'src/*/bin/', 'src/*/obj/'
+   dotnet restore
+   dotnet build
+   ```
+
+## 🚨 SINAIS DE PROBLEMAS DE CACHE
 
 - ✅ Binding funciona nos logs
 - ✅ Converter retorna valores corretos
@@ -43,7 +45,7 @@ dotnet build
 - ❌ UserControls "misturados"
 - ❌ Visibility=Collapsed não funciona
 
-## 🛡️ PREVENÇÃO OBRIGATÓRIA:
+## 🛡️ PREVENÇÃO OBRIGATÓRIA
 
 ✅ **SEMPRE** usar Panel.ZIndex em UserControls sobrepostos
 ✅ **SEMPRE** usar Background="Transparent"
