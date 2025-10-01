@@ -9,40 +9,40 @@ using Microsoft.Extensions.Logging;
 namespace BioDesk.Services.Pdf;
 
 /// <summary>
-/// Serviço para geração de PDFs de Consentimentos Informados
-/// Usa QuestPDF para criar documentos profissionais com assinatura digital
+/// Serviço para geração de PDFs de Declarações de Saúde
+/// Layout igual aos Consentimentos, com assinaturas do paciente e terapeuta
 /// </summary>
-public class ConsentimentoPdfService
+public class DeclaracaoSaudePdfService
 {
-    private readonly ILogger<ConsentimentoPdfService> _logger;
+    private readonly ILogger<DeclaracaoSaudePdfService> _logger;
 
-    public ConsentimentoPdfService(ILogger<ConsentimentoPdfService> logger)
+    public DeclaracaoSaudePdfService(ILogger<DeclaracaoSaudePdfService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        // Configurar licença QuestPDF (Community License - grátis para uso pessoal/pequenos negócios)
+        // Configurar licença QuestPDF (Community License)
         QuestPDF.Settings.License = LicenseType.Community;
     }
 
     /// <summary>
-    /// Gera PDF de consentimento informado
+    /// Gera PDF de declaração de saúde
     /// </summary>
-    public string GerarPdfConsentimento(DadosConsentimento dados)
+    public string GerarPdfDeclaracaoSaude(DadosDeclaracaoSaude dados)
     {
-        _logger.LogInformation("📄 Gerando PDF de consentimento para: {Nome}", dados.NomePaciente);
+        _logger.LogInformation("📄 Gerando PDF de declaração de saúde para: {Nome}", dados.NomePaciente);
 
         try
         {
-            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: Pacientes\[Nome]\Consentimentos\
+            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: Pacientes\[Nome]\DeclaracoesSaude\
             var pastaDocumentos = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var pastaPaciente = Path.Combine(pastaDocumentos, "BioDeskPro2", "Pacientes", dados.NomePaciente);
-            var pastaConsentimentos = Path.Combine(pastaPaciente, "Consentimentos");
-            Directory.CreateDirectory(pastaConsentimentos);
+            var pastaDeclaracoes = Path.Combine(pastaPaciente, "DeclaracoesSaude");
+            Directory.CreateDirectory(pastaDeclaracoes);
 
-            var nomeArquivo = $"Consentimento_{dados.TipoTratamento.Replace(" ", "_")}_{dados.NomePaciente.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-            var caminhoCompleto = Path.Combine(pastaConsentimentos, nomeArquivo);
+            var nomeArquivo = $"DeclaracaoSaude_{dados.NomePaciente.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            var caminhoCompleto = Path.Combine(pastaDeclaracoes, nomeArquivo);
 
-            _logger.LogInformation("📁 Pasta de destino: {Pasta}", pastaConsentimentos);
+            _logger.LogInformation("📁 Pasta de destino: {Pasta}", pastaDeclaracoes);
 
             // Gerar PDF com QuestPDF
             Document.Create(container =>
@@ -76,7 +76,7 @@ public class ConsentimentoPdfService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao gerar PDF de consentimento");
+            _logger.LogError(ex, "❌ Erro ao gerar PDF de declaração de saúde");
             throw;
         }
     }
@@ -109,7 +109,6 @@ public class ConsentimentoPdfService
 
     private void CriarCabecalho(IContainer container)
     {
-        // ✅ CRITICAL: Envolver tudo num Column único para evitar erro "multiple child elements"
         container.Column(mainColumn =>
         {
             mainColumn.Item().Row(row =>
@@ -142,19 +141,19 @@ public class ConsentimentoPdfService
         });
     }
 
-    private void CriarConteudo(IContainer container, DadosConsentimento dados)
+    private void CriarConteudo(IContainer container, DadosDeclaracaoSaude dados)
     {
         container.Column(column =>
         {
             column.Spacing(15);
 
             // === TÍTULO DO DOCUMENTO ===
-            column.Item().PaddingTop(20).AlignCenter().Text("CONSENTIMENTO INFORMADO")
+            column.Item().PaddingTop(20).AlignCenter().Text("DECLARAÇÃO DE SAÚDE")
                 .FontSize(18)
                 .Bold()
                 .FontColor(Colors.Grey.Darken3);
 
-            column.Item().AlignCenter().Text(dados.TipoTratamento.ToUpper())
+            column.Item().AlignCenter().Text("AVALIAÇÃO CLÍNICA INICIAL")
                 .FontSize(14)
                 .SemiBold()
                 .FontColor(Colors.Green.Darken2);
@@ -175,81 +174,109 @@ public class ConsentimentoPdfService
                     row.ConstantItem(100).Text(text =>
                     {
                         text.Span("Data: ").SemiBold();
-                        text.Span(dados.DataConsentimento.ToString("dd/MM/yyyy"));
+                        text.Span(dados.DataDeclaracao.ToString("dd/MM/yyyy"));
                     });
                 });
             });
 
-            // === DESCRIÇÃO DO TRATAMENTO ===
-            column.Item().PaddingTop(10).Text("DESCRIÇÃO DO TRATAMENTO").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-            column.Item().PaddingTop(5).Text(dados.DescricaoTratamento)
-                .FontSize(10)
-                .LineHeight(1.5f);
-
-            // === INFORMAÇÕES ADICIONAIS ===
-            if (!string.IsNullOrEmpty(dados.InformacoesAdicionais))
+            // === MOTIVOS DA CONSULTA ===
+            if (!string.IsNullOrEmpty(dados.MotivoConsulta))
             {
-                column.Item().PaddingTop(10).Text("INFORMAÇÕES ADICIONAIS").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-                column.Item().PaddingTop(5).Text(dados.InformacoesAdicionais)
+                column.Item().PaddingTop(10).Text("1. MOTIVOS DA CONSULTA").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+                column.Item().PaddingTop(5).Text(dados.MotivoConsulta)
                     .FontSize(10)
                     .LineHeight(1.5f);
             }
 
-            // === DURAÇÃO E CUSTOS ===
-            if (dados.NumeroSessoes.HasValue || dados.CustoPorSessao.HasValue)
+            // === HISTÓRIA CLÍNICA PASSADA ===
+            if (!string.IsNullOrEmpty(dados.HistoriaClinica))
             {
-                column.Item().PaddingTop(15).Background(Colors.Green.Lighten3).Padding(12).Row(row =>
-                {
-                    if (dados.NumeroSessoes.HasValue)
-                    {
-                        row.RelativeItem().Column(c =>
-                        {
-                            c.Item().Text($"Nº de Sessões: {dados.NumeroSessoes.Value}").FontSize(10);
-                        });
-                    }
+                column.Item().PaddingTop(10).Text("2. HISTÓRIA CLÍNICA PASSADA").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+                column.Item().PaddingTop(5).Text(dados.HistoriaClinica)
+                    .FontSize(10)
+                    .LineHeight(1.5f);
+            }
 
-                    if (dados.CustoPorSessao.HasValue)
-                    {
-                        row.RelativeItem().Column(c =>
-                        {
-                            c.Item().Text($"Custo/Sessão: {dados.CustoPorSessao.Value:C}").FontSize(10);
-                        });
-                    }
+            // === MEDICAÇÃO ATUAL ===
+            if (!string.IsNullOrEmpty(dados.MedicacaoAtual))
+            {
+                column.Item().PaddingTop(10).Text("3. MEDICAÇÃO/SUPLEMENTAÇÃO ATUAL").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+                column.Item().PaddingTop(5).Text(dados.MedicacaoAtual)
+                    .FontSize(10)
+                    .LineHeight(1.5f);
+            }
+
+            // === ALERGIAS E REAÇÕES ADVERSAS ===
+            if (!string.IsNullOrEmpty(dados.Alergias))
+            {
+                column.Item().PaddingTop(10).Background(Colors.Red.Lighten4).Padding(10).Column(col =>
+                {
+                    col.Item().Text("⚠️ 4. ALERGIAS E REAÇÕES ADVERSAS").FontSize(12).Bold().FontColor(Colors.Red.Darken2);
+                    col.Item().PaddingTop(5).Text(dados.Alergias)
+                        .FontSize(10)
+                        .LineHeight(1.5f);
                 });
             }
 
-            // === TERMOS DO CONSENTIMENTO ===
-            column.Item().PaddingTop(15).Text("DECLARAÇÃO DE CONSENTIMENTO").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+            // === ESTILO DE VIDA ===
+            if (!string.IsNullOrEmpty(dados.EstiloVida))
+            {
+                column.Item().PaddingTop(10).Text("5. ESTILO DE VIDA").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+                column.Item().PaddingTop(5).Text(dados.EstiloVida)
+                    .FontSize(10)
+                    .LineHeight(1.5f);
+            }
+
+            // === HISTÓRIA FAMILIAR ===
+            if (!string.IsNullOrEmpty(dados.HistoriaFamiliar))
+            {
+                column.Item().PaddingTop(10).Text("6. HISTÓRIA FAMILIAR").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+                column.Item().PaddingTop(5).Text(dados.HistoriaFamiliar)
+                    .FontSize(10)
+                    .LineHeight(1.5f);
+            }
+
+            // === OBSERVAÇÕES CLÍNICAS ===
+            if (!string.IsNullOrEmpty(dados.ObservacoesClinicas))
+            {
+                column.Item().PaddingTop(15).Background(Colors.Blue.Lighten4).Padding(12).Column(col =>
+                {
+                    col.Item().Text("💡 OBSERVAÇÕES CLÍNICAS DO TERAPEUTA").FontSize(11).Bold().FontColor(Colors.Blue.Darken2);
+                    col.Item().PaddingTop(8).Text(dados.ObservacoesClinicas)
+                        .FontSize(10)
+                        .LineHeight(1.5f);
+                });
+            }
+
+            // === DECLARAÇÃO ===
+            column.Item().PaddingTop(15).Text("DECLARAÇÃO").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
             column.Item().PaddingTop(5).Column(col =>
             {
-                col.Item().Text("✓ Fui informado(a) sobre os benefícios, riscos e alternativas ao tratamento proposto.")
+                col.Item().Text("Declaro que as informações acima prestadas são verdadeiras e completas. " +
+                               "Estou ciente de que a omissão ou falsidade destas informações pode comprometer o diagnóstico e tratamento.")
+                    .FontSize(10)
+                    .LineHeight(1.5f);
+
+                col.Item().PaddingTop(8).Text("✓ Autorizo o uso destas informações para fins clínicos e de acompanhamento médico.")
                     .FontSize(10)
                     .LineHeight(1.4f);
 
-                col.Item().PaddingTop(5).Text("✓ Tive a oportunidade de esclarecer todas as minhas dúvidas.")
-                    .FontSize(10)
-                    .LineHeight(1.4f);
-
-                col.Item().PaddingTop(5).Text("✓ Aceito os riscos e benefícios descritos neste documento.")
-                    .FontSize(10)
-                    .LineHeight(1.4f);
-
-                col.Item().PaddingTop(5).Text("✓ Consinto o tratamento proposto de forma livre e esclarecida.")
+                col.Item().PaddingTop(5).Text("✓ Comprometo-me a informar qualquer alteração relevante no meu estado de saúde.")
                     .FontSize(10)
                     .LineHeight(1.4f);
             });
 
-            // === ASSINATURA ===
+            // === ASSINATURAS ===
             column.Item().PaddingTop(30).Row(row =>
             {
                 row.RelativeItem().Column(col =>
                 {
-                    // 🖼️ RENDERIZAR ASSINATURA SE EXISTIR
-                    if (!string.IsNullOrEmpty(dados.AssinaturaDigitalBase64))
+                    // 🖼️ RENDERIZAR ASSINATURA DO PACIENTE
+                    if (!string.IsNullOrEmpty(dados.AssinaturaPacienteBase64))
                     {
                         try
                         {
-                            byte[] imageBytes = Convert.FromBase64String(dados.AssinaturaDigitalBase64);
+                            byte[] imageBytes = Convert.FromBase64String(dados.AssinaturaPacienteBase64);
                             col.Item()
                                 .Border(1)
                                 .BorderColor(Colors.Grey.Lighten2)
@@ -271,7 +298,6 @@ public class ConsentimentoPdfService
                     }
                     else
                     {
-                        // Fallback: linha horizontal se não houver assinatura
                         col.Item().LineHorizontal(1).LineColor(Colors.Black);
                         col.Item().PaddingTop(5).AlignCenter().Text("[Assinatura não capturada]")
                             .FontSize(8)
@@ -318,7 +344,6 @@ public class ConsentimentoPdfService
                     }
                     else
                     {
-                        // Fallback: linha horizontal
                         _logger.LogWarning("⚠️ Assinatura do terapeuta não encontrada: {Path}", dados.AssinaturaTerapeutaPath);
                         col.Item().LineHorizontal(1).LineColor(Colors.Black);
                     }
@@ -332,10 +357,19 @@ public class ConsentimentoPdfService
                 });
             });
 
+            // === RGPD E CONSENTIMENTO ===
+            column.Item().PaddingTop(20).Background(Colors.Green.Lighten4).Padding(10).Text(
+                "✓ RGPD: Declaro que fui informado(a) sobre a utilização e tratamento dos meus dados pessoais, " +
+                "de acordo com o Regulamento Geral de Proteção de Dados (RGPD - Lei 58/2019). " +
+                "Autorizo o tratamento dos meus dados para fins clínicos e de acompanhamento médico.")
+                .FontSize(8)
+                .LineHeight(1.4f)
+                .FontColor(Colors.Green.Darken3);
+
             // === NOTA LEGAL ===
-            column.Item().PaddingTop(20).Background(Colors.Yellow.Lighten3).Padding(10).Text(
+            column.Item().PaddingTop(10).Background(Colors.Yellow.Lighten3).Padding(10).Text(
                 "⚠️ Este documento tem validade legal e deve ser guardado em local seguro. " +
-                "Em caso de dúvidas ou para revogar este consentimento, contacte a clínica.")
+                "Em caso de dúvidas ou necessidade de atualização, contacte a clínica.")
                 .FontSize(8)
                 .Italic()
                 .FontColor(Colors.Orange.Darken3);
@@ -346,22 +380,27 @@ public class ConsentimentoPdfService
 }
 
 /// <summary>
-/// Dados necessários para gerar PDF de consentimento
+/// Dados necessários para gerar PDF de declaração de saúde
 /// </summary>
-public class DadosConsentimento
+public class DadosDeclaracaoSaude
 {
     public string NomePaciente { get; set; } = string.Empty;
-    public string TipoTratamento { get; set; } = string.Empty;
-    public string DescricaoTratamento { get; set; } = string.Empty;
-    public string InformacoesAdicionais { get; set; } = string.Empty;
-    public DateTime DataConsentimento { get; set; } = DateTime.Now;
-    public int? NumeroSessoes { get; set; }
-    public decimal? CustoPorSessao { get; set; }
+    public DateTime DataDeclaracao { get; set; } = DateTime.Now;
 
+    // === SECÇÕES DO QUESTIONÁRIO ===
+    public string? MotivoConsulta { get; set; }
+    public string? HistoriaClinica { get; set; }
+    public string? MedicacaoAtual { get; set; }
+    public string? Alergias { get; set; }
+    public string? EstiloVida { get; set; }
+    public string? HistoriaFamiliar { get; set; }
+    public string? ObservacoesClinicas { get; set; }
+
+    // === ASSINATURAS ===
     /// <summary>
     /// Assinatura do paciente capturada como imagem PNG em Base64
     /// </summary>
-    public string? AssinaturaDigitalBase64 { get; set; }
+    public string? AssinaturaPacienteBase64 { get; set; }
 
     /// <summary>
     /// Caminho para a assinatura do terapeuta (ficheiro estático)

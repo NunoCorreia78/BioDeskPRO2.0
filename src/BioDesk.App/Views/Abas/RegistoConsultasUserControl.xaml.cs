@@ -1,3 +1,4 @@
+using System;
 using System.Windows.Controls;
 using System.Windows;
 using System.Threading.Tasks;
@@ -16,7 +17,11 @@ public partial class RegistoConsultasUserControl : UserControl
         InitializeComponent();
 
         // Obter logger do DI container
+        // ⚡ SAFE: ServiceProvider é inicializado no App.xaml.cs antes de qualquer UserControl
+#pragma warning disable CS8604
         _logger = ((App)Application.Current).ServiceProvider.GetRequiredService<ILogger<RegistoConsultasUserControl>>();
+#pragma warning restore CS8604
+        
         Loaded += OnLoaded;
     }
 

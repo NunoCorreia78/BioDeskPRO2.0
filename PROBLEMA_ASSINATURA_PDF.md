@@ -1,6 +1,6 @@
 # 🐛 PROBLEMA: Assinatura não aparece no PDF de Consentimentos
 
-**Data**: 01/10/2025 22:00  
+**Data**: 01/10/2025 22:00
 **Status**: 🔴 EM INVESTIGAÇÃO (Task #5)
 
 ## 📋 Contexto
@@ -70,9 +70,9 @@ Esperado:
 
 ## 🔄 Estado do Repositório
 
-**Commit**: `f4cca2b`  
-**Branch**: `copilot/vscode1759173130560`  
-**Push**: ✅ Realizado com sucesso  
+**Commit**: `f4cca2b`
+**Branch**: `copilot/vscode1759173130560`
+**Push**: ✅ Realizado com sucesso
 **Backup BD**: biodesk.db (176KB, 01/10/2025 20:58)
 
 ---

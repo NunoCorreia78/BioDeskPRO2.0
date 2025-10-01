@@ -102,9 +102,7 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
 
             IsLoading = false;
         }, "Erro ao carregar pacientes");
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Abrir ficha do paciente selecionado
     /// </summary>
     [RelayCommand]

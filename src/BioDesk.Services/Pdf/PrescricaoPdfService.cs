@@ -267,7 +267,7 @@ public class PrescricaoPdfService
                         _logger.LogWarning("⚠️ Assinatura do terapeuta não encontrada: {Path}", assinaturaTerapeutaPath);
                         col.Item().LineHorizontal(1).LineColor(Colors.Black);
                     }
-                    
+
                     col.Item().PaddingTop(5).AlignCenter().Text("Profissional Responsável")
                         .FontSize(9)
                         .Italic();

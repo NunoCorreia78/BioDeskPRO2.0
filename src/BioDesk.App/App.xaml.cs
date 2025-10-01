@@ -243,6 +243,7 @@ Inner Exceptions:
         // === PDF SERVICES (QuestPDF) ===
         services.AddScoped<Services.Pdf.ConsentimentoPdfService>();
         services.AddScoped<Services.Pdf.PrescricaoPdfService>();
+        services.AddScoped<Services.Pdf.DeclaracaoSaudePdfService>();
 
         // === VIEWMODELS ===
         services.AddTransient<DashboardViewModel>();
