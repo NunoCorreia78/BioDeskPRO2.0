@@ -13,7 +13,7 @@
         <!-- Converters -->
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
-        
+
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#9CAF97"/>
             <Setter Property="Foreground" Value="White"/>
@@ -144,24 +144,25 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <TextBlock Grid.Column="0" Text="📊 Estatísticas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D"/>
-                        
-                        <!-- Botão Configurações -->
-                        <Button Grid.Column="1" Content="⚙️ Configurações"
-                               Click="BtnConfiguracoes_Click"
-                               Style="{StaticResource ActionButtonStyle}"
-                               Margin="10,0,0,0"
-                               ToolTip="Configurar email e outras opções do sistema"/>
+
                         <!-- Loading indicator -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="🔄" FontSize="14" Foreground="#9CAF97" Margin="0,0,5,0" 
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <TextBlock Text="🔄" FontSize="14" Foreground="#9CAF97" Margin="0,0,5,0"
                                      Visibility="{Binding IsLoadingStats, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            <TextBlock Text="{Binding UltimaAtualizacao, StringFormat='Atualizado: {0:HH:mm:ss}'}" 
+                            <TextBlock Text="{Binding UltimaAtualizacao, StringFormat='Atualizado: {0:HH:mm:ss}'}"
                                      FontSize="11" Foreground="#5A6558"
                                      Visibility="{Binding IsLoadingStats, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                         </StackPanel>
+
+                        <!-- Botão Configurações -->
+                        <Button Grid.Column="2" Content="⚙️ Configurações"
+                               Click="BtnConfiguracoes_Click"
+                               Style="{StaticResource ActionButtonStyle}"
+                               ToolTip="Configurar email e outras opções do sistema"/>
                     </Grid>
 
                     <UniformGrid Rows="1" Columns="4" Margin="0,0,0,40">

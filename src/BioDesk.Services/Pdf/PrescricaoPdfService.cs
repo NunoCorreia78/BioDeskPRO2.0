@@ -26,7 +26,7 @@ public class PrescricaoPdfService
     }
 
     /// <summary>
-    /// Gera PDF de prescrição médica
+    /// Gera PDF de prescrição médica em pasta temporária
     /// </summary>
     public string GerarPdfPrescricao(DadosPrescricao dados)
     {
@@ -34,13 +34,12 @@ public class PrescricaoPdfService
 
         try
         {
-            // Caminho para salvar o PDF
-            var pastaDocumentos = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var pastaBioDesk = Path.Combine(pastaDocumentos, "BioDeskPro2", "Prescricoes");
-            Directory.CreateDirectory(pastaBioDesk);
+            // ⭐ GERAR EM PASTA TEMPORÁRIA (será copiado depois)
+            var pastaTemp = Path.GetTempPath();
+            var nomeArquivo = $"Prescricao_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            var caminhoCompleto = Path.Combine(pastaTemp, nomeArquivo);
 
-            var nomeArquivo = $"Prescricao_{dados.NomePaciente.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-            var caminhoCompleto = Path.Combine(pastaBioDesk, nomeArquivo);
+            _logger.LogInformation("🔧 Caminho temporário: {Caminho}", caminhoCompleto);
 
             // Gerar PDF com QuestPDF
             Document.Create(container =>
@@ -107,33 +106,37 @@ public class PrescricaoPdfService
 
     private void CriarCabecalho(IContainer container)
     {
-        container.Row(row =>
+        container.Column(col =>
         {
-            // Logo/Título à esquerda
-            row.RelativeItem().Column(column =>
+            // Cabeçalho com logo e data
+            col.Item().Row(row =>
             {
-                column.Item().Text("🌿 BioDeskPro 2.0")
-                    .FontSize(20)
-                    .Bold()
-                    .FontColor(Colors.Grey.Darken3);
+                // Logo/Título à esquerda
+                row.RelativeItem().Column(column =>
+                {
+                    column.Item().Text("🌿 BioDeskPro 2.0")
+                        .FontSize(20)
+                        .Bold()
+                        .FontColor(Colors.Grey.Darken3);
 
-                column.Item().Text("Prescrição de Medicina Complementar")
-                    .FontSize(10)
-                    .Italic()
-                    .FontColor(Colors.Grey.Darken2);
+                    column.Item().Text("Prescrição de Medicina Complementar")
+                        .FontSize(10)
+                        .Italic()
+                        .FontColor(Colors.Grey.Darken2);
+                });
+
+                // Data à direita
+                row.ConstantItem(150).AlignRight().Column(column =>
+                {
+                    column.Item().Text($"Data: {DateTime.Now:dd/MM/yyyy}")
+                        .FontSize(10)
+                        .FontColor(Colors.Grey.Darken3);
+                });
             });
 
-            // Data à direita
-            row.ConstantItem(150).AlignRight().Column(column =>
-            {
-                column.Item().Text($"Data: {DateTime.Now:dd/MM/yyyy}")
-                    .FontSize(10)
-                    .FontColor(Colors.Grey.Darken3);
-            });
+            // Linha separadora DENTRO do Column
+            col.Item().PaddingTop(10).BorderBottom(2).BorderColor(Colors.Teal.Medium);
         });
-
-        // Linha separadora
-        container.PaddingTop(10).BorderBottom(2).BorderColor(Colors.Teal.Medium);
     }
 
     private void CriarConteudo(IContainer container, DadosPrescricao dados)

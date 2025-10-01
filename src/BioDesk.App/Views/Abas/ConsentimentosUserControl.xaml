@@ -123,6 +123,8 @@
                                   Padding="12,10"
                                   Background="White"
                                   BorderBrush="#E3E9DE"
+                                  SelectedValuePath="Content"
+                                  SelectedValue="{Binding TipoTratamentoSelecionado, Mode=TwoWay}"
                                   SelectionChanged="TipoTratamentoCombo_SelectionChanged">
                             <ComboBoxItem Content="Selecione uma técnica..." IsEnabled="False"/>
 
@@ -162,7 +164,7 @@
                     <!-- Texto do Consentimento -->
                     <TextBox x:Name="ConsentimentoTexto"
                              Style="{StaticResource ConsentTextStyle}"
-                             Text="Por favor, selecione uma técnica no menu acima para visualizar o respectivo consentimento informado."
+                             Text="{Binding DescricaoTratamento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Margin="0,0,0,20"/>
 
                     <!-- Declarações de Consentimento -->
@@ -299,6 +301,41 @@
                             HorizontalAlignment="Center"
                             Visibility="Collapsed"
                             Click="BtnAssinar_Click"/>
+
+                    <!-- Botão para Gerar PDF (após assinatura confirmada) -->
+                    <Button x:Name="BtnGerarPdfNovo"
+                            Content="📄 Gerar PDF do Consentimento"
+                            Background="#059669"
+                            Foreground="White"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Padding="20,12"
+                            HorizontalAlignment="Center"
+                            Visibility="Collapsed"
+                            Cursor="Hand"
+                            Margin="0,20,0,0"
+                            Click="BtnGerarPdfNovo_Click">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="8"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#047857"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
 
                 </StackPanel>
             </Border>

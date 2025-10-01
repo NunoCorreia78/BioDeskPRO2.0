@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using BioDesk.Services.Email;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +12,7 @@ namespace BioDesk.ViewModels;
 public partial class ConfiguracoesViewModel : ObservableObject
 {
     private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService;
     private readonly ILogger<ConfiguracoesViewModel> _logger;
 
     [ObservableProperty]
@@ -41,9 +44,11 @@ public partial class ConfiguracoesViewModel : ObservableObject
 
     public ConfiguracoesViewModel(
         IConfiguration configuration,
+        IEmailService emailService,
         ILogger<ConfiguracoesViewModel> logger)
     {
         _configuration = configuration;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -115,39 +120,98 @@ public partial class ConfiguracoesViewModel : ObservableObject
                 return;
             }
 
-            MostrarInfo("🔄 A testar conexão com Gmail...");
+            MostrarInfo("🔄 A enviar email de teste para " + EmailRemetente + "...");
 
-            // TODO: Implementar teste real de envio de email
-            await Task.Delay(2000); // Simulação
+            // TESTAR DIRETAMENTE SEM GRAVAR (TestarConexaoAsync passa credenciais ao EmailService)
+            var resultado = await _emailService.TestarConexaoAsync(
+                smtpUsername: EmailRemetente,
+                smtpPassword: EmailPassword,
+                fromEmail: EmailRemetente,
+                fromName: NomeRemetente ?? "BioDeskPro"
+            );
 
-            MostrarSucesso("✅ Conexão testada com sucesso! Email de teste enviado.");
-            _logger.LogInformation("Teste de conexão de email bem-sucedido");
+            if (resultado.Sucesso)
+            {
+                MostrarSucesso($"✅ Email de teste enviado com sucesso para {EmailRemetente}! Verifique a sua caixa de entrada.");
+                _logger.LogInformation("✅ Teste de conexão de email bem-sucedido");
+            }
+            else
+            {
+                MostrarErro(resultado.Mensagem ?? "Erro desconhecido ao enviar email");
+                _logger.LogError("❌ Teste de email falhou: {Mensagem}", resultado.Mensagem);
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao testar conexão de email");
-            MostrarErro($"Erro ao testar: {ex.Message}");
+            _logger.LogError(ex, "❌ Erro ao testar conexão de email");
+            MostrarErro($"❌ Erro ao testar: {ex.Message}\n\nVerifique se:\n• App Password está correto\n• Email é Gmail\n• Tem conexão à internet");
         }
     }
 
     private async Task GuardarUserSecretsAsync()
     {
-        // Criar comando para guardar user secrets
-        var secretsCommands = new[]
-        {
-            $"dotnet user-secrets set \"Email:Sender\" \"{EmailRemetente}\"",
-            $"dotnet user-secrets set \"Email:Password\" \"{EmailPassword}\"",
-            $"dotnet user-secrets set \"Email:SenderName\" \"{NomeRemetente}\""
-        };
+        // Guardar diretamente no IConfiguration (usado pelo EmailService)
+        // NOTA: User Secrets são lidos automaticamente em Development
+        // Para produção, usar variáveis de ambiente ou cofre seguro
 
-        foreach (var command in secretsCommands)
+        try
         {
-            // Executar comando (implementação simplificada)
-            // Na prática, usaria Process.Start ou biblioteca de configuração
-            await Task.Delay(100);
+            // Obter caminho do projeto BioDesk.App corretamente
+            // AppDomain.BaseDirectory aponta para bin/Debug/net8.0-windows/
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var appProjectPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(baseDir, "..", "..", ".."));
+
+            _logger.LogInformation($"🔍 Tentando gravar User Secrets no projeto: {appProjectPath}");
+
+            var secretsCommands = new[]
+            {
+                ("Email:Sender", EmailRemetente),
+                ("Email:Password", EmailPassword),
+                ("Email:SenderName", NomeRemetente)
+            };
+
+            foreach (var (key, value) in secretsCommands)
+            {
+                var processInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = $"user-secrets set \"{key}\" \"{value}\" --project \"{appProjectPath}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = appProjectPath // ✅ CRITICAL: Define working directory
+                };
+
+                _logger.LogInformation($"🔧 Executando: dotnet user-secrets set \"{key}\" \"***\" --project \"{appProjectPath}\"");
+
+                using var process = System.Diagnostics.Process.Start(processInfo);
+                if (process != null)
+                {
+                    await process.WaitForExitAsync();
+
+                    var output = await process.StandardOutput.ReadToEndAsync();
+                    var error = await process.StandardError.ReadToEndAsync();
+
+                    if (process.ExitCode != 0)
+                    {
+                        _logger.LogError($"❌ Erro ao guardar {key}. Exit code: {process.ExitCode}\nStdErr: {error}\nStdOut: {output}");
+                        throw new Exception($"Erro ao guardar {key}: {error}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"✅ {key} guardado com sucesso");
+                    }
+                }
+            }
+
+            _logger.LogInformation("✅ User secrets guardados com sucesso via dotnet CLI");
         }
-
-        _logger.LogInformation("User secrets guardados com sucesso");
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao executar dotnet user-secrets");
+            throw;
+        }
     }
 
     private void MostrarSucesso(string mensagem)

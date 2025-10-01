@@ -154,6 +154,6 @@ dotnet user-secrets clear
 
 ---
 
-**Última Atualização**: 1 de Outubro de 2025  
-**Versão**: 1.0.0 (Sistema de Configurações Seguras Implementado)  
+**Última Atualização**: 1 de Outubro de 2025
+**Versão**: 1.0.0 (Sistema de Configurações Seguras Implementado)
 **Status**: ✅ Funcional e Testável

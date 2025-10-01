@@ -255,6 +255,12 @@ public partial class ConsentimentosViewModel : ObservableValidator
     [NotifyPropertyChangedFor(nameof(ConsentimentoValidoLegalmente))]
     private string? _assinaturaDigital;
 
+    /// <summary>
+    /// Assinatura capturada do canvas como imagem PNG em Base64
+    /// </summary>
+    [ObservableProperty]
+    private string? _assinaturaDigitalBase64;
+
     [ObservableProperty]
     private DateTime? _dataAssinatura;
 
@@ -516,26 +522,49 @@ public partial class ConsentimentosViewModel : ObservableValidator
             _logger.LogInformation("📄 Iniciando geração de PDF de consentimento...");
 
             // Validar dados obrigatórios
+            _logger.LogInformation("🔍 Validando NomePaciente: '{Nome}'", NomePaciente ?? "<null>");
             if (string.IsNullOrWhiteSpace(NomePaciente))
             {
-                _logger.LogWarning("⚠️ Nome do paciente não preenchido");
+                _logger.LogWarning("❌ VALIDAÇÃO FALHOU: Nome do paciente não preenchido");
+                MessageBox.Show(
+                    "⚠️ Nome do paciente não está preenchido!\n\nPor favor, preencha o nome do paciente antes de gerar o PDF.",
+                    "Dados Incompletos",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 UltimoPdfGerado = null;
                 return;
             }
+            _logger.LogInformation("✅ NomePaciente válido: '{Nome}'", NomePaciente);
 
+            _logger.LogInformation("🔍 Validando TipoTratamentoSelecionado: '{Tipo}'", TipoTratamentoSelecionado ?? "<null>");
             if (string.IsNullOrWhiteSpace(TipoTratamentoSelecionado) || TipoTratamentoSelecionado == "Selecione...")
             {
-                _logger.LogWarning("⚠️ Tipo de tratamento não selecionado");
+                _logger.LogWarning("❌ VALIDAÇÃO FALHOU: Tipo de tratamento não selecionado");
+                MessageBox.Show(
+                    "⚠️ Tipo de tratamento não foi selecionado!\n\nPor favor, selecione o tipo de tratamento (Naturopatia, Osteopatia, etc.).",
+                    "Dados Incompletos",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 UltimoPdfGerado = null;
                 return;
             }
+            _logger.LogInformation("✅ TipoTratamentoSelecionado válido: '{Tipo}'", TipoTratamentoSelecionado);
 
+            _logger.LogInformation("🔍 Validando DescricaoTratamento: '{Descricao}' (Length: {Length})",
+                DescricaoTratamento ?? "<null>",
+                DescricaoTratamento?.Length ?? 0);
             if (string.IsNullOrWhiteSpace(DescricaoTratamento))
             {
-                _logger.LogWarning("⚠️ Descrição do tratamento não preenchida");
+                _logger.LogWarning("❌ VALIDAÇÃO FALHOU: Descrição do tratamento não preenchida");
+                MessageBox.Show(
+                    "⚠️ Descrição do tratamento não está preenchida!\n\nPor favor, descreva o tratamento que será realizado.",
+                    "Dados Incompletos",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 UltimoPdfGerado = null;
                 return;
             }
+            _logger.LogInformation("✅ DescricaoTratamento válida: {Length} caracteres", DescricaoTratamento.Length);
 
             // Criar dados do consentimento
             var dados = new Services.Pdf.DadosConsentimento
@@ -546,7 +575,8 @@ public partial class ConsentimentosViewModel : ObservableValidator
                 InformacoesAdicionais = string.Empty, // TODO: Adicionar campo de observações
                 DataConsentimento = DateTime.Now,
                 NumeroSessoes = NumeroSessoesPrevistas > 0 ? NumeroSessoesPrevistas : null,
-                CustoPorSessao = CustoPorSessao > 0 ? CustoPorSessao : null
+                CustoPorSessao = CustoPorSessao > 0 ? CustoPorSessao : null,
+                AssinaturaDigitalBase64 = AssinaturaDigitalBase64 // 🖼️ Passar assinatura capturada
             };
 
             // Gerar PDF
@@ -558,6 +588,11 @@ public partial class ConsentimentosViewModel : ObservableValidator
         catch (Exception ex)
         {
             _logger.LogError(ex, "❌ Erro ao gerar PDF de consentimento");
+            MessageBox.Show(
+                $"❌ ERRO ao gerar PDF!\n\nMensagem: {ex.Message}\n\nInner Exception: {ex.InnerException?.Message ?? "Nenhuma"}\n\nStackTrace:\n{ex.StackTrace}",
+                "Erro Fatal",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
             UltimoPdfGerado = null;
         }
     }

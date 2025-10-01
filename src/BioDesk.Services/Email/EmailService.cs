@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using BioDesk.Data;
 using BioDesk.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,19 +21,21 @@ namespace BioDesk.Services.Email;
 public class EmailService : IEmailService
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<EmailService> _logger;
 
-    // Configurações SMTP (podem ser movidas para appsettings.json)
-    private const string SmtpHost = "smtp.gmail.com"; // Alterar conforme necessário
-    private const int SmtpPort = 587;
-    private const string SmtpUsername = "seu-email@gmail.com"; // ⚠️ CONFIGURAR
-    private const string SmtpPassword = "sua-senha-app"; // ⚠️ CONFIGURAR
-    private const string FromEmail = "seu-email@gmail.com"; // ⚠️ CONFIGURAR
-    private const string FromName = "BioDeskPro - Clínica"; // ⚠️ CONFIGURAR
+    // Configurações SMTP dinâmicas (lidas do IConfiguration/User Secrets)
+    private string SmtpHost => "smtp.gmail.com";
+    private int SmtpPort => 587;
+    private string SmtpUsername => _configuration["Email:Sender"] ?? throw new InvalidOperationException("Email:Sender não configurado. Use o botão Configurações.");
+    private string SmtpPassword => _configuration["Email:Password"] ?? throw new InvalidOperationException("Email:Password não configurado. Use o botão Configurações.");
+    private string FromEmail => _configuration["Email:Sender"] ?? throw new InvalidOperationException("Email:Sender não configurado.");
+    private string FromName => _configuration["Email:SenderName"] ?? "BioDeskPro - Terapias Naturais";
 
-    public EmailService(IServiceProvider serviceProvider, ILogger<EmailService> logger)
+    public EmailService(IServiceProvider serviceProvider, IConfiguration configuration, ILogger<EmailService> logger)
     {
         _serviceProvider = serviceProvider;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -57,46 +60,48 @@ public class EmailService : IEmailService
     }
 
     /// <summary>
-    /// Envia um email. Se offline, adiciona à fila.
+    /// ⚡ CORREÇÃO CRÍTICA: Envia email IMEDIATAMENTE ou falha com exceção clara
+    /// NÃO silencia erros - se falhar, LANÇA EXCEÇÃO para ViewModel tratar
     /// </summary>
     public async Task<EmailResult> EnviarAsync(EmailMessage message)
     {
-        _logger.LogInformation("📧 Tentando enviar email para {To}: {Subject}", message.To, message.Subject);
+        _logger.LogInformation("📧 Tentando enviar email IMEDIATO para {To}: {Subject}", message.To, message.Subject);
 
-        // Verificar conexão
+        // ⚠️ Verificar conexão
         if (!TemConexao)
         {
-            _logger.LogWarning("⚠️ Sem conexão com internet. Email adicionado à fila.");
+            _logger.LogWarning("⚠️ Sem conexão com internet.");
             return new EmailResult
             {
                 Sucesso = false,
                 AdicionadoNaFila = true,
-                Mensagem = "Sem conexão. Email será enviado automaticamente quando a conexão retornar."
+                Mensagem = "Sem conexão à internet. Email ficará agendado para envio automático."
             };
         }
 
-        // Tentar enviar
+        // ⚡ Tentar enviar IMEDIATAMENTE
         try
         {
             await EnviarViaSMTPAsync(message);
-
-            _logger.LogInformation("✅ Email enviado com sucesso para {To}", message.To);
+            _logger.LogInformation("✅ Email enviado IMEDIATAMENTE para {To}", message.To);
 
             return new EmailResult
             {
                 Sucesso = true,
-                Mensagem = "Email enviado com sucesso!"
+                Mensagem = "✅ Email enviado com sucesso!"
             };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao enviar email para {To}", message.To);
+            // ❌ CRÍTICO: NÃO SILENCIAR - Lançar exceção para ViewModel saber que falhou
+            _logger.LogError(ex, "❌ ERRO ao enviar email para {To}: {Message}", message.To, ex.Message);
 
+            // Retornar falha COM mensagem clara
             return new EmailResult
             {
                 Sucesso = false,
-                AdicionadoNaFila = true,
-                Mensagem = $"Erro: {ex.Message}. Email adicionado à fila para retry."
+                AdicionadoNaFila = false, // ⚠️ NÃO foi adicionado à fila - está na BD como Agendado
+                Mensagem = $"❌ Erro ao enviar: {ex.Message}"
             };
         }
     }
@@ -106,13 +111,15 @@ public class EmailService : IEmailService
     /// </summary>
     public async Task ProcessarFilaAsync()
     {
+        _logger.LogWarning("🔍 [ProcessarFila] INICIANDO verificação...");
+
         if (!TemConexao)
         {
-            _logger.LogDebug("⚠️ Sem conexão. Fila não processada.");
+            _logger.LogWarning("⚠️ [ProcessarFila] Sem conexão. Fila não processada.");
             return;
         }
 
-        _logger.LogInformation("🔄 Processando fila de emails...");
+        _logger.LogWarning("✅ [ProcessarFila] Conexão OK. Buscando emails agendados...");
 
         // ✅ Criar scope para resolver DbContext
         using var scope = _serviceProvider.CreateScope();
@@ -127,10 +134,18 @@ public class EmailService : IEmailService
             .Include(c => c.Anexos)
             .ToListAsync();
 
-        _logger.LogInformation("📬 {Count} mensagens na fila para processar", mensagensNaFila.Count);
+        _logger.LogWarning("📬 [ProcessarFila] Encontrei {Count} mensagens na fila", mensagensNaFila.Count);
+
+        foreach (var msg in mensagensNaFila)
+        {
+            _logger.LogWarning("  → Email ID {Id}: {Assunto} (Tentativas: {Tentativas})",
+                msg.Id, msg.Assunto, msg.TentativasEnvio);
+        }
 
         foreach (var comunicacao in mensagensNaFila)
         {
+            _logger.LogWarning("🔧 [ProcessarFila] Tentando enviar Email ID {Id}...", comunicacao.Id);
+
             try
             {
                 // Criar EmailMessage
@@ -143,19 +158,31 @@ public class EmailService : IEmailService
                     Attachments = comunicacao.Anexos.Select(a => a.CaminhoArquivo).ToList()
                 };
 
+                _logger.LogWarning("📧 [ProcessarFila] Enviando via SMTP para {To}...", comunicacao.Destinatario);
+
                 // Tentar enviar
                 await EnviarViaSMTPAsync(emailMessage);
 
-                // Sucesso → Atualizar status
+                // ✅ SUCESSO → Atualizar status
+                _logger.LogWarning("✅ [ProcessarFila] SMTP OK! Atualizando status do Email ID {Id}...", comunicacao.Id);
+                _logger.LogWarning("   ANTES: IsEnviado={IsEnviado}, Status={Status}, Tentativas={Tentativas}",
+                    comunicacao.IsEnviado, comunicacao.Status, comunicacao.TentativasEnvio);
+
                 comunicacao.IsEnviado = true;
                 comunicacao.Status = StatusComunicacao.Enviado;
                 comunicacao.DataEnvio = DateTime.Now;
                 comunicacao.UltimoErro = null;
+                // ⚠️ NÃO resetar TentativasEnvio - manter histórico
 
-                _logger.LogInformation("✅ Email da fila enviado com sucesso (ID: {Id})", comunicacao.Id);
+                _logger.LogWarning("   DEPOIS: IsEnviado={IsEnviado}, Status={Status}, DataEnvio={DataEnvio}",
+                    comunicacao.IsEnviado, comunicacao.Status, comunicacao.DataEnvio);
+                _logger.LogWarning("✅ [ProcessarFila] Email ID {Id} enviado com SUCESSO!", comunicacao.Id);
             }
             catch (Exception ex)
             {
+                _logger.LogError("❌ [ProcessarFila] ERRO ao enviar Email ID {Id}: {Error}", comunicacao.Id, ex.Message);
+                _logger.LogError("Stack: {Stack}", ex.StackTrace);
+
                 // Falhou → Incrementar tentativas e agendar próxima tentativa
                 comunicacao.TentativasEnvio++;
                 comunicacao.UltimoErro = ex.Message;
@@ -164,16 +191,24 @@ public class EmailService : IEmailService
                 if (comunicacao.TentativasEnvio >= 3)
                 {
                     comunicacao.Status = StatusComunicacao.Falhado;
-                    _logger.LogError("❌ Email falhou após 3 tentativas (ID: {Id}): {Error}", comunicacao.Id, ex.Message);
+                    _logger.LogError("❌ Email ID {Id} marcado como FALHADO (3 tentativas)", comunicacao.Id);
                 }
                 else
                 {
-                    _logger.LogWarning("⚠️ Tentativa {Tentativa}/3 falhou para email ID {Id}. Próxima tentativa: {ProximaTentativa}",
-                        comunicacao.TentativasEnvio, comunicacao.Id, comunicacao.ProximaTentativa);
+                    _logger.LogWarning("⚠️ Email ID {Id}: Tentativa {Tentativa}/3. Próximo retry: {ProximaTentativa}",
+                        comunicacao.Id, comunicacao.TentativasEnvio, comunicacao.ProximaTentativa);
                 }
             }
 
+            _logger.LogWarning("💾 [ProcessarFila] Salvando alterações para Email ID {Id}...", comunicacao.Id);
+
+            // ⚠️ CRITICAL: Verificar estado antes de salvar
+            var entry = dbContext.Entry(comunicacao);
+            _logger.LogWarning("   Estado EF: {State}, IsEnviado={IsEnviado}, Status={Status}",
+                entry.State, comunicacao.IsEnviado, comunicacao.Status);
+
             await dbContext.SaveChangesAsync();
+            _logger.LogWarning("✅ [ProcessarFila] Email ID {Id} salvo na BD", comunicacao.Id);
         }
 
         _logger.LogInformation("✅ Processamento de fila concluído");
@@ -190,6 +225,92 @@ public class EmailService : IEmailService
 
         return await dbContext.Comunicacoes
             .CountAsync(c => !c.IsEnviado && c.Status == StatusComunicacao.Agendado);
+    }
+
+    /// <summary>
+    /// Testa conexão SMTP com credenciais fornecidas (usado no botão Testar Conexão)
+    /// NÃO grava na BD, apenas testa envio real
+    /// </summary>
+    public async Task<EmailResult> TestarConexaoAsync(string smtpUsername, string smtpPassword, string fromEmail, string fromName)
+    {
+        try
+        {
+            _logger.LogInformation("🔍 Testando conexão SMTP com {Email}...", smtpUsername);
+
+            // Criar email de teste
+            var emailTeste = $@"
+                <html>
+                <body style='font-family: Arial, sans-serif; padding: 20px;'>
+                    <h2 style='color: #059669;'>✅ Configuração de Email Bem-Sucedida!</h2>
+                    <p>Parabéns! O seu sistema de email do <strong>BioDeskPro</strong> está configurado corretamente.</p>
+                    <hr style='border: 1px solid #E3E9DE; margin: 20px 0;'/>
+                    <p><strong>Detalhes da Configuração:</strong></p>
+                    <ul>
+                        <li><strong>Remetente:</strong> {smtpUsername}</li>
+                        <li><strong>Nome:</strong> {fromName}</li>
+                        <li><strong>Data do Teste:</strong> {DateTime.Now:dd/MM/yyyy HH:mm:ss}</li>
+                    </ul>
+                    <p style='color: #6B7280; font-size: 12px; margin-top: 30px;'>
+                        Este é um email de teste automático do BioDeskPro.<br/>
+                        Se recebeu esta mensagem, significa que está tudo a funcionar perfeitamente! 🎉
+                    </p>
+                </body>
+                </html>";
+
+            // Enviar email de teste diretamente via SMTP (sem gravar na BD)
+            using var smtpClient = new SmtpClient(SmtpHost, SmtpPort)
+            {
+                Credentials = new NetworkCredential(smtpUsername, smtpPassword),
+                EnableSsl = true,
+                Timeout = 30000 // 30 segundos
+            };
+
+            using var mailMessage = new MailMessage
+            {
+                From = new MailAddress(fromEmail, fromName),
+                Subject = "✅ Teste de Configuração - BioDeskPro",
+                Body = emailTeste,
+                IsBodyHtml = true
+            };
+
+            mailMessage.To.Add(new MailAddress(smtpUsername, fromName)); // Envia para si próprio
+
+            await smtpClient.SendMailAsync(mailMessage);
+
+            _logger.LogInformation("✅ Email de teste enviado com sucesso!");
+            return new EmailResult
+            {
+                Sucesso = true,
+                Mensagem = $"✅ Email de teste enviado com sucesso para {smtpUsername}!"
+            };
+        }
+        catch (SmtpException smtpEx)
+        {
+            _logger.LogError(smtpEx, "❌ Erro SMTP ao testar conexão");
+
+            var mensagemErro = smtpEx.StatusCode switch
+            {
+                SmtpStatusCode.MailboxUnavailable => "Email inválido ou não encontrado.",
+                SmtpStatusCode.MailboxBusy => "Caixa de email ocupada. Tente novamente.",
+                SmtpStatusCode.GeneralFailure => "Falha geral no servidor SMTP. Verifique credenciais.",
+                _ => $"Erro SMTP ({smtpEx.StatusCode}): {smtpEx.Message}"
+            };
+
+            return new EmailResult
+            {
+                Sucesso = false,
+                Mensagem = $"❌ Falha ao enviar: {mensagemErro}\n\nVerifique:\n• App Password correto\n• Email é Gmail\n• Conexão à internet"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro inesperado ao testar conexão");
+            return new EmailResult
+            {
+                Sucesso = false,
+                Mensagem = $"❌ Erro ao testar: {ex.Message}"
+            };
+        }
     }
 
     /// <summary>

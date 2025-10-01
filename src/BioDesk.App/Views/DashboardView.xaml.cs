@@ -48,7 +48,7 @@ public partial class DashboardView : UserControl
             // Criar a janela de configurações
             var configView = app.ServiceProvider.GetRequiredService<ConfiguracoesView>();
             configView.Owner = Window.GetWindow(this);
-            
+
             // Mostrar como diálogo modal
             var result = configView.ShowDialog();
 

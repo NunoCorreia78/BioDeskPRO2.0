@@ -19,7 +19,7 @@ public class ConsentimentoPdfService
     public ConsentimentoPdfService(ILogger<ConsentimentoPdfService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
+
         // Configurar licença QuestPDF (Community License - grátis para uso pessoal/pequenos negócios)
         QuestPDF.Settings.License = LicenseType.Community;
     }
@@ -33,13 +33,16 @@ public class ConsentimentoPdfService
 
         try
         {
-            // Caminho para salvar o PDF
+            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: Pacientes\[Nome]\Consentimentos\
             var pastaDocumentos = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var pastaBioDesk = Path.Combine(pastaDocumentos, "BioDeskPro2", "Consentimentos");
-            Directory.CreateDirectory(pastaBioDesk);
+            var pastaPaciente = Path.Combine(pastaDocumentos, "BioDeskPro2", "Pacientes", dados.NomePaciente);
+            var pastaConsentimentos = Path.Combine(pastaPaciente, "Consentimentos");
+            Directory.CreateDirectory(pastaConsentimentos);
 
             var nomeArquivo = $"Consentimento_{dados.TipoTratamento.Replace(" ", "_")}_{dados.NomePaciente.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-            var caminhoCompleto = Path.Combine(pastaBioDesk, nomeArquivo);
+            var caminhoCompleto = Path.Combine(pastaConsentimentos, nomeArquivo);
+
+            _logger.LogInformation("📁 Pasta de destino: {Pasta}", pastaConsentimentos);
 
             // Gerar PDF com QuestPDF
             Document.Create(container =>
@@ -86,13 +89,13 @@ public class ConsentimentoPdfService
         try
         {
             _logger.LogInformation("📂 Abrindo PDF: {Caminho}", caminhoArquivo);
-            
+
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = caminhoArquivo,
                 UseShellExecute = true
             };
-            
+
             Process.Start(processStartInfo);
         }
         catch (Exception ex)
@@ -106,33 +109,37 @@ public class ConsentimentoPdfService
 
     private void CriarCabecalho(IContainer container)
     {
-        container.Row(row =>
+        // ✅ CRITICAL: Envolver tudo num Column único para evitar erro "multiple child elements"
+        container.Column(mainColumn =>
         {
-            // Logo/Título à esquerda
-            row.RelativeItem().Column(column =>
+            mainColumn.Item().Row(row =>
             {
-                column.Item().Text("🌿 BioDeskPro 2.0")
-                    .FontSize(20)
-                    .Bold()
-                    .FontColor(Colors.Grey.Darken3);
+                // Logo/Título à esquerda
+                row.RelativeItem().Column(column =>
+                {
+                    column.Item().Text("🌿 BioDeskPro 2.0")
+                        .FontSize(20)
+                        .Bold()
+                        .FontColor(Colors.Grey.Darken3);
 
-                column.Item().Text("Sistema de Gestão Médica Integrativa")
-                    .FontSize(10)
-                    .Italic()
-                    .FontColor(Colors.Grey.Darken2);
+                    column.Item().Text("Sistema de Gestão Médica Integrativa")
+                        .FontSize(10)
+                        .Italic()
+                        .FontColor(Colors.Grey.Darken2);
+                });
+
+                // Data à direita
+                row.ConstantItem(150).AlignRight().Column(column =>
+                {
+                    column.Item().Text($"Data: {DateTime.Now:dd/MM/yyyy}")
+                        .FontSize(10)
+                        .FontColor(Colors.Grey.Darken3);
+                });
             });
 
-            // Data à direita
-            row.ConstantItem(150).AlignRight().Column(column =>
-            {
-                column.Item().Text($"Data: {DateTime.Now:dd/MM/yyyy}")
-                    .FontSize(10)
-                    .FontColor(Colors.Grey.Darken3);
-            });
+            // Linha separadora
+            mainColumn.Item().PaddingTop(10).BorderBottom(2).BorderColor(Colors.Green.Medium);
         });
-
-        // Linha separadora
-        container.PaddingTop(10).BorderBottom(2).BorderColor(Colors.Green.Medium);
     }
 
     private void CriarConteudo(IContainer container, DadosConsentimento dados)
@@ -218,15 +225,15 @@ public class ConsentimentoPdfService
                 col.Item().Text("✓ Fui informado(a) sobre os benefícios, riscos e alternativas ao tratamento proposto.")
                     .FontSize(10)
                     .LineHeight(1.4f);
-                
+
                 col.Item().PaddingTop(5).Text("✓ Tive a oportunidade de esclarecer todas as minhas dúvidas.")
                     .FontSize(10)
                     .LineHeight(1.4f);
-                
+
                 col.Item().PaddingTop(5).Text("✓ Aceito os riscos e benefícios descritos neste documento.")
                     .FontSize(10)
                     .LineHeight(1.4f);
-                
+
                 col.Item().PaddingTop(5).Text("✓ Consinto o tratamento proposto de forma livre e esclarecida.")
                     .FontSize(10)
                     .LineHeight(1.4f);
@@ -237,7 +244,40 @@ public class ConsentimentoPdfService
             {
                 row.RelativeItem().Column(col =>
                 {
-                    col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                    // 🖼️ RENDERIZAR ASSINATURA SE EXISTIR
+                    if (!string.IsNullOrEmpty(dados.AssinaturaDigitalBase64))
+                    {
+                        try
+                        {
+                            byte[] imageBytes = Convert.FromBase64String(dados.AssinaturaDigitalBase64);
+                            col.Item()
+                                .Border(1)
+                                .BorderColor(Colors.Grey.Lighten2)
+                                .Padding(5)
+                                .Height(80)
+                                .Image(imageBytes)
+                                .FitArea();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "❌ Erro ao renderizar assinatura do paciente");
+                            col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                            col.Item().PaddingTop(5).AlignCenter().Text("[Erro ao carregar assinatura]")
+                                .FontSize(8)
+                                .Italic()
+                                .FontColor(Colors.Red.Medium);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: linha horizontal se não houver assinatura
+                        col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                        col.Item().PaddingTop(5).AlignCenter().Text("[Assinatura não capturada]")
+                            .FontSize(8)
+                            .Italic()
+                            .FontColor(Colors.Red.Medium);
+                    }
+                    
                     col.Item().PaddingTop(5).AlignCenter().Text("Assinatura do Paciente")
                         .FontSize(9)
                         .Italic();
@@ -250,11 +290,41 @@ public class ConsentimentoPdfService
 
                 row.RelativeItem().Column(col =>
                 {
-                    col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                    // 👨‍⚕️ RENDERIZAR ASSINATURA DO TERAPEUTA
+                    if (System.IO.File.Exists(dados.AssinaturaTerapeutaPath))
+                    {
+                        try
+                        {
+                            byte[] assinaturaTerapeuta = System.IO.File.ReadAllBytes(dados.AssinaturaTerapeutaPath);
+                            col.Item()
+                                .Border(1)
+                                .BorderColor(Colors.Grey.Lighten2)
+                                .Padding(5)
+                                .Height(80)
+                                .Image(assinaturaTerapeuta)
+                                .FitArea();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "❌ Erro ao carregar assinatura do terapeuta: {Path}", dados.AssinaturaTerapeutaPath);
+                            col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                            col.Item().PaddingTop(5).AlignCenter().Text("[Erro ao carregar assinatura]")
+                                .FontSize(8)
+                                .Italic()
+                                .FontColor(Colors.Red.Medium);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: linha horizontal
+                        _logger.LogWarning("⚠️ Assinatura do terapeuta não encontrada: {Path}", dados.AssinaturaTerapeutaPath);
+                        col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                    }
+                    
                     col.Item().PaddingTop(5).AlignCenter().Text("Profissional Responsável")
                         .FontSize(9)
                         .Italic();
-                    col.Item().AlignCenter().Text("BioDeskPro 2.0")
+                    col.Item().AlignCenter().Text(dados.NomeTerapeuta)
                         .FontSize(8)
                         .FontColor(Colors.Grey.Darken1);
                 });
@@ -285,4 +355,19 @@ public class DadosConsentimento
     public DateTime DataConsentimento { get; set; } = DateTime.Now;
     public int? NumeroSessoes { get; set; }
     public decimal? CustoPorSessao { get; set; }
+    
+    /// <summary>
+    /// Assinatura do paciente capturada como imagem PNG em Base64
+    /// </summary>
+    public string? AssinaturaDigitalBase64 { get; set; }
+    
+    /// <summary>
+    /// Caminho para a assinatura do terapeuta (ficheiro estático)
+    /// </summary>
+    public string AssinaturaTerapeutaPath { get; set; } = "Assets/Images/assinatura.png";
+    
+    /// <summary>
+    /// Nome do terapeuta responsável
+    /// </summary>
+    public string NomeTerapeuta { get; set; } = "Nuno Correia";
 }

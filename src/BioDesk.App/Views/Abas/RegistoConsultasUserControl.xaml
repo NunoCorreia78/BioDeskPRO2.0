@@ -159,12 +159,13 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- MODAL PRESCRIÇÃO (Overlay) - ✅ INICIA OCULTO -->
+        <!-- MODAL PRESCRIÇÃO (Overlay) -->
         <Border Grid.Column="0" Grid.ColumnSpan="3" Background="#CC000000"
-                Visibility="Collapsed"
+                Visibility="{Binding MostrarPrescricao, Converter={StaticResource BoolToVis}}"
                 x:Name="ModalPrescricao"
                 Panel.ZIndex="100">
-            <Border Background="White" CornerRadius="16" Padding="30" MaxWidth="900" MaxHeight="700" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Border Background="White" CornerRadius="16" Padding="30" MaxWidth="900" MaxHeight="700" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!-- Logo da Clínica -->
@@ -222,7 +223,17 @@
 
                         <!-- Botões -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Command="{Binding GerarPdfPrescricaoCommand}" Content="📄 Gerar PDF" Background="#9CAF97" Foreground="White" Padding="16,10" Margin="0,0,12,0" Cursor="Hand" BorderThickness="0" FontSize="14" FontWeight="SemiBold">
+                            <Button x:Name="BtnGerarPdf"
+                                    Click="BtnGerarPdf_Click"
+                                    Content="📄 Gerar PDF"
+                                    Background="#9CAF97"
+                                    Foreground="White"
+                                    Padding="16,10"
+                                    Margin="0,0,12,0"
+                                    Cursor="Hand"
+                                    BorderThickness="0"
+                                    FontSize="14"
+                                    FontWeight="SemiBold">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">

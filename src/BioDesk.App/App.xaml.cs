@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Threading;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ using BioDesk.Services.Navigation;
 using BioDesk.Services.Email;
 using BioDesk.Services.Cache;
 using BioDesk.Services.AutoSave;
+using BioDesk.Services.Documentos;
 using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
 
@@ -147,6 +149,11 @@ Inner Exceptions:
             Console.WriteLine("🏗️ Configurando host com DI...");
             // Configurar o host com DI
             _host = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    // ⚡ CRITICAL: Garantir carregamento de User Secrets em WPF
+                    config.AddUserSecrets<App>();
+                })
                 .ConfigureServices(ConfigureServices)
                 .ConfigureLogging(logging =>
                 {
@@ -229,6 +236,9 @@ Inner Exceptions:
         // === EMAIL SERVICE + BACKGROUND QUEUE PROCESSOR ===
         services.AddSingleton<IEmailService, EmailService>();
         services.AddHostedService<EmailQueueProcessor>();
+
+        // === DOCUMENTO SERVICE (gestão de pastas por paciente) ===
+        services.AddSingleton<IDocumentoService, DocumentoService>();
 
         // === PDF SERVICES (QuestPDF) ===
         services.AddScoped<Services.Pdf.ConsentimentoPdfService>();

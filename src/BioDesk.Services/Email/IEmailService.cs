@@ -27,6 +27,11 @@ public interface IEmailService
     /// Retorna número de mensagens na fila aguardando envio
     /// </summary>
     Task<int> ContarMensagensNaFilaAsync();
+
+    /// <summary>
+    /// Testa conexão SMTP com credenciais fornecidas (usado em ConfiguracoesView)
+    /// </summary>
+    Task<EmailResult> TestarConexaoAsync(string smtpUsername, string smtpPassword, string fromEmail, string fromName);
 }
 
 /// <summary>

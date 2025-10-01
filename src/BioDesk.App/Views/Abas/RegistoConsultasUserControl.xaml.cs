@@ -1,23 +1,23 @@
 using System.Windows.Controls;
 using System.Windows;
+using System.Threading.Tasks;
 using BioDesk.ViewModels.Abas;
-using System.ComponentModel;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BioDesk.App.Views.Abas;
 
 public partial class RegistoConsultasUserControl : UserControl
 {
+    private readonly ILogger<RegistoConsultasUserControl> _logger;
+
     public RegistoConsultasUserControl()
     {
         InitializeComponent();
-        Loaded += OnLoaded;
-        DataContextChanged += OnDataContextChanged;
 
-        // ✅ GARANTIR que modal começa oculto
-        if (ModalPrescricao != null)
-        {
-            ModalPrescricao.Visibility = Visibility.Collapsed;
-        }
+        // Obter logger do DI container
+        _logger = ((App)Application.Current).ServiceProvider.GetRequiredService<ILogger<RegistoConsultasUserControl>>();
+        Loaded += OnLoaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -67,28 +67,44 @@ public partial class RegistoConsultasUserControl : UserControl
         }
     }
 
-    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    /// <summary>
+    /// 🚨 HANDLER DIAGNÓSTICO BRUTAL - TESTA SE BOTÃO RECEBE CLICK
+    /// </summary>
+    private async void BtnGerarPdf_Click(object sender, RoutedEventArgs e)
     {
-        // Unsubscribe do ViewModel anterior
-        if (e.OldValue is RegistoConsultasViewModel oldViewModel)
-        {
-            oldViewModel.PropertyChanged -= OnViewModelPropertyChanged;
-        }
+        _logger.LogWarning("🎯 CLICK HANDLER INVOCADO!");
 
-        // Subscribe ao novo ViewModel
-        if (e.NewValue is RegistoConsultasViewModel newViewModel)
+        // Tentar obter ViewModel do UserControl
+        if (DataContext is RegistoConsultasViewModel vm)
         {
-            newViewModel.PropertyChanged += OnViewModelPropertyChanged;
+            _logger.LogWarning("✅ ViewModel encontrado! Invocando método diretamente...");
+
+            // Chamar método privado via reflexão (hack temporário para diagnóstico)
+            var method = vm.GetType().GetMethod("GerarPdfPrescricaoAsync",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (method != null)
+            {
+                _logger.LogWarning("✅ Método GerarPdfPrescricaoAsync encontrado! Invocando...");
+                await (Task)(method.Invoke(vm, null) ?? Task.CompletedTask);
+            }
+            else
+            {
+                _logger.LogError("❌ Método GerarPdfPrescricaoAsync NÃO encontrado!");
+                MessageBox.Show("❌ Método não encontrado via reflexão!", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        else
+        {
+            _logger.LogError("❌ DataContext NÃO é RegistoConsultasViewModel! É: {Type}", DataContext?.GetType().FullName ?? "NULL");
+            MessageBox.Show(
+                $"❌ DataContext ERRADO!\n\nTipo: {DataContext?.GetType().FullName ?? "NULL"}",
+                "Erro DataContext",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 
-    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(RegistoConsultasViewModel.MostrarPrescricao) &&
-            DataContext is RegistoConsultasViewModel viewModel)
-        {
-            // ✅ Atualizar visibilidade do modal manualmente
-            ModalPrescricao.Visibility = viewModel.MostrarPrescricao ? Visibility.Visible : Visibility.Collapsed;
-        }
-    }
+    // ✅ BINDING XAML CONTROLA VISIBILITY DO MODAL AUTOMATICAMENTE
+    // ✅ COMANDO PDF É BINDEADO VIA {Binding GerarPdfPrescricaoAsyncCommand}
 }

@@ -10,6 +10,11 @@
         ResizeMode="NoResize"
         Background="{StaticResource FundoPrincipal}">
 
+    <Window.Resources>
+        <!-- Converter para Visibility -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </Window.Resources>
+
     <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -19,7 +24,7 @@
 
         <!-- Cabeçalho -->
         <StackPanel Grid.Row="0" Margin="0,0,0,25">
-            <TextBlock Text="⚙️ Configurações do Sistema" 
+            <TextBlock Text="⚙️ Configurações do Sistema"
                       FontSize="24" FontWeight="SemiBold"
                       Foreground="{StaticResource TextoPrincipal}"/>
             <TextBlock Text="Gerir credenciais de email e outras configurações"
@@ -31,12 +36,12 @@
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <!-- Secção: Configurações de Email -->
-                <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1" 
+                <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
                        CornerRadius="12" Padding="25" Margin="0,0,0,20">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                             <TextBlock Text="📧" FontSize="20" Margin="0,0,10,0"/>
-                            <TextBlock Text="Configurações de Email" 
+                            <TextBlock Text="Configurações de Email"
                                       FontSize="18" FontWeight="SemiBold"
                                       Foreground="{StaticResource TextoPrincipal}"
                                       VerticalAlignment="Center"/>
@@ -44,7 +49,7 @@
 
                         <!-- Email Remetente -->
                         <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Email de Envio *" 
+                            <TextBlock Text="Email de Envio *"
                                       Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox Text="{Binding EmailRemetente, UpdateSourceTrigger=PropertyChanged}"
                                     Style="{StaticResource FieldTextBoxStyle}"
@@ -56,7 +61,7 @@
 
                         <!-- App Password do Gmail -->
                         <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="App Password do Gmail *" 
+                            <TextBlock Text="App Password do Gmail *"
                                       Style="{StaticResource FieldLabelStyle}"/>
                             <PasswordBox x:Name="PasswordBox"
                                         Style="{StaticResource FieldPasswordBoxStyle}"
@@ -68,7 +73,7 @@
 
                         <!-- Nome do Remetente -->
                         <StackPanel Margin="0,0,0,20">
-                            <TextBlock Text="Nome do Remetente" 
+                            <TextBlock Text="Nome do Remetente"
                                       Style="{StaticResource FieldLabelStyle}"/>
                             <TextBox Text="{Binding NomeRemetente, UpdateSourceTrigger=PropertyChanged}"
                                     Style="{StaticResource FieldTextBoxStyle}"
@@ -107,7 +112,7 @@
                 </Border>
 
                 <!-- Status de Configuração -->
-                <Border Background="{Binding StatusBackground}" BorderBrush="{Binding StatusBorder}" 
+                <Border Background="{Binding StatusBackground}" BorderBrush="{Binding StatusBorder}"
                        BorderThickness="1" CornerRadius="8" Padding="15"
                        Visibility="{Binding MostrarStatus, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel Orientation="Horizontal">

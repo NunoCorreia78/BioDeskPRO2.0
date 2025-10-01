@@ -1,9 +1,15 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using BioDesk.ViewModels.Abas;
 
 namespace BioDesk.App.Views.Abas
 {
@@ -371,6 +377,13 @@ www.cnpd.pt"
                 {
                     ConsentimentoTitle.Text = template.Titulo;
                     ConsentimentoTexto.Text = template.Texto;
+
+                    // ✅ ACTUALIZAR O VIEWMODEL TAMBÉM!
+                    if (DataContext is ConsentimentosViewModel viewModel)
+                    {
+                        viewModel.DescricaoTratamento = template.Texto;
+                    }
+
                     ConsentimentoDeclaracoes.Visibility = Visibility.Visible;
                     BtnAssinar.Visibility = Visibility.Visible;
                 }
@@ -379,6 +392,13 @@ www.cnpd.pt"
             {
                 ConsentimentoTitle.Text = "Selecione uma técnica para visualizar o consentimento informado";
                 ConsentimentoTexto.Text = "Por favor, selecione uma técnica no menu acima para visualizar o respectivo consentimento informado.";
+
+                // ✅ LIMPAR O VIEWMODEL TAMBÉM!
+                if (DataContext is ConsentimentosViewModel viewModel)
+                {
+                    viewModel.DescricaoTratamento = string.Empty;
+                }
+
                 ConsentimentoDeclaracoes.Visibility = Visibility.Collapsed;
                 BtnAssinar.Visibility = Visibility.Collapsed;
             }
@@ -515,31 +535,162 @@ www.cnpd.pt"
             _currentStroke = null;
         }
 
+        /// <summary>
+        /// Captura a assinatura do canvas e converte para Base64 (PNG)
+        /// </summary>
+        private string CapturarAssinaturaComoImagem()
+        {
+            try
+            {
+                // Verificar se canvas tem tamanho válido
+                if (AssinaturaCanvas.ActualWidth <= 0 || AssinaturaCanvas.ActualHeight <= 0)
+                {
+                    return string.Empty;
+                }
+
+                // Criar bitmap com resolução do canvas
+                var renderBitmap = new RenderTargetBitmap(
+                    (int)AssinaturaCanvas.ActualWidth,
+                    (int)AssinaturaCanvas.ActualHeight,
+                    96, // DPI horizontal
+                    96, // DPI vertical
+                    PixelFormats.Pbgra32);
+
+                // Renderizar canvas no bitmap
+                renderBitmap.Render(AssinaturaCanvas);
+
+                // Codificar como PNG
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+                // Converter para Base64
+                using (var memoryStream = new MemoryStream())
+                {
+                    encoder.Save(memoryStream);
+                    byte[] imageBytes = memoryStream.ToArray();
+                    string base64String = Convert.ToBase64String(imageBytes);
+                    return base64String;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"❌ Erro ao capturar assinatura como imagem:\n\n{ex.Message}",
+                    "Erro de Captura",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return string.Empty;
+            }
+        }
+
         private void BtnConfirmarAssinatura_Click(object sender, RoutedEventArgs e)
         {
             if (_hasSignature)
             {
-                MessageBox.Show($"Consentimento assinado digitalmente com sucesso!\n\nPaciente: {TxtNomePaciente.Text}\nData: {TxtDataConsentimento.Text}\nTécnica: {((ComboBoxItem)TipoTratamentoCombo.SelectedItem)?.Content}",
-                    "✅ Assinatura Confirmada", MessageBoxButton.OK, MessageBoxImage.Information);
+                // ✅ GUARDAR DADOS ANTES DO RESET
+                var viewModel = DataContext as ConsentimentosViewModel;
+                if (viewModel != null)
+                {
+                    // 🖼️ CAPTURAR ASSINATURA COMO IMAGEM BASE64
+                    string assinaturaBase64 = CapturarAssinaturaComoImagem();
+                    viewModel.AssinaturaDigitalBase64 = assinaturaBase64;
 
-                // Reset do formulário
-                TipoTratamentoCombo.SelectedIndex = 0;
-                ChkCompreendi.IsChecked = false;
-                ChkAceito.IsChecked = false;
-                ChkConsinto.IsChecked = false;
-                TxtNomePaciente.Clear();
+                    // Invocar assinatura digital no ViewModel
+                    viewModel.AssinarDigitalmenteCommand.Execute(null);
+
+                    MessageBox.Show(
+                        $"✅ Consentimento assinado digitalmente com sucesso!\n\n" +
+                        $"Paciente: {viewModel.NomePaciente}\n" +
+                        $"Data: {DateTime.Now:dd/MM/yyyy HH:mm}\n" +
+                        $"Técnica: {viewModel.TipoTratamentoSelecionado}\n\n" +
+                        $"Clique no botão 'Gerar PDF' abaixo para criar o documento.",
+                        "✅ Assinatura Confirmada",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "✅ Consentimento assinado digitalmente com sucesso!\n\nClique no botão 'Gerar PDF' abaixo.",
+                        "✅ Assinatura Confirmada",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+
+                // ✅ LIMPAR APENAS O CANVAS DE ASSINATURA (não o formulário!)
                 AssinaturaCanvas.Children.Clear();
                 AssinaturaInstrucoes.Visibility = Visibility.Visible;
                 AssinaturaSection.Visibility = Visibility.Collapsed;
-                BtnAssinar.Visibility = Visibility.Collapsed;
                 _hasSignature = false;
                 BtnConfirmarAssinatura.IsEnabled = false;
                 _currentStroke = null;
+
+                // ✅ MOSTRAR BOTÃO DE GERAR PDF!
+                BtnGerarPdfNovo.Visibility = Visibility.Visible;
+
+                // ❌ NÃO LIMPAR O FORMULÁRIO! Os dados são necessários para o PDF!
             }
             else
             {
                 MessageBox.Show("Por favor, assine no campo acima antes de confirmar.", "Assinatura Necessária", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+
+        private void BtnGerarPdfNovo_Click(object sender, RoutedEventArgs e)
+        {
+            var viewModel = DataContext as ConsentimentosViewModel;
+            if (viewModel == null) return;
+
+            // ⚠️ WORKAROUND: Source Generator não funciona - usar Reflection como em RegistoConsultasUserControl
+            try
+            {
+                var method = viewModel.GetType().GetMethod("GerarPdfConsentimento", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (method != null)
+                {
+                    method.Invoke(viewModel, null);
+                }
+                else
+                {
+                    MessageBox.Show("❌ ERRO: Método GerarPdfConsentimento não encontrado via Reflection!", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"❌ ERRO na Reflection: {ex.Message}\n\nInner: {ex.InnerException?.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Se sucesso, perguntar se deseja abrir
+            if (!string.IsNullOrEmpty(viewModel.UltimoPdfGerado))
+            {
+                var resultado = MessageBox.Show(
+                    $"✅ PDF de consentimento gerado com sucesso!\n\n📁 Local: {viewModel.UltimoPdfGerado}\n\nDeseja abrir o documento agora?",
+                    "PDF Gerado",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Information);
+
+                if (resultado == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = viewModel.UltimoPdfGerado,
+                            UseShellExecute = true
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(
+                            $"❌ Erro ao abrir PDF: {ex.Message}",
+                            "Erro",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+            }
+            // Se falhou, ViewModel já mostrou mensagem específica - NÃO mostrar mensagem genérica
         }
         public class ConsentimentoTemplate
         {
