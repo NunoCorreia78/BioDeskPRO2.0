@@ -62,7 +62,7 @@ public class PrescricaoPdfService
                     {
                         text.Span("Gerado em: ");
                         text.Span($"{DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9).Italic();
-                        text.Span(" | BioDeskPro 2.0 - Prescrição Médica").FontSize(8).FontColor(Colors.Grey.Medium);
+                        text.Span(" | Nuno Correia - Terapias Naturais - Prescrição").FontSize(8).FontColor(Colors.Grey.Medium);
                     });
                 });
             })
@@ -114,7 +114,7 @@ public class PrescricaoPdfService
                 // Logo/Título à esquerda
                 row.RelativeItem().Column(column =>
                 {
-                    column.Item().Text("🌿 BioDeskPro 2.0")
+                    column.Item().Text("🌿 Nuno Correia - Terapias Naturais")
                         .FontSize(20)
                         .Bold()
                         .FontColor(Colors.Grey.Darken3);
@@ -234,25 +234,43 @@ public class PrescricaoPdfService
                     .LineHeight(1.5f);
             }
 
-            // === DURAÇÃO DO TRATAMENTO ===
-            if (!string.IsNullOrEmpty(dados.DuracaoTratamento))
-            {
-                column.Item().PaddingTop(15).Background(Colors.Teal.Lighten4).Padding(12).Column(c =>
-                {
-                    c.Item().Text($"⏱️ Duração do Tratamento: {dados.DuracaoTratamento}").FontSize(10);
-                });
-            }
-
-            // === ASSINATURA ===
+            // === ASSINATURA DO TERAPEUTA ===
             column.Item().PaddingTop(30).Row(row =>
             {
                 row.RelativeItem().Column(col =>
                 {
-                    col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                    // 👨‍⚕️ RENDERIZAR ASSINATURA DO TERAPEUTA
+                    string assinaturaTerapeutaPath = "Assets/Images/assinatura.png";
+                    if (System.IO.File.Exists(assinaturaTerapeutaPath))
+                    {
+                        try
+                        {
+                            byte[] assinaturaTerapeuta = System.IO.File.ReadAllBytes(assinaturaTerapeutaPath);
+                            col.Item()
+                                .Border(1)
+                                .BorderColor(Colors.Grey.Lighten2)
+                                .Padding(5)
+                                .Height(80)
+                                .Image(assinaturaTerapeuta)
+                                .FitArea();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "❌ Erro ao carregar assinatura do terapeuta: {Path}", assinaturaTerapeutaPath);
+                            col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: linha horizontal
+                        _logger.LogWarning("⚠️ Assinatura do terapeuta não encontrada: {Path}", assinaturaTerapeutaPath);
+                        col.Item().LineHorizontal(1).LineColor(Colors.Black);
+                    }
+                    
                     col.Item().PaddingTop(5).AlignCenter().Text("Profissional Responsável")
                         .FontSize(9)
                         .Italic();
-                    col.Item().AlignCenter().Text("BioDeskPro 2.0")
+                    col.Item().AlignCenter().Text("Nuno Correia - Terapias Naturais")
                         .FontSize(8)
                         .FontColor(Colors.Grey.Darken1);
                 });

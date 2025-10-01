@@ -65,7 +65,7 @@ public class ConsentimentoPdfService
                     {
                         text.Span("Gerado em: ");
                         text.Span($"{DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9).Italic();
-                        text.Span(" | BioDeskPro 2.0").FontSize(8).FontColor(Colors.Grey.Medium);
+                        text.Span(" | Nuno Correia - Terapias Naturais").FontSize(8).FontColor(Colors.Grey.Medium);
                     });
                 });
             })
@@ -117,7 +117,7 @@ public class ConsentimentoPdfService
                 // Logo/Título à esquerda
                 row.RelativeItem().Column(column =>
                 {
-                    column.Item().Text("🌿 BioDeskPro 2.0")
+                    column.Item().Text("🌿 Nuno Correia - Terapias Naturais")
                         .FontSize(20)
                         .Bold()
                         .FontColor(Colors.Grey.Darken3);

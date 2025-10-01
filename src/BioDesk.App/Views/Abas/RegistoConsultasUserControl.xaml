@@ -213,11 +213,12 @@
                             </Button.Template>
                         </Button>
 
-                        <!-- Assinatura Digital -->
-                        <Border BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                        <!-- Assinatura Digital do Terapeuta -->
+                        <Border BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20" Background="#FAFBFA">
                             <StackPanel>
-                                <TextBlock Text="Assinatura Digital" FontSize="14" Foreground="#5A6558" Margin="0,0,0,8"/>
-                                <Image Source="/Assets/Images/assinatura.png" Stretch="Uniform" MaxHeight="100" HorizontalAlignment="Left"/>
+                                <TextBlock Text="✍️ Assinatura do Terapeuta" FontSize="14" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                                <Image Source="/Assets/Images/assinatura.png" Stretch="Uniform" MaxHeight="80" HorizontalAlignment="Left" Margin="0,0,0,8"/>
+                                <TextBlock Text="Nuno Correia - Terapias Naturais" FontSize="12" Foreground="#5A6558" FontStyle="Italic"/>
                             </StackPanel>
                         </Border>
 
