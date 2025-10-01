@@ -255,8 +255,9 @@ public class ConsentimentoPdfService
                                 .BorderColor(Colors.Grey.Lighten2)
                                 .Padding(5)
                                 .Height(80)
+                                .AlignCenter()
                                 .Image(imageBytes)
-                                .FitArea();
+                                .FitHeight();
                         }
                         catch (Exception ex)
                         {
@@ -301,8 +302,9 @@ public class ConsentimentoPdfService
                                 .BorderColor(Colors.Grey.Lighten2)
                                 .Padding(5)
                                 .Height(80)
+                                .AlignCenter()
                                 .Image(assinaturaTerapeuta)
-                                .FitArea();
+                                .FitHeight();
                         }
                         catch (Exception ex)
                         {

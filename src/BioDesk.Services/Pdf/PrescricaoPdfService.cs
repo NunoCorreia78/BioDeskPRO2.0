@@ -251,8 +251,9 @@ public class PrescricaoPdfService
                                 .BorderColor(Colors.Grey.Lighten2)
                                 .Padding(5)
                                 .Height(80)
+                                .AlignCenter()
                                 .Image(assinaturaTerapeuta)
-                                .FitArea();
+                                .FitHeight();
                         }
                         catch (Exception ex)
                         {
