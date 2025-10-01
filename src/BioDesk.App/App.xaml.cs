@@ -238,6 +238,7 @@ Inner Exceptions:
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
         services.AddTransient<ListaPacientesViewModel>(); // ✅ LISTA DE PACIENTES
+        services.AddTransient<ConfiguracoesViewModel>(); // ✅ CONFIGURAÇÕES
 
         // ViewModels das Abas
         services.AddTransient<DeclaracaoSaudeViewModel>();
@@ -251,5 +252,6 @@ Inner Exceptions:
         services.AddTransient<Views.ConsultasView>();
         services.AddTransient<Views.FichaPacienteView>();
         services.AddTransient<Views.ListaPacientesView>(); // ✅ LISTA DE PACIENTES
+        services.AddTransient<Views.ConfiguracoesView>(); // ✅ CONFIGURAÇÕES
     }
 }

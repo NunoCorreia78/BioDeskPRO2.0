@@ -148,6 +148,12 @@
                         
                         <TextBlock Grid.Column="0" Text="📊 Estatísticas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D"/>
                         
+                        <!-- Botão Configurações -->
+                        <Button Grid.Column="1" Content="⚙️ Configurações"
+                               Click="BtnConfiguracoes_Click"
+                               Style="{StaticResource ActionButtonStyle}"
+                               Margin="10,0,0,0"
+                               ToolTip="Configurar email e outras opções do sistema"/>
                         <!-- Loading indicator -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="🔄" FontSize="14" Foreground="#9CAF97" Margin="0,0,5,0" 

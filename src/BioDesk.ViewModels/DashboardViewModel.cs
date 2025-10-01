@@ -106,6 +106,13 @@ public partial class DashboardViewModel : NavigationViewModelBase, IDisposable
     }
 
     [RelayCommand]
+    private void AbrirConfiguracoes()
+    {
+        _logger.LogInformation("⚙️ Abrindo janela de Configurações...");
+        // Este comando será tratado no code-behind da view
+    }
+
+    [RelayCommand]
     private void NavegarParaFicha()
     {
         NovoPaciente();
