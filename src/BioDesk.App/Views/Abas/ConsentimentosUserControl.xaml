@@ -118,19 +118,27 @@
                                    FontSize="16"
                                    Foreground="#3F4A3D"
                                    Margin="0,0,0,10"/>
-                        <ComboBox Name="TipoTratamentoCombo"
+                        <ComboBox x:Name="TipoTratamentoCombo"
                                   FontSize="14"
                                   Padding="12,10"
                                   Background="White"
                                   BorderBrush="#E3E9DE"
                                   SelectionChanged="TipoTratamentoCombo_SelectionChanged">
                             <ComboBoxItem Content="Selecione uma técnica..." IsEnabled="False"/>
+
+                            <!-- Técnicas Principais -->
                             <ComboBoxItem Content="🌿 Naturopatia - Consulta Geral" Tag="naturopatia"/>
                             <ComboBoxItem Content="🦴 Osteopatia - Tratamento Manual" Tag="osteopatia"/>
+                            <ComboBoxItem Content="👁️ Iridologia - Diagnóstico pela Íris" Tag="iridologia"/>
+                            <ComboBoxItem Content="💉 Mesoterapia Homeopática" Tag="mesoterapia"/>
+                            <ComboBoxItem Content="⚡ Medicina Informacional/Bioenergética" Tag="bioenergetica"/>
+
+                            <!-- Técnicas Complementares -->
                             <ComboBoxItem Content="🪡 Acupunctura - Medicina Tradicional Chinesa" Tag="acupunctura"/>
                             <ComboBoxItem Content="💆 Massagem Terapêutica" Tag="massagem"/>
-                            <ComboBoxItem Content="🌱 Fitoterapia - Medicina Herbal" Tag="fitoterapia"/>
-                            <ComboBoxItem Content="🧘 Terapia Bioenergética" Tag="bioenergetica"/>
+
+                            <!-- Aspectos Legais -->
+                            <ComboBoxItem Content="🔐 RGPD - Proteção de Dados Pessoais" Tag="rgpd"/>
                         </ComboBox>
                         <TextBlock Text="📋 Template será carregado automaticamente"
                                    FontSize="12"
@@ -202,9 +210,11 @@
                                            Foreground="#3F4A3D"
                                            Margin="0,0,0,5"/>
                                 <TextBox x:Name="TxtNomePaciente"
+                                         Text="{Binding NomePaciente, Mode=OneWay}"
+                                         IsReadOnly="True"
                                          Padding="12,10"
                                          FontSize="14"
-                                         Background="White"
+                                         Background="#F7F9F6"
                                          BorderBrush="#E3E9DE"
                                          BorderThickness="1"/>
                             </StackPanel>
@@ -214,10 +224,15 @@
                                            FontWeight="SemiBold"
                                            Foreground="#3F4A3D"
                                            Margin="0,0,0,5"/>
-                                <DatePicker x:Name="DateConsentimento"
-                                           SelectedDate="{x:Static sys:DateTime.Today}"
-                                           FontSize="14"
-                                           xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
+                                <TextBox x:Name="TxtDataConsentimento"
+                                         Text="{Binding Source={x:Static sys:DateTime.Today}, Converter={StaticResource FlexibleDateConverter}, Mode=OneTime}"
+                                         Padding="12,10"
+                                         FontSize="14"
+                                         Background="White"
+                                         BorderBrush="#E3E9DE"
+                                         BorderThickness="1"
+                                         ToolTip="Formatos aceitos: dd/MM/yyyy, dd-MM-yyyy, yyyy-MM-dd, etc."
+                                         xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

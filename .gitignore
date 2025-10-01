@@ -20,6 +20,9 @@ artifacts/
 *.db
 *.db-shm
 *.db-wal
+biodesk.db
+biodesk.db-*
+*.db.backup_*
 
 # Logs
 logs/

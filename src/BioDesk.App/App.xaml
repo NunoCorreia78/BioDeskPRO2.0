@@ -20,6 +20,7 @@
             <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
             <converters:StatusToVisibilityConverter x:Key="StatusToVisibilityConverter"/>
             <converters:StringParameterToVisibilityConverter x:Key="StringParameterToVisibilityConverter"/>
+            <converters:FlexibleDateConverter x:Key="FlexibleDateConverter"/>
 
             <!-- Alias para compatibilidade -->
             <converters:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>

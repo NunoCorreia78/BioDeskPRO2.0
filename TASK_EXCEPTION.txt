@@ -1,0 +1,10 @@
+💥 UNOBSERVED TASK EXCEPTION
+
+Exception Type: AggregateException
+Message: A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (SQLite Error 1: 'no such table: Comunicacoes'.)
+
+Stack Trace:
+
+
+Inner Exceptions:
+- SQLite Error 1: 'no such table: Comunicacoes'.

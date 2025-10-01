@@ -259,7 +259,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button x:Name="BtnAba5" Content="👁️ Íris"
+                <Button x:Name="BtnAba5" Content="� Comunicação"
                         Command="{Binding NavegarParaAbaCommand}"
                         CommandParameter="5">
                     <Button.Style>
@@ -334,27 +334,23 @@
                         Panel.ZIndex="25"
                         Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=3}"/>
 
-                    <!-- Texto para outras abas (Abas 4-6) -->
+                    <!-- UserControl para Aba 4: Registo de Consultas/Sessões -->
+                    <abas:RegistoConsultasUserControl
+                        x:Name="RegistoConsultasUserControl"
+                        Panel.ZIndex="26"
+                        Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=4}"/>
+
+                    <!-- UserControl para Aba 5: Comunicação -->
+                    <abas:ComunicacaoUserControl
+                        x:Name="ComunicacaoUserControl"
+                        Panel.ZIndex="20"
+                        Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=5}"/>
+
+                    <!-- Texto para aba 6 (em desenvolvimento) -->
                     <TextBlock Text="{Binding ConteudoAbaAtiva}" FontSize="16" Margin="20"
                               Foreground="{StaticResource TextoPrincipal}"
-                              TextWrapping="Wrap">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="4">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="5">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding AbaAtiva}" Value="6">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                              TextWrapping="Wrap"
+                              Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=6}"/>
                 </Grid>
 
         </Border>
@@ -372,17 +368,22 @@
 
                 <!-- Botões Esquerda -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Content="🏠 Home"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Command="{Binding VoltarDashboardCommand}"
+                            Margin="0,0,12,0"
+                            ToolTip="Voltar ao Dashboard (protege alterações não guardadas)"/>
                     <Button Content="⬅️ Anterior"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Command="{Binding AbaAnteriorCommand}"/>
                 </StackPanel>
 
-                <!-- Botões Centro - SISTEMA AUTO-SAVE RESTAURADO -->
+                <!-- Botões Centro - SISTEMA DE GRAVAÇÃO MANUAL -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="💾 Guardar Rascunho"
                             Style="{StaticResource SecondaryButtonStyle}"
                             Command="{Binding GuardarRascunhoCommand}"/>
-                    <TextBlock Text="{Binding StatusAutoSave, FallbackValue='Pronto'}"
+                    <TextBlock Text="{Binding StatusSave, FallbackValue='Pronto'}"
                                FontSize="11" Margin="12,0,0,0"
                                VerticalAlignment="Center"
                                Foreground="{StaticResource TextoSecundario}"/>

@@ -17,8 +17,56 @@ namespace BioDesk.App.Views.Abas
         public ConsentimentosUserControl()
         {
             InitializeComponent();
+            Loaded += OnLoaded;
             _templates = new Dictionary<string, ConsentimentoTemplate>();
             InicializarTemplates();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            // Subscrever eventos de mudança em todos os controles
+            SubscribeToControlChanges(this);
+        }
+
+        /// <summary>
+        /// Subscrever recursivamente a mudanças em TextBox, ComboBox e CheckBox
+        /// </summary>
+        private void SubscribeToControlChanges(DependencyObject parent)
+        {
+            int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+
+                if (child is TextBox textBox)
+                {
+                    textBox.TextChanged -= OnControlValueChanged;
+                    textBox.TextChanged += OnControlValueChanged;
+                }
+                else if (child is ComboBox comboBox)
+                {
+                    comboBox.SelectionChanged -= OnControlValueChanged;
+                    comboBox.SelectionChanged += OnControlValueChanged;
+                }
+                else if (child is CheckBox checkBox)
+                {
+                    checkBox.Checked -= OnControlValueChanged;
+                    checkBox.Unchecked -= OnControlValueChanged;
+                    checkBox.Checked += OnControlValueChanged;
+                    checkBox.Unchecked += OnControlValueChanged;
+                }
+
+                SubscribeToControlChanges(child);
+            }
+        }
+
+        private void OnControlValueChanged(object sender, RoutedEventArgs e)
+        {
+            var window = Window.GetWindow(this);
+            if (window?.DataContext is BioDesk.ViewModels.FichaPacienteViewModel viewModel)
+            {
+                viewModel.MarcarComoAlterado();
+            }
         }
 
         private void InicializarTemplates()
@@ -152,33 +200,6 @@ RESPONSABILIDADES DO PACIENTE:
 • Comunicar desconforto durante o tratamento"
             });
 
-            _templates.Add("fitoterapia", new ConsentimentoTemplate
-            {
-                Titulo = "🌱 CONSENTIMENTO INFORMADO - FITOTERAPIA",
-                Texto = @"NATUREZA DO TRATAMENTO:
-A Fitoterapia utiliza plantas medicinais e seus extratos para prevenir e tratar diversos desequilíbrios de saúde de forma natural.
-
-BENEFÍCIOS ESPERADOS:
-• Tratamento natural de sintomas
-• Fortalecimento de órgãos e sistemas
-• Melhoria da vitalidade
-• Equilíbrio funcional do organismo
-• Complemento ao tratamento convencional
-
-RISCOS E PRECAUÇÕES:
-• Possíveis reações alérgicas
-• Interações com medicamentos
-• Efeitos secundários específicos de cada planta
-• Dosagem inadequada pode ser ineficaz ou prejudicial
-
-RESPONSABILIDADES DO PACIENTE:
-• Informar toda a medicação atual
-• Comunicar alergias conhecidas
-• Seguir dosagens prescritas rigorosamente
-• Informar sobre gravidez/amamentação
-• Comunicar qualquer reação adversa"
-            });
-
             _templates.Add("bioenergetica", new ConsentimentoTemplate
             {
                 Titulo = "🧘 CONSENTIMENTO INFORMADO - TERAPIA BIOENERGÉTICA",
@@ -203,6 +224,142 @@ RESPONSABILIDADES DO PACIENTE:
 • Comunicar condições psiquiátricas
 • Ter expectativas realistas
 • Comunicar qualquer desconforto emocional"
+            });
+
+            // ===== NOVAS TÉCNICAS ESPECIALIZADAS =====
+
+            _templates.Add("iridologia", new ConsentimentoTemplate
+            {
+                Titulo = "👁️ CONSENTIMENTO INFORMADO - IRIDOLOGIA",
+                Texto = @"NATUREZA DO EXAME:
+A Iridologia é uma técnica de análise da íris ocular para avaliação da condição geral de saúde e identificação de predisposições constitucionais.
+
+PROCEDIMENTO:
+• Observação detalhada da íris com lupa especializada
+• Possível fotografia da íris (com consentimento)
+• Análise de padrões, cores e marcas
+• Correlação com mapa iridológico
+• Elaboração de relatório informativo
+
+LIMITAÇÕES IMPORTANTES:
+• NÃO é diagnóstico médico
+• NÃO substitui exames clínicos
+• Indica tendências constitucionais
+• Ferramenta de avaliação complementar
+• Não detecta doenças específicas
+
+RESPONSABILIDADES DO PACIENTE:
+• Manter seguimento médico regular
+• Não interromper medicação prescrita
+• Usar informações como orientação preventiva
+• Procurar médico para sintomas específicos
+
+PROTEÇÃO DE DADOS:
+• Imagens armazenadas com segurança
+• Uso exclusivo para análise iridológica
+• Não partilha com terceiros"
+            });
+
+            _templates.Add("mesoterapia", new ConsentimentoTemplate
+            {
+                Titulo = "💉 CONSENTIMENTO INFORMADO - MESOTERAPIA HOMEOPÁTICA",
+                Texto = @"NATUREZA DO TRATAMENTO:
+A Mesoterapia Homeopática consiste na aplicação de medicamentos homeopáticos através de micro-injeções dérmicas superficiais em pontos específicos.
+
+PROCEDIMENTO:
+• Preparação e desinfeção da área
+• Aplicação de agulhas muito finas (4-6mm)
+• Injeção de preparados homeopáticos
+• Possível aplicação de compressas locais
+• Observação pós-aplicação
+
+BENEFÍCIOS ESPERADOS:
+• Ação localizada do medicamento
+• Estimulação de pontos específicos
+• Melhoria da circulação local
+• Redução de inflamação
+• Harmonização energética local
+
+RISCOS POTENCIAIS:
+• Dor leve no local da aplicação
+• Pequenos hematomas temporários
+• Vermelhidão local (24-48h)
+• Raramente: reação alérgica local
+• Risco mínimo de infeção (material estéril)
+
+CONTRAINDICAÇÕES:
+• Alergia conhecida aos componentes
+• Infeções locais ativas
+• Distúrbios de coagulação graves
+• Tratamento anticoagulante (consultar médico)
+• Gravidez (primeiro trimestre)
+
+RESPONSABILIDADES DO PACIENTE:
+• Informar alergias e medicação
+• Comunicar distúrbios de coagulação
+• Manter higiene local pós-tratamento
+• Evitar manipular área tratada nas primeiras 6h"
+            });
+
+
+
+            _templates.Add("rgpd", new ConsentimentoTemplate
+            {
+                Titulo = "🔐 CONSENTIMENTO RGPD - PROTEÇÃO DE DADOS PESSOAIS",
+                Texto = @"TRATAMENTO DE DADOS PESSOAIS - RGPD
+
+RESPONSÁVEL PELO TRATAMENTO:
+[Nome do Profissional/Clínica]
+[Morada completa]
+[Contactos]
+
+FINALIDADE DO TRATAMENTO:
+• Prestação de cuidados de saúde
+• Gestão de consultas e tratamentos
+• Comunicação com o paciente
+• Faturação e arquivo clínico
+• Cumprimento de obrigações legais
+
+DADOS RECOLHIDOS:
+• Dados de identificação
+• Dados de contacto
+• Dados de saúde (histórico clínico)
+• Dados de tratamentos realizados
+• Fotografias/imagens (se aplicável)
+
+BASE LEGAL:
+• Consentimento explícito do titular
+• Interesse legítimo para prestação de cuidados
+• Cumprimento de obrigação legal
+• Proteção de interesses vitais
+
+DESTINATÁRIOS:
+• Profissionais de saúde envolvidos
+• Entidades seguradoras (se aplicável)
+• Autoridades de saúde (se obrigatório)
+• Não há transferências para países terceiros
+
+PRAZO DE CONSERVAÇÃO:
+• Dados clínicos: 5 anos após última consulta
+• Dados administrativos: conforme legislação
+• Imagens/fotografias: com consentimento específico
+
+DIREITOS DO TITULAR:
+• Acesso aos seus dados
+• Retificação de dados incorretos
+• Apagamento (direito ao esquecimento)
+• Limitação do tratamento
+• Portabilidade dos dados
+• Oposição ao tratamento
+• Retirar consentimento a qualquer momento
+
+CONTACTOS:
+Para exercer os seus direitos ou esclarecimentos:
+[Contacto do responsável pela proteção de dados]
+
+AUTORIDADE DE CONTROLO:
+Comissão Nacional de Proteção de Dados (CNPD)
+www.cnpd.pt"
             });
         }
 
@@ -268,13 +425,38 @@ RESPONSABILIDADES DO PACIENTE:
 
         private void BtnPDF_Click(object sender, RoutedEventArgs e)
         {
-            var btn = sender as Button;
-            var consentimento = btn?.Tag as string;
+            // Chamar comando do ViewModel para gerar PDF
+            var viewModel = DataContext as ViewModels.Abas.ConsentimentosViewModel;
 
-            if (!string.IsNullOrEmpty(consentimento))
+            if (viewModel == null) return;
+
+            // Gerar PDF (modifica viewModel.UltimoPdfGerado)
+            viewModel.GerarPdfConsentimentoCommand.Execute(null);
+
+            // Verificar resultado
+            if (viewModel.UltimoPdfGerado == null)
             {
-                MessageBox.Show($"📑 Gerando PDF: {consentimento}\n\nO documento será salvo em:\nDocumentos/BioDeskPro2/Consentimentos/\n\nFuncionalidade será implementada na próxima versão.",
-                    "Gerar PDF", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    "⚠️ Não foi possível gerar o PDF. Verifique:\n\n" +
+                    "✓ Nome do paciente está preenchido\n" +
+                    "✓ Tipo de tratamento selecionado\n" +
+                    "✓ Descrição do tratamento preenchida",
+                    "Dados Incompletos",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            // Perguntar se deseja abrir
+            var resultado = MessageBox.Show(
+                $"✅ PDF de consentimento gerado com sucesso!\n\n📁 Local: {viewModel.UltimoPdfGerado}\n\nDeseja abrir o documento agora?",
+                "PDF Gerado",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+
+            if (resultado == MessageBoxResult.Yes)
+            {
+                viewModel.AbrirPdf(viewModel.UltimoPdfGerado);
             }
         }
 
@@ -337,7 +519,7 @@ RESPONSABILIDADES DO PACIENTE:
         {
             if (_hasSignature)
             {
-                MessageBox.Show($"Consentimento assinado digitalmente com sucesso!\n\nPaciente: {TxtNomePaciente.Text}\nData: {DateConsentimento.SelectedDate:dd/MM/yyyy}\nTécnica: {((ComboBoxItem)TipoTratamentoCombo.SelectedItem)?.Content}",
+                MessageBox.Show($"Consentimento assinado digitalmente com sucesso!\n\nPaciente: {TxtNomePaciente.Text}\nData: {TxtDataConsentimento.Text}\nTécnica: {((ComboBoxItem)TipoTratamentoCombo.SelectedItem)?.Content}",
                     "✅ Assinatura Confirmada", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Reset do formulário

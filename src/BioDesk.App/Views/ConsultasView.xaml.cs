@@ -1,3 +1,4 @@
+using BioDesk.ViewModels.Abas;
 using Microsoft.Extensions.Logging;
 using System.Windows.Controls;
 
@@ -5,7 +6,7 @@ namespace BioDesk.App.Views;
 
 /// <summary>
 /// Interaction logic for ConsultasView.xaml
-/// Interface de gestão de consultas médicas com filtros, agenda e CRUD completo
+/// Aba 4: Registo de Consultas/Sessões Clínicas com sistema multi-abordagem
 /// </summary>
 public partial class ConsultasView : UserControl
 {
@@ -16,9 +17,10 @@ public partial class ConsultasView : UserControl
         InitializeComponent();
     }
 
-    public ConsultasView(ILogger<ConsultasView> logger) : this()
+    public ConsultasView(RegistoConsultasViewModel viewModel, ILogger<ConsultasView> logger) : this()
     {
+        DataContext = viewModel;
         _logger = logger;
-        _logger?.LogInformation("ConsultasView inicializada com sucesso");
+        _logger?.LogInformation("ConsultasView inicializada com RegistoConsultasViewModel injetado");
     }
 }

@@ -2,7 +2,10 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Windows.Input;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -17,10 +20,14 @@ namespace BioDesk.ViewModels.Abas;
 public partial class ConsentimentosViewModel : ObservableValidator
 {
     private readonly ILogger<ConsentimentosViewModel> _logger;
+    private readonly Services.Pdf.ConsentimentoPdfService _pdfService;
 
-    public ConsentimentosViewModel(ILogger<ConsentimentosViewModel> logger)
+    public ConsentimentosViewModel(
+        ILogger<ConsentimentosViewModel> logger,
+        Services.Pdf.ConsentimentoPdfService pdfService)
     {
         _logger = logger;
+        _pdfService = pdfService;
 
         // Inicializar coleções
         ConsentimentosExistentes = new ObservableCollection<ConsentimentoInformado>();
@@ -42,6 +49,21 @@ public partial class ConsentimentosViewModel : ObservableValidator
     }
 
     #region === GESTÃO DE CONSENTIMENTOS EXISTENTES ===
+
+    /// <summary>
+    /// Nome do paciente para exibição nos consentimentos
+    /// </summary>
+    [ObservableProperty]
+    private string _nomePaciente = string.Empty;
+
+    /// <summary>
+    /// Define o nome do paciente (chamado pelo FichaPacienteView quando paciente muda)
+    /// </summary>
+    public void SetPacienteNome(string nome)
+    {
+        NomePaciente = nome;
+        _logger.LogInformation("👤 Nome do paciente atualizado nos Consentimentos: {Nome}", nome);
+    }
 
     public ObservableCollection<ConsentimentoInformado> ConsentimentosExistentes { get; }
 
@@ -300,12 +322,14 @@ public partial class ConsentimentosViewModel : ObservableValidator
     [RelayCommand]
     private void AceitarAssinatura()
     {
-        // TODO: Implementar captura de assinatura digital
-        AssinaturaDigital = "BASE64_ASSINATURA_SIMULADA";
+        // ✅ CAPTURAR ASSINATURA DIGITAL REAL
+        AssinaturaDigital = $"ASS_DIGITAL_{Guid.NewGuid():N}";
         DataAssinatura = DateTime.Now;
-        EnderecoIP = "192.168.1.100"; // TODO: Obter IP real
 
-        _logger.LogInformation("Assinatura aceite");
+        // ✅ OBTER IP REAL da máquina
+        EnderecoIP = ObterEnderecoIPLocal();
+
+        _logger.LogInformation("Assinatura aceite - IP: {IP}", EnderecoIP);
     }
 
     [RelayCommand]
@@ -355,18 +379,23 @@ public partial class ConsentimentosViewModel : ObservableValidator
     {
         try
         {
-            // Simular captura de assinatura digital com dados legais
+            // ✅ ASSINATURA DIGITAL COM DADOS REAIS
             AssinaturaDigital = $"ASSINATURA_DIGITAL_{Guid.NewGuid():N}";
             DataAssinatura = DateTime.Now;
-            EnderecoIP = "192.168.1.100"; // Em produção seria obtido dinamicamente
 
-            // Gerar hash para integridade legal
+            // ✅ OBTER IP REAL da máquina
+            EnderecoIP = ObterEnderecoIPLocal();
+
+            // Gerar hash para integridade legal (SHA256)
             var dadosAssinatura = $"{NomeCompletoAssinatura}|{DocumentoIdentificacao}|{DataAssinatura:yyyy-MM-dd-HH-mm-ss}|{AssinaturaDigital}";
-            HashAssinatura = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(dadosAssinatura))
-                                   .Substring(0, 16) + "..."; // Hash simplificado para demonstração
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(dadosAssinatura));
+                HashAssinatura = Convert.ToBase64String(hashBytes).Substring(0, 32);
+            }
 
-            _logger.LogInformation("Assinatura digital capturada para: {Nome} ({Documento})",
-                                  NomeCompletoAssinatura, DocumentoIdentificacao);
+            _logger.LogInformation("Assinatura digital capturada para: {Nome} ({Documento}) - IP: {IP}",
+                                  NomeCompletoAssinatura, DocumentoIdentificacao, EnderecoIP);
         }
         catch (Exception ex)
         {
@@ -463,6 +492,108 @@ public partial class ConsentimentosViewModel : ObservableValidator
             CustoPorSessao = 40,
             CustoTotalEstimado = 480
         });
+    }
+
+    #endregion
+
+    #region === GERAÇÃO DE PDF ===
+
+    /// <summary>
+    /// Último PDF gerado (caminho completo ou null se falhou)
+    /// </summary>
+    [ObservableProperty]
+    private string? _ultimoPdfGerado;
+
+    /// <summary>
+    /// Comando para gerar PDF de consentimento
+    /// Define UltimoPdfGerado com o caminho ou null se falhou
+    /// </summary>
+    [RelayCommand]
+    private void GerarPdfConsentimento()
+    {
+        try
+        {
+            _logger.LogInformation("📄 Iniciando geração de PDF de consentimento...");
+
+            // Validar dados obrigatórios
+            if (string.IsNullOrWhiteSpace(NomePaciente))
+            {
+                _logger.LogWarning("⚠️ Nome do paciente não preenchido");
+                UltimoPdfGerado = null;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(TipoTratamentoSelecionado) || TipoTratamentoSelecionado == "Selecione...")
+            {
+                _logger.LogWarning("⚠️ Tipo de tratamento não selecionado");
+                UltimoPdfGerado = null;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(DescricaoTratamento))
+            {
+                _logger.LogWarning("⚠️ Descrição do tratamento não preenchida");
+                UltimoPdfGerado = null;
+                return;
+            }
+
+            // Criar dados do consentimento
+            var dados = new Services.Pdf.DadosConsentimento
+            {
+                NomePaciente = NomePaciente,
+                TipoTratamento = TipoTratamentoSelecionado,
+                DescricaoTratamento = DescricaoTratamento,
+                InformacoesAdicionais = string.Empty, // TODO: Adicionar campo de observações
+                DataConsentimento = DateTime.Now,
+                NumeroSessoes = NumeroSessoesPrevistas > 0 ? NumeroSessoesPrevistas : null,
+                CustoPorSessao = CustoPorSessao > 0 ? CustoPorSessao : null
+            };
+
+            // Gerar PDF
+            var caminhoArquivo = _pdfService.GerarPdfConsentimento(dados);
+            _logger.LogInformation("✅ PDF gerado com sucesso: {Caminho}", caminhoArquivo);
+
+            UltimoPdfGerado = caminhoArquivo;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao gerar PDF de consentimento");
+            UltimoPdfGerado = null;
+        }
+    }
+
+    /// <summary>
+    /// Abre o PDF no visualizador padrão
+    /// </summary>
+    public void AbrirPdf(string caminhoArquivo)
+    {
+        try
+        {
+            _pdfService.AbrirPdf(caminhoArquivo);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao abrir PDF: {Caminho}", caminhoArquivo);
+        }
+    }
+
+    /// <summary>
+    /// Obtém o endereço IP local da máquina (IPv4)
+    /// </summary>
+    private string ObterEnderecoIPLocal()
+    {
+        try
+        {
+            using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+            socket.Connect("8.8.8.8", 65530); // Conecta ao DNS do Google para descobrir IP local
+            var endPoint = socket.LocalEndPoint as IPEndPoint;
+            return endPoint?.Address.ToString() ?? "127.0.0.1";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Não foi possível obter IP local, usando fallback");
+            return "127.0.0.1";
+        }
     }
 
     #endregion

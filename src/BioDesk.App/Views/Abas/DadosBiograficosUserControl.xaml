@@ -29,7 +29,7 @@
                         <!-- Nome Preferencial -->
                         <StackPanel Margin="15,0,0,0">
                             <TextBlock Text="Nome Preferencial" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding PacienteAtual.NomePreferencial, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding PacienteAtual.NomePreferido, UpdateSourceTrigger=PropertyChanged}"
                                    Style="{StaticResource FieldTextBoxStyle}"/>
                         </StackPanel>
                     </UniformGrid>
@@ -39,8 +39,9 @@
                         <!-- Data de Nascimento -->
                         <StackPanel Margin="0,0,15,0">
                             <TextBlock Text="Data de Nascimento *" Style="{StaticResource FieldLabelStyle}"/>
-                            <DatePicker SelectedDate="{Binding PacienteAtual.DataNascimento, UpdateSourceTrigger=PropertyChanged}"
-                                      Style="{StaticResource FieldDatePickerStyle}"/>
+                            <TextBox Text="{Binding PacienteAtual.DataNascimento, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDateConverter}}"
+                                     Style="{StaticResource FieldTextBoxStyle}"
+                                     ToolTip="Formatos aceitos: dd/MM/yyyy, dd-MM-yyyy, yyyy-MM-dd, etc."/>
                             <TextBlock Text="{Binding IdadePaciente, FallbackValue='-- anos'}"
                                      FontSize="10" Foreground="#5A6558" Margin="0,2,0,0"/>
                         </StackPanel>
@@ -48,7 +49,8 @@
                         <!-- Género -->
                         <StackPanel Margin="15,0,15,0">
                             <TextBlock Text="Género" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox SelectedItem="{Binding PacienteAtual.Genero, UpdateSourceTrigger=PropertyChanged}"
+                            <ComboBox Text="{Binding PacienteAtual.Genero, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEditable="False"
                                     Style="{StaticResource FieldComboBoxStyle}">
                                 <ComboBoxItem Content="Masculino"/>
                                 <ComboBoxItem Content="Feminino"/>

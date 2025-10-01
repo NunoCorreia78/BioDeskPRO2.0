@@ -1,13 +1,21 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Markup;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using BioDesk.Data;
+using BioDesk.Data.Repositories;
 using BioDesk.Services.Navigation;
+using BioDesk.Services.Email;
+using BioDesk.Services.Cache;
+using BioDesk.Services.AutoSave;
 using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
 
@@ -25,6 +33,93 @@ public partial class App : Application
     /// ServiceProvider público para acesso aos serviços registrados
     /// </summary>
     public IServiceProvider? ServiceProvider => _host?.Services;
+
+    // ✅ CRITICAL: Constructor com handlers de exceptions globais
+    public App()
+    {
+        // 🚨 Capturar TODAS as exceptions não tratadas
+        AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+    }
+
+    // ✅ HANDLER 1: Exceptions em background threads
+    private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        var exception = e.ExceptionObject as Exception;
+        var errorMessage = $@"💥 UNHANDLED EXCEPTION (Background Thread)
+
+Exception Type: {exception?.GetType().Name ?? "Unknown"}
+Message: {exception?.Message ?? "No message"}
+
+Stack Trace:
+{exception?.StackTrace ?? "No stack trace"}
+
+Inner Exception:
+{exception?.InnerException?.Message ?? "None"}
+
+Inner Stack:
+{exception?.InnerException?.StackTrace ?? "None"}
+
+Is Terminating: {e.IsTerminating}";
+
+        // Log para ficheiro
+        System.IO.File.WriteAllText(@"C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\UNHANDLED_EXCEPTION.txt", errorMessage);
+
+        // Mostrar ao utilizador
+        MessageBox.Show(errorMessage, "🚨 UNHANDLED EXCEPTION", MessageBoxButton.OK, MessageBoxImage.Stop);
+    }
+
+    // ✅ HANDLER 2: Exceptions na UI thread (MAIS PROVÁVEL)
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        var errorMessage = $@"💥 DISPATCHER EXCEPTION (UI Thread)
+
+Exception Type: {e.Exception.GetType().Name}
+Message: {e.Exception.Message}
+
+Stack Trace:
+{e.Exception.StackTrace}
+
+Inner Exception:
+{e.Exception.InnerException?.Message ?? "None"}
+
+Inner Stack:
+{e.Exception.InnerException?.StackTrace ?? "None"}
+
+Source: {e.Exception.Source}
+Target Site: {e.Exception.TargetSite?.Name ?? "Unknown"}";
+
+        // Log para ficheiro
+        System.IO.File.WriteAllText(@"C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\DISPATCHER_EXCEPTION.txt", errorMessage);
+
+        // Mostrar ao utilizador
+        MessageBox.Show(errorMessage, "🚨 UI THREAD CRASH", MessageBoxButton.OK, MessageBoxImage.Stop);
+
+        // ✅ CRITICAL: Marcar como tratado para evitar crash silencioso
+        e.Handled = true;
+    }
+
+    // ✅ HANDLER 3: Task exceptions não observadas
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        var errorMessage = $@"💥 UNOBSERVED TASK EXCEPTION
+
+Exception Type: {e.Exception.GetType().Name}
+Message: {e.Exception.Message}
+
+Stack Trace:
+{e.Exception.StackTrace}
+
+Inner Exceptions:
+{string.Join("\n", e.Exception.InnerExceptions.Select(ex => $"- {ex.Message}"))}";
+
+        // Log para ficheiro
+        System.IO.File.WriteAllText(@"C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\TASK_EXCEPTION.txt", errorMessage);
+
+        // ✅ CRITICAL: Marcar como observado
+        e.SetObserved();
+    }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -63,7 +158,16 @@ public partial class App : Application
 
             Console.WriteLine("✅ Sistema limpo iniciado com sucesso...");
 
-            Console.WriteLine("🚀 Iniciando host...");
+            Console.WriteLine("�️ Aplicando migrations ao arranque...");
+            // ⚡ CRITICAL: Garantir que DB tem schema atualizado ANTES de iniciar serviços
+            using (var scope = _host.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
+                await dbContext.Database.MigrateAsync();
+                Console.WriteLine("✅ Migrations aplicadas com sucesso!");
+            }
+
+            Console.WriteLine("�🚀 Iniciando host...");
             // Iniciar o host
             await _host.StartAsync();
 
@@ -103,22 +207,49 @@ public partial class App : Application
 
     private static void ConfigureServices(IServiceCollection services)
     {
-        // SISTEMA COMPLETAMENTE LIMPO - SEM BASE DE DADOS
-        // Serviços MÍNIMOS
+        // === NAVIGATION ===
         services.AddSingleton<INavigationService, NavigationService>();
 
-        // ViewModels - DASHBOARD + FICHA PACIENTE
+        // === DATABASE: EF Core + SQLite ===
+        services.AddDbContext<BioDeskDbContext>(options =>
+            options.UseSqlite("Data Source=biodesk.db")); // Relative to App folder
+
+        // === REPOSITORY PATTERN + UNIT OF WORK ===
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IPacienteRepository, PacienteRepository>();
+        services.AddScoped<ISessaoRepository, SessaoRepository>();
+
+        // === CACHE SERVICE (Singleton para performance) ===
+        services.AddMemoryCache();
+        services.AddSingleton<ICacheService, CacheService>();
+
+        // === AUTO-SAVE SERVICE (Transient - cada ViewModel tem o seu) ===
+        services.AddTransient<IAutoSaveService, AutoSaveService>();
+
+        // === EMAIL SERVICE + BACKGROUND QUEUE PROCESSOR ===
+        services.AddSingleton<IEmailService, EmailService>();
+        services.AddHostedService<EmailQueueProcessor>();
+
+        // === PDF SERVICES (QuestPDF) ===
+        services.AddScoped<Services.Pdf.ConsentimentoPdfService>();
+        services.AddScoped<Services.Pdf.PrescricaoPdfService>();
+
+        // === VIEWMODELS ===
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
+        services.AddTransient<ListaPacientesViewModel>(); // ✅ LISTA DE PACIENTES
 
         // ViewModels das Abas
         services.AddTransient<DeclaracaoSaudeViewModel>();
         services.AddTransient<ConsentimentosViewModel>();
+        services.AddTransient<RegistoConsultasViewModel>(); // ABA 4: Registo de Sessões
+        services.AddTransient<ComunicacaoViewModel>(); // ✅ ABA 5: Comunicação
 
         // Views - SISTEMA LIMPO
         services.AddSingleton<MainWindow>();
         services.AddTransient<Views.DashboardView>();
         services.AddTransient<Views.ConsultasView>();
         services.AddTransient<Views.FichaPacienteView>();
+        services.AddTransient<Views.ListaPacientesView>(); // ✅ LISTA DE PACIENTES
     }
 }

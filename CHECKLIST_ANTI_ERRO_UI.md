@@ -3,6 +3,7 @@
 ## 🚨 REGRAS CRÍTICAS - NUNCA IGNORAR
 
 ### 1. **SOBREPOSIÇÃO DE USERCONTROLS**
+
 ❌ **NUNCA** colocar UserControls no mesmo Grid sem Z-Index
 ✅ **SEMPRE** usar `Panel.ZIndex` quando UserControls partilham espaço
 ✅ **SEMPRE** usar bordas coloridas DEBUG durante desenvolvimento
@@ -16,20 +17,24 @@
 ```
 
 ### 2. **VISIBILITY BINDING**
+
 ❌ **NUNCA** confiar apenas em `Visibility=Collapsed`
 ✅ **SEMPRE** verificar com bordas DEBUG se está realmente oculto
 ✅ **SEMPRE** testar cada estado de navegação
 
 ### 3. **BACKGROUND TRANSPARENTE**
+
 ❌ **NUNCA** deixar UserControls com Background sólido por defeito
 ✅ **SEMPRE** usar `Background="Transparent"` em UserControls sobrepostos
 
 ### 4. **ORDEM DE RENDERIZAÇÃO**
+
 ❌ **NUNCA** assumir que ordem no XAML = ordem visual
 ✅ **SEMPRE** definir explicitamente com Panel.ZIndex
 ✅ **SEMPRE** comentar a intenção da ordem
 
 ### 5. **TESTE VISUAL OBRIGATÓRIO**
+
 ✅ **SEMPRE** testar navegação entre TODAS as abas
 ✅ **SEMPRE** verificar se conteúdo corresponde ao tab ativo
 ✅ **SEMPRE** usar bordas DEBUG até confirmar funcionamento
@@ -37,6 +42,7 @@
 ## 🔍 PROCEDIMENTO DEBUG
 
 ### 1. **Identificar Sobreposição**
+
 ```xaml
 <!-- Adicionar temporariamente -->
 BorderBrush="Red" BorderThickness="3"    <!-- UserControl 1 -->
@@ -44,17 +50,20 @@ BorderBrush="Blue" BorderThickness="3"   <!-- UserControl 2 -->
 ```
 
 ### 2. **Verificar Z-Index**
+
 ```xaml
 Panel.ZIndex="100"  <!-- Deve ficar por cima -->
 Panel.ZIndex="50"   <!-- Deve ficar por baixo -->
 ```
 
 ### 3. **Confirmar Visibility**
+
 - Clicar em cada tab
 - Verificar se aparece apenas a borda correta
 - Confirmar que conteúdo corresponde ao tab
 
 ### 4. **Remover DEBUG**
+
 - Só remover bordas depois de 100% confirmado
 - Manter comentários explicativos
 

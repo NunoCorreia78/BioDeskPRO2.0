@@ -75,12 +75,14 @@ namespace BioDesk.App
         {
             _logger.LogInformation("🔧 Registrando views no sistema de navegação...");
 
-            // Sistema limpo - views existentes + FichaPaciente
+            // Sistema limpo - views existentes + FichaPaciente + ListaPacientes
             _navigationService.Register("Dashboard", typeof(Views.DashboardView));
             _navigationService.Register("Consultas", typeof(Views.ConsultasView));
             _navigationService.Register("FichaPaciente", typeof(Views.FichaPacienteView));
+            _navigationService.Register("NovoPaciente", typeof(Views.FichaPacienteView)); // Alias para criar novo
+            _navigationService.Register("ListaPacientes", typeof(Views.ListaPacientesView)); // ✅ NOVO
 
-            _logger.LogInformation("✅ Views registradas: Dashboard, Consultas, FichaPaciente");
+            _logger.LogInformation("✅ Views registradas: Dashboard, Consultas, FichaPaciente, ListaPacientes");
         }
 
         private void OnNavigationRequested(object? sender, string viewName)
@@ -109,6 +111,8 @@ namespace BioDesk.App
                     "Dashboard" => _serviceProvider.GetRequiredService<Views.DashboardView>(),
                     "Consultas" => _serviceProvider.GetRequiredService<Views.ConsultasView>(),
                     "FichaPaciente" => _serviceProvider.GetRequiredService<Views.FichaPacienteView>(),
+                    "NovoPaciente" => _serviceProvider.GetRequiredService<Views.FichaPacienteView>(),
+                    "ListaPacientes" => _serviceProvider.GetRequiredService<Views.ListaPacientesView>(), // ✅ ADICIONADO
                     _ => null
                 };
 
@@ -127,11 +131,13 @@ namespace BioDesk.App
                 {
                     _logger.LogInformation("🎯 Definindo DataContext para '{ViewName}'...", viewName);
 
-                    // Sistema limpo - Dashboard + FichaPaciente
+                    // Sistema limpo - Dashboard + FichaPaciente + ListaPacientes
                     fe.DataContext = viewName switch
                     {
                         "Dashboard" => _serviceProvider.GetRequiredService<DashboardViewModel>(),
                         "FichaPaciente" => _serviceProvider.GetRequiredService<FichaPacienteViewModel>(),
+                        "NovoPaciente" => _serviceProvider.GetRequiredService<FichaPacienteViewModel>(),
+                        "ListaPacientes" => _serviceProvider.GetRequiredService<ListaPacientesViewModel>(), // ✅ ADICIONADO
                         "Consultas" => _serviceProvider.GetRequiredService<DashboardViewModel>(), // Fallback para Dashboard
                         _ => _serviceProvider.GetRequiredService<DashboardViewModel>() // Fallback para Dashboard
                     };

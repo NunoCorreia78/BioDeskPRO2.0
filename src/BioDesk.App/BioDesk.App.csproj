@@ -23,4 +23,10 @@
     <ProjectReference Include="..\BioDesk.Data\BioDesk.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Logo: opcional, só embede se existir -->
+    <Resource Include="Assets\Images\logo.png" Condition="Exists('Assets\Images\logo.png')" />
+    <Resource Include="Assets\Images\assinatura.png" />
+  </ItemGroup>
+
 </Project>

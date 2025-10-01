@@ -4,11 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             xmlns:converters="clr-namespace:BioDesk.App.Converters"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=viewmodels:DashboardViewModel}">
 
     <UserControl.Resources>
+        <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#9CAF97"/>
             <Setter Property="Foreground" Value="White"/>
@@ -110,35 +115,51 @@
                             </Border>
                         </Button>
 
-                        <!-- Card Lista de Pacientes - Melhorado -->
+                        <!-- Card Lista de Pacientes ✅ FUNCIONAL -->
                         <Button Style="{StaticResource ActionCardStyle}"
-                                IsEnabled="False"
+                                Command="{Binding ListaPacientesCommand}"
                                 Margin="15,0,0,0">
                             <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="16"
-                                    Padding="30,25" Opacity="0.7">
+                                    Padding="30,25">
                                 <Border.Effect>
                                     <DropShadowEffect Color="#E0E0E0" BlurRadius="10" ShadowDepth="3" Opacity="0.3"/>
                                 </Border.Effect>
                                 <StackPanel HorizontalAlignment="Center">
-                                    <Border Background="#C8D4C5" Width="65" Height="65" CornerRadius="32"
+                                    <Border Background="#9CAF97" Width="65" Height="65" CornerRadius="32"
                                             HorizontalAlignment="Center" Margin="0,0,0,15">
                                         <TextBlock Text="📋" FontSize="30" HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" Foreground="White"/>
                                     </Border>
                                     <TextBlock Text="Lista de Pacientes" FontSize="18" FontWeight="Bold"
                                              Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-                                    <TextBlock Text="Em desenvolvimento..." FontSize="13"
-                                             Foreground="#9B9B9B" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Pesquisar e editar" FontSize="13"
+                                             Foreground="#5A6558" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                         </Button>
                     </UniformGrid>
 
-                    <!-- Estatísticas Expandidas -->
-                    <TextBlock Text="📊 Estatísticas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
+                    <!-- Estatísticas Expandidas - COM BINDING BD -->
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="📊 Estatísticas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D"/>
+                        
+                        <!-- Loading indicator -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="🔄" FontSize="14" Foreground="#9CAF97" Margin="0,0,5,0" 
+                                     Visibility="{Binding IsLoadingStats, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBlock Text="{Binding UltimaAtualizacao, StringFormat='Atualizado: {0:HH:mm:ss}'}" 
+                                     FontSize="11" Foreground="#5A6558"
+                                     Visibility="{Binding IsLoadingStats, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                        </StackPanel>
+                    </Grid>
 
                     <UniformGrid Rows="1" Columns="4" Margin="0,0,0,40">
-                        <!-- Total Pacientes -->
+                        <!-- Total Pacientes - COM BINDING -->
                         <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
                                 Padding="20" Margin="0,0,8,0">
                             <Border.Effect>
@@ -146,14 +167,14 @@
                             </Border.Effect>
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="👥" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                <TextBlock Text="0" FontSize="22" FontWeight="Bold"
+                                <TextBlock Text="{Binding TotalPacientes}" FontSize="22" FontWeight="Bold"
                                          Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                                 <TextBlock Text="Pacientes" FontSize="12"
                                          Foreground="#5A6558" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
-                        <!-- Consultas Hoje -->
+                        <!-- Consultas Hoje - COM BINDING -->
                         <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
                                 Padding="20" Margin="8,0">
                             <Border.Effect>
@@ -161,14 +182,14 @@
                             </Border.Effect>
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="📅" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                <TextBlock Text="0" FontSize="22" FontWeight="Bold"
+                                <TextBlock Text="{Binding ConsultasHoje}" FontSize="22" FontWeight="Bold"
                                          Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                                 <TextBlock Text="Hoje" FontSize="12"
                                          Foreground="#5A6558" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
-                        <!-- Consultas Esta Semana -->
+                        <!-- Consultas Esta Semana - COM BINDING -->
                         <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
                                 Padding="20" Margin="8,0">
                             <Border.Effect>
@@ -176,14 +197,14 @@
                             </Border.Effect>
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="🗓️" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                <TextBlock Text="0" FontSize="22" FontWeight="Bold"
+                                <TextBlock Text="{Binding ConsultasSemana}" FontSize="22" FontWeight="Bold"
                                          Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                                 <TextBlock Text="Esta Semana" FontSize="12"
                                          Foreground="#5A6558" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
 
-                        <!-- Consultas Este Mês -->
+                        <!-- Consultas Este Mês - COM BINDING -->
                         <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
                                 Padding="20" Margin="8,0,0,0">
                             <Border.Effect>
@@ -191,7 +212,7 @@
                             </Border.Effect>
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="📊" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                                <TextBlock Text="0" FontSize="22" FontWeight="Bold"
+                                <TextBlock Text="{Binding ConsultasMes}" FontSize="22" FontWeight="Bold"
                                          Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                                 <TextBlock Text="Este Mês" FontSize="12"
                                          Foreground="#5A6558" HorizontalAlignment="Center"/>

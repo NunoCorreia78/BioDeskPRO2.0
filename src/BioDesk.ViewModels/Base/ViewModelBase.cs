@@ -24,6 +24,9 @@ public abstract partial class ViewModelBase : ObservableObject
     private string _errorMessage = string.Empty;
 
     [ObservableProperty]
+    private string? _successMessage;
+
+    [ObservableProperty]
     private Dictionary<string, List<string>> _validationErrors = new();
 
     /// <summary>
@@ -34,7 +37,7 @@ public abstract partial class ViewModelBase : ObservableObject
     /// <summary>
     /// Obtém os erros de validação formatados como string
     /// </summary>
-    public string ValidationErrorsText => string.Join(Environment.NewLine, 
+    public string ValidationErrorsText => string.Join(Environment.NewLine,
         ValidationErrors.SelectMany(kv => kv.Value.Select(v => $"• {v}")));
 
     /// <summary>
@@ -43,9 +46,9 @@ public abstract partial class ViewModelBase : ObservableObject
     protected bool ValidateModel<T>(T model, IValidator<T> validator)
     {
         var validationResult = validator.Validate(model);
-        
+
         ValidationErrors.Clear();
-        
+
         if (!validationResult.IsValid)
         {
             foreach (var error in validationResult.Errors)
@@ -60,7 +63,7 @@ public abstract partial class ViewModelBase : ObservableObject
 
         OnPropertyChanged(nameof(HasValidationErrors));
         OnPropertyChanged(nameof(ValidationErrorsText));
-        
+
         return validationResult.IsValid;
     }
 

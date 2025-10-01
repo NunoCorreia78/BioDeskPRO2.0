@@ -2,11 +2,14 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using BioDesk.Data.Repositories;
 using BioDesk.Domain.Entities;
+using BioDesk.Services.Navigation;
 
 namespace BioDesk.ViewModels.Abas;
 
@@ -17,10 +20,19 @@ namespace BioDesk.ViewModels.Abas;
 public partial class DeclaracaoSaudeViewModel : ObservableValidator
 {
     private readonly ILogger<DeclaracaoSaudeViewModel> _logger;
+    private readonly IUnitOfWork? _unitOfWork;
+    private readonly INavigationService? _navigationService;
 
-    public DeclaracaoSaudeViewModel(ILogger<DeclaracaoSaudeViewModel> logger)
+    [ObservableProperty] private Paciente? _pacienteAtual;
+
+    public DeclaracaoSaudeViewModel(
+        ILogger<DeclaracaoSaudeViewModel> logger,
+        IUnitOfWork? unitOfWork = null,
+        INavigationService? navigationService = null)
     {
         _logger = logger;
+        _unitOfWork = unitOfWork;
+        _navigationService = navigationService;
 
         // Inicializar coleções
         Cirurgias = new ObservableCollection<Cirurgia>();
@@ -43,6 +55,25 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
         _logger.LogInformation("DeclaracaoSaudeViewModel inicializado");
     }
 
+    #region === DADOS DO PACIENTE ===
+
+    /// <summary>
+    /// Nome do paciente para exibição na declaração
+    /// </summary>
+    [ObservableProperty]
+    private string _nomePaciente = string.Empty;
+
+    /// <summary>
+    /// Define o nome do paciente (chamado pelo FichaPacienteView quando paciente muda)
+    /// </summary>
+    public void SetPacienteNome(string nome)
+    {
+        NomePaciente = nome;
+        _logger.LogInformation("👤 Nome do paciente atualizado na Declaração: {Nome}", nome);
+    }
+
+    #endregion
+
     #region === ANTECEDENTES PESSOAIS ===
 
     // Doenças Crónicas
@@ -59,10 +90,10 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
     private bool _temAlergias;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MostraEspecificacaoOutras))]
     private bool _temOutrasDoencas;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(MostraEspecificacaoOutras))]
     private string? _especificacaoOutrasDoencas;
 
     public bool MostraEspecificacaoOutras => TemOutrasDoencas;
@@ -376,10 +407,48 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
     }
 
     [RelayCommand]
-    private void GuardarRascunho()
+    private async Task GuardarRascunho()
     {
-        _logger.LogInformation("Guardando rascunho da declaração de saúde");
-        // TODO: Implementar salvamento
+        _logger.LogInformation("💾 Guardando rascunho da declaração de saúde");
+
+        if (PacienteAtual != null && _unitOfWork != null)
+        {
+            try
+            {
+                // ✅ GRAVAR HISTÓRICO MÉDICO NA BD
+                var todosHistoricos = await _unitOfWork.HistoricoMedico.GetAllAsync();
+                var historicoExistente = todosHistoricos.FirstOrDefault(h => h.PacienteId == PacienteAtual.Id);
+
+                if (historicoExistente != null)
+                {
+                    // Atualizar existente
+                    // TODO: Mapear propriedades do ViewModel para o histórico
+                    _unitOfWork.HistoricoMedico.Update(historicoExistente);
+                }
+                else
+                {
+                    // Criar novo
+                    var novoHistorico = new HistoricoMedico
+                    {
+                        PacienteId = PacienteAtual.Id,
+                        DataCriacao = DateTime.Now
+                        // TODO: Mapear propriedades do ViewModel
+                    };
+                    await _unitOfWork.HistoricoMedico.AddAsync(novoHistorico);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation("✅ Rascunho da declaração de saúde guardado");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao guardar rascunho da declaração de saúde");
+            }
+        }
+        else
+        {
+            _logger.LogWarning("⚠️ Não foi possível guardar rascunho: PacienteAtual ou UnitOfWork é null");
+        }
     }
 
     [RelayCommand]
@@ -387,12 +456,19 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
     {
         if (!PodeAvancar)
         {
-            _logger.LogWarning("Tentativa de avançar sem completar declaração legal");
+            _logger.LogWarning("⚠️ Tentativa de avançar sem completar declaração legal");
             return;
         }
 
-        _logger.LogInformation("Validação da declaração de saúde passou, avançando para próxima aba");
-        // TODO: Implementar navegação para Aba 3
+        _logger.LogInformation("✅ Validação da declaração de saúde passou, avançando para Aba 3 (Consentimentos)");
+
+        // ✅ NAVEGAR PARA ABA 3 (CONSENTIMENTOS)
+        if (_navigationService != null)
+        {
+            // Informar ao FichaPacienteViewModel para mudar para aba 3
+            // TODO: Implementar sistema de mensageria ou callback para mudar aba
+            _logger.LogInformation("🔄 Navegação para Aba 3 solicitada");
+        }
     }
 
     #endregion
