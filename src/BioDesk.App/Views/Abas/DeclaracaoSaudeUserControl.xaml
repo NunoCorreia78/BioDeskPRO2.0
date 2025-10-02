@@ -619,6 +619,12 @@
                                     Content="✅ Confirmar Declaração"
                                     Style="{StaticResource NavigationButtonStyle}"
                                     Click="BtnConfirmarDeclaracao_Click"
+                                    Padding="15,8" Margin="0,0,10,0"/>
+
+                            <Button x:Name="BtnGerarPdfDeclaracao"
+                                    Content="📄 Gerar PDF"
+                                    Style="{StaticResource NavigationButtonStyle}"
+                                    Click="BtnGerarPdfDeclaracao_Click"
                                     Padding="15,8"/>
                         </StackPanel>
 

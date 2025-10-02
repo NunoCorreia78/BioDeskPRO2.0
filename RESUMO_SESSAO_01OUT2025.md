@@ -73,7 +73,7 @@
 
 **Uso:**
 ```xaml
-<controls:SignatureCanvasControl 
+<controls:SignatureCanvasControl
     SignatureConfirmed="OnSignatureConfirmed"/>
 ```
 
@@ -122,7 +122,7 @@ private void OnSignatureConfirmed(object sender, SignatureConfirmedEventArgs e)
 
 **Warning:**
 ```
-CS8604: Possible null reference argument for parameter 'provider' 
+CS8604: Possible null reference argument for parameter 'provider'
 in 'ILogger<RegistoConsultasUserControl> ServiceProviderServiceExtensions
 .GetRequiredService<ILogger<RegistoConsultasUserControl>>(IServiceProvider provider)'.
 ```
@@ -169,6 +169,6 @@ in 'ILogger<RegistoConsultasUserControl> ServiceProviderServiceExtensions
 
 ---
 
-**Data:** 01 de Outubro de 2025  
-**Sessão:** Investigação BD + PDF Services + Canvas Assinatura  
+**Data:** 01 de Outubro de 2025
+**Sessão:** Investigação BD + PDF Services + Canvas Assinatura
 **Status Geral:** ✅ SUCESSO TOTAL

@@ -28,7 +28,10 @@
   <ItemGroup>
     <!-- Logo: opcional, só embede se existir -->
     <Resource Include="Assets\Images\logo.png" Condition="Exists('Assets\Images\logo.png')" />
-    <Resource Include="Assets\Images\assinatura.png" />
+    <!-- Assinatura: copiar para output para File.ReadAllBytes() -->
+    <Content Include="Assets\Images\assinatura.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

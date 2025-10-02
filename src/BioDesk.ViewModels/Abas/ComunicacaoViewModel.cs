@@ -26,9 +26,52 @@ public partial class ComunicacaoViewModel : ViewModelBase
     private readonly IEmailService _emailService;
     private readonly BioDeskDbContext _dbContext;
     private readonly IDocumentoService _documentoService;
+    private readonly IDocumentosPacienteService _documentosPacienteService;
 
     [ObservableProperty] private Paciente? _pacienteAtual;
     [ObservableProperty] private ObservableCollection<Comunicacao> _historicoComunicacoes = new();
+
+    /// <summary>
+    /// Informação do cabeçalho do histórico
+    /// </summary>
+    public int TotalEnviados => HistoricoComunicacoes?.Count(c => c.Status == StatusComunicacao.Enviado) ?? 0;
+    
+    public string ProximoAgendamento
+    {
+        get
+        {
+            var proximo = HistoricoComunicacoes?
+                .Where(c => c.Status == StatusComunicacao.Agendado && c.ProximaTentativa.HasValue)
+                .OrderBy(c => c.ProximaTentativa)
+                .FirstOrDefault();
+
+            if (proximo == null)
+                return "Sem agendamentos";
+
+            var tempo = proximo.ProximaTentativa!.Value - DateTime.Now;
+            if (tempo.TotalMinutes < 1)
+                return "Em breve...";
+            if (tempo.TotalMinutes < 60)
+                return $"Em {(int)tempo.TotalMinutes} minutos";
+            if (tempo.TotalHours < 24)
+                return $"Em {(int)tempo.TotalHours}h";
+            return proximo.ProximaTentativa.Value.ToString("dd/MM HH:mm");
+        }
+    }
+
+    /// <summary>
+    /// Notifica UI quando o histórico muda
+    /// </summary>
+    partial void OnHistoricoComunicacoesChanged(ObservableCollection<Comunicacao> value)
+    {
+        OnPropertyChanged(nameof(TotalEnviados));
+        OnPropertyChanged(nameof(ProximoAgendamento));
+    }
+
+    // ⭐ NOVO: Gestão de documentos do paciente
+    [ObservableProperty] private ObservableCollection<DocumentoPacienteViewModel> _documentosPaciente = new();
+    [ObservableProperty] private bool _carregandoDocumentos = false;
+    [ObservableProperty] private string _statusDocumentos = "Nenhum documento encontrado";
 
     // Formulário de envio
     [ObservableProperty] private TipoComunicacao _tipoSelecionado = TipoComunicacao.Email;
@@ -48,11 +91,24 @@ public partial class ComunicacaoViewModel : ViewModelBase
         {
             _logger.LogWarning("⚠️ Paciente sem email no contacto");
         }
+
+        // ⭐ NOVO: Carregar documentos do paciente automaticamente
+        if (value != null)
+        {
+            _ = CarregarDocumentosPacienteAsync();
+        }
+        else
+        {
+            DocumentosPaciente.Clear();
+            StatusDocumentos = "Nenhum paciente selecionado";
+        }
     }
     [ObservableProperty] private string _assunto = string.Empty;
     [ObservableProperty] private string _corpo = string.Empty;
-    [ObservableProperty] private bool _agendarFollowUp = false;
-    [ObservableProperty] private int _diasFollowUp = 7;
+    
+    // ⭐ Agendamento de envio do email
+    [ObservableProperty] private bool _agendarEnvio = false;
+    [ObservableProperty] private DateTime _dataEnvioAgendado = DateTime.Now.AddDays(1).Date.AddHours(9); // Amanhã às 9h por padrão
 
     // ⭐ NOVO: Gestão de anexos
     [ObservableProperty] private ObservableCollection<string> _anexos = new();
@@ -84,12 +140,14 @@ public partial class ComunicacaoViewModel : ViewModelBase
         ILogger<ComunicacaoViewModel> logger,
         IEmailService emailService,
         BioDeskDbContext dbContext,
-        IDocumentoService documentoService)
+        IDocumentoService documentoService,
+        IDocumentosPacienteService documentosPacienteService)
     {
         _logger = logger;
         _emailService = emailService;
         _dbContext = dbContext;
         _documentoService = documentoService;
+        _documentosPacienteService = documentosPacienteService;
 
         _logger.LogInformation("ComunicacaoViewModel inicializado");
 
@@ -148,7 +206,11 @@ Conforme conversado na consulta, segue em anexo a prescrição recomendada.
 Qualquer dúvida, estou à disposição.
 
 Cumprimentos,
-[Nome do Terapeuta]",
+
+Nuno Correia - Terapias Naturais
+Naturopatia - Osteopatia - Medicina Bioenergética
+📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
+🌿 Cuidar de si, naturalmente",
 
             "Confirmação de Consulta" => $@"Olá {PacienteAtual.NomeCompleto},
 
@@ -157,7 +219,11 @@ Confirmamos a sua consulta para [DATA/HORA].
 Em caso de necessidade de reagendar, por favor contacte-nos.
 
 Cumprimentos,
-[Clínica]",
+
+Nuno Correia - Terapias Naturais
+Naturopatia - Osteopatia - Medicina Bioenergética
+📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
+🌿 Cuidar de si, naturalmente",
 
             "Follow-up" => $@"Olá {PacienteAtual.NomeCompleto},
 
@@ -166,14 +232,22 @@ Como está a decorrer o tratamento? Sente melhorias?
 Estou disponível para qualquer esclarecimento.
 
 Cumprimentos,
-[Nome do Terapeuta]",
+
+Nuno Correia - Terapias Naturais
+Naturopatia - Osteopatia - Medicina Bioenergética
+📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
+🌿 Cuidar de si, naturalmente",
 
             "Lembrete" => $@"Olá {PacienteAtual.NomeCompleto},
 
 Lembrete: [DETALHE DO LEMBRETE]
 
 Cumprimentos,
-[Clínica]",
+
+Nuno Correia - Terapias Naturais
+Naturopatia - Osteopatia - Medicina Bioenergética
+📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
+🌿 Cuidar de si, naturalmente",
 
             _ => string.Empty
         };
@@ -258,7 +332,83 @@ Cumprimentos,
 
             IsLoading = true;
 
-            // Criar comunicação na DB (mesmo se offline)
+            // ⭐ NOVO: Verificar se deve agendar o envio para data futura
+            if (AgendarEnvio && DataEnvioAgendado > DateTime.Now)
+            {
+                // AGENDAR para envio futuro (não enviar imediatamente)
+                var comunicacaoAgendada = new Comunicacao
+                {
+                    PacienteId = PacienteAtual.Id,
+                    Tipo = TipoSelecionado,
+                    Destinatario = Destinatario,
+                    Assunto = Assunto,
+                    Corpo = Corpo,
+                    TemplateUtilizado = TemplateSelecionado,
+                    Status = StatusComunicacao.Agendado,
+                    IsEnviado = false,
+                    DataCriacao = DateTime.Now,
+                    DataEnvio = null,
+                    ProximaTentativa = DataEnvioAgendado, // ⭐ Data escolhida pelo utilizador
+                    TentativasEnvio = 0,
+                    UltimoErro = null
+                };
+
+                await _dbContext.Comunicacoes.AddAsync(comunicacaoAgendada);
+
+                // Gravar anexos na BD
+                foreach (var caminhoFicheiro in Anexos)
+                {
+                    var anexo = new AnexoComunicacao
+                    {
+                        ComunicacaoId = comunicacaoAgendada.Id,
+                        CaminhoArquivo = caminhoFicheiro,
+                        NomeArquivo = System.IO.Path.GetFileName(caminhoFicheiro),
+                        TamanhoBytes = new System.IO.FileInfo(caminhoFicheiro).Length,
+                        DataCriacao = DateTime.Now
+                    };
+                    await _dbContext.Set<AnexoComunicacao>().AddAsync(anexo);
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                var tempoDiferenca = DataEnvioAgendado - DateTime.Now;
+                string mensagemTempo = tempoDiferenca.TotalHours < 24 
+                    ? $"em {(int)tempoDiferenca.TotalHours}h" 
+                    : DataEnvioAgendado.ToString("dd/MM às HH:mm");
+
+                SuccessMessage = $"📅 Email agendado para envio {mensagemTempo}";
+                _logger.LogInformation("📅 Email ID {Id} agendado para {Data}", comunicacaoAgendada.Id, DataEnvioAgendado);
+
+                // Limpar formulário
+                Assunto = string.Empty;
+                Corpo = string.Empty;
+                AgendarEnvio = false;
+                DataEnvioAgendado = DateTime.Now.AddDays(1).Date.AddHours(9);
+                Anexos.Clear();
+                StatusAnexos = string.Empty;
+
+                // Recarregar histórico
+                await CarregarHistoricoAsync();
+
+                IsLoading = false;
+                return; // ⭐ IMPORTANTE: Não continuar para envio imediato
+            }
+
+            // ⚡ ENVIO IMEDIATO (código original)
+            // Isso evita duplicação pelo EmailProcessorService background task
+            var emailMessage = new EmailMessage
+            {
+                To = Destinatario,
+                ToName = PacienteAtual.NomeCompleto,
+                Subject = Assunto,
+                Body = Corpo,
+                IsHtml = true,
+                Attachments = Anexos.ToList()
+            };
+
+            var resultado = await _emailService.EnviarAsync(emailMessage);
+
+            // Criar comunicação na DB com STATUS CORRETO desde o início
             var comunicacao = new Comunicacao
             {
                 PacienteId = PacienteAtual.Id,
@@ -267,24 +417,17 @@ Cumprimentos,
                 Assunto = Assunto,
                 Corpo = Corpo,
                 TemplateUtilizado = TemplateSelecionado,
-                Status = StatusComunicacao.Agendado,
+                Status = resultado.Sucesso ? StatusComunicacao.Enviado : StatusComunicacao.Agendado,
+                IsEnviado = resultado.Sucesso,
                 DataCriacao = DateTime.Now,
-                ProximaTentativa = DateTime.Now // Tentar enviar imediatamente
+                DataEnvio = resultado.Sucesso ? DateTime.Now : null,
+                ProximaTentativa = resultado.Sucesso ? null : DateTime.Now.AddMinutes(2),
+                TentativasEnvio = resultado.Sucesso ? 0 : 1,
+                UltimoErro = resultado.Sucesso ? null : resultado.Mensagem
             };
 
-            // Agendar follow-up se selecionado
-            if (AgendarFollowUp)
-            {
-                comunicacao.DataFollowUp = DateTime.Now.AddDays(DiasFollowUp);
-                comunicacao.MensagemFollowUp = $"Follow-up automático após {DiasFollowUp} dias";
-            }
-
             await _dbContext.Comunicacoes.AddAsync(comunicacao);
-            await _dbContext.SaveChangesAsync();
-
-            _logger.LogInformation("✅ Comunicação criada na DB (ID: {Id})", comunicacao.Id);
-
-            // ⭐ CORREÇÃO: Gravar anexos na BD
+            // Gravar anexos na BD
             foreach (var caminhoFicheiro in Anexos)
             {
                 var anexo = new AnexoComunicacao
@@ -297,59 +440,32 @@ Cumprimentos,
                 };
                 await _dbContext.Set<AnexoComunicacao>().AddAsync(anexo);
             }
+
             await _dbContext.SaveChangesAsync();
 
-            // ⭐ CORREÇÃO: Tentar enviar IMEDIATAMENTE (não esperar pelos 30s do processador)
-            var emailMessage = new EmailMessage
-            {
-                To = Destinatario,
-                ToName = PacienteAtual.NomeCompleto,
-                Subject = Assunto,
-                Body = Corpo,
-                IsHtml = true,
-                Attachments = Anexos.ToList() // ⭐ Passar anexos
-            };
-
-            // ⚡ CRÍTICO: Tentar envio IMEDIATO
-            var resultado = await _emailService.EnviarAsync(emailMessage);
-
-            // Atualizar status conforme resultado
+            // Mensagem de feedback conforme resultado
             if (resultado.Sucesso)
             {
-                // ✅ SUCESSO: Enviado imediatamente
-                comunicacao.IsEnviado = true;
-                comunicacao.Status = StatusComunicacao.Enviado;
-                comunicacao.DataEnvio = DateTime.Now;
-                comunicacao.UltimoErro = null;
                 SuccessMessage = "✅ Email enviado com sucesso!";
-                _logger.LogInformation("✅ Email ID {Id} enviado IMEDIATAMENTE", comunicacao.Id);
+                _logger.LogInformation("✅ Email ID {Id} enviado IMEDIATAMENTE (Status={Status})", comunicacao.Id, comunicacao.Status);
             }
             else
             {
                 if (resultado.AdicionadoNaFila)
                 {
-                    // ⚠️ SEM REDE: Fica Agendado para processador tentar
-                    SuccessMessage = "⚠️ Sem conexão. Email agendado para envio automático quando a rede retornar.";
-                    _logger.LogWarning("⚠️ Email ID {Id} agendado (sem rede)", comunicacao.Id);
+                    SuccessMessage = "⚠️ Sem conexão. Email agendado para envio automático.";
+                    _logger.LogWarning("⚠️ Email ID {Id} agendado (sem rede, Status={Status})", comunicacao.Id, comunicacao.Status);
                 }
                 else
                 {
-                    // ❌ ERRO: Falhou mas fica Agendado para retry automático
-                    comunicacao.UltimoErro = resultado.Mensagem;
-                    comunicacao.TentativasEnvio = 1; // Primeira tentativa falhou
-                    comunicacao.ProximaTentativa = DateTime.Now.AddMinutes(2); // Retry em 2 minutos
-
-                    SuccessMessage = $"⚠️ Erro ao enviar agora. Email agendado para retry automático em 2 minutos.\n{resultado.Mensagem}";
-                    _logger.LogWarning("⚠️ Email ID {Id} agendado para retry (erro: {Error})", comunicacao.Id, resultado.Mensagem);
+                    SuccessMessage = $"⚠️ Erro ao enviar. Email agendado para retry em 2 minutos.";
+                    _logger.LogWarning("⚠️ Email ID {Id} agendado para retry (erro: {Error}, Status={Status})", comunicacao.Id, resultado.Mensagem, comunicacao.Status);
                 }
             }
-
-            await _dbContext.SaveChangesAsync();
 
             // Limpar formulário
             Assunto = string.Empty;
             Corpo = string.Empty;
-            AgendarFollowUp = false;
             Anexos.Clear(); // ⭐ Limpar anexos
             StatusAnexos = string.Empty;
 
@@ -397,7 +513,6 @@ Cumprimentos,
     {
         Assunto = string.Empty;
         Corpo = string.Empty;
-        AgendarFollowUp = false;
         TemplateSelecionado = "Personalizado";
         Anexos.Clear();
         StatusAnexos = string.Empty;
@@ -508,7 +623,7 @@ Cumprimentos,
         var historico = await _dbContext.Comunicacoes
             .Where(c => c.PacienteId == PacienteAtual.Id && !c.IsDeleted)
             .OrderByDescending(c => c.DataCriacao)
-            .Take(50)
+            .Take(10)  // ⭐ Limitar aos últimos 10 para melhor performance
             .ToListAsync();
 
         HistoricoComunicacoes = new ObservableCollection<Comunicacao>(historico);
@@ -540,5 +655,126 @@ Cumprimentos,
             .OrderBy(c => c.DataFollowUp)
             .Select(c => c.DataFollowUp)
             .FirstOrDefaultAsync();
+    }
+
+    // ============================
+    // ⭐ NOVO: GESTÃO DE DOCUMENTOS DO PACIENTE
+    // ============================
+
+    /// <summary>
+    /// Carrega todos os documentos (PDFs) do paciente atual
+    /// Busca em: Consentimentos/, Prescricoes/, Pacientes/[Nome]/
+    /// </summary>
+    [RelayCommand]
+    private async Task CarregarDocumentosPacienteAsync()
+    {
+        if (PacienteAtual == null)
+        {
+            DocumentosPaciente.Clear();
+            StatusDocumentos = "Nenhum paciente selecionado";
+            return;
+        }
+
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            CarregandoDocumentos = true;
+            StatusDocumentos = "A carregar documentos...";
+
+            var documentos = await _documentosPacienteService.ObterDocumentosDoPacienteAsync(
+                PacienteAtual.Id,
+                PacienteAtual.NomeCompleto);
+
+            DocumentosPaciente.Clear();
+            foreach (var doc in documentos)
+            {
+                DocumentosPaciente.Add(new DocumentoPacienteViewModel(doc));
+            }
+
+            StatusDocumentos = DocumentosPaciente.Count switch
+            {
+                0 => "Nenhum documento encontrado",
+                1 => "1 documento encontrado",
+                _ => $"{DocumentosPaciente.Count} documentos encontrados"
+            };
+
+            _logger.LogInformation("📄 Carregados {Count} documentos do paciente {PacienteId}",
+                DocumentosPaciente.Count, PacienteAtual.Id);
+
+            CarregandoDocumentos = false;
+        });
+    }
+
+    /// <summary>
+    /// Anexa os documentos selecionados ao email
+    /// </summary>
+    [RelayCommand]
+    private void AnexarDocumentosSelecionados()
+    {
+        try
+        {
+            var selecionados = DocumentosPaciente
+                .Where(d => d.Selecionado)
+                .ToList();
+
+            if (!selecionados.Any())
+            {
+                ErrorMessage = "Nenhum documento selecionado!";
+                return;
+            }
+
+            int adicionados = 0;
+            foreach (var doc in selecionados)
+            {
+                if (!Anexos.Contains(doc.CaminhoCompleto))
+                {
+                    Anexos.Add(doc.CaminhoCompleto);
+                    adicionados++;
+                    _logger.LogInformation("📎 Documento anexado: {Nome}", doc.Nome);
+                }
+            }
+
+            AtualizarStatusAnexos();
+
+            // Limpar seleção após anexar
+            foreach (var doc in selecionados)
+            {
+                doc.Selecionado = false;
+            }
+
+            _logger.LogInformation("✅ {Count} documento(s) anexado(s) ao email", adicionados);
+
+            if (adicionados > 0)
+            {
+                StatusDocumentos = $"{adicionados} documento(s) anexado(s) ao email";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao anexar documentos selecionados");
+            ErrorMessage = $"Erro ao anexar documentos: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Seleciona/deseleciona todos os documentos
+    /// ⚠️ ACEITA object para compatibilidade com XAML (converte string/bool)
+    /// </summary>
+    [RelayCommand]
+    private void SelecionarTodosDocumentos(object? parameter)
+    {
+        bool selecionar = parameter switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var result) => result,
+            _ => false
+        };
+
+        foreach (var doc in DocumentosPaciente)
+        {
+            doc.Selecionado = selecionar;
+        }
+
+        _logger.LogInformation("{Action} todos os documentos",
+            selecionar ? "Selecionados" : "Desmarcados");
     }
 }

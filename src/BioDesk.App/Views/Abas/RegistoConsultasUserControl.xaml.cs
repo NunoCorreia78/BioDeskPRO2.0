@@ -21,7 +21,7 @@ public partial class RegistoConsultasUserControl : UserControl
 #pragma warning disable CS8604
         _logger = ((App)Application.Current).ServiceProvider.GetRequiredService<ILogger<RegistoConsultasUserControl>>();
 #pragma warning restore CS8604
-        
+
         Loaded += OnLoaded;
     }
 

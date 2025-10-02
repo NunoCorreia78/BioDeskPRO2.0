@@ -24,6 +24,14 @@ biodesk.db
 biodesk.db-*
 *.db.backup_*
 
+# Debug and Investigation Scripts (não commitar)
+Debug_Scripts/
+InvestigacaoDB/
+*.csx
+CheckDB.cs
+VerificarBD.cs
+InvestigarPaciente.cs
+
 # Logs
 logs/
 *.log

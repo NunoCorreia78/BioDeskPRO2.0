@@ -282,9 +282,10 @@ public class DeclaracaoSaudePdfService
                                 .BorderColor(Colors.Grey.Lighten2)
                                 .Padding(5)
                                 .Height(80)
-                                .AlignCenter()
+                                .AlignCenter()  // Centraliza horizontalmente
+                                .AlignMiddle()  // Centraliza verticalmente
                                 .Image(imageBytes)
-                                .FitHeight();
+                                .FitArea();
                         }
                         catch (Exception ex)
                         {
@@ -318,23 +319,25 @@ public class DeclaracaoSaudePdfService
                 row.RelativeItem().Column(col =>
                 {
                     // 👨‍⚕️ RENDERIZAR ASSINATURA DO TERAPEUTA
-                    if (System.IO.File.Exists(dados.AssinaturaTerapeutaPath))
+                    string caminhoAssinatura = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", "assinatura.png");
+                    if (System.IO.File.Exists(caminhoAssinatura))
                     {
                         try
                         {
-                            byte[] assinaturaTerapeuta = System.IO.File.ReadAllBytes(dados.AssinaturaTerapeutaPath);
+                            byte[] assinaturaTerapeuta = System.IO.File.ReadAllBytes(caminhoAssinatura);
                             col.Item()
                                 .Border(1)
                                 .BorderColor(Colors.Grey.Lighten2)
                                 .Padding(5)
                                 .Height(80)
-                                .AlignCenter()
+                                .AlignCenter()  // Centraliza horizontalmente
+                                .AlignMiddle()  // Centraliza verticalmente
                                 .Image(assinaturaTerapeuta)
-                                .FitHeight();
+                                .FitArea();
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "❌ Erro ao carregar assinatura do terapeuta: {Path}", dados.AssinaturaTerapeutaPath);
+                            _logger.LogError(ex, "❌ Erro ao carregar assinatura do terapeuta: {Path}", caminhoAssinatura);
                             col.Item().LineHorizontal(1).LineColor(Colors.Black);
                             col.Item().PaddingTop(5).AlignCenter().Text("[Erro ao carregar assinatura]")
                                 .FontSize(8)
@@ -344,7 +347,7 @@ public class DeclaracaoSaudePdfService
                     }
                     else
                     {
-                        _logger.LogWarning("⚠️ Assinatura do terapeuta não encontrada: {Path}", dados.AssinaturaTerapeutaPath);
+                        _logger.LogWarning("⚠️ Assinatura do terapeuta não encontrada: {Path}", caminhoAssinatura);
                         col.Item().LineHorizontal(1).LineColor(Colors.Black);
                     }
 

@@ -240,7 +240,7 @@ public class PrescricaoPdfService
                 row.RelativeItem().Column(col =>
                 {
                     // 👨‍⚕️ RENDERIZAR ASSINATURA DO TERAPEUTA
-                    string assinaturaTerapeutaPath = "Assets/Images/assinatura.png";
+                    string assinaturaTerapeutaPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", "assinatura.png");
                     if (System.IO.File.Exists(assinaturaTerapeutaPath))
                     {
                         try
@@ -252,8 +252,9 @@ public class PrescricaoPdfService
                                 .Padding(5)
                                 .Height(80)
                                 .AlignCenter()
+                                .AlignMiddle()
                                 .Image(assinaturaTerapeuta)
-                                .FitHeight();
+                                .FitArea();
                         }
                         catch (Exception ex)
                         {

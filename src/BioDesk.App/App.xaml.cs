@@ -239,6 +239,7 @@ Inner Exceptions:
 
         // === DOCUMENTO SERVICE (gestão de pastas por paciente) ===
         services.AddSingleton<IDocumentoService, DocumentoService>();
+        services.AddSingleton<IDocumentosPacienteService, DocumentosPacienteService>();
 
         // === PDF SERVICES (QuestPDF) ===
         services.AddScoped<Services.Pdf.ConsentimentoPdfService>();

@@ -21,7 +21,7 @@ UserControl reutilizável para captura de assinatura digital em WPF. Converte a 
         xmlns:controls="clr-namespace:BioDesk.App.Controls">
 
     <StackPanel>
-        <controls:SignatureCanvasControl 
+        <controls:SignatureCanvasControl
             x:Name="SignatureCanvas"
             SignatureConfirmed="SignatureCanvas_SignatureConfirmed"/>
     </StackPanel>
@@ -48,7 +48,7 @@ namespace MyApp
         {
             // Guardar assinatura capturada
             _assinaturaBase64 = e.SignatureBase64;
-            
+
             // Usar na geração de PDF, por exemplo
             GerarPdfComAssinatura(_assinaturaBase64);
         }
@@ -242,14 +242,14 @@ public class DeclaracaoSaudeViewModel : ObservableObject
 ```xaml
 <UserControl xmlns:controls="clr-namespace:BioDesk.App.Controls"
              DataContext="{Binding DeclaracaoSaudeViewModel}">
-    
+
     <StackPanel>
         <!-- Questionário de saúde -->
         <TextBox Text="{Binding MotivoConsulta}"/>
         <!-- ... outros campos -->
 
         <!-- Canvas de Assinatura -->
-        <controls:SignatureCanvasControl 
+        <controls:SignatureCanvasControl
             x:Name="SignatureCanvas"
             SignatureConfirmed="OnSignatureConfirmed"/>
 
@@ -282,15 +282,15 @@ private void OnSignatureConfirmed(object sender, SignatureConfirmedEventArgs e)
 
 ## ✅ Checklist de Uso
 
-□ Adicionar `xmlns:controls` no XAML  
-□ Adicionar `<controls:SignatureCanvasControl>` na view  
-□ Subscrever ao evento `SignatureConfirmed`  
-□ Guardar `e.SignatureBase64` numa variável/propriedade  
-□ Passar Base64 para o PDF Service  
-□ Testar geração de PDF com assinatura  
+□ Adicionar `xmlns:controls` no XAML
+□ Adicionar `<controls:SignatureCanvasControl>` na view
+□ Subscrever ao evento `SignatureConfirmed`
+□ Guardar `e.SignatureBase64` numa variável/propriedade
+□ Passar Base64 para o PDF Service
+□ Testar geração de PDF com assinatura
 
 ---
 
-**Criado:** 01 de Outubro de 2025  
-**Versão:** 1.0  
+**Criado:** 01 de Outubro de 2025
+**Versão:** 1.0
 **Autor:** BioDeskPro2 Development Team
