@@ -39,7 +39,7 @@
 - Configura remote do GitHub
 - Opção de fazer `git push -f` automaticamente
 
-**⚠️ ATENÇÃO:** 
+**⚠️ ATENÇÃO:**
 - Isto APAGA todo o histórico de commits
 - Force push SOBRESCREVE o repositório no GitHub
 - **IRREVERSÍVEL!** Confirma com "CONFIRMO" antes de executar
@@ -118,5 +118,5 @@ C:\Users\Nuno Correia\OneDrive\Documentos\
 
 ---
 
-**Data:** 2025-10-03  
+**Data:** 2025-10-03
 **Status:** ✅ SISTEMA 100% FUNCIONAL

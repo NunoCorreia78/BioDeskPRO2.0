@@ -26,7 +26,7 @@ public class PrescricaoPdfService
     }
 
     /// <summary>
-    /// Gera PDF de prescrição médica em pasta temporária
+    /// Gera PDF de prescrição médica na pasta do paciente
     /// </summary>
     public string GerarPdfPrescricao(DadosPrescricao dados)
     {
@@ -34,12 +34,18 @@ public class PrescricaoPdfService
 
         try
         {
-            // ⭐ GERAR EM PASTA TEMPORÁRIA (será copiado depois)
-            var pastaTemp = Path.GetTempPath();
-            var nomeArquivo = $"Prescricao_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-            var caminhoCompleto = Path.Combine(pastaTemp, nomeArquivo);
+            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: BaseDirectory\Pacientes\[Nome]\Prescricoes\
+            // Subir da pasta bin/Debug/net8.0-windows até raiz do projeto
+            var binDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var baseDirectory = Path.GetFullPath(Path.Combine(binDirectory, "..", "..", "..", "..", ".."));
+            var pastaPaciente = Path.Combine(baseDirectory, "Pacientes", dados.NomePaciente);
+            var pastaPrescricoes = Path.Combine(pastaPaciente, "Prescricoes");
+            Directory.CreateDirectory(pastaPrescricoes);
 
-            _logger.LogInformation("🔧 Caminho temporário: {Caminho}", caminhoCompleto);
+            var nomeArquivo = $"Prescricao_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            var caminhoCompleto = Path.Combine(pastaPrescricoes, nomeArquivo);
+
+            _logger.LogInformation("� Pasta de destino: {Pasta}", pastaPrescricoes);
 
             // Gerar PDF com QuestPDF
             Document.Create(container =>

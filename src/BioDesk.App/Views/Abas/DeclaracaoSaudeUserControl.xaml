@@ -77,11 +77,11 @@
                     <!-- Doenças Crónicas -->
                     <TextBlock Text="Doenças Crónicas" Style="{StaticResource SubHeaderStyle}"/>
                     <UniformGrid Columns="3" Margin="0,0,0,15">
-                        <CheckBox Content="Diabetes" IsChecked="{Binding TemDiabetes}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Hipertensão" IsChecked="{Binding TemHipertensao}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Cardiopatias" IsChecked="{Binding TemCardiopatias}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Alergias" IsChecked="{Binding TemAlergias}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Outras" IsChecked="{Binding TemOutrasDoencas}" Margin="0,0,0,8"/>
+                        <CheckBox Content="Diabetes" IsChecked="{Binding TemDiabetes, Mode=TwoWay}" Margin="0,0,0,8"/>
+                        <CheckBox Content="Hipertensão" IsChecked="{Binding TemHipertensao, Mode=TwoWay}" Margin="0,0,0,8"/>
+                        <CheckBox Content="Cardiopatias" IsChecked="{Binding TemCardiopatias, Mode=TwoWay}" Margin="0,0,0,8"/>
+                        <CheckBox Content="Alergias" IsChecked="{Binding TemAlergias, Mode=TwoWay}" Margin="0,0,0,8"/>
+                        <CheckBox Content="Outras" IsChecked="{Binding TemOutrasDoencas, Mode=TwoWay}" Margin="0,0,0,8"/>
                     </UniformGrid>
 
                     <!-- Campo "Especificar Outras" - Visível apenas quando "Outras" selecionado -->
@@ -243,9 +243,20 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Medicamento" Binding="{Binding Medicamento}" Width="200"/>
                                 <DataGridComboBoxColumn Header="Severidade"
-                                                        SelectedItemBinding="{Binding Severidade}"
-                                                        ItemsSource="{Binding DataContext.OpcoesSeveridade, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        Width="120"/>
+                                                        SelectedItemBinding="{Binding Severidade, UpdateSourceTrigger=PropertyChanged}"
+                                                        Width="120">
+                                    <DataGridComboBoxColumn.ElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesSeveridade, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                            <Setter Property="IsReadOnly" Value="True"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.ElementStyle>
+                                    <DataGridComboBoxColumn.EditingElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesSeveridade, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.EditingElementStyle>
+                                </DataGridComboBoxColumn>
                                 <DataGridTextColumn Header="Reação" Binding="{Binding Reacao}" Width="200"/>
                                 <DataGridTemplateColumn Header="Ações" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -376,9 +387,20 @@
                                 <DataGridTextColumn Header="Condição/Doença" Binding="{Binding CondicaoDoenca}" Width="180"/>
                                 <DataGridTextColumn Header="Idade Diagnóstico" Binding="{Binding IdadeDiagnostico}" Width="120"/>
                                 <DataGridComboBoxColumn Header="Status"
-                                                        SelectedItemBinding="{Binding Status}"
-                                                        ItemsSource="{Binding DataContext.OpcoesStatusFamiliar, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        Width="100"/>
+                                                        SelectedItemBinding="{Binding Status, UpdateSourceTrigger=PropertyChanged}"
+                                                        Width="100">
+                                    <DataGridComboBoxColumn.ElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesStatusFamiliar, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                            <Setter Property="IsReadOnly" Value="True"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.ElementStyle>
+                                    <DataGridComboBoxColumn.EditingElementStyle>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesStatusFamiliar, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                        </Style>
+                                    </DataGridComboBoxColumn.EditingElementStyle>
+                                </DataGridComboBoxColumn>
                                 <DataGridTemplateColumn Header="Ações" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -475,12 +497,11 @@
                                 <TextBlock Text="{Binding HorasSono}" Margin="8,0,0,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="horas/noite" Margin="4,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
                             </StackPanel>
-                            <TextBox Text="{Binding QualidadeSono, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}">
-                                <TextBox.Tag>
-                                    <TextBlock Text="Qualidade do sono..." Opacity="0.6"/>
-                                </TextBox.Tag>
-                            </TextBox>
+                            <!-- ✅ CORRIGIDO: Mudado de TextBox para ComboBox -->
+                            <TextBlock Text="Qualidade do Sono" Style="{StaticResource FieldLabelStyle}"/>
+                            <ComboBox ItemsSource="{Binding OpcoesQualidadeSono}"
+                                      SelectedItem="{Binding QualidadeSono}"
+                                      Style="{StaticResource FieldComboBoxStyle}"/>
                         </StackPanel>
                     </UniformGrid>
 
@@ -527,13 +548,13 @@
 
                     <StackPanel Margin="0,0,0,15">
                         <CheckBox Content="Confirmo a veracidade de todas as informações fornecidas"
-                                  IsChecked="{Binding ConfirmoVeracidade}"
+                                  IsChecked="{Binding ConfirmoVeracidade, Mode=TwoWay}"
                                   FontWeight="Medium" Margin="0,0,0,8"/>
                         <CheckBox Content="Compreendo a importância de fornecer informação completa e precisa"
-                                  IsChecked="{Binding CompreendoImportancia}"
+                                  IsChecked="{Binding CompreendoImportancia, Mode=TwoWay}"
                                   FontWeight="Medium" Margin="0,0,0,8"/>
                         <CheckBox Content="Comprometo-me a informar sobre quaisquer alterações futuras"
-                                  IsChecked="{Binding ComprometoInformarAlteracoes}"
+                                  IsChecked="{Binding ComprometoInformarAlteracoes, Mode=TwoWay}"
                                   FontWeight="Medium" Margin="0,0,0,12"/>
                     </StackPanel>
 
@@ -589,15 +610,42 @@
                                    FontSize="12" Foreground="#5A6558" Margin="0,0,0,10"/>
 
                         <Border BorderBrush="#9CAF97" BorderThickness="2" CornerRadius="8"
-                                Background="White" Margin="0,0,0,10">
-                            <Grid>
+                                Background="White" Margin="0,0,0,10"
+                                HorizontalAlignment="Left">
+                            <Grid Width="600" Height="150">
                                 <Canvas x:Name="AssinaturaCanvasDeclaracao"
                                         Width="600" Height="150"
                                         Background="White"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Stylus.IsFlicksEnabled="False"
+                                        Stylus.IsTapFeedbackEnabled="False"
+                                        Stylus.IsPressAndHoldEnabled="False"
                                         MouseDown="AssinaturaCanvas_MouseDown"
                                         MouseMove="AssinaturaCanvas_MouseMove"
                                         MouseUp="AssinaturaCanvas_MouseUp"
-                                        MouseLeave="AssinaturaCanvas_MouseLeave"/>
+                                        MouseLeave="AssinaturaCanvas_MouseLeave"
+                                        StylusDown="AssinaturaCanvas_StylusDown"
+                                        StylusMove="AssinaturaCanvas_StylusMove"
+                                        StylusUp="AssinaturaCanvas_StylusUp"/>
+
+                                <!-- ⭐ LINHA GUIA CENTRAL: Marca o MEIO da assinatura (centralizar aqui) -->
+                                <Line X1="300" Y1="0" X2="300" Y2="150"
+                                      Stroke="#9CAF97" 
+                                      StrokeThickness="2"
+                                      StrokeDashArray="5 3"
+                                      IsHitTestVisible="False"
+                                      Opacity="0.8"/>
+                                
+                                <!-- Label explicativo da linha guia -->
+                                <TextBlock Text="← Centro da Assinatura →" 
+                                           Canvas.Left="220" 
+                                           Canvas.Top="5"
+                                           FontSize="9" 
+                                           FontStyle="Italic"
+                                           Foreground="#9CAF97"
+                                           IsHitTestVisible="False"
+                                           Opacity="0.7"/>
 
                                 <TextBlock x:Name="AssinaturaInstrucoesDeclaracao"
                                            Text="Clique e arraste para assinar"

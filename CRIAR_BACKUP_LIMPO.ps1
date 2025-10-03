@@ -51,7 +51,7 @@ $excluirFicheiros = @(
 )
 
 # Função para verificar se pasta deve ser excluída
-function Should-Exclude($path) {
+function Test-ShouldExclude($path) {
     foreach ($item in $excluir) {
         if ($path -like "*\$item\*" -or $path -like "*\$item") {
             return $true
@@ -64,12 +64,12 @@ function Should-Exclude($path) {
 Get-ChildItem -Path $origem -Recurse | ForEach-Object {
     $relativePath = $_.FullName.Substring($origem.Length)
     $targetPath = Join-Path $destino $relativePath
-    
+
     # Verificar se deve excluir
-    if (Should-Exclude $_.FullName) {
+    if (Test-ShouldExclude $_.FullName) {
         return
     }
-    
+
     # Verificar extensão de ficheiro
     $skip = $false
     foreach ($pattern in $excluirFicheiros) {
@@ -79,7 +79,7 @@ Get-ChildItem -Path $origem -Recurse | ForEach-Object {
         }
     }
     if ($skip) { return }
-    
+
     # Copiar
     if ($_.PSIsContainer) {
         New-Item -ItemType Directory -Path $targetPath -Force | Out-Null

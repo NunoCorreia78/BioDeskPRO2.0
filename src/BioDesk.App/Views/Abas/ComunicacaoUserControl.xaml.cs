@@ -1,7 +1,9 @@
+using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace BioDesk.App.Views.Abas
 {
@@ -64,6 +66,21 @@ namespace BioDesk.App.Views.Abas
             if (window?.DataContext is BioDesk.ViewModels.FichaPacienteViewModel viewModel)
             {
                 viewModel.MarcarComoAlterado();
+            }
+        }
+
+        /// <summary>
+        /// ⭐ NOVO: Handler para duplo-clique em documento → Abre PDF
+        /// </summary>
+        private void ListBoxDocumentos_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not ComunicacaoViewModel viewModel)
+                return;
+
+            // Obter documento clicado
+            if (sender is ListBox listBox && listBox.SelectedItem is DocumentoPacienteViewModel documento)
+            {
+                viewModel.AbrirDocumentoCommand.Execute(documento);
             }
         }
     }

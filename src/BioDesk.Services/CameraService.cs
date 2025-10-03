@@ -117,8 +117,12 @@ public class CameraService : ICameraService, IDisposable
 
     public Task StartPreviewAsync(int cameraIndex)
     {
+        // ✅ CORRETO: Evitar .Wait() deadlock - usar flag diretamente
         if (_isPreviewRunning)
-            StopPreviewAsync().Wait();
+        {
+            _isPreviewRunning = false;
+            _previewTimer.Stop();
+        }
 
         _activeCamera = new CameraInfo
         {

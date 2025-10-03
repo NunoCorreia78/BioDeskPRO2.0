@@ -49,8 +49,9 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
         OpcoesAlcool = new[] { "Selecione...", "Nunca", "Ocasional", "Regular", "Excessivo" };
         OpcoesExercicio = new[] { "Selecione...", "Sedentário", "Ligeiro", "Moderado", "Intenso" };
         OpcoesDieta = new[] { "Selecione...", "Omnívora", "Vegetariana", "Vegana", "Mediterrânica", "Outras" };
-        OpcoesSeveridade = new[] { "Selecione...", "Leve", "Moderada", "Grave" };
-        OpcoesStatusFamiliar = new[] { "Selecione...", "Vivo", "Falecido" };
+        OpcoesQualidadeSono = new ObservableCollection<string> { "Selecione...", "Boa", "Razoável", "Má", "Insónia" };  // ✅ ObservableCollection
+        OpcoesSeveridade = new ObservableCollection<string> { "Selecione...", "Leve", "Moderada", "Grave", "Muito Grave" };  // ✅ ObservableCollection
+        OpcoesStatusFamiliar = new ObservableCollection<string> { "Selecione...", "Ativo", "Controlado", "Em Remissão", "Curado", "Desconhecido" };  // ✅ ObservableCollection
 
         _logger.LogInformation("DeclaracaoSaudeViewModel inicializado");
     }
@@ -214,8 +215,9 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
     public string[] OpcoesAlcool { get; }
     public string[] OpcoesExercicio { get; }
     public string[] OpcoesDieta { get; }
-    public string[] OpcoesSeveridade { get; }
-    public string[] OpcoesStatusFamiliar { get; }
+    public ObservableCollection<string> OpcoesQualidadeSono { get; }  // ✅ ObservableCollection
+    public ObservableCollection<string> OpcoesSeveridade { get; }  // ✅ ObservableCollection
+    public ObservableCollection<string> OpcoesStatusFamiliar { get; }  // ✅ ObservableCollection
 
     #endregion
 

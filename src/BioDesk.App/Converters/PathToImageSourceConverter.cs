@@ -28,7 +28,7 @@ public class PathToImageSourceConverter : IValueConverter
             bitmap.UriSource = new Uri(caminho, UriKind.Absolute);
             bitmap.EndInit();
             bitmap.Freeze(); // Torna thread-safe e imutável
-            
+
             return bitmap;
         }
         catch

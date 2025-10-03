@@ -78,25 +78,6 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
-        // ⚡ LOG MANUAL PARA FICHEIRO (ILogger não funciona!)
-        LogManual("📝 IrisdiagnosticoViewModel CONSTRUTOR chamado!");
-    }
-    
-    // ⚡ MÉTODO AUXILIAR PARA LOG MANUAL
-    private void LogManual(string mensagem)
-    {
-        try
-        {
-            var logFile = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "BioDeskPro2", "LOGS_DEBUG.txt"
-            );
-            var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
-            var linha = $"[{timestamp}] {mensagem}\n";
-            System.IO.File.AppendAllText(logFile, linha);
-        }
-        catch { /* Ignorar erros de log */ }
     }
 
     /// <summary>
@@ -104,25 +85,20 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     /// </summary>
     public async Task CarregarDadosAsync(Paciente paciente)
     {
-        LogManual("🔍 DEBUG: CarregarDadosAsync INICIADO");
-        _logger.LogInformation("🔍 DEBUG: CarregarDadosAsync INICIADO");
-        
         if (paciente == null)
         {
-            LogManual("⚠️ CarregarDadosAsync: Paciente é NULL");
             _logger.LogWarning("⚠️ Tentativa de carregar dados com paciente nulo");
             return;
         }
 
-        LogManual($"🔍 DEBUG: Paciente recebido: ID={paciente.Id}, Nome={paciente.NomeCompleto}");
-        _logger.LogInformation("🔍 DEBUG: Paciente recebido: ID={Id}, Nome={Nome}", paciente.Id, paciente.NomeCompleto);
+        _logger.LogInformation("� Carregando dados de íris para paciente: {Nome} (ID={Id})", paciente.NomeCompleto, paciente.Id);
 
         PacienteAtual = paciente;
-        
+
         _logger.LogInformation("🔍 DEBUG: PacienteAtual setado. Chamando CarregarImagensAsync...");
-        
+
         await CarregarImagensAsync();
-        
+
         _logger.LogInformation("🔍 DEBUG: CarregarDadosAsync COMPLETO. Total de imagens: {Count}", IrisImagens.Count);
     }
 
@@ -139,11 +115,9 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
         try
         {
-            LogManual($"🔍 CarregarImagensAsync: Paciente ID={PacienteAtual.Id}, Nome={PacienteAtual.NomeCompleto}");
-            _logger.LogInformation("🔍 CarregarImagensAsync: Paciente ID={Id}, Nome={Nome}", PacienteAtual.Id, PacienteAtual.NomeCompleto);
+            _logger.LogInformation("🔍 Carregando imagens para Paciente ID={Id}, Nome={Nome}", PacienteAtual.Id, PacienteAtual.NomeCompleto);
 
             var todasImagens = await _unitOfWork.IrisImagens.GetAllAsync();
-            LogManual($"🔍 Total de imagens na BD: {todasImagens.Count()}");
             _logger.LogInformation("🔍 Total de imagens na BD: {Count}", todasImagens.Count());
 
             var imagensDoPaciente = todasImagens
@@ -151,13 +125,12 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
                 .OrderByDescending(i => i.DataCaptura)
                 .ToList();
 
-            LogManual($"🔍 Imagens filtradas para Paciente {PacienteAtual.Id}: {imagensDoPaciente.Count}");
             _logger.LogInformation("🔍 Imagens filtradas para Paciente {Id}: {Count}", PacienteAtual.Id, imagensDoPaciente.Count);
 
             // Log detalhado de cada imagem
             foreach (var img in imagensDoPaciente)
             {
-                _logger.LogInformation("  📷 Imagem ID={Id}, Olho={Olho}, Caminho={Caminho}, Data={Data}", 
+                _logger.LogInformation("  📷 Imagem ID={Id}, Olho={Olho}, Caminho={Caminho}, Data={Data}",
                     img.Id, img.Olho, img.CaminhoImagem, img.DataCaptura);
             }
 
@@ -295,13 +268,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
             if (resultado != System.Windows.MessageBoxResult.Yes)
             {
-                LogManual("❌ Remoção cancelada pelo utilizador");
-                _logger.LogInformation("❌ Remoção de imagem cancelada pelo utilizador");
                 return;
             }
-
-            LogManual("✅ Utilizador confirmou remoção. Iniciando processo...");
-            _logger.LogInformation("✅ Utilizador confirmou remoção. Iniciando processo...");
 
             IsLoading = true;
             ErrorMessage = null;
@@ -309,77 +277,52 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             var imagemId = IrisImagemSelecionada.Id;
             var caminhoImagem = IrisImagemSelecionada.CaminhoImagem;
 
-            LogManual($"🔍 ID da imagem: {imagemId}, Caminho: {caminhoImagem}");
-            _logger.LogInformation($"🔍 ID da imagem: {imagemId}, Caminho: {caminhoImagem}");
-
             // 🔓 Limpar seleção para liberar binding (converter já carregou em memória)
-            LogManual("🔓 Limpando seleção para liberar referência...");
             IrisImagemSelecionada = null;
-            LogManual("✅ Seleção limpa");
 
             // 2️⃣ Remover arquivo físico (se existir)
             if (System.IO.File.Exists(caminhoImagem))
             {
-                LogManual($"🗑️ Arquivo existe, deletando: {caminhoImagem}");
                 System.IO.File.Delete(caminhoImagem);
-                LogManual("✅ Arquivo físico DELETADO com sucesso");
                 _logger.LogInformation("🗑️ Arquivo físico removido: {Caminho}", caminhoImagem);
             }
             else
             {
-                LogManual($"⚠️ Arquivo físico NÃO EXISTE: {caminhoImagem}");
                 _logger.LogWarning("⚠️ Arquivo físico não encontrado: {Caminho}", caminhoImagem);
             }
 
             // 3️⃣ Remover do banco de dados (cascade delete remove IrisMarcas automaticamente)
-            LogManual($"🔍 Buscando entidade na BD pelo ID {imagemId}...");
             var imagemParaRemover = await _unitOfWork.IrisImagens.GetByIdAsync(imagemId);
-            
+
             if (imagemParaRemover == null)
             {
-                LogManual($"❌ ERRO: Imagem ID {imagemId} não encontrada na BD!");
                 ErrorMessage = "Imagem não encontrada na base de dados.";
+                _logger.LogError("❌ Imagem ID {Id} não encontrada na BD", imagemId);
                 return;
             }
 
-            LogManual($"✅ Entidade encontrada: Olho={imagemParaRemover.Olho}, PacienteId={imagemParaRemover.PacienteId}");
-            LogManual($"🔍 Chamando _unitOfWork.IrisImagens.Remove para ID {imagemId}");
             _unitOfWork.IrisImagens.Remove(imagemParaRemover);
-            LogManual("✅ Remove() executado, entidade marcada para remoção");
-
-            LogManual("🔍 Salvando mudanças na BD...");
-            _logger.LogInformation("🔍 Salvando mudanças na BD...");
             await _unitOfWork.SaveChangesAsync();
 
-            LogManual($"✅ Imagem removida da BD: ID {imagemId}");
-            _logger.LogInformation("✅ Imagem de íris removida da BD: ID {Id}", imagemId);
+            _logger.LogInformation("✅ Imagem de íris removida: ID {Id}, Olho {Olho}", imagemId, imagemParaRemover.Olho);
 
-            // 4️⃣ Recarregar lista (seleção já foi limpa antes de deletar ficheiro)
-            LogManual("🔍 Recarregando lista de imagens...");
-            _logger.LogInformation("🔍 Recarregando lista de imagens...");
+            // 4️⃣ Recarregar lista
             await CarregarImagensAsync();
-            LogManual("✅ Lista recarregada! RemoverImagemAsync COMPLETO");
         }
         catch (Exception ex)
         {
-            LogManual($"❌❌❌ EXCEÇÃO CAPTURADA: {ex.GetType().Name}");
-            LogManual($"Mensagem: {ex.Message}");
-            LogManual($"StackTrace: {ex.StackTrace}");
             _logger.LogError(ex, "❌ Erro ao remover imagem de íris");
             ErrorMessage = $"Erro ao remover imagem: {ex.Message}";
         }
         finally
         {
             IsLoading = false;
-            LogManual("🏁 RemoverImagemAsync FINALIZADO (finally block)");
         }
     }
 
     private bool CanRemoverImagem()
     {
-        var pode = IrisImagemSelecionada != null;
-        _logger.LogInformation($"🔍 DEBUG: CanRemoverImagem chamado! IrisImagemSelecionada={(IrisImagemSelecionada?.Olho ?? "NULL")}, Pode={pode}");
-        return pode;
+        return IrisImagemSelecionada != null;
     }
 
     /// <summary>
@@ -580,8 +523,9 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
         try
         {
-            // TODO: Mostrar dialog para editar observações
-            // Por agora, apenas log
+            // TODO: Integração do dialog deve ser feita na camada View (IrisdiagnosticoUserControl)
+            // ViewModels não devem referenciar Views/Dialogs (violação MVVM)
+            // Por agora, apenas log para confirmar que comando executa
             _logger.LogInformation("📝 Editar observações da marca ID {Id}", marca.Id);
 
             // Salvar na BD

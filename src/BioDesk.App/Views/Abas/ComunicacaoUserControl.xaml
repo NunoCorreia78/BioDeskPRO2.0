@@ -140,7 +140,8 @@
                                  MaxHeight="200"
                                  Background="White"
                                  BorderBrush="#E3E9DE"
-                                 BorderThickness="1">
+                                 BorderThickness="1"
+                                 MouseDoubleClick="ListBoxDocumentos_MouseDoubleClick">
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>

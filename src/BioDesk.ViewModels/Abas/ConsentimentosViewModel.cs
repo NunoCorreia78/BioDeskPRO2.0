@@ -40,8 +40,14 @@ public partial class ConsentimentosViewModel : ObservableValidator
         NumeroSessoesPrevistas = 1;
         CustoPorSessao = 0;
 
-        // Carregar dados de exemplo
-        CarregarConsentimentosExemplo();
+        // ✅ Carregar dados de exemplo APENAS em DEBUG
+        if (SeedData.ConsentimentosSeedData.ShouldLoadSampleData())
+        {
+            foreach (var exemplo in SeedData.ConsentimentosSeedData.GetExemplos())
+            {
+                ConsentimentosExistentes.Add(exemplo);
+            }
+        }
 
         AtualizarContadores();
 
@@ -459,47 +465,6 @@ public partial class ConsentimentosViewModel : ObservableValidator
         ConsentimentosAtivos = ConsentimentosExistentes.Count(c => c.Estado == "Ativo");
     }
 
-    private void CarregarConsentimentosExemplo()
-    {
-        ConsentimentosExistentes.Add(new ConsentimentoInformado
-        {
-            Id = 1,
-            TipoTratamento = "Fitoterapia",
-            DescricaoTratamento = "Tratamento com plantas medicinais para ansiedade",
-            DataCriacao = DateTime.Now.AddDays(-30),
-            Estado = "Ativo",
-            NumeroSessoesPrevistas = 10,
-            CustoPorSessao = 45,
-            CustoTotalEstimado = 450
-        });
-
-        ConsentimentosExistentes.Add(new ConsentimentoInformado
-        {
-            Id = 2,
-            TipoTratamento = "Acupunctura",
-            DescricaoTratamento = "Tratamento para dores lombares",
-            DataCriacao = DateTime.Now.AddDays(-15),
-            Estado = "Ativo",
-            NumeroSessoesPrevistas = 8,
-            CustoPorSessao = 50,
-            CustoTotalEstimado = 400
-        });
-
-        ConsentimentosExistentes.Add(new ConsentimentoInformado
-        {
-            Id = 3,
-            TipoTratamento = "Massagem",
-            DescricaoTratamento = "Massagem relaxante mensal",
-            DataCriacao = DateTime.Now.AddDays(-60),
-            Estado = "Revogado",
-            DataRevogacao = DateTime.Now.AddDays(-10),
-            MotivoRevogacao = "Mudança de terapeuta",
-            NumeroSessoesPrevistas = 12,
-            CustoPorSessao = 40,
-            CustoTotalEstimado = 480
-        });
-    }
-
     #endregion
 
     #region === GERAÇÃO DE PDF ===
@@ -572,7 +537,7 @@ public partial class ConsentimentosViewModel : ObservableValidator
                 NomePaciente = NomePaciente,
                 TipoTratamento = TipoTratamentoSelecionado,
                 DescricaoTratamento = DescricaoTratamento,
-                InformacoesAdicionais = string.Empty, // TODO: Adicionar campo de observações
+                InformacoesAdicionais = string.Empty, // Campo removido - não necessário
                 DataConsentimento = DateTime.Now,
                 NumeroSessoes = NumeroSessoesPrevistas > 0 ? NumeroSessoesPrevistas : null,
                 CustoPorSessao = CustoPorSessao > 0 ? CustoPorSessao : null,

@@ -106,12 +106,12 @@ $fileCount = 0
 Get-ChildItem -Path $origem -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
     $relativePath = $_.FullName.Substring($origem.Length)
     $targetPath = Join-Path $destino $relativePath
-    
+
     # Verificar se deve excluir
     if (Should-Exclude $_.FullName) {
         return
     }
-    
+
     # Verificar extensão de ficheiro
     $skip = $false
     foreach ($pattern in $excluirFicheiros) {
@@ -121,7 +121,7 @@ Get-ChildItem -Path $origem -Recurse -ErrorAction SilentlyContinue | ForEach-Obj
         }
     }
     if ($skip) { return }
-    
+
     # Copiar
     if ($_.PSIsContainer) {
         New-Item -ItemType Directory -Path $targetPath -Force -ErrorAction SilentlyContinue | Out-Null
@@ -226,7 +226,7 @@ if ($backups.Count -gt 1) {
     for ($i = 0; $i -lt $backups.Count; $i++) {
         $backup = $backups[$i]
         $tamanho = (Get-ChildItem -Path $backup.FullName -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1MB
-        
+
         if ($i -eq 0) {
             Write-Host "   ✅ $($backup.Name) - $([math]::Round($tamanho, 2)) MB [MANTIDO]" -ForegroundColor Green
         } else {
@@ -243,9 +243,9 @@ if ($backups.Count -gt 1) {
     for ($i = 1; $i -lt $backups.Count; $i++) {
         $backup = $backups[$i]
         $tamanho = (Get-ChildItem -Path $backup.FullName -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1MB
-        
+
         Remove-Item -Path $backup.FullName -Recurse -Force -ErrorAction SilentlyContinue
-        
+
         $apagados++
         $espacoLiberado += $tamanho
     }
@@ -431,9 +431,9 @@ if ($pushConfirm -eq "S" -or $pushConfirm -eq "s") {
     Write-Host ""
     Write-Host "🚀 Fazendo force push para GitHub..." -ForegroundColor Yellow
     Write-Host ""
-    
+
     git push -f origin main
-    
+
     Write-Host ""
     Write-Host "✅ Push concluído com sucesso!" -ForegroundColor Green
 } else {

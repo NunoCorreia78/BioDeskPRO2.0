@@ -80,7 +80,8 @@
                         <StackPanel Margin="15,0,15,0">
                             <TextBlock Text="Como teve conhecimento" Style="{StaticResource FieldLabelStyle}"/>
                             <ComboBox x:Name="ProvenienciaComboBox"
-                                    SelectedItem="{Binding PacienteAtual.Proveniencia, UpdateSourceTrigger=PropertyChanged}"
+                                    Text="{Binding PacienteAtual.Proveniencia, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEditable="False"
                                     Style="{StaticResource FieldComboBoxStyle}">
                                 <ComboBoxItem Content="Recomendação médica"/>
                                 <ComboBoxItem Content="Amigo/Familiar"/>

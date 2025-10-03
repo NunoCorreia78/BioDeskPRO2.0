@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;  // ✅ ADICIONADO para LINQ (Select, etc.)
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -91,36 +92,23 @@ public partial class DeclaracaoSaudeUserControl : UserControl
 
     // ===== ASSINATURA DIGITAL =====
 
+    // ===== MOUSE EVENTS (Mouse tradicional) =====
     private void AssinaturaCanvas_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed)
+        if (e.LeftButton == MouseButtonState.Pressed && e.StylusDevice == null)
         {
-            _isDrawing = true;
-            _hasSignature = true;
-
-            // Oculta as instruções
-            AssinaturaInstrucoesDeclaracao.Visibility = Visibility.Collapsed;
-
-            // Cria nova linha
-            _currentStroke = new Polyline
-            {
-                Stroke = Brushes.Black,
-                StrokeThickness = 2,
-                StrokeLineJoin = PenLineJoin.Round,
-                StrokeStartLineCap = PenLineCap.Round,
-                StrokeEndLineCap = PenLineCap.Round
-            };
-
-            Point startPoint = e.GetPosition(AssinaturaCanvasDeclaracao);
-            _currentStroke.Points.Add(startPoint);
-            AssinaturaCanvasDeclaracao.Children.Add(_currentStroke);
-            AssinaturaCanvasDeclaracao.CaptureMouse();
+            System.Diagnostics.Debug.WriteLine("🖱️ MOUSE DOWN detectado!"); // DEBUG
+            IniciarDesenho(e.GetPosition(AssinaturaCanvasDeclaracao));
+        }
+        else if (e.StylusDevice != null)
+        {
+            System.Diagnostics.Debug.WriteLine("🖱️ MOUSE DOWN ignorado (é stylus)"); // DEBUG
         }
     }
 
     private void AssinaturaCanvas_MouseMove(object sender, MouseEventArgs e)
     {
-        if (_isDrawing && _currentStroke != null && e.LeftButton == MouseButtonState.Pressed)
+        if (_isDrawing && _currentStroke != null && e.LeftButton == MouseButtonState.Pressed && e.StylusDevice == null)
         {
             Point currentPoint = e.GetPosition(AssinaturaCanvasDeclaracao);
             _currentStroke.Points.Add(currentPoint);
@@ -129,20 +117,83 @@ public partial class DeclaracaoSaudeUserControl : UserControl
 
     private void AssinaturaCanvas_MouseUp(object sender, MouseButtonEventArgs e)
     {
-        if (_isDrawing)
+        if (e.StylusDevice == null)
         {
-            _isDrawing = false;
-            _currentStroke = null;
-            AssinaturaCanvasDeclaracao.ReleaseMouseCapture();
+            FinalizarDesenho();
         }
     }
 
     private void AssinaturaCanvas_MouseLeave(object sender, MouseEventArgs e)
     {
+        if (_isDrawing && e.StylusDevice == null)
+        {
+            FinalizarDesenho();
+        }
+    }
+
+    // ===== STYLUS EVENTS (Wacom / Canetas digitais) =====
+    private void AssinaturaCanvas_StylusDown(object sender, StylusDownEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine("🖊️ STYLUS DOWN detectado!"); // DEBUG
+        IniciarDesenho(e.GetPosition(AssinaturaCanvasDeclaracao));
+        e.Handled = true; // Prevenir que dispare MouseDown também
+    }
+
+    private void AssinaturaCanvas_StylusMove(object sender, StylusEventArgs e)
+    {
+        if (_isDrawing && _currentStroke != null)
+        {
+            StylusPointCollection points = e.GetStylusPoints(AssinaturaCanvasDeclaracao);
+            System.Diagnostics.Debug.WriteLine($"🖊️ STYLUS MOVE - {points.Count} pontos"); // DEBUG
+            foreach (StylusPoint sp in points)
+            {
+                _currentStroke.Points.Add(new Point(sp.X, sp.Y));
+            }
+            e.Handled = true;
+        }
+    }
+
+    private void AssinaturaCanvas_StylusUp(object sender, StylusEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine("🖊️ STYLUS UP detectado!"); // DEBUG
+        FinalizarDesenho();
+        e.Handled = true;
+    }
+
+    // ===== MÉTODOS AUXILIARES =====
+    private void IniciarDesenho(Point startPoint)
+    {
+        _isDrawing = true;
+        _hasSignature = true;
+
+        // Oculta as instruções
+        AssinaturaInstrucoesDeclaracao.Visibility = Visibility.Collapsed;
+
+        // ✅ CAPTURAR MOUSE/STYLUS ANTES de criar stroke
+        AssinaturaCanvasDeclaracao.CaptureStylus();
+        AssinaturaCanvasDeclaracao.CaptureMouse();
+
+        // Cria nova linha
+        _currentStroke = new Polyline
+        {
+            Stroke = Brushes.Black,
+            StrokeThickness = 2,
+            StrokeLineJoin = PenLineJoin.Round,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round
+        };
+
+        _currentStroke.Points.Add(startPoint);
+        AssinaturaCanvasDeclaracao.Children.Add(_currentStroke);
+    }
+
+    private void FinalizarDesenho()
+    {
         if (_isDrawing)
         {
             _isDrawing = false;
             _currentStroke = null;
+            AssinaturaCanvasDeclaracao.ReleaseStylusCapture();
             AssinaturaCanvasDeclaracao.ReleaseMouseCapture();
         }
     }
@@ -227,22 +278,53 @@ public partial class DeclaracaoSaudeUserControl : UserControl
 
             var pdfService = app.ServiceProvider.GetRequiredService<BioDesk.Services.Pdf.DeclaracaoSaudePdfService>();
 
+            // ✅ CORRIGIDO: Pegar dados REAIS do ViewModel
+            var viewModel = DataContext as DeclaracaoSaudeViewModel;
+            
             // 📋 Preparar dados da declaração
             var dadosDeclaracao = new BioDesk.Services.Pdf.DadosDeclaracaoSaude
             {
-                NomePaciente = TxtNomePacienteDeclaracao.Text,
-                DataDeclaracao = DateTime.TryParse(TxtDataDeclaracao.Text, out var data) ? data : DateTime.Now,
+                NomePaciente = viewModel?.NomePaciente ?? "Paciente",
+                DataDeclaracao = DateTime.Now,
                 AssinaturaPacienteBase64 = assinaturaPacienteBase64,
                 AssinaturaTerapeutaPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "assinatura_terapeuta.png"),
 
-                // Secções do questionário (texto livre simplificado)
-                MotivoConsulta = "Consulta registada pelo utilizador",
-                HistoriaClinica = "Ver formulário completo no sistema",
-                MedicacaoAtual = "Ver formulário completo no sistema",
-                Alergias = "Ver formulário completo no sistema",
-                EstiloVida = "Ver formulário completo no sistema",
-                HistoriaFamiliar = "Ver formulário completo no sistema",
-                ObservacoesClinicas = "Declaração assinada digitalmente"
+                // ✅ CORRIGIDO: Secções com dados REAIS do questionário
+                MotivoConsulta = viewModel != null
+                    ? $"Consulta de saúde integrativa. Paciente: {viewModel.NomePaciente}"
+                    : "Consulta registada",
+                    
+                HistoriaClinica = viewModel != null
+                    ? $"**DOENÇAS CRÓNICAS:**\n" +
+                      $"Diabetes: {(viewModel.TemDiabetes ? "Sim" : "Não")}, " +
+                      $"Hipertensão: {(viewModel.TemHipertensao ? "Sim" : "Não")}, " +
+                      $"Cardiopatias: {(viewModel.TemCardiopatias ? "Sim" : "Não")}\n" +
+                      (viewModel.TemOutrasDoencas ? $"Outras: {viewModel.EspecificacaoOutrasDoencas}\n" : "") +
+                      $"\n**CIRURGIAS:** {viewModel.Cirurgias.Count} registada(s)" +
+                      $"\n**HOSPITALIZAÇÕES:** {viewModel.Hospitalizacoes.Count} registada(s)"
+                    : "Ver sistema",
+                    
+                MedicacaoAtual = viewModel != null && viewModel.MedicamentosAtuais.Any()
+                    ? "**MEDICAMENTOS ATUAIS:**\n" + string.Join("\n• ", viewModel.MedicamentosAtuais.Select(m => $"{m.Nome} - {m.Dosagem} ({m.Frequencia})"))
+                    : "Sem medicação registada",
+                    
+                Alergias = viewModel != null && viewModel.AlergiasMedicamentosas.Any()
+                    ? "**ALERGIAS MEDICAMENTOSAS:**\n" + string.Join("\n• ", viewModel.AlergiasMedicamentosas.Select(a => $"{a.Medicamento} - Severidade: {a.Severidade} - Reação: {a.Reacao}"))
+                    : "Sem alergias registadas",
+                    
+                EstiloVida = viewModel != null
+                    ? $"**ESTILO DE VIDA:**\n" +
+                      $"• Sono: {viewModel.HorasSono} horas/noite ({viewModel.QualidadeSono ?? "Não especificado"})\n" +
+                      $"• Suplementos: {viewModel.SuplementosAlimentares ?? "Não especificado"}\n" +
+                      $"• Medicamentos Naturais: {viewModel.MedicamentosNaturais ?? "Não especificado"}"
+                    : "Ver sistema",
+                    
+                HistoriaFamiliar = viewModel != null && viewModel.HistoriaFamiliar.Any()
+                    ? "**HISTÓRIA FAMILIAR:**\n" + string.Join("\n• ", viewModel.HistoriaFamiliar.Select(h => $"{h.GrauParentesco}: {h.CondicaoDoenca} (Idade diagnóstico: {h.IdadeDiagnostico}, Status: {h.Status})"))
+                    : "Sem histórico familiar registado",
+                    
+                ObservacoesClinicas = "Declaração de saúde preenchida e assinada digitalmente pelo paciente. " +
+                                      "Todos os dados foram fornecidos de forma voluntária e consciente."
             };
 
             // 📄 Gerar PDF

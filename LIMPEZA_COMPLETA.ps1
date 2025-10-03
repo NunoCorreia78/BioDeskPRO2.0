@@ -48,7 +48,7 @@ if (Test-Path $pastaBackups) {
             $backup = $backups[$i]
             $tamanho = (Get-ChildItem -Path $backup.FullName -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1MB
             $data = $backup.CreationTime.ToString("dd/MM/yyyy HH:mm")
-            
+
             if ($i -eq 0) {
                 Write-Host "   ✅ $($backup.Name) - $([math]::Round($tamanho, 2)) MB - $data [SERÁ MANTIDO]" -ForegroundColor Green
             } else {
@@ -66,10 +66,10 @@ if (Test-Path $pastaBackups) {
             for ($i = 1; $i -lt $backups.Count; $i++) {
                 $backup = $backups[$i]
                 $tamanho = (Get-ChildItem -Path $backup.FullName -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1MB
-                
+
                 Write-Host "   🗑️  Apagando: $($backup.Name)..." -ForegroundColor Gray
                 Remove-Item -Path $backup.FullName -Recurse -Force -ErrorAction SilentlyContinue
-                
+
                 $apagados++
                 $espacoLiberado += $tamanho
             }
@@ -110,7 +110,7 @@ if ($statusOutput) {
     Write-Host ""
     Write-Host "Estas alterações vão ser incluídas no novo commit inicial." -ForegroundColor Yellow
     Write-Host ""
-    
+
     $continuar = Read-Host "Continuar assim mesmo? (S/N)"
     if ($continuar -ne "S" -and $continuar -ne "s") {
         Write-Host ""
@@ -270,9 +270,9 @@ if ($pushConfirm -eq "S" -or $pushConfirm -eq "s") {
     Write-Host ""
     Write-Host "🚀 Fazendo force push para GitHub..." -ForegroundColor Yellow
     Write-Host ""
-    
+
     git push -f origin main
-    
+
     Write-Host ""
     Write-Host "✅ Push concluído com sucesso!" -ForegroundColor Green
     Write-Host ""

@@ -33,9 +33,11 @@ public class DeclaracaoSaudePdfService
 
         try
         {
-            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: Pacientes\[Nome]\DeclaracoesSaude\
-            var pastaDocumentos = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var pastaPaciente = Path.Combine(pastaDocumentos, "BioDeskPro2", "Pacientes", dados.NomePaciente);
+            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: BaseDirectory\Pacientes\[Nome]\DeclaracoesSaude\
+            // Subir da pasta bin/Debug/net8.0-windows até raiz do projeto
+            var binDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var baseDirectory = Path.GetFullPath(Path.Combine(binDirectory, "..", "..", "..", "..", ".."));
+            var pastaPaciente = Path.Combine(baseDirectory, "Pacientes", dados.NomePaciente);
             var pastaDeclaracoes = Path.Combine(pastaPaciente, "DeclaracoesSaude");
             Directory.CreateDirectory(pastaDeclaracoes);
 
@@ -281,11 +283,10 @@ public class DeclaracaoSaudePdfService
                                 .Border(1)
                                 .BorderColor(Colors.Grey.Lighten2)
                                 .Padding(5)
-                                .Height(80)
-                                .AlignCenter()  // Centraliza horizontalmente
+                                .Height(80)  // ✅ Altura fixa
+                                .AlignCenter()  // Centraliza o container
                                 .AlignMiddle()  // Centraliza verticalmente
-                                .Image(imageBytes)
-                                .FitArea();
+                                .Image(imageBytes, ImageScaling.FitWidth);  // ✅ CORRIGIDO: FitWidth em vez de FitArea
                         }
                         catch (Exception ex)
                         {

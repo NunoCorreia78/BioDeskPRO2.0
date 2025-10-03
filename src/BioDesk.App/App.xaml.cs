@@ -132,34 +132,9 @@ Inner Exceptions:
 
     protected override async void OnStartup(StartupEventArgs e)
     {
-        // ⚡ CRITICAL: Logger manual para ficheiro
-        var logFile = System.IO.Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "BioDeskPro2", "LOGS_DEBUG.txt"
-        );
-        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logFile)!);
-        
-        void Log(string mensagem)
-        {
-            var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
-            var linha = $"[{timestamp}] {mensagem}\n";
-            System.IO.File.AppendAllText(logFile, linha);
-        }
-        
         try
         {
-            // Limpar ficheiro
-            if (System.IO.File.Exists(logFile))
-                System.IO.File.Delete(logFile);
-            
-            Log("========================================");
-            Log("🚀 BIODESK PRO 2 - ARRANQUE");
-            Log($"Data: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-            Log("========================================");
-            Log("");
-            
             Console.WriteLine("🔧 OnStartup iniciado...");
-            Log("🔧 OnStartup iniciado...");
 
             // Configurar cultura portuguesa para toda a aplicação
             var culture = new CultureInfo("pt-PT");
@@ -179,14 +154,7 @@ Inner Exceptions:
                     XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
 
             Console.WriteLine("🏗️ Configurando host com DI...");
-            Log("🏗️ Configurando host com DI...");
-            
-            // ⚡ CRITICAL: Logger para FICHEIRO (já que console não funciona!)
-            var logFilePath = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "BioDeskPro2", "LOGS_DEBUG.txt"
-            );
-            
+
             // Configurar o host com DI
             _host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
@@ -203,30 +171,23 @@ Inner Exceptions:
                     logging.SetMinimumLevel(LogLevel.Information); // Information level
                 })
                 .Build();
-            
-            Log("✅ Host configurado com sucesso!");
 
             Console.WriteLine("✅ Sistema limpo iniciado com sucesso...");
-            Log("✅ Sistema limpo iniciado com sucesso...");
-            
+
             Console.WriteLine("📊 Aplicando migrations ao arranque...");
-            Log("📊 Aplicando migrations ao arranque...");
             // ⚡ CRITICAL: Garantir que DB tem schema atualizado ANTES de iniciar serviços
             using (var scope = _host.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
                 await dbContext.Database.MigrateAsync();
                 Console.WriteLine("✅ Migrations aplicadas com sucesso!");
-                Log("✅ Migrations aplicadas com sucesso!");
             }
 
             Console.WriteLine("🚀 Iniciando host...");
-            Log("🚀 Iniciando host...");
             // Iniciar o host
             await _host.StartAsync();
 
             Console.WriteLine("🪟 Criando MainWindow...");
-            Log("🪟 Criando MainWindow...");
             // Criar e mostrar a janela principal
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
 
@@ -235,18 +196,9 @@ Inner Exceptions:
             logger.LogInformation("🚀 BioDeskPro2 inicializado com sucesso!");
 
             Console.WriteLine("📺 Mostrando MainWindow...");
-            Log("📺 Mostrando MainWindow...");
             mainWindow.Show();
             logger.LogInformation("✅ MainWindow apresentada - aplicação pronta!");
             Console.WriteLine("✅ Aplicação pronta! Aguardando interação do utilizador...");
-            Log("✅ Aplicação pronta! Aguardando interação do utilizador...");
-            Log("");
-            Log("🎯 INSTRUÇÕES:");
-            Log("   1. Selecione um paciente na aplicação");
-            Log("   2. Vá para tab 'Irisdiagnóstico'");
-            Log("   3. Verifique os logs neste ficheiro!");
-            Log("");
-            Console.WriteLine();
 
             base.OnStartup(e);
             Console.WriteLine("🎉 OnStartup completado!");
@@ -263,7 +215,8 @@ Inner Exceptions:
     {
         if (_host != null)
         {
-            _host.StopAsync().Wait();
+            // ✅ CORRETO: Task.Run evita deadlock com SynchronizationContext
+            Task.Run(async () => await _host.StopAsync()).GetAwaiter().GetResult();
             _host.Dispose();
         }
 

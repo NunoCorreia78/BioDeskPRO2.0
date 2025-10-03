@@ -60,7 +60,7 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             else
             {
                 _logger.LogInformation("🔍 FichaPacienteViewModel - Inicializando NOVO paciente...");
-                InicializarDadosExemplo();
+                InicializarNovoPaciente();
             }
 
             _logger.LogInformation("🔍 FichaPacienteViewModel - Atualizando progresso...");
@@ -568,7 +568,7 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             {
                 _logger.LogWarning("⚠️ Paciente ID {Id} não encontrado!", pacienteId);
                 ErrorMessage = "Paciente não encontrado";
-                InicializarDadosExemplo(); // Fallback para novo
+                InicializarNovoPaciente(); // Fallback para novo
                 _isLoadingData = false; // ⭐ Desativar flag
                 return;
             }
@@ -601,7 +601,11 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
         });
     }
 
-    private void InicializarDadosExemplo()
+    /// <summary>
+    /// Inicializa estrutura para criação de NOVO paciente (Id = 0 para INSERT).
+    /// NÃO é sample data - é inicialização legítima de novo registo vazio.
+    /// </summary>
+    private void InicializarNovoPaciente()
     {
         _isLoadingData = true; // ⭐ Ativar flag para evitar IsDirty durante inicialização
 

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -780,5 +782,45 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         _logger.LogInformation("{Action} todos os documentos",
             selecionar ? "Selecionados" : "Desmarcados");
+    }
+
+    /// <summary>
+    /// ⭐ NOVO: Abre documento PDF no visualizador padrão do sistema
+    /// </summary>
+    [RelayCommand]
+    private void AbrirDocumento(DocumentoPacienteViewModel? documento)
+    {
+        if (documento == null)
+        {
+            _logger.LogWarning("⚠️ Tentativa de abrir documento null");
+            return;
+        }
+
+        try
+        {
+            if (!File.Exists(documento.CaminhoCompleto))
+            {
+                ErrorMessage = $"Documento não encontrado: {documento.Nome}";
+                _logger.LogWarning("📄 Documento não existe: {Caminho}", documento.CaminhoCompleto);
+                return;
+            }
+
+            _logger.LogInformation("📂 Abrindo documento: {Nome}", documento.Nome);
+
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = documento.CaminhoCompleto,
+                UseShellExecute = true
+            };
+
+            Process.Start(processStartInfo);
+
+            _logger.LogInformation("✅ Documento aberto com sucesso: {Nome}", documento.Nome);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao abrir documento: {Nome}", documento.Nome);
+            ErrorMessage = $"Erro ao abrir documento: {ex.Message}";
+        }
     }
 }

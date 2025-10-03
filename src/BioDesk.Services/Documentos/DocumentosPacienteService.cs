@@ -21,13 +21,18 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
     private readonly string[] _pastasBusca = new[]
     {
         "Consentimentos",
-        "Prescricoes"
+        "Prescricoes",
+        "DeclaracoesSaude"  // ✅ ADICIONADO: Incluir declarações de saúde
     };
 
     public DocumentosPacienteService(ILogger<DocumentosPacienteService> logger)
     {
         _logger = logger;
-        _baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        
+        // ✅ CORREÇÃO CRÍTICA: Subir da pasta bin/Debug/net8.0-windows até raiz do projeto
+        // bin\Debug\net8.0-windows → bin\Debug → bin → BioDesk.App → src → RAIZ
+        var binDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        _baseDirectory = Path.GetFullPath(Path.Combine(binDirectory, "..", "..", "..", "..", ".."));
     }
 
     public async Task<List<DocumentoPaciente>> ObterDocumentosDoPacienteAsync(int pacienteId, string nomePaciente)
@@ -37,40 +42,82 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
         var documentos = new List<DocumentoPaciente>();
         var nomeNormalizado = NormalizarNomeParaBusca(nomePaciente);
 
+        // 🔍 DEBUG: Escrever log detalhado para ficheiro
+        var logPath = Path.Combine(_baseDirectory, "DEBUG_DOCUMENTOS.txt");
+        var logLines = new List<string>
+        {
+            $"=== DEBUG BUSCA DOCUMENTOS - {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===",
+            $"PacienteId: {pacienteId}",
+            $"NomePaciente: {nomePaciente}",
+            $"NomeNormalizado: {nomeNormalizado}",
+            $"BaseDirectory: {_baseDirectory}",
+            ""
+        };
+
         try
         {
-            // 1. Buscar nas pastas globais (Consentimentos/, Prescricoes/)
-            foreach (var pasta in _pastasBusca)
+            // ✅ Buscar APENAS na pasta específica do paciente (BaseDirectory\Pacientes\[Nome]\)
+            var pastaPacienteRaiz = Path.Combine(_baseDirectory, "Pacientes");
+            logLines.Add($"PastaPacienteRaiz: {pastaPacienteRaiz}");
+            logLines.Add($"Pasta existe? {Directory.Exists(pastaPacienteRaiz)}");
+
+            if (!Directory.Exists(pastaPacienteRaiz))
             {
-                var caminhoPasta = Path.Combine(_baseDirectory, pasta);
-                if (!Directory.Exists(caminhoPasta))
-                {
-                    _logger.LogDebug("Pasta não encontrada: {Pasta}", caminhoPasta);
-                    continue;
-                }
-
-                var pdfs = Directory.GetFiles(caminhoPasta, "*.pdf", SearchOption.TopDirectoryOnly)
-                    .Where(f => ContemNomePaciente(f, nomeNormalizado))
-                    .Select(f => CriarDocumentoPaciente(f, pacienteId, DeterminarTipoPorPasta(pasta)));
-
-                documentos.AddRange(pdfs);
+                _logger.LogWarning("⚠️ Pasta de pacientes não encontrada: {Pasta}", pastaPacienteRaiz);
+                logLines.Add("❌ PASTA RAIZ NÃO EXISTE!");
+                File.WriteAllLines(logPath, logLines);
+                return new List<DocumentoPaciente>();
             }
 
-            // 2. Buscar na pasta específica do paciente (Pacientes/{Id}_Nome/)
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            var pastaPacienteRaiz = Path.Combine(appData, "BioDeskPro2", "Documentos", "Pacientes");
-
-            if (Directory.Exists(pastaPacienteRaiz))
+            // Listar TODAS as pastas dentro de Pacientes/
+            var todasPastas = Directory.GetDirectories(pastaPacienteRaiz);
+            logLines.Add($"\nTotal de pastas em Pacientes/: {todasPastas.Length}");
+            foreach (var pasta in todasPastas)
             {
-                var pastasPaciente = Directory.GetDirectories(pastaPacienteRaiz)
-                    .Where(p => ContemIdOuNome(p, pacienteId, nomeNormalizado));
+                logLines.Add($"  - {Path.GetFileName(pasta)}");
+            }
 
-                foreach (var pastaPaciente in pastasPaciente)
+            // ✅ Procurar pasta que CONTÉM o nome do paciente (normalizar AMBOS removendo espaços)
+            var nomeComUnderscores = nomePaciente.Replace(" ", "_").ToLowerInvariant();
+            logLines.Add($"\nNomeComUnderscores: {nomeComUnderscores}");
+            logLines.Add($"Buscando pastas que contenham: '{nomeNormalizado}' OU '{nomeComUnderscores}'");
+            
+            var pastasPaciente = Directory.GetDirectories(pastaPacienteRaiz)
+                .Where(p => 
                 {
-                    var pdfs = Directory.GetFiles(pastaPaciente, "*.pdf", SearchOption.AllDirectories)
-                        .Select(f => CriarDocumentoPaciente(f, pacienteId, DeterminarTipoPorCaminho(f)));
+                    var nomePasta = Path.GetFileName(p).ToLowerInvariant();
+                    var nomePastaNormalizado = nomePasta.Replace(" ", "").Replace("_", ""); // Remover espaços E underscores
+                    var match = nomePastaNormalizado.Contains(nomeNormalizado) || nomePasta.Contains(nomeComUnderscores);
+                    logLines.Add($"  Pasta '{Path.GetFileName(p)}' (normalizado: '{nomePastaNormalizado}') → match: {match}");
+                    return match;
+                })
+                .ToList();
 
-                    documentos.AddRange(pdfs);
+            logLines.Add($"\nPastas encontradas para o paciente: {pastasPaciente.Count}");
+
+            foreach (var pastaPaciente in pastasPaciente)
+            {
+                _logger.LogDebug("📂 Buscando em: {Pasta}", pastaPaciente);
+                logLines.Add($"\n📂 Buscando em: {pastaPaciente}");
+                
+                // Listar subpastas
+                var subpastas = Directory.GetDirectories(pastaPaciente);
+                logLines.Add($"  Subpastas: {subpastas.Length}");
+                foreach (var sub in subpastas)
+                {
+                    logLines.Add($"    - {Path.GetFileName(sub)}");
+                }
+                
+                // ✅ Buscar recursivamente em todas as subpastas (Consentimentos/, Prescricoes/, DeclaracoesSaude/)
+                var pdfs = Directory.GetFiles(pastaPaciente, "*.pdf", SearchOption.AllDirectories).ToList();
+                logLines.Add($"  PDFs encontrados: {pdfs.Count}");
+                
+                foreach (var pdf in pdfs)
+                {
+                    var relPath = pdf.Replace(pastaPaciente, "").TrimStart('\\');
+                    logLines.Add($"    ✅ {relPath}");
+                    var doc = CriarDocumentoPaciente(pdf, pacienteId, DeterminarTipoPorCaminho(pdf));
+                    documentos.Add(doc);
                 }
             }
 
@@ -79,12 +126,20 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
                 .OrderByDescending(d => d.DataCriacao)
                 .ToList();
 
+            logLines.Add($"\n📄 TOTAL DE DOCUMENTOS ENCONTRADOS: {resultado.Count}");
             _logger.LogInformation("📄 Encontrados {Count} documentos para paciente {PacienteId}", resultado.Count, pacienteId);
+            
+            // Escrever log para ficheiro
+            File.WriteAllLines(logPath, logLines);
+            
             return resultado;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "❌ Erro ao buscar documentos do paciente {PacienteId}", pacienteId);
+            logLines.Add($"\n❌ ERRO: {ex.Message}");
+            logLines.Add($"StackTrace: {ex.StackTrace}");
+            File.WriteAllLines(logPath, logLines);
             return new List<DocumentoPaciente>();
         }
     }
@@ -177,6 +232,7 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
         {
             "consentimentos" => TipoDocumentoEnum.Consentimento,
             "prescricoes" => TipoDocumentoEnum.Prescricao,
+            "declaracoessaude" => TipoDocumentoEnum.Declaracao,  // ✅ ADICIONADO
             _ => TipoDocumentoEnum.Outro
         };
     }

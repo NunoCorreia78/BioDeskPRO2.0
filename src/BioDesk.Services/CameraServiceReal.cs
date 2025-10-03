@@ -219,8 +219,17 @@ public class RealCameraService : ICameraService, IDisposable
     {
         if (_disposed) return;
 
-        StopPreviewAsync().Wait();
+        // ✅ CORRETO: SignalToStop() é síncrono, evita .Wait() deadlock
+        if (_videoSource != null && _videoSource.IsRunning)
+        {
+            _videoSource.SignalToStop();
+            _videoSource.NewFrame -= OnNewFrameReceived;
+            _videoSource = null;
+        }
+
         _lastCapturedFrame?.Dispose();
+        _isPreviewRunning = false;
+        _activeCamera = null;
         _disposed = true;
     }
 }

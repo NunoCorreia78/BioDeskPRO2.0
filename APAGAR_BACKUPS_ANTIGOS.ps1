@@ -29,7 +29,7 @@ for ($i = 0; $i -lt $backups.Count; $i++) {
     $backup = $backups[$i]
     $tamanho = (Get-ChildItem -Path $backup.FullName -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
     $data = $backup.CreationTime.ToString("dd/MM/yyyy HH:mm")
-    
+
     if ($i -eq 0) {
         Write-Host "   ✅ [$($i+1)] $($backup.Name) - $([math]::Round($tamanho, 2)) MB - $data [MAIS RECENTE]" -ForegroundColor Green
     } else {
@@ -57,10 +57,10 @@ $espacoLiberado = 0
 for ($i = 1; $i -lt $backups.Count; $i++) {
     $backup = $backups[$i]
     $tamanho = (Get-ChildItem -Path $backup.FullName -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
-    
+
     Write-Host "   🗑️  Apagando: $($backup.Name)..." -ForegroundColor Gray
     Remove-Item -Path $backup.FullName -Recurse -Force
-    
+
     $apagados++
     $espacoLiberado += $tamanho
 }
