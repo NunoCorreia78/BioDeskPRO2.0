@@ -1,0 +1,411 @@
+<UserControl x:Class="BioDesk.App.Views.Abas.ConsentimentosUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:BioDesk.App.Converters"
+             d:DesignHeight="800" d:DesignWidth="1000"
+             mc:Ignorable="d"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibility"/>
+
+        <!-- Estilos para interface de consentimentos -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#3F4A3D"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <Style x:Key="TreatmentCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="25"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#9CAF97"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#879B83"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#F7F9F6"/>
+            <Setter Property="Foreground" Value="#3F4A3D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E8ECE6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ConsentTextStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#F7F9F6"/>
+            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="MinHeight" Value="120"/>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- === INTERFACE CONSENTIMENTOS INFORMADOS === -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+        <StackPanel MaxWidth="900">
+
+            <!-- Cabeçalho Principal -->
+            <TextBlock Text="📋 CONSENTIMENTOS INFORMADOS"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       Foreground="#3F4A3D"
+                       Margin="0,0,0,30"/>
+
+            <!-- === SEÇÃO: NOVO CONSENTIMENTO === -->
+            <Border Style="{StaticResource TreatmentCardStyle}">
+                <StackPanel>
+
+                    <TextBlock Text="📝 NOVO CONSENTIMENTO" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <!-- Seleção de Tratamento -->
+                    <StackPanel Margin="0,0,0,25">
+                        <TextBlock Text="Selecionar Técnica/Tratamento:"
+                                   FontWeight="SemiBold"
+                                   FontSize="16"
+                                   Foreground="#3F4A3D"
+                                   Margin="0,0,0,10"/>
+                        <ComboBox x:Name="TipoTratamentoCombo"
+                                  FontSize="14"
+                                  Padding="12,10"
+                                  Background="White"
+                                  BorderBrush="#E3E9DE"
+                                  SelectedValuePath="Content"
+                                  SelectedValue="{Binding TipoTratamentoSelecionado, Mode=TwoWay}"
+                                  SelectionChanged="TipoTratamentoCombo_SelectionChanged">
+                            <ComboBoxItem Content="Selecione uma técnica..." IsEnabled="False"/>
+
+                            <!-- Técnicas Principais -->
+                            <ComboBoxItem Content="🌿 Naturopatia - Consulta Geral" Tag="naturopatia"/>
+                            <ComboBoxItem Content="🦴 Osteopatia - Tratamento Manual" Tag="osteopatia"/>
+                            <ComboBoxItem Content="👁️ Iridologia - Diagnóstico pela Íris" Tag="iridologia"/>
+                            <ComboBoxItem Content="💉 Mesoterapia Homeopática" Tag="mesoterapia"/>
+                            <ComboBoxItem Content="⚡ Medicina Informacional/Bioenergética" Tag="bioenergetica"/>
+
+                            <!-- Técnicas Complementares -->
+                            <ComboBoxItem Content="🪡 Acupunctura - Medicina Tradicional Chinesa" Tag="acupunctura"/>
+                            <ComboBoxItem Content="💆 Massagem Terapêutica" Tag="massagem"/>
+
+                            <!-- Aspectos Legais -->
+                            <ComboBoxItem Content="🔐 RGPD - Proteção de Dados Pessoais" Tag="rgpd"/>
+                        </ComboBox>
+                        <TextBlock Text="📋 Template será carregado automaticamente"
+                                   FontSize="12"
+                                   Foreground="#059669"
+                                   FontStyle="Italic"
+                                   Margin="0,8,0,0"/>
+                    </StackPanel>
+
+                    <!-- Separador Visual -->
+                    <Border Height="1" Background="#E3E9DE" Margin="0,0,0,25"/>
+
+                    <!-- Informação do Consentimento -->
+                    <TextBlock x:Name="ConsentimentoTitle"
+                               Text="Selecione uma técnica para visualizar o consentimento informado"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Foreground="#5A6558"
+                               Margin="0,0,0,15"
+                               HorizontalAlignment="Center"/>
+
+                    <!-- Texto do Consentimento -->
+                    <TextBox x:Name="ConsentimentoTexto"
+                             Style="{StaticResource ConsentTextStyle}"
+                             Text="{Binding DescricaoTratamento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,20"/>
+
+                    <!-- Declarações de Consentimento -->
+                    <StackPanel x:Name="ConsentimentoDeclaracoes" Visibility="Collapsed" Margin="0,0,0,20">
+                        <Border Background="#F0FDF4" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="✅ DECLARAÇÕES DE CONSENTIMENTO"
+                                           FontWeight="Bold"
+                                           FontSize="16"
+                                           Foreground="#059669"
+                                           Margin="0,0,0,10"/>
+
+                                <CheckBox x:Name="ChkCompreendi"
+                                          Content="Declaro que li e compreendi toda a informação acima"
+                                          FontSize="14"
+                                          Foreground="#059669"
+                                          FontWeight="Medium"
+                                          Margin="0,0,0,8"/>
+
+                                <CheckBox x:Name="ChkAceito"
+                                          Content="Aceito os riscos e benefícios descritos"
+                                          FontSize="14"
+                                          Foreground="#059669"
+                                          FontWeight="Medium"
+                                          Margin="0,0,0,8"/>
+
+                                <CheckBox x:Name="ChkConsinto"
+                                          Content="Consinto o tratamento proposto de forma livre e esclarecida"
+                                          FontSize="14"
+                                          Foreground="#059669"
+                                          FontWeight="Medium"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Dados do Paciente -->
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Nome Completo:"
+                                           FontWeight="SemiBold"
+                                           Foreground="#3F4A3D"
+                                           Margin="0,0,0,5"/>
+                                <TextBox x:Name="TxtNomePaciente"
+                                         Text="{Binding NomePaciente, Mode=OneWay}"
+                                         IsReadOnly="True"
+                                         Padding="12,10"
+                                         FontSize="14"
+                                         Background="#F7F9F6"
+                                         BorderBrush="#E3E9DE"
+                                         BorderThickness="1"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <TextBlock Text="Data:"
+                                           FontWeight="SemiBold"
+                                           Foreground="#3F4A3D"
+                                           Margin="0,0,0,5"/>
+                                <TextBox x:Name="TxtDataConsentimento"
+                                         Text="{Binding Source={x:Static sys:DateTime.Today}, Converter={StaticResource FlexibleDateConverter}, Mode=OneTime}"
+                                         Padding="12,10"
+                                         FontSize="14"
+                                         Background="White"
+                                         BorderBrush="#E3E9DE"
+                                         BorderThickness="1"
+                                         ToolTip="Formatos aceitos: dd/MM/yyyy, dd-MM-yyyy, yyyy-MM-dd, etc."
+                                         xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- === ASSINATURA DIGITAL === -->
+                    <StackPanel x:Name="AssinaturaSection" Margin="0,15,0,0" Visibility="Collapsed">
+                        <TextBlock Text="✍️ ASSINATURA DIGITAL"
+                                   FontWeight="Bold"
+                                   FontSize="16"
+                                   Foreground="#059669"
+                                   Margin="0,0,0,10"/>
+
+                        <!-- Canvas para Assinatura -->
+                        <Border BorderBrush="#E3E9DE"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                Background="White"
+                                Height="120"
+                                Margin="0,0,0,10">
+                            <Grid>
+                                <Canvas x:Name="AssinaturaCanvas"
+                                        Background="Transparent"
+                                        MouseDown="AssinaturaCanvas_MouseDown"
+                                        MouseMove="AssinaturaCanvas_MouseMove"
+                                        MouseUp="AssinaturaCanvas_MouseUp"/>
+
+                                <!-- Texto de instruções -->
+                                <TextBlock x:Name="AssinaturaInstrucoes"
+                                           Text="Assine aqui com o rato ou ecrã tátil"
+                                           FontSize="14"
+                                           Foreground="#9CA3AF"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           IsHitTestVisible="False"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Botões de Assinatura -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
+                            <Button x:Name="BtnLimparAssinatura"
+                                    Content="�️ Limpar"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    FontSize="14"
+                                    Padding="15,8"
+                                    Margin="0,0,10,0"
+                                    Click="BtnLimparAssinatura_Click"/>
+
+                            <Button x:Name="BtnConfirmarAssinatura"
+                                    Content="✅ Confirmar Assinatura"
+                                    Style="{StaticResource ActionButtonStyle}"
+                                    FontSize="14"
+                                    Padding="20,8"
+                                    IsEnabled="False"
+                                    Click="BtnConfirmarAssinatura_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Botão de Assinatura -->
+                    <Button x:Name="BtnAssinar"
+                            Content="✍️ Assinar Digitalmente"
+                            Style="{StaticResource ActionButtonStyle}"
+                            FontSize="16"
+                            Padding="20,12"
+                            HorizontalAlignment="Center"
+                            Visibility="Collapsed"
+                            Click="BtnAssinar_Click"/>
+
+                    <!-- Botão para Gerar PDF (após assinatura confirmada) -->
+                    <Button x:Name="BtnGerarPdfNovo"
+                            Content="📄 Gerar PDF do Consentimento"
+                            Background="#059669"
+                            Foreground="White"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Padding="20,12"
+                            HorizontalAlignment="Center"
+                            Visibility="Collapsed"
+                            Cursor="Hand"
+                            Margin="0,20,0,0"
+                            Click="BtnGerarPdfNovo_Click">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="8"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#047857"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                </StackPanel>
+            </Border>
+
+            <!-- === SEÇÃO: CONSENTIMENTOS ASSINADOS === -->
+            <Border Style="{StaticResource TreatmentCardStyle}">
+                <StackPanel>
+
+                    <TextBlock Text="📑 CONSENTIMENTOS ASSINADOS" Style="{StaticResource SectionHeaderStyle}"/>
+
+                    <!-- Lista de Consentimentos (Mock Data) -->
+                    <Border Background="#F7F9F6" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="🌿 Naturopatia - Consulta Geral"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"
+                                           Foreground="#3F4A3D"/>
+                                <TextBlock Text="Assinado em: 25/09/2025 14:30"
+                                           FontSize="12"
+                                           Foreground="#5A6558"
+                                           Margin="0,2,0,0"/>
+                                <TextBlock Text="✅ Consentimento válido e ativo"
+                                           FontSize="11"
+                                           FontWeight="Medium"
+                                           Foreground="#059669"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Content="👁️ Ver"
+                                    Background="#F7F9F6"
+                                    Foreground="#3F4A3D"
+                                    BorderBrush="#E3E9DE"
+                                    BorderThickness="1"
+                                    Padding="10,5"
+                                    Margin="0,0,5,0"
+                                    FontSize="12"
+                                    Click="BtnVer_Click"
+                                    Tag="Naturopatia - Consulta Geral"/>
+
+                            <Button Grid.Column="2" Content="📄 PDF"
+                                    Background="#059669"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Padding="10,5"
+                                    FontSize="12"
+                                    Click="BtnPDF_Click"
+                                    Tag="Naturopatia - Consulta Geral"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Mensagem quando não há consentimentos -->
+                    <TextBlock x:Name="TxtSemConsentimentos"
+                               Text="📝 Nenhum consentimento assinado ainda."
+                               FontStyle="Italic"
+                               Foreground="#9CA3AF"
+                               HorizontalAlignment="Center"
+                               Margin="0,20,0,0"
+                               Visibility="Collapsed"/>
+
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

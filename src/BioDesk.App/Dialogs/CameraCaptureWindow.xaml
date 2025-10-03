@@ -1,0 +1,120 @@
+<Window x:Class="BioDesk.App.Dialogs.CameraCaptureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="📷 Captura de Íris - Iridoscópio"
+        Height="700" Width="900"
+        WindowStartupLocation="CenterOwner"
+        Background="#F7F9F6">
+
+    <Window.Resources>
+        <!-- Estilo de botões -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Título -->
+        <TextBlock Grid.Row="0"
+                   Text="👁️ Captura de Imagem da Íris"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Foreground="#3F4A3D"
+                   Margin="0,0,0,20"/>
+
+        <!-- Preview da Câmara -->
+        <Border Grid.Row="1"
+                BorderBrush="#E3E9DE"
+                BorderThickness="2"
+                CornerRadius="8"
+                Background="Black">
+            <Image x:Name="PreviewImage"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- Controlos de Câmara -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,20,0,10">
+
+            <!-- Seletor de Câmara -->
+            <TextBlock Text="📹 Câmara:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,10,0"
+                       FontWeight="SemiBold"
+                       Foreground="#3F4A3D"/>
+            <ComboBox x:Name="CameraSelector"
+                      Width="200"
+                      SelectedIndex="0"
+                      SelectionChanged="CameraSelector_SelectionChanged">
+                <ComboBoxItem Content="0 - WebCam Integrada"/>
+                <ComboBoxItem Content="1 - Iridoscópio USB"/>
+            </ComboBox>
+
+            <Separator Width="20" Visibility="Hidden"/>
+
+            <!-- Ajustes de Imagem (futuro) -->
+            <TextBlock Text="🔆 Brilho:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,10,0"
+                       FontWeight="SemiBold"
+                       Foreground="#3F4A3D"/>
+            <Slider x:Name="BrightnessSlider"
+                    Width="150"
+                    Minimum="-50"
+                    Maximum="50"
+                    Value="0"
+                    TickFrequency="10"
+                    IsSnapToTickEnabled="True"
+                    VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Botões de Ação -->
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,10,0,0">
+
+            <Button x:Name="StartPreviewButton"
+                    Content="▶️ Iniciar Preview"
+                    Style="{StaticResource ActionButton}"
+                    Background="#9CAF97"
+                    Click="StartPreviewButton_Click"
+                    Width="150"
+                    Margin="0,0,10,0"/>
+
+            <Button x:Name="CaptureButton"
+                    Content="📸 Tirar Foto"
+                    Style="{StaticResource ActionButton}"
+                    Background="#6B8E63"
+                    Click="CaptureButton_Click"
+                    Width="150"
+                    Margin="0,0,10,0"
+                    IsEnabled="False"/>
+
+            <Button Content="❌ Cancelar"
+                    Style="{StaticResource ActionButton}"
+                    Background="#C9A66B"
+                    Click="CancelButton_Click"
+                    Width="120"/>
+        </StackPanel>
+    </Grid>
+</Window>

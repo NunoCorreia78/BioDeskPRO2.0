@@ -1,0 +1,35 @@
+{
+  "FormattingOptions": {
+    "EnableEditorConfigSupport": true,
+    "OrganizeImports": true,
+    "NewLine": "\r\n",
+    "UseTabs": false,
+    "TabSize": 4,
+    "IndentationSize": 4
+  },
+
+  "RoslynExtensionsOptions": {
+    "EnableAnalyzersSupport": true,
+    "EnableImportCompletion": true,
+    "EnableDecompilationSupport": true,
+    "EnableInlayHintsForParameters": true,
+    "EnableInlayHintsForLiteralParameters": true,
+    "EnableInlayHintsForIndexerParameters": true,
+    "EnableInlayHintsForObjectCreationParameters": true,
+    "EnableInlayHintsForOtherParameters": true,
+    "EnableInlayHintsForTypes": true,
+    "EnableInlayHintsForImplicitVariableTypes": true,
+    "EnableInlayHintsForLambdaParameterTypes": true,
+    "EnableInlayHintsForImplicitObjectCreation": true
+  },
+
+  "Sdk": {
+    "IncludePrereleases": false
+  },
+
+  "MSBuild": {
+    "LoadProjectsOnDemand": false,
+    "EnablePackageAutoRestore": true,
+    "UseBundledOnly": false
+  }
+}

@@ -1,0 +1,339 @@
+<UserControl x:Class="BioDesk.App.Views.Abas.RegistoConsultasUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:BioDesk.ViewModels.Abas;assembly=BioDesk.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vm:RegistoConsultasViewModel}"
+             mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1400">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid Background="#FCFDFB">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- COLUNA ESQUERDA (40%): Card Paciente + Botão + Histórico -->
+        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
+                <!-- Card Paciente -->
+                <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="{Binding PacienteAtual.NomeCompleto}" FontSize="18" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                        <TextBlock FontSize="14" Foreground="#5A6558">
+                            <Run Text="Data: "/><Run Text="{Binding DataConsulta, StringFormat='dd/MM/yyyy HH:mm'}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Botão Gerar Prescrição -->
+                <Button Command="{Binding AbrirPrescricaoCommand}" Background="#9CAF97" Foreground="White" Padding="16,12" Margin="0,0,0,24" Cursor="Hand" BorderThickness="0" FontSize="15" FontWeight="SemiBold">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="📋" FontSize="18" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Gerar Prescrição" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}"/>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#879B83"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- Histórico Consultas -->
+                <TextBlock Text="Histórico de Consultas" FontSize="16" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,12"/>
+
+                <DataGrid ItemsSource="{Binding Sessoes}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="None"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          RowBackground="#F7F9F6"
+                          AlternatingRowBackground="White"
+                          SelectionMode="Single"
+                          RowHeight="40">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Data" Binding="{Binding DataHora, StringFormat='{}{0:dd/MM/yyyy}'}" Width="90"/>
+                        <DataGridTextColumn Header="Resumo" Binding="{Binding AvaliacaoResumo}" Width="*"/>
+                        <DataGridTemplateColumn Header="Ações" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.AbrirDetalhesConsultaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Content="📄 Detalhes"
+                                            Background="#9CAF97"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Padding="8,4"
+                                            Cursor="Hand"
+                                            FontSize="11"
+                                            FontWeight="SemiBold">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#879B83"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#E3E9DE"/>
+                            <Setter Property="Foreground" Value="#3F4A3D"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="8,6"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#9CAF97"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                </DataGrid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- COLUNA DIREITA (60%): 2 Campos + Botão Guardar -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
+                <TextBlock Text="Avaliação Clínica" FontSize="16" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                <TextBox Text="{Binding Avaliacao, UpdateSourceTrigger=PropertyChanged}"
+                         Height="280"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Visible"
+                         Padding="12"
+                         FontSize="14"
+                         Background="#F7F9F6"
+                         BorderBrush="#E3E9DE"
+                         BorderThickness="1"
+                         Margin="0,0,0,20"/>
+
+                <TextBlock Text="Plano Terapêutico" FontSize="16" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                <TextBox Text="{Binding PlanoTerapeutico, UpdateSourceTrigger=PropertyChanged}"
+                         Height="280"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Visible"
+                         Padding="12"
+                         FontSize="14"
+                         Background="#F7F9F6"
+                         BorderBrush="#E3E9DE"
+                         BorderThickness="1"
+                         Margin="0,0,0,20"/>
+
+                <Button Command="{Binding GuardarConsultaCommand}" Background="#9CAF97" Foreground="White" Padding="16,12" Cursor="Hand" BorderThickness="0" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Right">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                <TextBlock Text="✔️ Guardar Consulta" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#879B83"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- MODAL PRESCRIÇÃO (Overlay) -->
+        <Border Grid.Column="0" Grid.ColumnSpan="3" Background="#CC000000"
+                Visibility="{Binding MostrarPrescricao, Converter={StaticResource BoolToVis}}"
+                x:Name="ModalPrescricao"
+                Panel.ZIndex="100">
+            <Border Background="White" CornerRadius="16" Padding="30" MaxWidth="900" MaxHeight="700" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Logo da Clínica -->
+                        <Image Source="/Assets/Images/logo.png" Stretch="Uniform" MaxHeight="60" HorizontalAlignment="Center" Margin="0,0,0,16">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Style.Triggers>
+                                        <!-- Se logo.png não existir, esconde a Image -->
+                                        <Trigger Property="Source" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <!-- Cabeçalho -->
+                        <TextBlock FontSize="22" FontWeight="Bold" Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <Run Text="Prescrição - "/><Run Text="{Binding PacienteAtual.NomeCompleto}"/>
+                        </TextBlock>
+                        <TextBlock Text="{Binding DataConsulta, StringFormat='dd/MM/yyyy'}" FontSize="14" Foreground="#5A6558" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+
+                        <!-- Tabela Suplementos -->
+                        <DataGrid ItemsSource="{Binding Suplementos}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderBrush="#E3E9DE" BorderThickness="1" Margin="0,0,0,16" RowHeight="40">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Suplemento" Binding="{Binding Suplemento, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                <DataGridTextColumn Header="Forma de Tomar" Binding="{Binding FormaTomar, UpdateSourceTrigger=PropertyChanged}" Width="3*"/>
+                                <DataGridTemplateColumn Header="" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="❌" Command="{Binding DataContext.RemoverSuplementoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="#D9534F" FontSize="14"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <Button Command="{Binding AdicionarSuplementoCommand}" Background="#E8EDE6" Foreground="#3F4A3D" Padding="12,8" Margin="0,0,0,20" Cursor="Hand" BorderBrush="#9CAF97" BorderThickness="1" HorizontalAlignment="Left">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <TextBlock Text="➕ Adicionar Suplemento" Foreground="{TemplateBinding Foreground}"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <!-- Assinatura Digital do Terapeuta -->
+                        <Border BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20" Background="#FAFBFA">
+                            <StackPanel>
+                                <TextBlock Text="✍️ Assinatura do Terapeuta" FontSize="14" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                                <Image Source="/Assets/Images/assinatura.png" Stretch="Uniform" MaxHeight="80" HorizontalAlignment="Left" Margin="0,0,0,8"/>
+                                <TextBlock Text="Nuno Correia - Terapias Naturais" FontSize="12" Foreground="#5A6558" FontStyle="Italic"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Botões -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="BtnGerarPdf"
+                                    Click="BtnGerarPdf_Click"
+                                    Content="📄 Gerar PDF"
+                                    Background="#9CAF97"
+                                    Foreground="White"
+                                    Padding="16,10"
+                                    Margin="0,0,12,0"
+                                    Cursor="Hand"
+                                    BorderThickness="0"
+                                    FontSize="14"
+                                    FontWeight="SemiBold">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            <Button Command="{Binding FecharPrescricaoCommand}" Content="✖️ Fechar" Background="#E3E9DE" Foreground="#3F4A3D" Padding="16,10" Cursor="Hand" BorderThickness="0" FontSize="14">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Border>
+
+        <!-- ✅ NOVO: MODAL DETALHES DA CONSULTA -->
+        <Border Grid.Column="0" Grid.ColumnSpan="3"
+                Background="#CC000000"
+                Visibility="{Binding MostrarDetalhes, Converter={StaticResource BoolToVis}}"
+                Panel.ZIndex="200">
+            <Border Background="White" CornerRadius="16" Padding="30" MaxWidth="800" MaxHeight="600" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                        <TextBlock Text="📄 Detalhes da Consulta" FontSize="20" FontWeight="Bold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding ConsultaSelecionada.DataHora, StringFormat='Data: {0:dddd, dd MMMM yyyy - HH:mm}'}"
+                                   FontSize="14"
+                                   Foreground="#5A6558"
+                                   Margin="0,0,0,4"/>
+                        <Border Height="2" Background="#E3E9DE" Margin="0,12,0,0"/>
+                    </StackPanel>
+
+                    <!-- Conteúdo Scrollável -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!-- Avaliação -->
+                            <TextBlock Text="Avaliação Clínica" FontSize="16" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                            <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                                <TextBlock Text="{Binding ConsultaSelecionada.Avaliacao}"
+                                           TextWrapping="Wrap"
+                                           FontSize="14"
+                                           Foreground="#3F4A3D"
+                                           LineHeight="22"/>
+                            </Border>
+
+                            <!-- Plano Terapêutico -->
+                            <TextBlock Text="Plano Terapêutico" FontSize="16" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                            <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="8" Padding="16">
+                                <TextBlock Text="{Binding ConsultaSelecionada.Plano}"
+                                           TextWrapping="Wrap"
+                                           FontSize="14"
+                                           Foreground="#3F4A3D"
+                                           LineHeight="22"/>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Botão Fechar -->
+                    <Button Grid.Row="2"
+                            Command="{Binding FecharDetalhesConsultaCommand}"
+                            Content="✖️ Fechar"
+                            Background="#9CAF97"
+                            Foreground="White"
+                            Padding="20,12"
+                            Margin="0,20,0,0"
+                            Cursor="Hand"
+                            BorderThickness="0"
+                            FontSize="15"
+                            FontWeight="SemiBold"
+                            HorizontalAlignment="Center">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#879B83"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

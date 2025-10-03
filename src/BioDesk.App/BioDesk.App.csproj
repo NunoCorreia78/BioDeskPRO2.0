@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <StartupObject>BioDesk.App.App</StartupObject>
+    <UserSecretsId>biodesk-app-secrets-2025</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BioDesk.ViewModels\BioDesk.ViewModels.csproj" />
+    <ProjectReference Include="..\BioDesk.Services\BioDesk.Services.csproj" />
+    <ProjectReference Include="..\BioDesk.Data\BioDesk.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Logo: opcional, só embede se existir -->
+    <Resource Include="Assets\Images\logo.png" Condition="Exists('Assets\Images\logo.png')" />
+    <!-- Assinatura: copiar para output para File.ReadAllBytes() -->
+    <Content Include="Assets\Images\assinatura.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!-- Mapas Iridológicos: embebidos como recursos -->
+    <EmbeddedResource Include="Resources\IridologyMaps\*.json" />
+  </ItemGroup>
+
+</Project>

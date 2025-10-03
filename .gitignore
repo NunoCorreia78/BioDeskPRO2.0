@@ -1,0 +1,46 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+x64/
+x86/
+build/
+bld/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# SQLite temporary files
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+LOGS_DEBUG.txt
+
+# Temporary files
+*.tmp
+*.temp
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# Node modules
+node_modules/
+
+# Backups
+Backups_*/
+*.bak
+*.backup
+
+# OS generated files
+.DS_Store
+Thumbs.db

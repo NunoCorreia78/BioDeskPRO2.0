@@ -1,0 +1,312 @@
+<UserControl x:Class="BioDesk.App.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             xmlns:converters="clr-namespace:BioDesk.App.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=viewmodels:DashboardViewModel}">
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#9CAF97"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#879B83"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#6B7F67"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#C8D4C5"/>
+                                <Setter Property="Foreground" Value="#9B9B9B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionCardStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Gradiente de fundo terroso -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#FCFDFB" Offset="0"/>
+                <GradientStop Color="#F2F5F0" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- Espaçamento para conteúdo principal -->
+        <Border Height="20" VerticalAlignment="Top" Background="Transparent"/>
+
+        <ScrollViewer Margin="0,20,0,0" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="30">
+                <StackPanel>
+                    <!-- Ações Rápidas Cards Melhorados -->
+                    <TextBlock Text="⚡ Ações Rápidas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
+
+                    <UniformGrid Rows="1" Columns="2" Margin="0,0,0,40">
+                        <!-- Card Novo Paciente - Melhorado -->
+                        <Button Command="{Binding NovoPacienteCommand}"
+                                Style="{StaticResource ActionCardStyle}"
+                                Margin="0,0,15,0">
+                            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="16"
+                                    Padding="30,25">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#E0E0E0" BlurRadius="10" ShadowDepth="3" Opacity="0.4"/>
+                                </Border.Effect>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Border Background="#9CAF97" Width="65" Height="65" CornerRadius="32"
+                                            HorizontalAlignment="Center" Margin="0,0,0,15">
+                                        <TextBlock Text="👤" FontSize="30" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Novo Paciente" FontSize="18" FontWeight="Bold"
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock Text="Criar nova ficha médica" FontSize="13"
+                                             Foreground="#5A6558" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
+
+                        <!-- Card Lista de Pacientes ✅ FUNCIONAL -->
+                        <Button Style="{StaticResource ActionCardStyle}"
+                                Command="{Binding ListaPacientesCommand}"
+                                Margin="15,0,0,0">
+                            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="16"
+                                    Padding="30,25">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#E0E0E0" BlurRadius="10" ShadowDepth="3" Opacity="0.3"/>
+                                </Border.Effect>
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Border Background="#9CAF97" Width="65" Height="65" CornerRadius="32"
+                                            HorizontalAlignment="Center" Margin="0,0,0,15">
+                                        <TextBlock Text="📋" FontSize="30" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Lista de Pacientes" FontSize="18" FontWeight="Bold"
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                    <TextBlock Text="Pesquisar e editar" FontSize="13"
+                                             Foreground="#5A6558" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Button>
+                    </UniformGrid>
+
+                    <!-- Estatísticas Expandidas - COM BINDING BD -->
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="📊 Estatísticas" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D"/>
+
+                        <!-- Loading indicator -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <TextBlock Text="🔄" FontSize="14" Foreground="#9CAF97" Margin="0,0,5,0"
+                                     Visibility="{Binding IsLoadingStats, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBlock Text="{Binding UltimaAtualizacao, StringFormat='Atualizado: {0:HH:mm:ss}'}"
+                                     FontSize="11" Foreground="#5A6558"
+                                     Visibility="{Binding IsLoadingStats, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                        </StackPanel>
+
+                        <!-- Botão Configurações -->
+                        <Button Grid.Column="2" Content="⚙️ Configurações"
+                               Click="BtnConfiguracoes_Click"
+                               Style="{StaticResource ActionButtonStyle}"
+                               ToolTip="Configurar email e outras opções do sistema"/>
+                    </Grid>
+
+                    <UniformGrid Rows="1" Columns="4" Margin="0,0,0,40">
+                        <!-- Total Pacientes - COM BINDING -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
+                                Padding="20" Margin="0,0,8,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="👥" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding TotalPacientes}" FontSize="22" FontWeight="Bold"
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Pacientes" FontSize="12"
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Consultas Hoje - COM BINDING -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
+                                Padding="20" Margin="8,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="📅" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding ConsultasHoje}" FontSize="22" FontWeight="Bold"
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Hoje" FontSize="12"
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Consultas Esta Semana - COM BINDING -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
+                                Padding="20" Margin="8,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="🗓️" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding ConsultasSemana}" FontSize="22" FontWeight="Bold"
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Esta Semana" FontSize="12"
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Consultas Este Mês - COM BINDING -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12"
+                                Padding="20" Margin="8,0,0,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#E0E0E0" BlurRadius="6" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="📊" FontSize="28" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding ConsultasMes}" FontSize="22" FontWeight="Bold"
+                                         Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                                <TextBlock Text="Este Mês" FontSize="12"
+                                         Foreground="#5A6558" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- Estado da Aplicação - Expandido -->
+                    <TextBlock Text="⚙️ Estado da Aplicação" FontSize="20" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,20"/>
+
+                    <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" Padding="25">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#E0E0E0" BlurRadius="8" ShadowDepth="3" Opacity="0.3"/>
+                        </Border.Effect>
+                        <StackPanel>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Base de Dados -->
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                    <Border Background="#4CAF50" Width="50" Height="50" CornerRadius="25"
+                                            HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="💾" FontSize="24" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Base de Dados" FontSize="14" FontWeight="SemiBold"
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                                    <TextBlock Text="✅ Conectada" FontSize="12"
+                                             Foreground="#4CAF50" HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Iridoscópio -->
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                    <Border Background="#FF9800" Width="50" Height="50" CornerRadius="25"
+                                            HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="👁️" FontSize="24" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Iridoscópio" FontSize="14" FontWeight="SemiBold"
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                                    <TextBlock Text="⚠️ Desconectado" FontSize="12"
+                                             Foreground="#FF9800" HorizontalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Medicina Quântica -->
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                    <Border Background="#9C27B0" Width="50" Height="50" CornerRadius="25"
+                                            HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="🔬" FontSize="24" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Med. Quântica" FontSize="14" FontWeight="SemiBold"
+                                             Foreground="#3F4A3D" HorizontalAlignment="Center" Margin="0,0,0,3"/>
+                                    <TextBlock Text="⚠️ Aguardando" FontSize="12"
+                                             Foreground="#9C27B0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Informações do Sistema -->
+                            <Separator Margin="0,10" Background="#E3E9DE"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="💻 Sistema:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,3"/>
+                                    <TextBlock Text="BioDeskPro2 v1.0.0" FontSize="12" FontWeight="SemiBold" Foreground="#3F4A3D"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="🔄 Última Sincronização:" FontSize="12" Foreground="#5A6558" Margin="0,0,0,3"/>
+                                    <TextBlock Text="{Binding DataAtual, StringFormat='dd/MM HH:mm'}" FontSize="12" FontWeight="SemiBold" Foreground="#3F4A3D"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Espaçamento final -->
+                    <Border Height="30"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

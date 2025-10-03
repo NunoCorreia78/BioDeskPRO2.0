@@ -1,0 +1,334 @@
+<UserControl x:Class="BioDesk.App.Views.ListaPacientesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:ListaPacientesViewModel}"
+             d:DesignHeight="800" d:DesignWidth="1400"
+             Background="#FCFDFB">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#9CAF97" Padding="24,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="📋 Lista de Pacientes" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"/>
+                    
+                    <Border Background="White" 
+                            CornerRadius="12" 
+                            Padding="12,6" 
+                            Margin="16,0,0,0">
+                        <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#3F4A3D">
+                            <Run Text="{Binding TotalPacientes, Mode=OneWay}"/>
+                            <Run Text="paciente(s)"/>
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="⬅ Voltar ao Dashboard"
+                        Command="{Binding VoltarDashboardCommand}"
+                        Background="White"
+                        Foreground="#3F4A3D"
+                        Padding="16,8"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        VerticalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="6"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F0F0"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Barra de Pesquisa e Ações -->
+        <Border Grid.Row="1" Background="#F7F9F6" Padding="24,16" BorderBrush="#E3E9DE" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Box -->
+                <Border Grid.Column="0" 
+                        Background="White" 
+                        BorderBrush="#E3E9DE" 
+                        BorderThickness="2" 
+                        CornerRadius="8"
+                        Padding="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" 
+                                   Text="🔍" 
+                                   FontSize="18" 
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,8,0"/>
+
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding TextoPesquisa, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="14"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 VerticalAlignment="Center">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding PesquisarCommand}"/>
+                            </TextBox.InputBindings>
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <VisualBrush Stretch="None" AlignmentX="Left">
+                                                        <VisualBrush.Visual>
+                                                            <TextBlock Text="Pesquisar por nome..." 
+                                                                       Foreground="#999" 
+                                                                       FontSize="14"/>
+                                                        </VisualBrush.Visual>
+                                                    </VisualBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+
+                        <Button Grid.Column="2"
+                                Content="Pesquisar"
+                                Command="{Binding PesquisarCommand}"
+                                Background="#9CAF97"
+                                Foreground="White"
+                                Padding="16,8"
+                                FontSize="13"
+                                FontWeight="SemiBold"
+                                BorderThickness="0"
+                                Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="4"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#879B83"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Botão Atualizar -->
+                <Button Grid.Column="1"
+                        Content="🔄 Atualizar"
+                        Command="{Binding AtualizarCommand}"
+                        Background="White"
+                        Foreground="#3F4A3D"
+                        Padding="16,8"
+                        FontSize="13"
+                        FontWeight="SemiBold"
+                        BorderBrush="#E3E9DE"
+                        BorderThickness="2"
+                        Margin="12,0,0,0"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="6"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F0F0"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <!-- Botão Novo Paciente -->
+                <Button Grid.Column="2"
+                        Content="➕ Novo Paciente"
+                        Command="{Binding NovoPacienteCommand}"
+                        Background="#4CAF50"
+                        Foreground="White"
+                        Padding="20,10"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        BorderThickness="0"
+                        Margin="12,0,0,0"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="8"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#45A049"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- DataGrid de Pacientes -->
+        <Border Grid.Row="2" Margin="24" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1">
+            <Grid>
+                <!-- Loading Overlay -->
+                <Border Background="#F0FFFFFF" 
+                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"
+                        Panel.ZIndex="999">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="⏳" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <TextBlock Text="Carregando pacientes..." FontSize="16" Foreground="#5A6558"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- DataGrid -->
+                <DataGrid ItemsSource="{Binding Pacientes}"
+                          SelectedItem="{Binding PacienteSelecionado}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#E3E9DE"
+                          BorderThickness="0"
+                          Background="White"
+                          RowBackground="White"
+                          AlternatingRowBackground="#F7F9F6"
+                          HeadersVisibility="Column"
+                          SelectionMode="Single"
+                          MouseDoubleClick="DataGrid_MouseDoubleClick">
+                    
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F7F9F6"/>
+                            <Setter Property="Foreground" Value="#3F4A3D"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="13"/>
+                            <Setter Property="Padding" Value="16,12"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+                            <Setter Property="BorderBrush" Value="#E3E9DE"/>
+                        </Style>
+                        
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="16,8"/>
+                            <Setter Property="FontSize" Value="13"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#E8F5E9"/>
+                                    <Setter Property="Foreground" Value="#2E7D32"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#F0F4EE"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nome Completo" Binding="{Binding NomeCompleto}" Width="*"/>
+                        <DataGridTextColumn Header="Data Nascimento" Binding="{Binding DataNascimento, StringFormat=dd/MM/yyyy}" Width="150"/>
+                        <DataGridTextColumn Header="Idade" Binding="{Binding Idade}" Width="80"/>
+                        <DataGridTextColumn Header="Género" Binding="{Binding Genero}" Width="120"/>
+                        <DataGridTextColumn Header="NIF" Binding="{Binding NIF}" Width="120"/>
+                        <DataGridTextColumn Header="Última Atualização" Binding="{Binding DataUltimaAtualizacao, StringFormat=dd/MM/yyyy HH:mm}" Width="180"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- Footer com Info -->
+        <Border Grid.Row="3" Background="#F7F9F6" Padding="24,12" BorderBrush="#E3E9DE" BorderThickness="0,1,0,0">
+            <TextBlock FontSize="12" Foreground="#5A6558">
+                <Run Text="💡 Dica:"/>
+                <Run Text="Clique duas vezes num paciente para abrir a ficha completa"/>
+            </TextBlock>
+        </Border>
+    </Grid>
+</UserControl>

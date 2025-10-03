@@ -1,0 +1,507 @@
+<UserControl x:Class="BioDesk.App.Views.Abas.IrisdiagnosticoUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:BioDesk.App.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1400"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <converters:PathToImageSourceConverter x:Key="PathToImageConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- COLUNA ESQUERDA: Galeria de Imagens -->
+        <Border Grid.Column="0"
+                Background="#F7F9F6"
+                CornerRadius="8"
+                Padding="12"
+                Margin="0,0,8,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Título -->
+                <TextBlock Grid.Row="0"
+                           Text="📸 Imagens de Íris"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="#3F4A3D"
+                           Margin="0,0,0,12"/>
+
+                <!-- ListBox de Imagens -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding IrisImagens}"
+                         SelectedItem="{Binding IrisImagemSelecionada}"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="2"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,0,4"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="BorderBrush" Value="#6B8E63"/>
+                                    <Setter Property="BorderThickness" Value="3"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderBrush" Value="#9CAF97"/>
+                                    <Setter Property="BorderThickness" Value="2"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="White"
+                                    CornerRadius="6"
+                                    Padding="8"
+                                    Margin="0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0"
+                                               Text="{Binding Olho}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="#3F4A3D"/>
+
+                                    <TextBlock Grid.Row="1"
+                                               Text="{Binding DataCaptura, StringFormat='dd/MM/yyyy HH:mm'}"
+                                               FontSize="12"
+                                               Foreground="#5A6558"
+                                               Margin="0,4,0,0"/>
+
+                                    <TextBlock Grid.Row="2"
+                                               Text="{Binding Observacoes}"
+                                               FontSize="11"
+                                               Foreground="#5A6558"
+                                               TextWrapping="Wrap"
+                                               Margin="0,4,0,0"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Botões de Ação: Grid 3 colunas iguais -->
+                <Grid Grid.Row="2" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Botão Adicionar (verde claro) -->
+                    <Button Grid.Column="0"
+                            Content="⊕"
+                            Command="{Binding AdicionarImagemCommand}"
+                            Background="#9CAF97"
+                            Foreground="White"
+                            Padding="8"
+                            BorderThickness="0"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            ToolTip="Adicionar imagem de ficheiro"
+                            Margin="0,0,2,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="6"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#879B83"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Botão Capturar (verde escuro) -->
+                    <Button Grid.Column="1"
+                            Content="📷"
+                            Click="CapturarDaCameraButton_Click"
+                            Background="#6B8E63"
+                            Foreground="White"
+                            Padding="8"
+                            BorderThickness="0"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            ToolTip="Capturar foto de íris com câmera"
+                            Margin="2,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="6"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#5A7853"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Botão Remover (vermelho terroso) -->
+                    <Button Grid.Column="2"
+                            Content="🗑️"
+                            Command="{Binding RemoverImagemCommand}"
+                            Background="#C85959"
+                            Foreground="White"
+                            Padding="8"
+                            BorderThickness="0"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            Cursor="Hand"
+                            ToolTipService.ToolTip="Remover imagem selecionada"
+                            Margin="2,0,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="6"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#A84545"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Opacity" Value="0.4"/>
+                                        <Setter Property="Cursor" Value="Arrow"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- COLUNA DIREITA: Preview -->
+        <Border Grid.Column="1"
+                Background="#F7F9F6"
+                CornerRadius="8"
+                Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Título -->
+                <TextBlock Grid.Row="0"
+                           Text="🔍 Preview da Íris"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="#3F4A3D"
+                           Margin="0,0,0,12"/>
+
+                <!-- Controlos Zoom + Color Picker -->
+                <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Controlos de Zoom -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="🔍 Zoom:" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                        <Button Content="−" Command="{Binding ZoomOutCommand}" Width="30" Height="30"
+                                Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" FontSize="16" FontWeight="Bold" Margin="0,0,4,0" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#D3D9CE"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <TextBlock Text="{Binding ZoomLevel, StringFormat='{}{0:F1}x'}" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Width="40" TextAlignment="Center" Margin="4,0"/>
+
+                        <Button Content="+" Command="{Binding ZoomInCommand}" Width="30" Height="30"
+                                Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" FontSize="16" FontWeight="Bold" Margin="0,0,8,0" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#D3D9CE"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <Button Content="↺ Reset" Command="{Binding ResetZoomCommand}"
+                                Background="#E3E9DE" Foreground="#3F4A3D" Padding="8,4" BorderThickness="0" FontSize="11" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#D3D9CE"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Paleta de Cores TERROSA -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
+                        <TextBlock Text="🎨 Cor:" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                        <!-- Vermelho Terroso #C85959 -->
+                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Margin="0,0,4,0" Cursor="Hand">
+                            <RadioButton.Template>
+                                <ControlTemplate TargetType="RadioButton">
+                                    <Border Background="#C85959" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
+                                        </Border.Effect>
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                </ControlTemplate>
+                            </RadioButton.Template>
+                        </RadioButton>
+
+                        <!-- Verde Musgo #6B8E63 -->
+                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Margin="0,0,4,0" Cursor="Hand">
+                            <RadioButton.Template>
+                                <ControlTemplate TargetType="RadioButton">
+                                    <Border Background="#6B8E63" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
+                                        </Border.Effect>
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                </ControlTemplate>
+                            </RadioButton.Template>
+                        </RadioButton>
+
+                        <!-- Azul Petróleo #5B7C99 -->
+                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Margin="0,0,4,0" Cursor="Hand">
+                            <RadioButton.Template>
+                                <ControlTemplate TargetType="RadioButton">
+                                    <Border Background="#5B7C99" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
+                                        </Border.Effect>
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                </ControlTemplate>
+                            </RadioButton.Template>
+                        </RadioButton>
+
+                        <!-- Amarelo Mostarda #D4A849 -->
+                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Cursor="Hand">
+                            <RadioButton.Template>
+                                <ControlTemplate TargetType="RadioButton">
+                                    <Border Background="#D4A849" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
+                                        </Border.Effect>
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                </ControlTemplate>
+                            </RadioButton.Template>
+                        </RadioButton>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Área de Preview com Canvas -->
+                <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1">
+                    <Grid x:Name="ImageContainer">
+                        <!-- Placeholder quando nenhuma imagem -->
+                        <TextBlock Text="📸 Selecione uma imagem para visualizar&#x0a;&#x0a;🖱️ Click esquerdo: adicionar marca&#x0a;🎨 Selecione uma cor acima"
+                                   FontSize="14" Foreground="#5A6558" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IrisImagemSelecionada}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- Imagem com Zoom -->
+                        <Viewbox Stretch="Uniform" x:Name="ImageViewbox">
+                            <Viewbox.Style>
+                                <Style TargetType="Viewbox">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IrisImagemSelecionada}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Viewbox.Style>
+
+                            <Grid x:Name="CanvasContainer">
+                                <Grid.RenderTransform>
+                                    <ScaleTransform ScaleX="{Binding ZoomLevel}" ScaleY="{Binding ZoomLevel}" CenterX="0" CenterY="0"/>
+                                </Grid.RenderTransform>
+
+                                <!-- Imagem de fundo (com converter que liberta lock do ficheiro) -->
+                                <Image x:Name="IrisImage" 
+                                       Source="{Binding IrisImagemSelecionada.CaminhoImagem, Converter={StaticResource PathToImageConverter}}" 
+                                       Stretch="None"/>
+
+                                <!-- Canvas para marcações -->
+                                <Canvas x:Name="MarkingsCanvas" Background="Transparent"
+                                        Width="{Binding ActualWidth, ElementName=IrisImage}"
+                                        Height="{Binding ActualHeight, ElementName=IrisImage}"
+                                        MouseLeftButtonDown="MarkingsCanvas_MouseLeftButtonDown">
+
+                                    <ItemsControl ItemsSource="{Binding MarcasImagem}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <Canvas/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style>
+                                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Ellipse Width="16" Height="16" Stroke="#3F4A3D" StrokeThickness="2" Cursor="Hand" ToolTip="{Binding Observacoes}">
+                                                    <Ellipse.Fill>
+                                                        <SolidColorBrush Color="{Binding Cor}"/>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Canvas>
+                            </Grid>
+                        </Viewbox>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
