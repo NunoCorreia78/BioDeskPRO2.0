@@ -29,7 +29,7 @@ if (-not (Test-Path $pastaPacientes)) {
 # Lista de pacientes conhecidos (pode ser expandida)
 $pacientes = @(
     "Nuno Filipe Correia",
-    "Maria Fernanda Costa", 
+    "Maria Fernanda Costa",
     "João Silva Santos",
     "Carlos António Pereira"
 )
@@ -45,49 +45,49 @@ $totalMovidos = 0
 foreach ($tipoOrigem in $tiposDocumento.Keys) {
     $pastaOrigem = Join-Path $baseDir $tipoOrigem
     $tipoDestino = $tiposDocumento[$tipoOrigem]
-    
+
     if (-not (Test-Path $pastaOrigem)) {
         Write-Host "⚠️  Pasta $tipoOrigem não encontrada - pulando" -ForegroundColor Yellow
         continue
     }
-    
+
     $pdfs = Get-ChildItem -Path $pastaOrigem -Filter "*.pdf" -ErrorAction SilentlyContinue
-    
+
     if ($pdfs.Count -eq 0) {
         Write-Host "ℹ️  Nenhum PDF em $tipoOrigem" -ForegroundColor Gray
         continue
     }
-    
+
     Write-Host "`n📁 Processando pasta: $tipoOrigem ($($pdfs.Count) arquivos)" -ForegroundColor White
-    
+
     foreach ($pdf in $pdfs) {
         $nomeArquivo = $pdf.Name
         $pacienteEncontrado = $null
-        
+
         # Tentar identificar o paciente pelo nome no arquivo
         foreach ($paciente in $pacientes) {
             $nomeSemEspacos = $paciente.Replace(" ", "")
             $nomeComUnderscores = $paciente.Replace(" ", "_")
-            
-            if ($nomeArquivo -match $nomeSemEspacos -or 
+
+            if ($nomeArquivo -match $nomeSemEspacos -or
                 $nomeArquivo -match $nomeComUnderscores -or
                 $nomeArquivo -match $paciente) {
                 $pacienteEncontrado = $paciente
                 break
             }
         }
-        
+
         if ($pacienteEncontrado) {
             # Criar estrutura de pastas
             $pastaPaciente = Join-Path $pastaPacientes $pacienteEncontrado
             $pastaDestino = Join-Path $pastaPaciente $tipoDestino
-            
+
             if (-not (Test-Path $pastaDestino)) {
                 New-Item -Path $pastaDestino -ItemType Directory -Force | Out-Null
             }
-            
+
             $destino = Join-Path $pastaDestino $nomeArquivo
-            
+
             # Verificar se já existe
             if (Test-Path $destino) {
                 Write-Host "   ⚠️  JÁ EXISTE: $nomeArquivo" -ForegroundColor Yellow

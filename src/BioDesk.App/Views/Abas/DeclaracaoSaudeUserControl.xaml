@@ -631,17 +631,17 @@
 
                                 <!-- ⭐ LINHA GUIA CENTRAL: Marca o MEIO da assinatura (centralizar aqui) -->
                                 <Line X1="300" Y1="0" X2="300" Y2="150"
-                                      Stroke="#9CAF97" 
+                                      Stroke="#9CAF97"
                                       StrokeThickness="2"
                                       StrokeDashArray="5 3"
                                       IsHitTestVisible="False"
                                       Opacity="0.8"/>
-                                
+
                                 <!-- Label explicativo da linha guia -->
-                                <TextBlock Text="← Centro da Assinatura →" 
-                                           Canvas.Left="220" 
+                                <TextBlock Text="← Centro da Assinatura →"
+                                           Canvas.Left="220"
                                            Canvas.Top="5"
-                                           FontSize="9" 
+                                           FontSize="9"
                                            FontStyle="Italic"
                                            Foreground="#9CAF97"
                                            IsHitTestVisible="False"

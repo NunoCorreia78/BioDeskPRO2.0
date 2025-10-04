@@ -255,6 +255,9 @@ Inner Exceptions:
         // === CAMERA SERVICE (captura REAL de íris via USB com AForge.NET) ===
         services.AddSingleton<ICameraService, RealCameraService>();
 
+        // === IRIDOLOGY SERVICE (mapa iridológico + JSON loader) ===
+        services.AddSingleton<IIridologyService, IridologyService>();
+
         // === PDF SERVICES (QuestPDF) ===
         services.AddScoped<Services.Pdf.ConsentimentoPdfService>();
         services.AddScoped<Services.Pdf.PrescricaoPdfService>();

@@ -280,7 +280,7 @@ public partial class DeclaracaoSaudeUserControl : UserControl
 
             // ✅ CORRIGIDO: Pegar dados REAIS do ViewModel
             var viewModel = DataContext as DeclaracaoSaudeViewModel;
-            
+
             // 📋 Preparar dados da declaração
             var dadosDeclaracao = new BioDesk.Services.Pdf.DadosDeclaracaoSaude
             {
@@ -293,7 +293,7 @@ public partial class DeclaracaoSaudeUserControl : UserControl
                 MotivoConsulta = viewModel != null
                     ? $"Consulta de saúde integrativa. Paciente: {viewModel.NomePaciente}"
                     : "Consulta registada",
-                    
+
                 HistoriaClinica = viewModel != null
                     ? $"**DOENÇAS CRÓNICAS:**\n" +
                       $"Diabetes: {(viewModel.TemDiabetes ? "Sim" : "Não")}, " +
@@ -303,26 +303,26 @@ public partial class DeclaracaoSaudeUserControl : UserControl
                       $"\n**CIRURGIAS:** {viewModel.Cirurgias.Count} registada(s)" +
                       $"\n**HOSPITALIZAÇÕES:** {viewModel.Hospitalizacoes.Count} registada(s)"
                     : "Ver sistema",
-                    
+
                 MedicacaoAtual = viewModel != null && viewModel.MedicamentosAtuais.Any()
                     ? "**MEDICAMENTOS ATUAIS:**\n" + string.Join("\n• ", viewModel.MedicamentosAtuais.Select(m => $"{m.Nome} - {m.Dosagem} ({m.Frequencia})"))
                     : "Sem medicação registada",
-                    
+
                 Alergias = viewModel != null && viewModel.AlergiasMedicamentosas.Any()
                     ? "**ALERGIAS MEDICAMENTOSAS:**\n" + string.Join("\n• ", viewModel.AlergiasMedicamentosas.Select(a => $"{a.Medicamento} - Severidade: {a.Severidade} - Reação: {a.Reacao}"))
                     : "Sem alergias registadas",
-                    
+
                 EstiloVida = viewModel != null
                     ? $"**ESTILO DE VIDA:**\n" +
                       $"• Sono: {viewModel.HorasSono} horas/noite ({viewModel.QualidadeSono ?? "Não especificado"})\n" +
                       $"• Suplementos: {viewModel.SuplementosAlimentares ?? "Não especificado"}\n" +
                       $"• Medicamentos Naturais: {viewModel.MedicamentosNaturais ?? "Não especificado"}"
                     : "Ver sistema",
-                    
+
                 HistoriaFamiliar = viewModel != null && viewModel.HistoriaFamiliar.Any()
                     ? "**HISTÓRIA FAMILIAR:**\n" + string.Join("\n• ", viewModel.HistoriaFamiliar.Select(h => $"{h.GrauParentesco}: {h.CondicaoDoenca} (Idade diagnóstico: {h.IdadeDiagnostico}, Status: {h.Status})"))
                     : "Sem histórico familiar registado",
-                    
+
                 ObservacoesClinicas = "Declaração de saúde preenchida e assinada digitalmente pelo paciente. " +
                                       "Todos os dados foram fornecidos de forma voluntária e consciente."
             };

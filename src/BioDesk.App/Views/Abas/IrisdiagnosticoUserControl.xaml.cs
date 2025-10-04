@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using BioDesk.ViewModels.Abas;
 using BioDesk.App.Views.Dialogs;
+using BioDesk.Domain;
 using BioDesk.Domain.Entities;
 using BioDesk.App.Dialogs;
 using BioDesk.Services;
@@ -24,6 +25,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
 
     /// <summary>
     /// Handler para click no Canvas - mostra dialog e adiciona marca com observações
+    /// FASE 4: Integra hit-testing para detectar zona iridológica
     /// </summary>
     private async void MarkingsCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -35,6 +37,12 @@ public partial class IrisdiagnosticoUserControl : UserControl
         if (canvas == null) return;
 
         var position = e.GetPosition(canvas);
+
+        // FASE 4: Detectar zona iridológica no clique (se mapa estiver visível)
+        if (viewModel.MostrarMapaIridologico)
+        {
+            viewModel.DetectarZonaNoClique(position.X, position.Y);
+        }
 
         // 1️⃣ Mostrar dialog para capturar observações
         var dialog = new ObservacaoMarcaDialog
@@ -145,5 +153,94 @@ public partial class IrisdiagnosticoUserControl : UserControl
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+    }
+
+    // === HANDLERS DE CALIBRAÇÃO ===
+
+    private bool _isDraggingHandler = false;
+    private object? _currentHandler = null;
+
+    /// <summary>
+    /// Inicia arrasto do handler
+    /// </summary>
+    private void Handler_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement element) return;
+
+        Console.WriteLine($"🎯 DEBUG Handler_MouseDown: Tag={element.Tag?.GetType().Name}, Capture={element.CaptureMouse()}");
+        Console.WriteLine($"🧪 Tag FullName: {element.Tag?.GetType().FullName}");
+        Console.WriteLine($"🧪 Tag is CalibrationHandler: {element.Tag is IrisdiagnosticoViewModel.CalibrationHandler}");
+
+        _isDraggingHandler = true;
+        _currentHandler = element.Tag; // CalibrationHandler do DataContext
+
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Arrasta handler (atualiza posição)
+    /// </summary>
+    private void Handler_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isDraggingHandler || _currentHandler == null) return;
+        if (sender is not FrameworkElement element) return;
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+
+        Console.WriteLine($"🔧 DEBUG Handler_MouseMove: Dragging={_isDraggingHandler}, Handler={_currentHandler?.GetType().Name}");
+
+        // 🔧 FIX: Usar HandlersCanvas diretamente (nomeado no XAML) em vez de element.Parent
+        // ItemsControl não define Parent corretamente, causava canvas = null
+        var position = e.GetPosition(HandlersCanvas);
+        Console.WriteLine($"� DEBUG MousePosition: ({position.X:F2}, {position.Y:F2})");
+
+        // Atualizar posição do handler
+        if (_currentHandler is IrisdiagnosticoViewModel.CalibrationHandler handler)
+        {
+            handler.X = position.X - 8; // -8 para centralizar ellipse 16x16
+            handler.Y = position.Y - 8;
+
+            Console.WriteLine($"📍 POSITION UPDATE: X={handler.X:F2}, Y={handler.Y:F2}, MousePos=({position.X:F2}, {position.Y:F2})");
+
+            // Recalcular raio baseado na nova posição
+            double centroX = handler.Tipo == "Pupila" ? viewModel.CentroPupilaX : viewModel.CentroIrisX;
+            double centroY = handler.Tipo == "Pupila" ? viewModel.CentroPupilaY : viewModel.CentroIrisY;
+
+            double novoRaio = Math.Sqrt(Math.Pow(position.X - centroX, 2) + Math.Pow(position.Y - centroY, 2));
+
+            if (handler.Tipo == "Pupila")
+            {
+                viewModel.RaioPupila = novoRaio;
+            }
+            else
+            {
+                viewModel.RaioIris = novoRaio;
+            }
+
+            // TODO: Implementar deformação local (apenas na área de influência do handler)
+            // Por agora, atualiza todos os handlers do mesmo círculo uniformemente
+
+            // Recalcular polígonos
+            viewModel.RecalcularPoligonosComDeformacao();
+        }
+
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Finaliza arrasto do handler
+    /// </summary>
+    private void Handler_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isDraggingHandler) return;
+        if (sender is not FrameworkElement element) return;
+
+        _isDraggingHandler = false;
+        _currentHandler = null;
+        element.ReleaseMouseCapture();
+
+        // 🔧 FIX: NÃO reinicializar handlers - mantém posição manual do arrasto
+        // (InicializarHandlers() resetava para círculo perfeito, perdendo ajuste manual)
+
+        e.Handled = true;
     }
 }

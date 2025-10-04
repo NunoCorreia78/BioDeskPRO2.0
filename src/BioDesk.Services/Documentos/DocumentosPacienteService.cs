@@ -28,7 +28,7 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
     public DocumentosPacienteService(ILogger<DocumentosPacienteService> logger)
     {
         _logger = logger;
-        
+
         // ✅ CORREÇÃO CRÍTICA: Subir da pasta bin/Debug/net8.0-windows até raiz do projeto
         // bin\Debug\net8.0-windows → bin\Debug → bin → BioDesk.App → src → RAIZ
         var binDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -81,9 +81,9 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
             var nomeComUnderscores = nomePaciente.Replace(" ", "_").ToLowerInvariant();
             logLines.Add($"\nNomeComUnderscores: {nomeComUnderscores}");
             logLines.Add($"Buscando pastas que contenham: '{nomeNormalizado}' OU '{nomeComUnderscores}'");
-            
+
             var pastasPaciente = Directory.GetDirectories(pastaPacienteRaiz)
-                .Where(p => 
+                .Where(p =>
                 {
                     var nomePasta = Path.GetFileName(p).ToLowerInvariant();
                     var nomePastaNormalizado = nomePasta.Replace(" ", "").Replace("_", ""); // Remover espaços E underscores
@@ -99,7 +99,7 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
             {
                 _logger.LogDebug("📂 Buscando em: {Pasta}", pastaPaciente);
                 logLines.Add($"\n📂 Buscando em: {pastaPaciente}");
-                
+
                 // Listar subpastas
                 var subpastas = Directory.GetDirectories(pastaPaciente);
                 logLines.Add($"  Subpastas: {subpastas.Length}");
@@ -107,11 +107,11 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
                 {
                     logLines.Add($"    - {Path.GetFileName(sub)}");
                 }
-                
+
                 // ✅ Buscar recursivamente em todas as subpastas (Consentimentos/, Prescricoes/, DeclaracoesSaude/)
                 var pdfs = Directory.GetFiles(pastaPaciente, "*.pdf", SearchOption.AllDirectories).ToList();
                 logLines.Add($"  PDFs encontrados: {pdfs.Count}");
-                
+
                 foreach (var pdf in pdfs)
                 {
                     var relPath = pdf.Replace(pastaPaciente, "").TrimStart('\\');
@@ -128,10 +128,10 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
 
             logLines.Add($"\n📄 TOTAL DE DOCUMENTOS ENCONTRADOS: {resultado.Count}");
             _logger.LogInformation("📄 Encontrados {Count} documentos para paciente {PacienteId}", resultado.Count, pacienteId);
-            
+
             // Escrever log para ficheiro
             File.WriteAllLines(logPath, logLines);
-            
+
             return resultado;
         }
         catch (Exception ex)

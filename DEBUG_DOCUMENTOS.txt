@@ -1,7 +1,7 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-03 23:49:06 ===
-PacienteId: 4
-NomePaciente: Nuno Filipe Correia
-NomeNormalizado: nunofilipecorreia
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-04 22:36:29 ===
+PacienteId: 2
+NomePaciente: Maria Fernanda Costa
+NomeNormalizado: mariafernandacosta
 BaseDirectory: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2
 
 PastaPacienteRaiz: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\Pacientes
@@ -14,33 +14,31 @@ Total de pastas em Pacientes/: 5
   - Maria_Fernanda_Costa
   - Nuno Filipe Correia
 
-NomeComUnderscores: nuno_filipe_correia
-Buscando pastas que contenham: 'nunofilipecorreia' OU 'nuno_filipe_correia'
+NomeComUnderscores: maria_fernanda_costa
+Buscando pastas que contenham: 'mariafernandacosta' OU 'maria_fernanda_costa'
   Pasta 'Carlos António Pereira' (normalizado: 'carlosantóniopereira') → match: False
   Pasta 'João Silva Santos' (normalizado: 'joãosilvasantos') → match: False
-  Pasta 'Maria Fernanda Costa' (normalizado: 'mariafernandacosta') → match: False
-  Pasta 'Maria_Fernanda_Costa' (normalizado: 'mariafernandacosta') → match: False
-  Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: True
+  Pasta 'Maria Fernanda Costa' (normalizado: 'mariafernandacosta') → match: True
+  Pasta 'Maria_Fernanda_Costa' (normalizado: 'mariafernandacosta') → match: True
+  Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: False
 
-Pastas encontradas para o paciente: 1
+Pastas encontradas para o paciente: 2
 
-📂 Buscando em: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\Pacientes\Nuno Filipe Correia
+📂 Buscando em: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria Fernanda Costa
   Subpastas: 2
     - Consentimentos
     - DeclaracoesSaude
-  PDFs encontrados: 13
-    ✅ Consentimentos\Consentimento_🌿_Naturopatia_-_Consulta_Geral_Nuno_Filipe_Correia_20251001_232705.pdf
-    ✅ Consentimentos\Consentimento_👁️_Iridologia_-_Diagnóstico_pela_Íris_Nuno_Filipe_Correia_20251001_235556.pdf
-    ✅ Consentimentos\Consentimento_👁️_Iridologia_-_Diagnóstico_pela_Íris_Nuno_Filipe_Correia_20251001_235612.pdf
-    ✅ Consentimentos\Consentimento_🦴_Osteopatia_-_Tratamento_Manual_Nuno_Filipe_Correia_20251001_230832.pdf
-    ✅ Consentimentos\Consentimento_🦴_Osteopatia_-_Tratamento_Manual_Nuno_Filipe_Correia_20251003_220639.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251001_232632.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251001_235520.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251003_100841.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251003_220505.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251003_223438.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251003_225352.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251003_231232.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno_Filipe_Correia_20251003_232115.pdf
+  PDFs encontrados: 6
+    ✅ Consentimentos\Consentimento_🌿_Naturopatia_-_Consulta_Geral_Maria_Fernanda_Costa_20251001_233728.pdf
+    ✅ Consentimentos\Consentimento_💆_Massagem_Terapêutica_Maria_Fernanda_Costa_20251001_213236.pdf
+    ✅ Consentimentos\Consentimento_🔐_RGPD_-_Proteção_de_Dados_Pessoais_Maria_Fernanda_Costa_20251001_223306.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251001_233619.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251003_193322.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251003_195919.pdf
 
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 13
+📂 Buscando em: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria_Fernanda_Costa
+  Subpastas: 1
+    - IrisImagens
+  PDFs encontrados: 0
+
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 6

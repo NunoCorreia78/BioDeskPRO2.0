@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using BioDesk.Services.Navigation;
 using BioDesk.ViewModels;
@@ -99,6 +100,66 @@ namespace BioDesk.App
             NavegarPara(viewName);
         }
 
+        private void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            try
+            {
+                _logger.LogInformation("🛑 MainWindow_Closing: Verificando alterações não guardadas...");
+
+                // Encontrar ContentControl na árvore visual
+                var contentControl = this.FindName("ContentArea") as ContentControl;
+                if (contentControl == null)
+                {
+                    _logger.LogWarning("⚠️ ContentArea não encontrado");
+                    return;
+                }
+
+                // Verificar se FichaPacienteViewModel está ativo e tem alterações
+                if (contentControl.Content is FrameworkElement fe &&
+                    fe.DataContext is FichaPacienteViewModel vm &&
+                    vm.IsDirty)
+                {
+                    _logger.LogWarning("⚠️ IsDirty detectado! Mostrando diálogo de confirmação...");
+
+                    var result = MessageBox.Show(
+                        "Tem alterações não guardadas no paciente atual.\n\n" +
+                        "Deseja guardar antes de sair?",
+                        "⚠️ Alterações Pendentes",
+                        MessageBoxButton.YesNoCancel,
+                        MessageBoxImage.Warning);
+
+                    switch (result)
+                    {
+                        case MessageBoxResult.Yes:
+                            _logger.LogInformation("✅ Utilizador escolheu guardar alterações");
+                            // Guardar automaticamente
+                            _ = vm.GuardarCompletoCommand.ExecuteAsync(null);
+                            _logger.LogInformation("✅ Alterações guardadas com sucesso");
+                            break;
+
+                        case MessageBoxResult.No:
+                            _logger.LogInformation("⚠️ Utilizador descartou alterações");
+                            // Descartar alterações e sair
+                            break;
+
+                        case MessageBoxResult.Cancel:
+                            _logger.LogInformation("❌ Utilizador cancelou o fecho");
+                            e.Cancel = true; // Cancelar fecho da aplicação
+                            break;
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("✅ Nenhuma alteração pendente detectada");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "💥 Erro ao verificar alterações pendentes no fecho");
+                // Permitir fecho mesmo com erro
+            }
+        }
+
         private void NavegarPara(string viewName)
         {
             try
@@ -147,7 +208,11 @@ namespace BioDesk.App
 
                     // Atualizar conteúdo
                     _logger.LogInformation("🔄 Atualizando ContentArea.Content...");
-                    ContentArea.Content = fe;
+                    var contentArea = this.FindName("ContentArea") as ContentControl;
+                    if (contentArea != null)
+                    {
+                        contentArea.Content = fe;
+                    }
 
                     _logger.LogInformation("✅ Navegação para '{ViewName}' concluída com sucesso", viewName);
                 }

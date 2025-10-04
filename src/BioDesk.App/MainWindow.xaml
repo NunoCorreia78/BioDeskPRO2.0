@@ -9,7 +9,8 @@
         Width="1366"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Background="#FCFDFB">
+        Background="#FCFDFB"
+        Closing="MainWindow_Closing">
 
     <Grid>
         <Grid.RowDefinitions>

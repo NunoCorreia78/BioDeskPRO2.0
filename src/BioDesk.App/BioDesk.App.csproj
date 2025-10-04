@@ -31,8 +31,10 @@
     <Content Include="Assets\Images\assinatura.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- Mapas Iridológicos: embebidos como recursos -->
-    <EmbeddedResource Include="Resources\IridologyMaps\*.json" />
+    <!-- Mapas Iridológicos: copiar para output para File.ReadAllTextAsync() -->
+    <Content Include="Resources\IridologyMaps\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

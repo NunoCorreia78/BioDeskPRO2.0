@@ -10,15 +10,26 @@
 
     <UserControl.Resources>
         <converters:PathToImageSourceConverter x:Key="PathToImageConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <!-- Converter: Percentual (0-100) para Opacity (0-1) -->
+        <converters:PercentToOpacityConverter x:Key="PercentToOpacityConverter"/>
+
+        <!-- Converter: Raio para Diâmetro (raio * 2) -->
+        <converters:DiameterConverter x:Key="DiameterConverter"/>
+
+        <!-- Converter: Centro para Offset (centro - raio) -->
+        <converters:CenterOffsetConverter x:Key="CenterOffsetConverter"/>
     </UserControl.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1*"/>  <!-- Direito: 25% -->
+            <ColumnDefinition Width="2*"/>  <!-- Mapa Central: 50% -->
+            <ColumnDefinition Width="1*"/>  <!-- Esquerdo: 25% -->
         </Grid.ColumnDefinitions>
 
-        <!-- COLUNA ESQUERDA: Galeria de Imagens -->
+        <!-- COLUNA 0: DIREITO - Galeria de Imagens -->
         <Border Grid.Column="0"
                 Background="#F7F9F6"
                 CornerRadius="8"
@@ -233,8 +244,232 @@
             </Grid>
         </Border>
 
-        <!-- COLUNA DIREITA: Preview -->
+        <!-- COLUNA 1: PREVIEW CENTRAL + MAPA IRIDOLÓGICO (50% largura) -->
         <Border Grid.Column="1"
+                Background="#F7F9F6"
+                CornerRadius="8"
+                Padding="16"
+                Margin="8,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Título Dinâmico -->
+                <TextBlock Grid.Row="0"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Foreground="#3F4A3D"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,16">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="🔍 Preview da Íris"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding MostrarMapaIridologico}" Value="True">
+                                    <Setter Property="Text" Value="🗺️ Mapa Iridológico Interativo"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <!-- Canvas Central com Imagem + Mapa Sobreposto -->
+                <Viewbox Grid.Row="1" Stretch="Uniform">
+                    <Canvas Width="600" Height="600" Background="White">
+
+                        <!-- LAYER 1: Imagem da Íris Real (sempre visível) -->
+                        <Image x:Name="IrisCentralImage"
+                               Width="600" Height="600"
+                               Source="{Binding IrisImagemSelecionada.CaminhoImagem, Converter={StaticResource PathToImageConverter}}"
+                               Stretch="Uniform"
+                               Panel.ZIndex="1">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IrisImagemSelecionada}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <!-- LAYER 2: Mapa Iridológico (polígonos com FLIP VERTICAL) -->
+                        <Canvas x:Name="MapaOverlayCanvas"
+                                Width="600" Height="600"
+                                Panel.ZIndex="2"
+                                Background="Transparent">
+                            <Canvas.RenderTransform>
+                                <ScaleTransform ScaleY="-1" CenterY="300"/>
+                            </Canvas.RenderTransform>
+                            <Canvas.Style>
+                                <Style TargetType="Canvas">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding MostrarMapaIridologico}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Canvas.Style>
+
+                            <!-- Polígonos das zonas -->
+                            <ItemsControl ItemsSource="{Binding PoligonosZonas}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Polygon Points="{Binding Pontos}"
+                                                 Stroke="#3F4A3D"
+                                                 StrokeThickness="2"
+                                                 Fill="{Binding CorPreenchimento}"
+                                                 Cursor="Hand"
+                                                 ToolTip="{Binding Nome}">
+                                            <Polygon.Style>
+                                                <Style TargetType="Polygon">
+                                                    <Setter Property="Opacity" Value="{Binding DataContext.OpacidadeMapa, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource PercentToOpacityConverter}}"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="0.8"/>
+                                                            <Setter Property="StrokeThickness" Value="3"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Polygon.Style>
+                                        </Polygon>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Canvas>
+
+                        <!-- LAYER 4: Handlers de Calibração (visíveis só em modo calibração) -->
+                        <!-- 🔧 FIX: Background removido para permitir eventos mouse passarem para handlers -->
+                        <Canvas x:Name="HandlersCanvas"
+                                Width="600" Height="600"
+                                Panel.ZIndex="3"
+                                IsHitTestVisible="True">
+                            <Canvas.Style>
+                                <Style TargetType="Canvas">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding MostrarMapaIridologico}" Value="True"/>
+                                                <Condition Binding="{Binding ModoCalibracaoAtivo}" Value="True"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Canvas.Style>
+
+                            <!-- Handlers da PUPILA (8 handlers) -->
+                            <ItemsControl ItemsSource="{Binding HandlersPupila}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Ellipse Width="16" Height="16"
+                                                 Fill="#5B7C99"
+                                                 Stroke="White"
+                                                 StrokeThickness="2"
+                                                 Cursor="Hand"
+                                                 IsHitTestVisible="True"
+                                                 MouseLeftButtonDown="Handler_MouseDown"
+                                                 MouseMove="Handler_MouseMove"
+                                                 MouseLeftButtonUp="Handler_MouseUp"
+                                                 Tag="{Binding}">
+                                            <Ellipse.RenderTransform>
+                                                <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                            </Ellipse.RenderTransform>
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Opacity" Value="0.7"/>
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <!-- Mostrar se Pupila = True OU Ambos = True -->
+                                                        <DataTrigger Binding="{Binding DataContext.TipoCalibracaoPupila, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DataContext.TipoCalibracaoAmbos, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="1"/>
+                                                            <Setter Property="Width" Value="20"/>
+                                                            <Setter Property="Height" Value="20"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Handlers da ÍRIS (8 handlers) -->
+                            <ItemsControl ItemsSource="{Binding HandlersIris}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Ellipse Width="16" Height="16"
+                                                 Fill="#6B8E63"
+                                                 Stroke="White"
+                                                 StrokeThickness="2"
+                                                 Cursor="Hand"
+                                                 IsHitTestVisible="True"
+                                                 MouseLeftButtonDown="Handler_MouseDown"
+                                                 MouseMove="Handler_MouseMove"
+                                                 MouseLeftButtonUp="Handler_MouseUp"
+                                                 Tag="{Binding}">
+                                            <Ellipse.RenderTransform>
+                                                <TranslateTransform X="{Binding X}" Y="{Binding Y}"/>
+                                            </Ellipse.RenderTransform>
+                                            <Ellipse.Style>
+                                                <Style TargetType="Ellipse">
+                                                    <Setter Property="Opacity" Value="0.7"/>
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <!-- Mostrar se Íris = True OU Ambos = True -->
+                                                        <DataTrigger Binding="{Binding DataContext.TipoCalibracaoIris, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding DataContext.TipoCalibracaoAmbos, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="1"/>
+                                                            <Setter Property="Width" Value="20"/>
+                                                            <Setter Property="Height" Value="20"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Ellipse.Style>
+                                        </Ellipse>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Canvas>
+                    </Canvas>
+                </Viewbox>
+            </Grid>
+        </Border>
+
+        <!-- COLUNA 2: ESQUERDO - Preview (era Grid.Column="1", agora é "2") -->
+        <Border Grid.Column="2"
                 Background="#F7F9F6"
                 CornerRadius="8"
                 Padding="16">
@@ -427,79 +662,166 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Área de Preview com Canvas -->
-                <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1">
-                    <Grid x:Name="ImageContainer">
-                        <!-- Placeholder quando nenhuma imagem -->
-                        <TextBlock Text="📸 Selecione uma imagem para visualizar&#x0a;&#x0a;🖱️ Click esquerdo: adicionar marca&#x0a;🎨 Selecione uma cor acima"
-                                   FontSize="14" Foreground="#5A6558" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
+                <!-- Controles de Calibração do Mapa -->
+                <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1" Padding="16" Margin="0,12,0,0">
+                    <StackPanel>
+                        <!-- Toggle Mapa Iridológico -->
+                        <ToggleButton Content="\ud83d\uddfa\ufe0f Mapa Iridol\u00f3gico"
+                                      IsChecked="{Binding MostrarMapaIridologico, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch"
+                                      Height="36"
+                                      FontSize="13" FontWeight="SemiBold"
+                                      Cursor="Hand"
+                                      Margin="0,0,0,16">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="6"
+                                                        Padding="8"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="2">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Background" Value="#E3E9DE"/>
+                                    <Setter Property="Foreground" Value="#3F4A3D"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IrisImagemSelecionada}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="Background" Value="#6B8E63"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#9CAF97"/>
+                                        </Trigger>
                                     </Style.Triggers>
                                 </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                            </ToggleButton.Style>
+                        </ToggleButton>
 
-                        <!-- Imagem com Zoom -->
-                        <Viewbox Stretch="Uniform" x:Name="ImageViewbox">
-                            <Viewbox.Style>
-                                <Style TargetType="Viewbox">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IrisImagemSelecionada}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Viewbox.Style>
+                        <!-- Título -->
+                        <TextBlock Text="🎯 Calibração do Mapa"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="#3F4A3D"
+                                   Margin="0,0,0,12"/>
 
-                            <Grid x:Name="CanvasContainer">
-                                <Grid.RenderTransform>
-                                    <ScaleTransform ScaleX="{Binding ZoomLevel}" ScaleY="{Binding ZoomLevel}" CenterX="0" CenterY="0"/>
-                                </Grid.RenderTransform>
-
-                                <!-- Imagem de fundo (com converter que liberta lock do ficheiro) -->
-                                <Image x:Name="IrisImage" 
-                                       Source="{Binding IrisImagemSelecionada.CaminhoImagem, Converter={StaticResource PathToImageConverter}}" 
-                                       Stretch="None"/>
-
-                                <!-- Canvas para marcações -->
-                                <Canvas x:Name="MarkingsCanvas" Background="Transparent"
-                                        Width="{Binding ActualWidth, ElementName=IrisImage}"
-                                        Height="{Binding ActualHeight, ElementName=IrisImage}"
-                                        MouseLeftButtonDown="MarkingsCanvas_MouseLeftButtonDown">
-
-                                    <ItemsControl ItemsSource="{Binding MarcasImagem}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <Canvas/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemContainerStyle>
-                                            <Style>
-                                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
-                                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                                            </Style>
-                                        </ItemsControl.ItemContainerStyle>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Ellipse Width="16" Height="16" Stroke="#3F4A3D" StrokeThickness="2" Cursor="Hand" ToolTip="{Binding Observacoes}">
-                                                    <Ellipse.Fill>
-                                                        <SolidColorBrush Color="{Binding Cor}"/>
-                                                    </Ellipse.Fill>
-                                                </Ellipse>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </Canvas>
+                        <!-- Opacidade do Mapa -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Opacidade do Mapa"
+                                       FontSize="13"
+                                       Foreground="#5A6558"
+                                       Margin="0,0,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Slider x:Name="OpacidadeSlider"
+                                        Grid.Column="0"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        Value="{Binding OpacidadeMapa, Mode=TwoWay}"
+                                        TickFrequency="10"
+                                        IsSnapToTickEnabled="True"
+                                        Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding OpacidadeMapa, StringFormat={}{0}%}"
+                                           FontSize="13"
+                                           Foreground="#3F4A3D"
+                                           VerticalAlignment="Center"
+                                           Width="40"
+                                           TextAlignment="Right"/>
                             </Grid>
-                        </Viewbox>
-                    </Grid>
+                        </StackPanel>
+
+                        <!-- Separador -->
+                        <Border Height="1" Background="#E3E9DE" Margin="0,4"/>
+
+                        <!-- Modo Calibração -->
+                        <CheckBox Content="🔧 Modo Calibração"
+                                  IsChecked="{Binding ModoCalibracaoAtivo, Mode=TwoWay}"
+                                  FontSize="13"
+                                  Foreground="#3F4A3D"/>
+
+                        <!-- Tipo de Calibração (visível só em modo calibração) -->
+                        <StackPanel Visibility="{Binding ModoCalibracaoAtivo, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="Calibrar:"
+                                       FontSize="13"
+                                       Foreground="#5A6558"
+                                       Margin="0,0,0,4"/>
+                            <StackPanel>
+                                <RadioButton Content="🔵 Pupila"
+                                             IsChecked="{Binding TipoCalibracaoPupila, Mode=TwoWay}"
+                                             FontSize="13"
+                                             Foreground="#3F4A3D"
+                                             Margin="0,0,0,4"/>
+                                <RadioButton Content="🟢 Íris"
+                                             IsChecked="{Binding TipoCalibracaoIris, Mode=TwoWay}"
+                                             FontSize="13"
+                                             Foreground="#3F4A3D"
+                                             Margin="0,0,0,4"/>
+                                <RadioButton Content="🔵🟢 Ambos"
+                                             IsChecked="{Binding TipoCalibracaoAmbos, Mode=TwoWay}"
+                                             FontSize="13"
+                                             Foreground="#3F4A3D"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Separador -->
+                        <Border Height="1" Background="#E3E9DE" Margin="0,4"
+                                Visibility="{Binding ModoCalibracaoAtivo, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                        <!-- Botão Reset -->
+                        <Button Content="� Reset Calibração"
+                                Command="{Binding ResetCalibracaoCommand}"
+                                Background="#9CAF97"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Padding="12,8"
+                                FontSize="13"
+                                FontWeight="SemiBold"
+                                Cursor="Hand"
+                                Visibility="{Binding ModoCalibracaoAtivo, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="6"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#879B83"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Instruções (visível só em modo calibração) -->
+                        <TextBlock Visibility="{Binding ModoCalibracaoAtivo, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   FontSize="11"
+                                   Foreground="#5A6558"
+                                   TextWrapping="Wrap"
+                                   LineHeight="16">
+                            <Run Text="💡 Arraste os handlers para ajustar."/>
+                            <LineBreak/>
+                            <Run Text="⌨️ Shift: mover todos uniformemente"/>
+                        </TextBlock>
+                    </StackPanel>
                 </Border>
             </Grid>
         </Border>

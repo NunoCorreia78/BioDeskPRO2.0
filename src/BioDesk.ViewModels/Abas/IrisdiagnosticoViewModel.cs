@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using BioDesk.Data.Repositories;
 using BioDesk.Domain.Entities;
+using BioDesk.Domain.Models;
+using BioDesk.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -18,6 +22,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<IrisdiagnosticoViewModel> _logger;
+    private readonly IIridologyService _iridologyService;
 
     [ObservableProperty]
     private Paciente? _pacienteAtual;
@@ -72,12 +77,136 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     [ObservableProperty]
     private string? _errorMessage;
 
+    // === FASE 4: MAPA IRIDOLÓGICO ===
+    [ObservableProperty]
+    private bool _mostrarMapaIridologico = false;
+
+    [ObservableProperty]
+    private IridologyZone? _zonaDetectada;
+
+    [ObservableProperty]
+    private IridologyMap? _mapaAtual;
+
+    /// <summary>
+    /// Classe auxiliar para renderizar polígonos no WPF
+    /// </summary>
+    public class ZonaPoligono
+    {
+        public string Nome { get; set; } = string.Empty;
+        public string Descricao { get; set; } = string.Empty;
+        public PointCollection Pontos { get; set; } = new();
+        public string CorPreenchimento { get; set; } = "#6B8E63"; // Verde musgo terroso
+    }
+
+    [ObservableProperty]
+    private ObservableCollection<ZonaPoligono> _poligonosZonas = new();
+
+    // === FASE 5: CALIBRAÇÃO AVANÇADA ===
+    
+    /// <summary>
+    /// Opacidade do mapa (0-100%)
+    /// </summary>
+    [ObservableProperty]
+    private double _opacidadeMapa = 50.0;
+
+    /// <summary>
+    /// Modo calibração ativo (mostra handlers)
+    /// </summary>
+    [ObservableProperty]
+    private bool _modoCalibracaoAtivo = false;
+
+    /// <summary>
+    /// Tipo de calibração: Pupila
+    /// </summary>
+    [ObservableProperty]
+    private bool _tipoCalibracaoPupila = false;
+
+    /// <summary>
+    /// Tipo de calibração: Íris
+    /// </summary>
+    [ObservableProperty]
+    private bool _tipoCalibracaoIris = true;
+
+    /// <summary>
+    /// Tipo de calibração: Ambos
+    /// </summary>
+    [ObservableProperty]
+    private bool _tipoCalibracaoAmbos = false;
+
+    /// <summary>
+    /// Classe para representar um handler (ponto de controle)
+    /// </summary>
+    public partial class CalibrationHandler : ObservableObject
+    {
+        [ObservableProperty]
+        private double _x;
+
+        [ObservableProperty]
+        private double _y;
+
+        [ObservableProperty]
+        private double _angulo; // 0-360°
+
+        [ObservableProperty]
+        private string _tipo = "Iris"; // "Pupila" ou "Iris"
+    }
+
+    /// <summary>
+    /// Handlers da pupila (8 pontos no círculo interno)
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<CalibrationHandler> _handlersPupila = new();
+
+    /// <summary>
+    /// Handlers da íris (8 pontos no círculo externo)
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<CalibrationHandler> _handlersIris = new();
+
+    /// <summary>
+    /// Centro da pupila X
+    /// </summary>
+    [ObservableProperty]
+    private double _centroPupilaX = 300;
+
+    /// <summary>
+    /// Centro da pupila Y
+    /// </summary>
+    [ObservableProperty]
+    private double _centroPupilaY = 300;
+
+    /// <summary>
+    /// Raio da pupila
+    /// </summary>
+    [ObservableProperty]
+    private double _raioPupila = 54;
+
+    /// <summary>
+    /// Centro da íris X
+    /// </summary>
+    [ObservableProperty]
+    private double _centroIrisX = 300;
+
+    /// <summary>
+    /// Centro da íris Y
+    /// </summary>
+    [ObservableProperty]
+    private double _centroIrisY = 300;
+
+    /// <summary>
+    /// Raio da íris
+    /// </summary>
+    [ObservableProperty]
+    private double _raioIris = 270;
+
     public IrisdiagnosticoViewModel(
         IUnitOfWork unitOfWork,
-        ILogger<IrisdiagnosticoViewModel> logger)
+        ILogger<IrisdiagnosticoViewModel> logger,
+        IIridologyService iridologyService)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _iridologyService = iridologyService ?? throw new ArgumentNullException(nameof(iridologyService));
     }
 
     /// <summary>
@@ -640,6 +769,12 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
             // Carregar marcas da nova imagem (fire-and-forget é seguro aqui)
             _ = CarregarMarcasAsync();
+
+            // FASE 4: Carregar mapa iridológico automaticamente
+            if (MostrarMapaIridologico)
+            {
+                _ = CarregarMapaIridologicoAsync();
+            }
         }
         else
         {
@@ -658,4 +793,403 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         OnPropertyChanged(nameof(CountAmarelo));
         OnPropertyChanged(nameof(CountTotal));
     }
+
+    // ========================================
+    // FASE 4: MAPA IRIDOLÓGICO
+    // ========================================
+
+    /// <summary>
+    /// Observador para quando MostrarMapaIridologico mudar via binding
+    /// </summary>
+    partial void OnMostrarMapaIridologicoChanged(bool value)
+    {
+        _logger.LogInformation("🗺️ Mapa iridológico mudou para: {Estado}", value ? "VISÍVEL" : "OCULTO");
+        
+        if (value && IrisImagemSelecionada != null)
+        {
+            _ = CarregarMapaIridologicoAsync();
+        }
+        else
+        {
+            // Limpar polígonos ao ocultar
+            PoligonosZonas.Clear();
+            ZonaDetectada = null;
+        }
+    }
+
+    /// <summary>
+    /// Carrega e renderiza mapa iridológico baseado no olho da imagem
+    /// </summary>
+    private async Task CarregarMapaIridologicoAsync()
+    {
+        if (IrisImagemSelecionada == null)
+        {
+            _logger.LogWarning("⚠️ Tentativa de carregar mapa sem imagem selecionada");
+            return;
+        }
+
+        try
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+
+            // Carregar JSON baseado no olho (Esquerdo → esq, Direito → drt)
+            MapaAtual = await _iridologyService.CarregarMapaAsync(IrisImagemSelecionada.Olho);
+
+            if (MapaAtual == null)
+            {
+                ErrorMessage = "Erro ao carregar mapa iridológico.";
+                _logger.LogError("❌ Falha ao carregar mapa para olho: {Olho}", IrisImagemSelecionada.Olho);
+                return;
+            }
+
+            _logger.LogInformation("✅ Mapa iridológico carregado: {TotalZonas} zonas, Tipo: {Tipo}",
+                MapaAtual.Metadata.TotalZonas,
+                MapaAtual.Metadata.Tipo);
+
+            // Renderizar polígonos
+            RenderizarPoligonos();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao carregar mapa iridológico");
+            ErrorMessage = $"Erro ao carregar mapa: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Renderiza todas as zonas do mapa como polígonos WPF
+    /// NOVO: Usa canvas fixo 600x600px para mapa centralizado
+    /// </summary>
+    private void RenderizarPoligonos()
+    {
+        if (MapaAtual == null) return;
+
+        PoligonosZonas.Clear();
+
+        // NOVO: Usar método de canvas fixo (600x600px)
+        var cores = new[] { "#6B8E63", "#9CAF97", "#5B7C99", "#D4A849" }; // Paleta terrosa
+        var corIndex = 0;
+
+        foreach (var zona in MapaAtual.Zonas)
+        {
+            // Usar método dedicado para canvas fixo
+            var poligonosWpf = _iridologyService.ConverterZonaParaPoligonosCanvasFixo(zona, canvasWidth: 600, canvasHeight: 600);
+
+            foreach (var pontos in poligonosWpf)
+            {
+                PoligonosZonas.Add(new ZonaPoligono
+                {
+                    Nome = zona.Nome,
+                    Descricao = zona.Descricao,
+                    Pontos = pontos,
+                    CorPreenchimento = cores[corIndex % cores.Length]
+                });
+            }
+
+            corIndex++;
+        }
+
+        _logger.LogInformation("🎨 Renderizados {Count} polígonos para {Zonas} zonas",
+            PoligonosZonas.Count,
+            MapaAtual.Zonas.Count);
+    }
+
+    /// <summary>
+    /// Detecta zona ao clicar (chamado pelo UserControl)
+    /// </summary>
+    public void DetectarZonaNoClique(double x, double y)
+    {
+        if (MapaAtual == null || !MostrarMapaIridologico) return;
+
+        ZonaDetectada = _iridologyService.DetectarZonaClique(x, y, MapaAtual);
+
+        if (ZonaDetectada != null)
+        {
+            _logger.LogInformation("🎯 Zona detectada no clique: {Nome}", ZonaDetectada.Nome);
+        }
+    }
+
+    // === MÉTODOS DE CALIBRAÇÃO ===
+
+    /// <summary>
+    /// Inicializa handlers da pupila e íris (8 pontos cada)
+    /// </summary>
+    public void InicializarHandlers()
+    {
+        HandlersPupila.Clear();
+        HandlersIris.Clear();
+
+        // 8 handlers uniformemente espaçados (0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°)
+        for (int i = 0; i < 8; i++)
+        {
+            double angulo = i * 45; // 0, 45, 90, ...
+
+            // Handler da PUPILA
+            double anguloRad = angulo * Math.PI / 180.0;
+            double xPupila = CentroPupilaX + RaioPupila * Math.Cos(anguloRad) - 8; // -8 para centralizar ellipse 16x16
+            double yPupila = CentroPupilaY + RaioPupila * Math.Sin(anguloRad) - 8;
+
+            HandlersPupila.Add(new CalibrationHandler
+            {
+                X = xPupila,
+                Y = yPupila,
+                Angulo = angulo,
+                Tipo = "Pupila"
+            });
+
+            // Handler da ÍRIS
+            double xIris = CentroIrisX + RaioIris * Math.Cos(anguloRad) - 8; // -8 para centralizar
+            double yIris = CentroIrisY + RaioIris * Math.Sin(anguloRad) - 8;
+
+            HandlersIris.Add(new CalibrationHandler
+            {
+                X = xIris,
+                Y = yIris,
+                Angulo = angulo,
+                Tipo = "Iris"
+            });
+        }
+
+        _logger.LogInformation("✅ Handlers inicializados: {Pupila} pupila, {Iris} íris", 
+            HandlersPupila.Count, HandlersIris.Count);
+    }
+
+    /// <summary>
+    /// Reset de calibração: restaura posições padrão
+    /// </summary>
+    [RelayCommand]
+    private void ResetCalibracao()
+    {
+        CentroPupilaX = 300;
+        CentroPupilaY = 300;
+        RaioPupila = 54;
+
+        CentroIrisX = 300;
+        CentroIrisY = 300;
+        RaioIris = 270;
+
+        OpacidadeMapa = 50.0;
+
+        InicializarHandlers();
+
+        // Recalcular polígonos
+        if (MostrarMapaIridologico && MapaAtual != null)
+        {
+            RenderizarPoligonos();
+        }
+
+        _logger.LogInformation("🔄 Calibração resetada para valores padrão");
+    }
+
+    /// <summary>
+    /// Recalcula polígonos com deformação baseada em handlers
+    /// (Implementação simplificada - pode ser expandida)
+    /// </summary>
+    public void RecalcularPoligonosComDeformacao()
+    {
+        if (MapaAtual == null) return;
+
+        // 🔧 DEFORMAÇÃO COM HANDLERS: Usar posições reais dos handlers para calcular raios deformados
+        if (ModoCalibracaoAtivo && (HandlersPupila.Count > 0 || HandlersIris.Count > 0))
+        {
+            RenderizarPoligonosComDeformacao();
+        }
+        else
+        {
+            // Círculos perfeitos (sem calibração)
+            RenderizarPoligonos();
+        }
+
+        _logger.LogInformation("🔄 Polígonos recalculados com nova calibração");
+    }
+
+    /// <summary>
+    /// Renderiza polígonos DEFORMADOS usando posições reais dos handlers
+    /// </summary>
+    private void RenderizarPoligonosComDeformacao()
+    {
+        if (MapaAtual == null) return;
+
+        PoligonosZonas.Clear();
+
+        var cores = new[] { "#6B8E63", "#9CAF97", "#5B7C99", "#D4A849" };
+        var corIndex = 0;
+
+        foreach (var zona in MapaAtual.Zonas)
+        {
+            // 🎯 NOVA LÓGICA: Interpolar pontos usando handlers
+            var poligonosDeformados = InterpolateZoneWithHandlers(zona);
+
+            foreach (var pontos in poligonosDeformados)
+            {
+                PoligonosZonas.Add(new ZonaPoligono
+                {
+                    Nome = zona.Nome,
+                    Descricao = zona.Descricao,
+                    Pontos = pontos,
+                    CorPreenchimento = cores[corIndex % cores.Length]
+                });
+            }
+
+            corIndex++;
+        }
+
+        _logger.LogInformation("🎨 Renderizados {Count} polígonos DEFORMADOS", PoligonosZonas.Count);
+    }
+
+    /// <summary>
+    /// Interpola pontos da zona usando posições reais dos handlers (deformação)
+    /// </summary>
+    private List<System.Windows.Media.PointCollection> InterpolateZoneWithHandlers(IridologyZone zona)
+    {
+        var result = new List<System.Windows.Media.PointCollection>();
+
+        // Calcular raio médio da zona baseado nos pontos
+        double raioMedioZona = 100.0; // Default
+        if (zona.Partes.Count > 0 && zona.Partes[0].Count > 0)
+        {
+            raioMedioZona = zona.Partes[0].Average(p => p.Raio) * 300.0; // Raio normalizado * metade canvas
+        }
+
+        // Usar handlers da pupila se raio < threshold, senão íris
+        var handlers = raioMedioZona < 80 ? HandlersPupila : HandlersIris;
+        
+        // 🔧 CORREÇÃO CRÍTICA: Usar o centro REAL dos handlers (não fixo 300,300)
+        var zonaCentroX = raioMedioZona < 80 ? CentroPupilaX : CentroIrisX;
+        var zonaCentroY = raioMedioZona < 80 ? CentroPupilaY : CentroIrisY;
+
+        if (handlers.Count == 0)
+        {
+            // Fallback: usar conversão normal se não há handlers
+            return _iridologyService.ConverterZonaParaPoligonosCanvasFixo(zona, 600, 600);
+        }
+
+        // Criar polígono deformado interpolando entre handlers
+        foreach (var parte in zona.Partes)
+        {
+            var pontos = new System.Windows.Media.PointCollection();
+
+            foreach (var coordenada in parte)
+            {
+                // Converter coordenada polar (ângulo, raio) para cartesiano DEFORMADO
+                double angulo = coordenada.Angulo * Math.PI / 180.0;
+                double raioOriginal = coordenada.Raio * 300.0; // Raio normalizado → pixels
+
+                // 🎯 INTERPOLAÇÃO: Encontrar raio deformado baseado nos handlers mais próximos
+                double raioDeformado = InterpolateRadiusFromHandlers(angulo, raioOriginal, handlers, zonaCentroX, zonaCentroY);
+
+                // Converter para cartesiano com raio deformado
+                double x = zonaCentroX + raioDeformado * Math.Cos(angulo);
+                double y = zonaCentroY + raioDeformado * Math.Sin(angulo);
+
+                pontos.Add(new System.Windows.Point(x, y));
+            }
+
+            if (pontos.Count > 0)
+                result.Add(pontos);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Interpola raio baseado nas posições dos handlers
+    /// DEFORMAÇÃO LOCAL: Cada handler estica/encolhe sua zona (±45°)
+    /// </summary>
+    private double InterpolateRadiusFromHandlers(double angulo, double raioOriginal, ObservableCollection<CalibrationHandler> handlers, double centroX, double centroY)
+    {
+        if (handlers.Count == 0) return raioOriginal;
+
+        // Encontrar os 2 handlers adjacentes ao ângulo (antes e depois)
+        var handlersComAngulo = handlers
+            .Select(h =>
+            {
+                var dx = h.X + 8 - centroX;
+                var dy = h.Y + 8 - centroY;
+                var anguloHandler = Math.Atan2(dy, dx);
+                var raioHandler = Math.Sqrt(dx * dx + dy * dy);
+                var diferencaAngulo = NormalizarAngulo(angulo - anguloHandler);
+                return new { Handler = h, Angulo = anguloHandler, Raio = raioHandler, Diferenca = diferencaAngulo };
+            })
+            .OrderBy(h => h.Angulo)
+            .ToList();
+
+        if (handlersComAngulo.Count == 0) return raioOriginal;
+
+        // Encontrar handler ANTERIOR (ângulo menor ou igual)
+        var handlerAnterior = handlersComAngulo.LastOrDefault(h => h.Angulo <= angulo) 
+                              ?? handlersComAngulo[^1]; // Wrap-around
+
+        // Encontrar handler POSTERIOR (ângulo maior)
+        var handlerPosterior = handlersComAngulo.FirstOrDefault(h => h.Angulo > angulo) 
+                               ?? handlersComAngulo[0]; // Wrap-around
+
+        // Calcular raio nominal (círculo perfeito) para comparação
+        var raioNominal = GetRaioNominal(handlerAnterior.Handler.Tipo);
+
+        // Fatores de deformação de cada handler (quanto esticou/encolheu)
+        var fatorAnterior = handlerAnterior.Raio / raioNominal;
+        var fatorPosterior = handlerPosterior.Raio / raioNominal;
+
+        // Interpolar entre os 2 handlers com base na posição angular
+        var anguloAnterior = handlerAnterior.Angulo;
+        var anguloPosterior = handlerPosterior.Angulo;
+
+        // Ajustar wrap-around (0°/360°)
+        if (anguloPosterior < anguloAnterior)
+            anguloPosterior += 2 * Math.PI;
+        if (angulo < anguloAnterior)
+            angulo += 2 * Math.PI;
+
+        // Fator de interpolação (0.0 = anterior, 1.0 = posterior)
+        var rangeAngulo = anguloPosterior - anguloAnterior;
+        var t = rangeAngulo > 0.0001 ? (angulo - anguloAnterior) / rangeAngulo : 0.5;
+        t = Math.Clamp(t, 0, 1);
+
+        // Interpolar o fator de deformação entre os 2 handlers
+        var fatorDeformacao = fatorAnterior * (1 - t) + fatorPosterior * t;
+
+        // Aplicar deformação ao raio original
+        return raioOriginal * fatorDeformacao;
+    }
+
+    /// <summary>
+    /// Obtém raio nominal (círculo perfeito) para o tipo de handler
+    /// </summary>
+    private double GetRaioNominal(string tipo)
+    {
+        return tipo == "Pupila" ? RaioPupila : RaioIris;
+    }
+
+    /// <summary>
+    /// Normaliza ângulo para -π a +π
+    /// </summary>
+    private double NormalizarAngulo(double angulo)
+    {
+        while (angulo > Math.PI) angulo -= 2 * Math.PI;
+        while (angulo < -Math.PI) angulo += 2 * Math.PI;
+        return angulo;
+    }
+
+    /// <summary>
+    /// Observador: quando modo calibração ativa, inicializa handlers
+    /// </summary>
+    partial void OnModoCalibracaoAtivoChanged(bool value)
+    {
+        if (value)
+        {
+            InicializarHandlers();
+            _logger.LogInformation("🔧 Modo calibração ATIVADO");
+        }
+        else
+        {
+            _logger.LogInformation("🔧 Modo calibração DESATIVADO");
+        }
+    }
 }
+
