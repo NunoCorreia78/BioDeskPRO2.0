@@ -199,6 +199,11 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     [ObservableProperty]
     private double _raioIris = 270;
 
+    // 🔧 RAIOS NOMINAIS FIXOS (círculo perfeito) - NUNCA devem ser alterados
+    // Usados como referência para calcular fatores de deformação
+    private const double RAIO_NOMINAL_PUPILA = 54.0;
+    private const double RAIO_NOMINAL_IRIS = 270.0;
+
     public IrisdiagnosticoViewModel(
         IUnitOfWork unitOfWork,
         ILogger<IrisdiagnosticoViewModel> logger,
@@ -1100,6 +1105,9 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     /// <summary>
     /// Interpola raio baseado nas posições dos handlers
     /// DEFORMAÇÃO LOCAL: Cada handler estica/encolhe sua zona (±45°)
+    /// 
+    /// 🔧 CORREÇÃO CRÍTICA: WPF usa coordenadas com Y crescendo para BAIXO,
+    /// mas Math.Atan2 assume Y crescendo para CIMA. Solução: inverter Y com -dy
     /// </summary>
     private double InterpolateRadiusFromHandlers(double angulo, double raioOriginal, ObservableCollection<CalibrationHandler> handlers, double centroX, double centroY)
     {
@@ -1109,12 +1117,17 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         var handlersComAngulo = handlers
             .Select(h =>
             {
-                var dx = h.X + 8 - centroX;
+                var dx = h.X + 8 - centroX; // +8 para compensar offset do Ellipse
                 var dy = h.Y + 8 - centroY;
-                var anguloHandler = Math.Atan2(dy, dx);
+                
+                // 🎯 CORREÇÃO: Inverter Y para compensar coordenadas WPF (Y cresce para BAIXO)
+                // WPF: Y=0 no topo, Y cresce para baixo
+                // Math.Atan2: Assume Y cresce para cima (convenção matemática)
+                // Solução: usar -dy para inverter o eixo Y
+                var anguloHandler = Math.Atan2(-dy, dx);
                 var raioHandler = Math.Sqrt(dx * dx + dy * dy);
-                var diferencaAngulo = NormalizarAngulo(angulo - anguloHandler);
-                return new { Handler = h, Angulo = anguloHandler, Raio = raioHandler, Diferenca = diferencaAngulo };
+                
+                return new { Handler = h, Angulo = anguloHandler, Raio = raioHandler };
             })
             .OrderBy(h => h.Angulo)
             .ToList();
@@ -1129,8 +1142,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         var handlerPosterior = handlersComAngulo.FirstOrDefault(h => h.Angulo > angulo) 
                                ?? handlersComAngulo[0]; // Wrap-around
 
-        // Calcular raio nominal (círculo perfeito) para comparação
-        var raioNominal = GetRaioNominal(handlerAnterior.Handler.Tipo);
+        // 🔧 CORREÇÃO: Usar raio nominal FIXO (não o valor dinâmico de RaioPupila/RaioIris)
+        var raioNominal = GetRaioNominalFixo(handlerAnterior.Handler.Tipo);
 
         // Fatores de deformação de cada handler (quanto esticou/encolheu)
         var fatorAnterior = handlerAnterior.Raio / raioNominal;
@@ -1154,12 +1167,30 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         // Interpolar o fator de deformação entre os 2 handlers
         var fatorDeformacao = fatorAnterior * (1 - t) + fatorPosterior * t;
 
+        // 📊 DEBUG (opcional - comentar após validação)
+        // Console.WriteLine($"🔍 Ponto: angulo={angulo * 180 / Math.PI:F1}°, raioOrig={raioOriginal:F1}");
+        // Console.WriteLine($"📍 Handler anterior: angulo={handlerAnterior.Angulo * 180 / Math.PI:F1}°, fator={fatorAnterior:F3}");
+        // Console.WriteLine($"📍 Handler posterior: angulo={handlerPosterior.Angulo * 180 / Math.PI:F1}°, fator={fatorPosterior:F3}");
+        // Console.WriteLine($"📏 t={t:F3}, fatorDeformacao={fatorDeformacao:F3}, raioFinal={raioOriginal * fatorDeformacao:F1}");
+
         // Aplicar deformação ao raio original
         return raioOriginal * fatorDeformacao;
     }
 
     /// <summary>
+    /// Obtém raio nominal FIXO (círculo perfeito) para o tipo de handler
+    /// 🔧 IMPORTANTE: Retorna valores CONSTANTES, não os valores dinâmicos de RaioPupila/RaioIris
+    /// Usado para calcular fatores de deformação relativos
+    /// </summary>
+    private double GetRaioNominalFixo(string tipo)
+    {
+        return tipo == "Pupila" ? RAIO_NOMINAL_PUPILA : RAIO_NOMINAL_IRIS;
+    }
+
+    /// <summary>
     /// Obtém raio nominal (círculo perfeito) para o tipo de handler
+    /// ⚠️ DEPRECATED: Use GetRaioNominalFixo() para interpolação de deformação
+    /// Este método retorna valores DINÂMICOS que podem causar erros na interpolação
     /// </summary>
     private double GetRaioNominal(string tipo)
     {
