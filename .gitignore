@@ -8,6 +8,10 @@ x86/
 build/
 bld/
 
+# Exception: Allow Debug source code folders (not build outputs)
+!src/**/Debug/
+!src/**/Debug/*.cs
+
 # Visual Studio cache/options
 .vs/
 .vscode/
