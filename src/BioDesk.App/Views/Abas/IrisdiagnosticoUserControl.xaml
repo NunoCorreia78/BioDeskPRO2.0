@@ -248,40 +248,16 @@
         <Border Grid.Column="1"
                 Background="#F7F9F6"
                 CornerRadius="8"
-                Padding="16"
+                Padding="4"
                 Margin="8,0">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Título Dinâmico -->
-                <TextBlock Grid.Row="0"
-                           FontSize="18"
-                           FontWeight="Bold"
-                           Foreground="#3F4A3D"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,16">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="🔍 Preview da Íris"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding MostrarMapaIridologico}" Value="True">
-                                    <Setter Property="Text" Value="🗺️ Mapa Iridológico Interativo"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-                <!-- Canvas Central com Imagem + Mapa Sobreposto -->
-                <Viewbox Grid.Row="1" Stretch="Uniform">
-                    <Canvas Width="600" Height="600" Background="White">
+                <!-- Canvas Central com Imagem + Mapa Sobreposto (sem título para ganhar espaço) -->
+                <Viewbox Stretch="Uniform">
+                    <Canvas Width="950" Height="950" Background="White">
 
                         <!-- LAYER 1: Imagem da Íris Real (sempre visível) -->
                         <Image x:Name="IrisCentralImage"
-                               Width="600" Height="600"
+                               Width="950" Height="950"
                                Source="{Binding IrisImagemSelecionada.CaminhoImagem, Converter={StaticResource PathToImageConverter}}"
                                Stretch="Uniform"
                                Panel.ZIndex="1">
@@ -299,7 +275,7 @@
 
                         <!-- LAYER 2: Mapa Iridológico (polígonos com FLIP VERTICAL) -->
             <Canvas x:Name="MapaOverlayCanvas"
-                Width="600" Height="600"
+                Width="950" Height="950"
                 Panel.ZIndex="2"
                 Background="Transparent"
                 MouseLeftButtonDown="MapaOverlayCanvas_MouseLeftButtonDown"
@@ -307,14 +283,19 @@
                 MouseLeftButtonUp="MapaOverlayCanvas_MouseLeftButtonUp"
                 MouseLeave="MapaOverlayCanvas_MouseLeave">
                             <Canvas.RenderTransform>
-                                <ScaleTransform ScaleY="-1" CenterY="300"/>
+                                <ScaleTransform ScaleY="-1" CenterY="475"/>
                             </Canvas.RenderTransform>
                             <Canvas.Style>
                                 <Style TargetType="Canvas">
                                     <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding MostrarMapaIridologico}" Value="True">
                                             <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <!-- ✅ CURSOR: SizeAll quando ModoMoverMapa está ativo -->
+                                        <DataTrigger Binding="{Binding ModoMoverMapa}" Value="True">
+                                            <Setter Property="Cursor" Value="SizeAll"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -367,7 +348,7 @@
                         <!-- LAYER 4: Handlers de Calibração (visíveis só em modo calibração) -->
                         <!-- 🔧 FIX: Background removido para permitir eventos mouse passarem para handlers -->
                         <Canvas x:Name="HandlersCanvas"
-                                Width="600" Height="600"
+                                Width="950" Height="950"
                                 Panel.ZIndex="3"
                                 IsHitTestVisible="True">
                             <Canvas.Style>
@@ -762,7 +743,7 @@
                 <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1" Padding="16" Margin="0,12,0,0">
                     <StackPanel>
                         <!-- Toggle Mapa Iridológico -->
-                        <ToggleButton Content="\ud83d\uddfa\ufe0f Mapa Iridol\u00f3gico"
+                        <ToggleButton Content="�️ Mostrar Mapa"
                                       IsChecked="{Binding MostrarMapaIridologico, Mode=TwoWay}"
                                       HorizontalAlignment="Stretch"
                                       Height="36"
@@ -801,7 +782,7 @@
                             </ToggleButton.Style>
                         </ToggleButton>
 
-                        <ToggleButton Content="🖐️ Mover Mapa Completo"
+                        <ToggleButton Content="🖐️ Mover Mapa"
                                       IsChecked="{Binding ModoMoverMapa, Mode=TwoWay}"
                                       IsEnabled="{Binding MostrarMapaIridologico}"
                                       HorizontalAlignment="Stretch"
@@ -1071,3 +1052,4 @@
         </Border>
     </Grid>
 </UserControl>
+

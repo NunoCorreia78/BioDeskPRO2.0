@@ -286,7 +286,8 @@ public class DeclaracaoSaudePdfService
                                 .Height(80)  // ✅ Altura fixa
                                 .AlignCenter()  // Centraliza o container
                                 .AlignMiddle()  // Centraliza verticalmente
-                                .Image(imageBytes, ImageScaling.FitWidth);  // ✅ CORRIGIDO: FitWidth em vez de FitArea
+                                .Image(imageBytes)  // ✅ ATUALIZADO: Nova API QuestPDF 2023.5+ (sem ImageScaling obsoleto)
+                                .FitWidth();  // ✅ Método moderno para ajustar largura
                         }
                         catch (Exception ex)
                         {
