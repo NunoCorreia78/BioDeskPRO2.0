@@ -1085,14 +1085,20 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             {
                 // Converter coordenada polar (ângulo, raio) para cartesiano DEFORMADO
                 double angulo = coordenada.Angulo * Math.PI / 180.0;
+                
+                // ✅ FIX CRÍTICO: Normalizar ângulo para [0, 2π] (consistência com handlers)
+                if (angulo < 0)
+                    angulo += 2 * Math.PI;
+                
                 double raioOriginal = coordenada.Raio * 300.0; // Raio normalizado → pixels
 
                 // 🎯 INTERPOLAÇÃO: Encontrar raio deformado baseado nos handlers mais próximos
                 double raioDeformado = InterpolateRadiusFromHandlers(angulo, raioOriginal, handlers, zonaCentroX, zonaCentroY);
 
-                // Converter para cartesiano com raio deformado
+                // ✅ FIX: Converter para cartesiano com Y invertido (WPF)
+                // Usar -Sin para Y porque WPF Y cresce para BAIXO
                 double x = zonaCentroX + raioDeformado * Math.Cos(angulo);
-                double y = zonaCentroY + raioDeformado * Math.Sin(angulo);
+                double y = zonaCentroY - raioDeformado * Math.Sin(angulo);  // ← NEGATIVO para inverter Y
 
                 pontos.Add(new System.Windows.Point(x, y));
             }
@@ -1113,73 +1119,78 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
     /// <summary>
     /// Interpola raio baseado nas posições dos handlers
-    /// DEFORMAÇÃO LOCAL: Cada handler estica/encolhe sua zona (±45°)
+    /// DEFORMAÇÃO RADIAL: Cada handler afeta zona de ±45° (90° total) com peso gaussiano
     /// FIX CRÍTICO: Eixo Y invertido para compatibilidade WPF (Y cresce para BAIXO)
     /// </summary>
     private double InterpolateRadiusFromHandlers(double angulo, double raioOriginal, ObservableCollection<CalibrationHandler> handlers, double centroX, double centroY)
     {
         if (handlers.Count == 0) return raioOriginal;
 
-        // 🔍 DEBUG: ATIVADO para diagnosticar inversão
-        Console.WriteLine($"🔍 Ponto: angulo={angulo * 180 / Math.PI:F1}°, raioOriginal={raioOriginal:F1}px");
-
-        // Encontrar os 2 handlers adjacentes ao ângulo (antes e depois)
+        // Calcular posições e ângulos de todos os handlers
         var handlersComAngulo = handlers
             .Select(h =>
             {
                 var dx = h.X + 8 - centroX;
                 var dy = h.Y + 8 - centroY;
                 // ✅ FIX: Inverter Y para WPF (Y cresce para BAIXO, mas Math.Atan2 assume Y para CIMA)
-                var anguloHandler = Math.Atan2(-dy, dx);  // ← INVERSÃO CRÍTICA
+                var anguloHandler = Math.Atan2(-dy, dx);
+                
+                // ✅ FIX CRÍTICO: Normalizar ângulo para [0, 2π]
+                if (anguloHandler < 0)
+                    anguloHandler += 2 * Math.PI;
+                
                 var raioHandler = Math.Sqrt(dx * dx + dy * dy);
-                var diferencaAngulo = NormalizarAngulo(angulo - anguloHandler);
                 
-                // 🔍 DEBUG: ATIVADO - Ver ângulos de cada handler
-                Console.WriteLine($"  📍 Handler: pos=({h.X:F0},{h.Y:F0}), dx={dx:F1}, dy={dy:F1}, angulo={anguloHandler * 180 / Math.PI:F1}°, raio={raioHandler:F1}px");
-                
-                return new { Handler = h, Angulo = anguloHandler, Raio = raioHandler, Diferenca = diferencaAngulo };
+                return new { Handler = h, Angulo = anguloHandler, Raio = raioHandler };
             })
-            .OrderBy(h => h.Angulo)
             .ToList();
 
         if (handlersComAngulo.Count == 0) return raioOriginal;
 
-        // Encontrar handler ANTERIOR (ângulo menor ou igual)
-        var handlerAnterior = handlersComAngulo.LastOrDefault(h => h.Angulo <= angulo) 
-                              ?? handlersComAngulo[^1]; // Wrap-around
+        // 🎯 NOVA LÓGICA: SOMA PONDERADA DE TODOS OS HANDLERS
+        // Cada handler contribui baseado na distância angular (zona de influência ±45°)
+        
+        var raioNominal = GetRaioNominalFixo(handlersComAngulo[0].Handler.Tipo);
+        double somaFatores = 0;
+        double somaPesos = 0;
 
-        // Encontrar handler POSTERIOR (ângulo maior)
-        var handlerPosterior = handlersComAngulo.FirstOrDefault(h => h.Angulo > angulo) 
-                               ?? handlersComAngulo[0]; // Wrap-around
+        foreach (var h in handlersComAngulo)
+        {
+            // Calcular diferença angular (considerar wrap-around em 0°/360°)
+            double diff = angulo - h.Angulo;
+            
+            // Normalizar para [-π, π]
+            while (diff > Math.PI) diff -= 2 * Math.PI;
+            while (diff < -Math.PI) diff += 2 * Math.PI;
+            
+            double diffAbs = Math.Abs(diff);
+            
+            // Zona de influência: ±45° (π/4 radianos)
+            double zonaInfluencia = Math.PI / 4.0; // 45°
+            
+            if (diffAbs <= zonaInfluencia)
+            {
+                // Peso gaussiano: máximo no centro (diff=0), zero nas bordas (diff=45°)
+                // Usar cosseno para transição suave: cos(0)=1, cos(45°)=0.707, cos(90°)=0
+                double peso = Math.Cos(diffAbs); // Suave e natural
+                
+                // Fator de deformação deste handler
+                double fatorHandler = h.Raio / raioNominal;
+                
+                somaFatores += fatorHandler * peso;
+                somaPesos += peso;
+            }
+        }
 
-        // Calcular raio nominal (círculo perfeito) para comparação
-        // ✅ FIX: Usar raio FIXO (não dinâmico) para evitar baseline móvel
-        var raioNominal = GetRaioNominalFixo(handlerAnterior.Handler.Tipo);
+        // Se nenhum handler influencia, usar raio original
+        if (somaPesos < 0.0001)
+            return raioOriginal;
 
-        // Fatores de deformação de cada handler (quanto esticou/encolheu)
-        var fatorAnterior = handlerAnterior.Raio / raioNominal;
-        var fatorPosterior = handlerPosterior.Raio / raioNominal;
-
-        // Interpolar entre os 2 handlers com base na posição angular
-        var anguloAnterior = handlerAnterior.Angulo;
-        var anguloPosterior = handlerPosterior.Angulo;
-
-        // Ajustar wrap-around (0°/360°)
-        if (anguloPosterior < anguloAnterior)
-            anguloPosterior += 2 * Math.PI;
-        if (angulo < anguloAnterior)
-            angulo += 2 * Math.PI;
-
-        // Fator de interpolação (0.0 = anterior, 1.0 = posterior)
-        var rangeAngulo = anguloPosterior - anguloAnterior;
-        var t = rangeAngulo > 0.0001 ? (angulo - anguloAnterior) / rangeAngulo : 0.5;
-        t = Math.Clamp(t, 0, 1);
-
-        // Interpolar o fator de deformação entre os 2 handlers
-        var fatorDeformacao = fatorAnterior * (1 - t) + fatorPosterior * t;
+        // Média ponderada dos fatores
+        double fatorDeformacaoFinal = somaFatores / somaPesos;
 
         // Aplicar deformação ao raio original
-        return raioOriginal * fatorDeformacao;
+        return raioOriginal * fatorDeformacaoFinal;
     }
 
     /// <summary>
