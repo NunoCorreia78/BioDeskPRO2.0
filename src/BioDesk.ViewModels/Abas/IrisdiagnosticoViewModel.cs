@@ -1542,16 +1542,30 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     /// <param name="deltaY">Deslocamento em Y</param>
     /// <summary>
     /// Inicia sessão de drag - previne renderizações intermédias
+    /// ✅ NOVO: Em modo "Mover Mapa", mantém polígonos visíveis para feedback visual em tempo real
     /// </summary>
     public void BeginDrag()
     {
         _isDragging = true;
         _suspendHandlerUpdates = true;  // Layer 2: Suspender PropertyChanged de handlers
-        MostrarPoligonosDuranteArrasto = false;  // ⭐ Layer 3: OCULTAR polígonos durante arrasto
-        var msg = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] ⭐⭐⭐ INÍCIO - Layers 1+2+3 ATIVAS ⭐⭐⭐";
-        _logger.LogWarning(msg);
-        Console.WriteLine(msg);
-        System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+        
+        // ✅ NOVO: Só oculta polígonos em modo calibração (handlers), não em modo "Mover Mapa"
+        if (ModoCalibracaoAtivo && !ModoMoverMapa)
+        {
+            MostrarPoligonosDuranteArrasto = false;  // ⭐ Layer 3: OCULTAR polígonos durante arrasto (apenas calibração)
+            var msg = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] ⭐ INÍCIO - Modo Calibração (polígonos ocultos) ⭐";
+            _logger.LogWarning(msg);
+            Console.WriteLine(msg);
+            System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+        }
+        else if (ModoMoverMapa)
+        {
+            // ✅ Em modo "Mover Mapa", mantém polígonos VISÍVEIS (MostrarPoligonosDuranteArrasto fica true)
+            var msg = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] 🖐️ INÍCIO - Modo Mover Mapa (polígonos VISÍVEIS) 🖐️";
+            _logger.LogInformation(msg);
+            Console.WriteLine(msg);
+            System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+        }
     }
 
     /// <summary>

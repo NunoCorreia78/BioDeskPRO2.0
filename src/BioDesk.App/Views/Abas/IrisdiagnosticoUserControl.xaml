@@ -801,7 +801,7 @@
                             </ToggleButton.Style>
                         </ToggleButton>
 
-                        <ToggleButton Content="↔️ Modo Mover Mapa"
+                        <ToggleButton Content="🖐️ Mover Mapa Completo"
                                       IsChecked="{Binding ModoMoverMapa, Mode=TwoWay}"
                                       IsEnabled="{Binding MostrarMapaIridologico}"
                                       HorizontalAlignment="Stretch"
@@ -809,6 +809,21 @@
                                       FontSize="13" FontWeight="SemiBold"
                                       Cursor="Hand"
                                       Margin="0,0,0,16">
+                            <ToggleButton.ToolTip>
+                                <ToolTip>
+                                    <StackPanel MaxWidth="250">
+                                        <TextBlock Text="Modo Mover Mapa" FontWeight="Bold" FontSize="13"/>
+                                        <TextBlock Text="Arraste para reposicionar o mapa iridológico completo" 
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,4,0,0"/>
+                                        <TextBlock Text="O mapa move-se em tempo real enquanto arrasta" 
+                                                   FontStyle="Italic" 
+                                                   Foreground="#6B8E63"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </ToggleButton.ToolTip>
                             <ToggleButton.Style>
                                 <Style TargetType="ToggleButton">
                                     <Setter Property="Template">
@@ -958,10 +973,26 @@
                         <Border Height="1" Background="#E3E9DE" Margin="0,4"/>
 
                         <!-- Modo Calibração -->
-                        <CheckBox Content="🔧 Modo Calibração"
+                        <CheckBox Content="🎯 Ajuste Fino (Handlers)"
                                   IsChecked="{Binding ModoCalibracaoAtivo, Mode=TwoWay}"
                                   FontSize="13"
-                                  Foreground="#3F4A3D"/>
+                                  Foreground="#3F4A3D">
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <StackPanel MaxWidth="250">
+                                        <TextBlock Text="Modo Ajuste Fino" FontWeight="Bold" FontSize="13"/>
+                                        <TextBlock Text="Mostra pontos de controle (handlers) para ajustar a deformação local do mapa" 
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,4,0,0"/>
+                                        <TextBlock Text="Arraste os handlers para adaptar o mapa à íris" 
+                                                   FontStyle="Italic" 
+                                                   Foreground="#6B8E63"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
 
                         <!-- Tipo de Calibração (visível só em modo calibração) -->
                         <StackPanel Visibility="{Binding ModoCalibracaoAtivo, Converter={StaticResource BooleanToVisibilityConverter}}">

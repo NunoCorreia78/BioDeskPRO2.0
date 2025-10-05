@@ -332,10 +332,18 @@ public partial class IrisdiagnosticoUserControl : UserControl
     {
         if (HandlersCanvas == null) return;
         if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
-        if (!viewModel.ModoCalibracaoAtivo && !viewModel.ModoMoverMapa) return;
+        
+        // ✅ SIMPLIFICADO: Só requer ModoMoverMapa OU ModoCalibracaoAtivo (não ambos)
+        if (!viewModel.ModoMoverMapa && !viewModel.ModoCalibracaoAtivo) return;
 
         // ⭐ Iniciar sessão de drag (previne renderizações intermédias)
         viewModel.BeginDrag();
+        
+        // ✅ NOVO: Cursor de movimento durante drag
+        if (MapaOverlayCanvas != null)
+        {
+            MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.SizeAll;
+        }
 
         _isDraggingMapa = true;
         _ultimaPosicaoMapa = GetMapaPositionRelativeToHandlers(e);
@@ -418,6 +426,12 @@ public partial class IrisdiagnosticoUserControl : UserControl
             metricsPost,
             BuildContext(viewModel, tipo));
 
+        // ✅ NOVO: Atualizar visual em tempo real quando em modo Mover Mapa
+        if (viewModel.ModoMoverMapa)
+        {
+            viewModel.RecalcularPoligonosComDeformacao();
+        }
+
         _ultimaPosicaoMapa = current;
         e.Handled = true;
     }
@@ -442,6 +456,13 @@ public partial class IrisdiagnosticoUserControl : UserControl
         }
 
         _isDraggingMapa = false;
+        
+        // ✅ NOVO: Restaurar cursor normal
+        if (MapaOverlayCanvas != null)
+        {
+            MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
+        }
+        
         MapaOverlayCanvas.ReleaseMouseCapture();
         e.Handled = true;
     }
@@ -487,6 +508,13 @@ public partial class IrisdiagnosticoUserControl : UserControl
         if (_isDraggingMapa)
         {
             _isDraggingMapa = false;
+            
+            // ✅ NOVO: Restaurar cursor
+            if (MapaOverlayCanvas != null)
+            {
+                MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
+            }
+            
             MapaOverlayCanvas.ReleaseMouseCapture();
         }
     }
