@@ -192,6 +192,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     private bool _atualizandoContagemHandlers;
     private bool _suspendHandlerUpdates;
     private bool _isDragging = false;  // ⭐ Flag para prevenir renderização durante arrasto
+    
+    // ⚡ PERFORMANCE: Throttling para RecalcularPoligonosComDeformacao durante drag
+    private DateTime _lastRenderTime = DateTime.MinValue;
+    private const int RenderThrottleMs = 50; // Mínimo 50ms entre renderizações durante drag
 
     /// <summary>
     /// Layer 3: Suspende visibilidade visual dos polígonos durante arrasto (previne atualizações assíncronas WPF)
@@ -1752,7 +1756,30 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     /// </summary>
     public void RecalcularPoligonosComDeformacao()
     {
+        RecalcularPoligonosComDeformacao(throttle: false);
+    }
+
+    /// <summary>
+    /// Recalcula polígonos com deformação baseada em handlers
+    /// </summary>
+    /// <param name="throttle">Se true, aplica throttle (mínimo 50ms entre atualizações)</param>
+    public void RecalcularPoligonosComDeformacao(bool throttle)
+    {
         if (MapaAtual == null) return;
+
+        // ⚡ PERFORMANCE: Throttle durante drag para reduzir overhead
+        if (throttle && _isDragging)
+        {
+            var elapsed = (DateTime.Now - _lastRenderTime).TotalMilliseconds;
+            if (elapsed < RenderThrottleMs)
+            {
+#if DEBUG
+                _logger.LogTrace("⏭️ Render throttled (last render {Elapsed}ms ago)", elapsed);
+#endif
+                return; // Skip render - too soon
+            }
+            _lastRenderTime = DateTime.Now;
+        }
 
         // 🔧 DEFORMAÇÃO COM HANDLERS: Usar posições reais dos handlers para calcular raios deformados
         if (ModoCalibracaoAtivo && (HandlersPupila.Count > 0 || HandlersIris.Count > 0))

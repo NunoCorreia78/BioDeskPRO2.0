@@ -228,8 +228,8 @@ public partial class IrisdiagnosticoUserControl : UserControl
             // TODO: Implementar deformação local (apenas na área de influência do handler)
             // Por agora, atualiza todos os handlers do mesmo círculo uniformemente
 
-            // Recalcular polígonos
-            viewModel.RecalcularPoligonosComDeformacao();
+            // ⚡ PERFORMANCE: Throttle recalculações durante arrasto de handler
+            viewModel.RecalcularPoligonosComDeformacao(throttle: true);
         }
 
         e.Handled = true;
@@ -419,12 +419,11 @@ public partial class IrisdiagnosticoUserControl : UserControl
             metricsPost,
             BuildContext(viewModel, tipo));
 
-        // ⚠️ PERFORMANCE: RecalcularPoligonosComDeformacao é chamado a cada MouseMove
-        // TODO: Implementar throttle/debounce para reduzir recalculações durante arrasto
-        // Alternativa: Usar apenas TranslateTransform visual durante drag, recalcular no MouseUp
+        // ⚡ PERFORMANCE: Throttle recalculações durante drag (max 1 a cada 50ms)
+        // Reduz overhead de limpar/repopular PoligonosZonas em cada frame
         if (viewModel.ModoMoverMapa)
         {
-            viewModel.RecalcularPoligonosComDeformacao();
+            viewModel.RecalcularPoligonosComDeformacao(throttle: true);
         }
 
         _ultimaPosicaoMapa = current;
