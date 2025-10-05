@@ -199,6 +199,13 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     [ObservableProperty]
     private double _raioIris = 270;
 
+    /// <summary>
+    /// ✅ RAIOS NOMINAIS FIXOS (usados como referência para cálculo de deformação)
+    /// Previne erros de baseline móvel durante drag de handlers
+    /// </summary>
+    private const double RAIO_NOMINAL_PUPILA = 54.0;
+    private const double RAIO_NOMINAL_IRIS = 270.0;
+
     public IrisdiagnosticoViewModel(
         IUnitOfWork unitOfWork,
         ILogger<IrisdiagnosticoViewModel> logger,
@@ -1098,12 +1105,23 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     }
 
     /// <summary>
+    /// ✅ RAIO NOMINAL FIXO (baseline imutável para cálculo de deformação)
+    /// Previne erro de "baseline móvel" onde GetRaioNominal() retorna valor que muda durante drag
+    /// </summary>
+    private static double GetRaioNominalFixo(string tipo) =>
+        tipo == "Pupila" ? RAIO_NOMINAL_PUPILA : RAIO_NOMINAL_IRIS;
+
+    /// <summary>
     /// Interpola raio baseado nas posições dos handlers
     /// DEFORMAÇÃO LOCAL: Cada handler estica/encolhe sua zona (±45°)
+    /// FIX CRÍTICO: Eixo Y invertido para compatibilidade WPF (Y cresce para BAIXO)
     /// </summary>
     private double InterpolateRadiusFromHandlers(double angulo, double raioOriginal, ObservableCollection<CalibrationHandler> handlers, double centroX, double centroY)
     {
         if (handlers.Count == 0) return raioOriginal;
+
+        // 🔍 DEBUG: Descomentar para diagnosticar problemas
+        // Console.WriteLine($"🔍 Ponto: angulo={angulo * 180 / Math.PI:F1}°, raioOriginal={raioOriginal:F1}px");
 
         // Encontrar os 2 handlers adjacentes ao ângulo (antes e depois)
         var handlersComAngulo = handlers
@@ -1111,9 +1129,14 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             {
                 var dx = h.X + 8 - centroX;
                 var dy = h.Y + 8 - centroY;
-                var anguloHandler = Math.Atan2(dy, dx);
+                // ✅ FIX: Inverter Y para WPF (Y cresce para BAIXO, mas Math.Atan2 assume Y para CIMA)
+                var anguloHandler = Math.Atan2(-dy, dx);  // ← INVERSÃO CRÍTICA
                 var raioHandler = Math.Sqrt(dx * dx + dy * dy);
                 var diferencaAngulo = NormalizarAngulo(angulo - anguloHandler);
+                
+                // 🔍 DEBUG: Descomentar para ver ângulos calculados
+                // Console.WriteLine($"  📍 Handler: pos=({h.X:F0},{h.Y:F0}), angulo={anguloHandler * 180 / Math.PI:F1}°, raio={raioHandler:F1}px");
+                
                 return new { Handler = h, Angulo = anguloHandler, Raio = raioHandler, Diferenca = diferencaAngulo };
             })
             .OrderBy(h => h.Angulo)
@@ -1130,7 +1153,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
                                ?? handlersComAngulo[0]; // Wrap-around
 
         // Calcular raio nominal (círculo perfeito) para comparação
-        var raioNominal = GetRaioNominal(handlerAnterior.Handler.Tipo);
+        // ✅ FIX: Usar raio FIXO (não dinâmico) para evitar baseline móvel
+        var raioNominal = GetRaioNominalFixo(handlerAnterior.Handler.Tipo);
 
         // Fatores de deformação de cada handler (quanto esticou/encolheu)
         var fatorAnterior = handlerAnterior.Raio / raioNominal;
