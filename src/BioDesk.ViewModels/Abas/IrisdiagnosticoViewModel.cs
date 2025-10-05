@@ -1120,8 +1120,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     {
         if (handlers.Count == 0) return raioOriginal;
 
-        // 🔍 DEBUG: Descomentar para diagnosticar problemas
-        // Console.WriteLine($"🔍 Ponto: angulo={angulo * 180 / Math.PI:F1}°, raioOriginal={raioOriginal:F1}px");
+        // 🔍 DEBUG: ATIVADO para diagnosticar inversão
+        Console.WriteLine($"🔍 Ponto: angulo={angulo * 180 / Math.PI:F1}°, raioOriginal={raioOriginal:F1}px");
 
         // Encontrar os 2 handlers adjacentes ao ângulo (antes e depois)
         var handlersComAngulo = handlers
@@ -1134,8 +1134,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
                 var raioHandler = Math.Sqrt(dx * dx + dy * dy);
                 var diferencaAngulo = NormalizarAngulo(angulo - anguloHandler);
                 
-                // 🔍 DEBUG: Descomentar para ver ângulos calculados
-                // Console.WriteLine($"  📍 Handler: pos=({h.X:F0},{h.Y:F0}), angulo={anguloHandler * 180 / Math.PI:F1}°, raio={raioHandler:F1}px");
+                // 🔍 DEBUG: ATIVADO - Ver ângulos de cada handler
+                Console.WriteLine($"  📍 Handler: pos=({h.X:F0},{h.Y:F0}), dx={dx:F1}, dy={dy:F1}, angulo={anguloHandler * 180 / Math.PI:F1}°, raio={raioHandler:F1}px");
                 
                 return new { Handler = h, Angulo = anguloHandler, Raio = raioHandler, Diferenca = diferencaAngulo };
             })
