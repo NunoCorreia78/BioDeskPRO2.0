@@ -41,7 +41,7 @@ public class DeclaracaoSaudePdfService
             var pastaDeclaracoes = Path.Combine(pastaPaciente, "DeclaracoesSaude");
             Directory.CreateDirectory(pastaDeclaracoes);
 
-            var nomeArquivo = $"DeclaracaoSaude_{dados.NomePaciente.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            var nomeArquivo = $"DeclaracaoSaude_{dados.NomePaciente}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
             var caminhoCompleto = Path.Combine(pastaDeclaracoes, nomeArquivo);
 
             _logger.LogInformation("📁 Pasta de destino: {Pasta}", pastaDeclaracoes);

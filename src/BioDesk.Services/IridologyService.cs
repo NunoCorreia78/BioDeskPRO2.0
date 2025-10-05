@@ -41,7 +41,7 @@ public class IridologyService : IIridologyService
 
         var caminhoResolvido = Path.GetFullPath(_caminhoJsonBase);
         _logger.LogInformation("📂 IridologyService inicializado. Caminho JSON: {Caminho}", caminhoResolvido);
-        
+
         // Verificar se pasta existe
         if (!Directory.Exists(caminhoResolvido))
         {

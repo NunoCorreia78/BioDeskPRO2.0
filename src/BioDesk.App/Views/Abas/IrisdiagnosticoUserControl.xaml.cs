@@ -1,13 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using BioDesk.ViewModels.Abas;
 using BioDesk.App.Views.Dialogs;
 using BioDesk.Domain;
 using BioDesk.Domain.Entities;
 using BioDesk.App.Dialogs;
 using BioDesk.Services;
+using BioDesk.Services.Debug;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BioDesk.App.Views.Abas;
@@ -18,9 +21,16 @@ namespace BioDesk.App.Views.Abas;
 /// </summary>
 public partial class IrisdiagnosticoUserControl : UserControl
 {
+    private readonly IDragDebugService? _dragDebugService;
+
     public IrisdiagnosticoUserControl()
     {
         InitializeComponent();
+
+        if (Application.Current is App app && app.ServiceProvider != null)
+        {
+            _dragDebugService = app.ServiceProvider.GetService<IDragDebugService>();
+        }
     }
 
     /// <summary>
@@ -242,5 +252,242 @@ public partial class IrisdiagnosticoUserControl : UserControl
         // (InicializarHandlers() resetava para círculo perfeito, perdendo ajuste manual)
 
         e.Handled = true;
+    }
+
+    // === HANDLERS DE CENTRO (STUB - não usados) ===
+
+    private void CentroHandler_MouseDown(object sender, MouseButtonEventArgs e) { }
+    private void CentroHandler_MouseMove(object sender, MouseEventArgs e) { }
+    private void CentroHandler_MouseUp(object sender, MouseButtonEventArgs e) { }
+
+    private void TrackDragEvent(
+        DragDebugEventType type,
+        string message,
+        Dictionary<string, double>? metrics = null,
+        Dictionary<string, string>? context = null)
+    {
+        if (_dragDebugService == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _dragDebugService.RecordEvent(type, message, metrics, context);
+        }
+        catch
+        {
+            // Ignorar exceptions de logging para não afetar o fluxo do UI.
+        }
+    }
+
+    private static Dictionary<string, double> BuildCentroMetrics(IrisdiagnosticoViewModel viewModel)
+    {
+        return new Dictionary<string, double>
+        {
+            ["centroPupilaX"] = viewModel.CentroPupilaX,
+            ["centroPupilaY"] = viewModel.CentroPupilaY,
+            ["raioPupila"] = viewModel.RaioPupila,
+            ["centroIrisX"] = viewModel.CentroIrisX,
+            ["centroIrisY"] = viewModel.CentroIrisY,
+            ["raioIris"] = viewModel.RaioIris
+        };
+    }
+
+    private static Dictionary<string, string> BuildContext(IrisdiagnosticoViewModel viewModel, string? modo = null)
+    {
+        var context = new Dictionary<string, string>
+        {
+            ["modoCalibracaoAtivo"] = viewModel.ModoCalibracaoAtivo.ToString(),
+            ["modoMoverMapa"] = viewModel.ModoMoverMapa.ToString(),
+            ["tipoCalibracaoPupila"] = viewModel.TipoCalibracaoPupila.ToString(),
+            ["tipoCalibracaoIris"] = viewModel.TipoCalibracaoIris.ToString(),
+            ["tipoCalibracaoAmbos"] = viewModel.TipoCalibracaoAmbos.ToString(),
+            ["mostrarMapaIridologico"] = viewModel.MostrarMapaIridologico.ToString()
+        };
+
+        if (!string.IsNullOrWhiteSpace(modo))
+        {
+            context["modo"] = modo;
+        }
+
+        if (viewModel.IrisImagemSelecionada != null)
+        {
+            context["imagemId"] = viewModel.IrisImagemSelecionada.Id.ToString();
+            context["olho"] = viewModel.IrisImagemSelecionada.Olho ?? string.Empty;
+        }
+
+        return context;
+    }
+
+    // === HANDLERS DE DRAG DO MAPA ===
+
+    private bool _isDraggingMapa = false;
+    private Point _ultimaPosicaoMapa;
+
+    /// <summary>
+    /// Inicia arrasto do mapa overlay
+    /// </summary>
+    private void MapaOverlayCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (HandlersCanvas == null) return;
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+        if (!viewModel.ModoCalibracaoAtivo && !viewModel.ModoMoverMapa) return;
+
+        // ⭐ Iniciar sessão de drag (previne renderizações intermédias)
+        viewModel.BeginDrag();
+
+        _isDraggingMapa = true;
+        _ultimaPosicaoMapa = GetMapaPositionRelativeToHandlers(e);
+        var modo = viewModel.ModoMoverMapa ? "MoverMapa" : "Calibracao";
+
+        var metrics = BuildCentroMetrics(viewModel);
+        metrics["mouseX"] = _ultimaPosicaoMapa.X;
+        metrics["mouseY"] = _ultimaPosicaoMapa.Y;
+
+        TrackDragEvent(
+            DragDebugEventType.DragStart,
+            "MouseDown mapa overlay",
+            metrics,
+            BuildContext(viewModel, modo));
+
+        MapaOverlayCanvas.CaptureMouse();
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Arrasta mapa overlay (translada handlers)
+    /// </summary>
+    private void MapaOverlayCanvas_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isDraggingMapa) return;
+        if (HandlersCanvas == null) return;
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+
+        var current = GetMapaPositionRelativeToHandlers(e);
+
+        double deltaX = current.X - _ultimaPosicaoMapa.X;
+        double deltaY = current.Y - _ultimaPosicaoMapa.Y;
+
+        // Detectar inversão Y (ScaleY=-1 no RenderTransform)
+        double scaleY = 1.0;
+        if (MapaOverlayCanvas?.RenderTransform is Transform renderTransform)
+        {
+            var matrix = renderTransform.Value;
+            scaleY = matrix.M22; // ScaleY component
+
+            // Se ScaleY negativo, inverter deltaY para movimento intuitivo
+            if (scaleY < 0)
+            {
+                deltaY = -deltaY;
+            }
+        }
+
+        // Determinar tipo de calibração ativa
+        var tipo = viewModel.ModoMoverMapa
+            ? "Ambos"
+            : viewModel.TipoCalibracaoAmbos
+                ? "Ambos"
+                : viewModel.TipoCalibracaoIris ? "Iris" : "Pupila";
+
+        var metricsPre = BuildCentroMetrics(viewModel);
+        metricsPre["mouseX"] = current.X;
+        metricsPre["mouseY"] = current.Y;
+        metricsPre["deltaX"] = deltaX;
+        metricsPre["deltaY"] = deltaY;
+        metricsPre["scaleY"] = scaleY;
+
+        TrackDragEvent(
+            DragDebugEventType.DragMovePreTransform,
+            "MouseMove (pré-translação)",
+            metricsPre,
+            BuildContext(viewModel, tipo));
+
+        // Transladar calibração
+        viewModel.TransladarCalibracao(tipo, deltaX, deltaY);
+
+        var metricsPost = BuildCentroMetrics(viewModel);
+        metricsPost["mouseX"] = current.X;
+        metricsPost["mouseY"] = current.Y;
+        metricsPost["deltaX"] = deltaX;
+        metricsPost["deltaY"] = deltaY;
+
+        TrackDragEvent(
+            DragDebugEventType.DragMovePostTransform,
+            "MouseMove (pós-translação)",
+            metricsPost,
+            BuildContext(viewModel, tipo));
+
+        _ultimaPosicaoMapa = current;
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Finaliza arrasto do mapa
+    /// </summary>
+    private void MapaOverlayCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isDraggingMapa) return;
+
+        if (DataContext is IrisdiagnosticoViewModel viewModel)
+        {
+            TrackDragEvent(
+                DragDebugEventType.DragEnd,
+                "MouseUp mapa overlay",
+                BuildCentroMetrics(viewModel),
+                BuildContext(viewModel));
+
+            // ⭐ Finalizar sessão de drag (força renderização final)
+            viewModel.EndDrag();
+        }
+
+        _isDraggingMapa = false;
+        MapaOverlayCanvas.ReleaseMouseCapture();
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// Converte posição do mouse de MapaOverlayCanvas para HandlersCanvas
+    /// </summary>
+    private Point GetMapaPositionRelativeToHandlers(MouseEventArgs e)
+    {
+        if (MapaOverlayCanvas == null || HandlersCanvas == null)
+            return new Point(0, 0);
+
+        var canvasPoint = e.GetPosition(MapaOverlayCanvas);
+        var transform = MapaOverlayCanvas.TransformToVisual(HandlersCanvas);
+        var handlerPoint = transform.Transform(canvasPoint);
+
+        Dictionary<string, string>? context = null;
+        if (DataContext is IrisdiagnosticoViewModel viewModel)
+        {
+            context = BuildContext(viewModel);
+        }
+
+        TrackDragEvent(
+            DragDebugEventType.CoordinateTransform,
+            "TransformToVisual (Mapa → Handlers)",
+            new Dictionary<string, double>
+            {
+                ["canvasX"] = canvasPoint.X,
+                ["canvasY"] = canvasPoint.Y,
+                ["handlerX"] = handlerPoint.X,
+                ["handlerY"] = handlerPoint.Y
+            },
+            context);
+
+        return handlerPoint;
+    }
+
+    /// <summary>
+    /// Reset ao soltar mouse fora
+    /// </summary>
+    private void MapaOverlayCanvas_MouseLeave(object sender, MouseEventArgs e)
+    {
+        if (_isDraggingMapa)
+        {
+            _isDraggingMapa = false;
+            MapaOverlayCanvas.ReleaseMouseCapture();
+        }
     }
 }

@@ -22,6 +22,7 @@ using BioDesk.Services.AutoSave;
 using BioDesk.Services.Documentos;
 using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
+using BioDesk.Services.Debug;
 
 namespace BioDesk.App;
 
@@ -257,6 +258,9 @@ Inner Exceptions:
 
         // === IRIDOLOGY SERVICE (mapa iridológico + JSON loader) ===
         services.AddSingleton<IIridologyService, IridologyService>();
+
+        // === DEBUG SERVICES ===
+        services.AddSingleton<IDragDebugService, DragDebugService>();
 
         // === PDF SERVICES (QuestPDF) ===
         services.AddScoped<Services.Pdf.ConsentimentoPdfService>();

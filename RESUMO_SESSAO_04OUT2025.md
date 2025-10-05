@@ -1,7 +1,7 @@
 # 📋 RESUMO DA SESSÃO - Auditoria e Melhorias
 
-**Data**: 04 de Outubro de 2025  
-**Aplicação**: BioDeskPro2 v1.0  
+**Data**: 04 de Outubro de 2025
+**Aplicação**: BioDeskPro2 v1.0
 **Status Build**: ✅ **SUCESSO** (0 Erros, 27 Warnings AForge)
 
 ---
@@ -23,7 +23,7 @@ if (contentControl.Content is FrameworkElement fe &&
 {
     // Mostra diálogo: Guardar? | Descartar | Cancelar
     var result = MessageBox.Show(...);
-    
+
     switch (result)
     {
         case MessageBoxResult.Yes:
@@ -156,20 +156,20 @@ protected override void OnExit(ExitEventArgs e)
     try
     {
         _logger?.LogInformation("🛑 Encerrando aplicação...");
-        
+
         // 1. Parar hosted services com timeout
         Task.Run(async () => await _host.StopAsync(TimeSpan.FromSeconds(5)))
             .GetAwaiter().GetResult();
-        
+
         // 2. Dispose de RealCameraService
         if (serviceProvider.GetService<ICameraService>() is IDisposable camera)
         {
             camera.Dispose();
         }
-        
+
         // 3. Matar processos órfãos
         KillOrphanProcesses();
-        
+
         _host.Dispose();
     }
     catch (Exception ex)
@@ -255,5 +255,5 @@ dotnet build
 
 ---
 
-**FIM DO RESUMO**  
+**FIM DO RESUMO**
 **Aplicação compilada e funcional com melhorias implementadas! 🎉**

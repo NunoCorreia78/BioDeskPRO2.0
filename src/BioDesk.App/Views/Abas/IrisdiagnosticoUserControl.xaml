@@ -298,10 +298,14 @@
                         </Image>
 
                         <!-- LAYER 2: Mapa Iridológico (polígonos com FLIP VERTICAL) -->
-                        <Canvas x:Name="MapaOverlayCanvas"
-                                Width="600" Height="600"
-                                Panel.ZIndex="2"
-                                Background="Transparent">
+            <Canvas x:Name="MapaOverlayCanvas"
+                Width="600" Height="600"
+                Panel.ZIndex="2"
+                Background="Transparent"
+                MouseLeftButtonDown="MapaOverlayCanvas_MouseLeftButtonDown"
+                MouseMove="MapaOverlayCanvas_MouseMove"
+                MouseLeftButtonUp="MapaOverlayCanvas_MouseLeftButtonUp"
+                MouseLeave="MapaOverlayCanvas_MouseLeave">
                             <Canvas.RenderTransform>
                                 <ScaleTransform ScaleY="-1" CenterY="300"/>
                             </Canvas.RenderTransform>
@@ -317,7 +321,19 @@
                             </Canvas.Style>
 
                             <!-- Polígonos das zonas -->
+                            <!-- ⭐ Layer 3: Visibility controlada por MostrarPoligonosDuranteArrasto -->
                             <ItemsControl ItemsSource="{Binding PoligonosZonas}">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <!-- Ocultar durante arrasto (previne updates assíncronos WPF) -->
+                                            <DataTrigger Binding="{Binding MostrarPoligonosDuranteArrasto}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <Canvas/>
@@ -462,6 +478,86 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+
+                            <!-- Handler central da PUPILA -->
+                            <Ellipse Width="18" Height="18"
+                                     Stroke="#5B7C99"
+                                     StrokeThickness="2"
+                                     Fill="#21405620"
+                                     Cursor="SizeAll"
+                                     Tag="Pupila"
+                                     Panel.ZIndex="200"
+                                     MouseLeftButtonDown="CentroHandler_MouseDown"
+                                     MouseMove="CentroHandler_MouseMove"
+                                     MouseLeftButtonUp="CentroHandler_MouseUp">
+                                <Ellipse.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform X="-9" Y="-9"/>
+                                        <TranslateTransform X="{Binding CentroPupilaX}" Y="{Binding CentroPupilaY}"/>
+                                    </TransformGroup>
+                                </Ellipse.RenderTransform>
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding DataContext.ModoCalibracaoAtivo, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                    <Condition Binding="{Binding DataContext.TipoCalibracaoPupila, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding DataContext.ModoCalibracaoAtivo, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                    <Condition Binding="{Binding DataContext.TipoCalibracaoAmbos, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+
+                            <!-- Handler central da ÍRIS -->
+                            <Ellipse Width="18" Height="18"
+                                     Stroke="#6B8E63"
+                                     StrokeThickness="2"
+                                     Fill="#205a4120"
+                                     Cursor="SizeAll"
+                                     Tag="Iris"
+                                     Panel.ZIndex="200"
+                                     MouseLeftButtonDown="CentroHandler_MouseDown"
+                                     MouseMove="CentroHandler_MouseMove"
+                                     MouseLeftButtonUp="CentroHandler_MouseUp">
+                                <Ellipse.RenderTransform>
+                                    <TransformGroup>
+                                        <TranslateTransform X="-9" Y="-9"/>
+                                        <TranslateTransform X="{Binding CentroIrisX}" Y="{Binding CentroIrisY}"/>
+                                    </TransformGroup>
+                                </Ellipse.RenderTransform>
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding DataContext.ModoCalibracaoAtivo, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                    <Condition Binding="{Binding DataContext.TipoCalibracaoIris, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding DataContext.ModoCalibracaoAtivo, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                    <Condition Binding="{Binding DataContext.TipoCalibracaoAmbos, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
                         </Canvas>
                     </Canvas>
                 </Viewbox>
@@ -705,12 +801,129 @@
                             </ToggleButton.Style>
                         </ToggleButton>
 
+                        <ToggleButton Content="↔️ Modo Mover Mapa"
+                                      IsChecked="{Binding ModoMoverMapa, Mode=TwoWay}"
+                                      IsEnabled="{Binding MostrarMapaIridologico}"
+                                      HorizontalAlignment="Stretch"
+                                      Height="36"
+                                      FontSize="13" FontWeight="SemiBold"
+                                      Cursor="Hand"
+                                      Margin="0,0,0,16">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="6"
+                                                        Padding="8"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="2">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Background" Value="#E3E9DE"/>
+                                    <Setter Property="Foreground" Value="#3F4A3D"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="Background" Value="#6B8E63"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#9CAF97"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.5"/>
+                                            <Setter Property="Cursor" Value="Arrow"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+
                         <!-- Título -->
                         <TextBlock Text="🎯 Calibração do Mapa"
                                    FontSize="16"
                                    FontWeight="SemiBold"
                                    Foreground="#3F4A3D"
                                    Margin="0,0,0,12"/>
+
+                        <!-- Controlos de Zoom do Mapa -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12" IsEnabled="{Binding MostrarMapaIridologico}">
+                            <TextBlock Text="🗺️ Zoom:" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                            <Button Content="−" Command="{Binding DiminuirMapaCommand}" Width="30" Height="30"
+                                    Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" FontSize="16" FontWeight="Bold" Margin="0,0,4,0" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#D3D9CE"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <TextBlock Text="{Binding MapaZoom, StringFormat='{}{0:F1}x'}" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Width="40" TextAlignment="Center" Margin="4,0"/>
+
+                            <Button Content="+" Command="{Binding AumentarMapaCommand}" Width="30" Height="30"
+                                    Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" FontSize="16" FontWeight="Bold" Margin="0,0,8,0" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#D3D9CE"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button Content="↺ Reset" Command="{Binding ResetMapaCommand}"
+                                    Background="#E3E9DE" Foreground="#3F4A3D" Padding="8,4" BorderThickness="0" FontSize="11" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#D3D9CE"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
 
                         <!-- Opacidade do Mapa -->
                         <StackPanel Margin="0,0,0,12">

@@ -1,7 +1,7 @@
 # 📋 CHECKLIST DE AUDITORIA COMPLETA - BioDeskPro2
 
-**Data**: 04 de Outubro de 2025  
-**Aplicação**: BioDeskPro2 v1.0  
+**Data**: 04 de Outubro de 2025
+**Aplicação**: BioDeskPro2 v1.0
 **Status**: Em execução para testes
 
 ---
@@ -19,8 +19,8 @@
 private void MainWindow_Closing(object sender, CancelEventArgs e)
 {
     // Verificar se FichaPacienteViewModel está ativo e tem alterações
-    if (ContentArea.Content is FrameworkElement fe && 
-        fe.DataContext is FichaPacienteViewModel vm && 
+    if (ContentArea.Content is FrameworkElement fe &&
+        fe.DataContext is FichaPacienteViewModel vm &&
         vm.IsDirty)
     {
         var result = MessageBox.Show(
@@ -57,8 +57,8 @@ private void MainWindow_Closing(object sender, CancelEventArgs e)
 ### 🔍 Canvas Encontrados
 
 #### **1. SignatureCanvasControl** (Controle Reutilizável)
-**Ficheiro**: `src/BioDesk.App/Controls/SignatureCanvasControl.xaml`  
-**Linha**: 23  
+**Ficheiro**: `src/BioDesk.App/Controls/SignatureCanvasControl.xaml`
+**Linha**: 23
 **Propriedades**:
 ```xaml
 <Canvas x:Name="AssinaturaCanvas"
@@ -79,8 +79,8 @@ private void MainWindow_Closing(object sender, CancelEventArgs e)
 ```
 
 #### **2. AssinaturaCanvasDeclaracao** (Declaração de Saúde)
-**Ficheiro**: `src/BioDesk.App/Views/Abas/DeclaracaoSaudeUserControl.xaml`  
-**Linha**: 616  
+**Ficheiro**: `src/BioDesk.App/Views/Abas/DeclaracaoSaudeUserControl.xaml`
+**Linha**: 616
 **Propriedades**:
 ```xaml
 <Canvas x:Name="AssinaturaCanvasDeclaracao"
@@ -107,13 +107,13 @@ private void MainWindow_Closing(object sender, CancelEventArgs e)
 ```
 
 #### **3. Assinatura Terapeuta** (Registo de Consultas)
-**Ficheiro**: `src/BioDesk.App/Views/Abas/RegistoConsultasUserControl.xaml`  
-**Linha**: 219  
+**Ficheiro**: `src/BioDesk.App/Views/Abas/RegistoConsultasUserControl.xaml`
+**Linha**: 219
 **Tipo**: Image (não é canvas interativo)
 ```xaml
-<Image Source="/Assets/Images/assinatura.png" 
-       Stretch="Uniform" 
-       MaxHeight="80" 
+<Image Source="/Assets/Images/assinatura.png"
+       Stretch="Uniform"
+       MaxHeight="80"
        HorizontalAlignment="Left"/>
 ```
 
@@ -157,7 +157,7 @@ private void MainWindow_Closing(object sender, CancelEventArgs e)
             StylusDown="AssinaturaCanvas_StylusDown"
             StylusMove="AssinaturaCanvas_StylusMove"
             StylusUp="AssinaturaCanvas_StylusUp">
-        
+
         <!-- LINHA GUIA CENTRAL (OPCIONAL mas RECOMENDADA) -->
         <Line X1="300" Y1="0" X2="300" Y2="150"
               Stroke="#E3E9DE"
@@ -181,7 +181,7 @@ private void MainWindow_Closing(object sender, CancelEventArgs e)
 
 ### 🔍 Análise do Código
 
-**Ficheiro**: `src/BioDesk.App/Views/Abas/DeclaracaoSaudeUserControl.xaml`  
+**Ficheiro**: `src/BioDesk.App/Views/Abas/DeclaracaoSaudeUserControl.xaml`
 **Linha**: 494-504
 
 ```xaml
@@ -282,7 +282,7 @@ public class TemplateInfo
 
 ### 🔍 Análise do App.xaml.cs
 
-**Ficheiro**: `src/BioDesk.App/App.xaml.cs`  
+**Ficheiro**: `src/BioDesk.App/App.xaml.cs`
 **Linha**: 217-227
 
 ```csharp
@@ -339,7 +339,7 @@ protected override void OnExit(ExitEventArgs e)
 
             // 2. Dispose de serviços singleton
             var serviceProvider = _host.Services;
-            
+
             // Garantir que câmera é desligada
             if (serviceProvider.GetService<ICameraService>() is IDisposable camera)
             {
@@ -381,7 +381,7 @@ private void KillOrphanProcesses()
     var currentProcess = Process.GetCurrentProcess();
     var orphans = Process.GetProcesses()
         .Where(p => p.ProcessName.Contains("AForge") && p.Id != currentProcess.Id);
-    
+
     foreach (var orphan in orphans)
     {
         try

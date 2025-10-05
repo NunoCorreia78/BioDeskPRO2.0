@@ -41,7 +41,7 @@ public class ConsentimentoPdfService
             var pastaConsentimentos = Path.Combine(pastaPaciente, "Consentimentos");
             Directory.CreateDirectory(pastaConsentimentos);
 
-            var nomeArquivo = $"Consentimento_{dados.TipoTratamento.Replace(" ", "_")}_{dados.NomePaciente.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+            var nomeArquivo = $"Consentimento_{dados.TipoTratamento}_{dados.NomePaciente}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
             var caminhoCompleto = Path.Combine(pastaConsentimentos, nomeArquivo);
 
             _logger.LogInformation("📁 Pasta de destino: {Pasta}", pastaConsentimentos);

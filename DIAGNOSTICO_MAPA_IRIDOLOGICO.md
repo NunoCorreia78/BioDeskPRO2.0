@@ -1,6 +1,6 @@
 # 🔴 DIAGNÓSTICO: Botão Mapa Iridológico
 
-**Data**: 04 de Outubro de 2025  
+**Data**: 04 de Outubro de 2025
 **Status**: ✅ **CORRIGIDO** (aguarda teste em runtime)
 
 ---
