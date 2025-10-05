@@ -177,9 +177,9 @@ public partial class IrisdiagnosticoUserControl : UserControl
     {
         if (sender is not FrameworkElement element) return;
 
-        Console.WriteLine($"🎯 DEBUG Handler_MouseDown: Tag={element.Tag?.GetType().Name}, Capture={element.CaptureMouse()}");
-        Console.WriteLine($"🧪 Tag FullName: {element.Tag?.GetType().FullName}");
-        Console.WriteLine($"🧪 Tag is CalibrationHandler: {element.Tag is IrisdiagnosticoViewModel.CalibrationHandler}");
+#if DEBUG
+        System.Diagnostics.Debug.WriteLine($"🎯 Handler_MouseDown: Tag={element.Tag?.GetType().Name}");
+#endif
 
         _isDraggingHandler = true;
         _currentHandler = element.Tag; // CalibrationHandler do DataContext
@@ -196,12 +196,9 @@ public partial class IrisdiagnosticoUserControl : UserControl
         if (sender is not FrameworkElement element) return;
         if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
 
-        Console.WriteLine($"🔧 DEBUG Handler_MouseMove: Dragging={_isDraggingHandler}, Handler={_currentHandler?.GetType().Name}");
-
         // 🔧 FIX: Usar HandlersCanvas diretamente (nomeado no XAML) em vez de element.Parent
         // ItemsControl não define Parent corretamente, causava canvas = null
         var position = e.GetPosition(HandlersCanvas);
-        Console.WriteLine($"� DEBUG MousePosition: ({position.X:F2}, {position.Y:F2})");
 
         // Atualizar posição do handler
         if (_currentHandler is IrisdiagnosticoViewModel.CalibrationHandler handler)
@@ -209,7 +206,9 @@ public partial class IrisdiagnosticoUserControl : UserControl
             handler.X = position.X - 8; // -8 para centralizar ellipse 16x16
             handler.Y = position.Y - 8;
 
-            Console.WriteLine($"📍 POSITION UPDATE: X={handler.X:F2}, Y={handler.Y:F2}, MousePos=({position.X:F2}, {position.Y:F2})");
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"📍 POSITION UPDATE: X={handler.X:F2}, Y={handler.Y:F2}");
+#endif
 
             // Recalcular raio baseado na nova posição
             double centroX = handler.Tipo == "Pupila" ? viewModel.CentroPupilaX : viewModel.CentroIrisX;
@@ -253,12 +252,6 @@ public partial class IrisdiagnosticoUserControl : UserControl
 
         e.Handled = true;
     }
-
-    // === HANDLERS DE CENTRO (STUB - não usados) ===
-
-    private void CentroHandler_MouseDown(object sender, MouseButtonEventArgs e) { }
-    private void CentroHandler_MouseMove(object sender, MouseEventArgs e) { }
-    private void CentroHandler_MouseUp(object sender, MouseButtonEventArgs e) { }
 
     private void TrackDragEvent(
         DragDebugEventType type,
@@ -426,7 +419,9 @@ public partial class IrisdiagnosticoUserControl : UserControl
             metricsPost,
             BuildContext(viewModel, tipo));
 
-        // ✅ NOVO: Atualizar visual em tempo real quando em modo Mover Mapa
+        // ⚠️ PERFORMANCE: RecalcularPoligonosComDeformacao é chamado a cada MouseMove
+        // TODO: Implementar throttle/debounce para reduzir recalculações durante arrasto
+        // Alternativa: Usar apenas TranslateTransform visual durante drag, recalcular no MouseUp
         if (viewModel.ModoMoverMapa)
         {
             viewModel.RecalcularPoligonosComDeformacao();

@@ -23,6 +23,12 @@ bld/
 # Logs
 *.log
 LOGS_DEBUG.txt
+drag_status.log
+drag_debug.log
+console_debug.log
+src/drag_debug.log
+src/DebugOutput/drag_debug.log
+DebugOutput/*.log
 
 # Temporary files
 *.tmp
