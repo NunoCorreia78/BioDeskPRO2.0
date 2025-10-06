@@ -192,6 +192,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     private bool _atualizandoContagemHandlers;
     private bool _suspendHandlerUpdates;
     private bool _isDragging = false;  // ⭐ Flag para prevenir renderização durante arrasto
+    
+    // ⚡ PERFORMANCE: Throttling para RecalcularPoligonosComDeformacao durante drag
+    private DateTime _lastRenderTime = DateTime.MinValue;
+    private const int RenderThrottleMs = 50; // Mínimo 50ms entre renderizações durante drag
 
     /// <summary>
     /// Layer 3: Suspende visibilidade visual dos polígonos durante arrasto (previne atualizações assíncronas WPF)
@@ -1348,28 +1352,27 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             // ⭐ REGRA 1: Não renderizar durante drag ativo (performance + previne esticamento)
             if (_isDragging)
             {
-                var msg = $"[{DateTime.Now:HH:mm:ss.fff}]    ⏭️⏭️⏭️ RENDERIZAÇÃO ADIADA - _isDragging = TRUE ⏭️⏭️⏭️";
-                _logger.LogWarning(msg);
-                Console.WriteLine(msg);
-                System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+#if DEBUG
+                _logger.LogDebug("⏭️ RENDERIZAÇÃO ADIADA - _isDragging = TRUE");
+#endif
                 // Renderização será feita no EndDrag()
             }
             // ⭐ REGRA 2: Modo "Mover Mapa" SEMPRE usa renderização simples (previne esticamento)
             // Deformação só deve ser usada quando editando handlers MANUALMENTE em modo calibração
             else if (ModoCalibracaoAtivo && !ModoMoverMapa)
             {
-                var msg = $"[{DateTime.Now:HH:mm:ss.fff}]    🎨 Renderizando polígonos COM deformação (calibração manual)";
-                _logger.LogWarning(msg);
-                Console.WriteLine(msg);
-                System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+#if DEBUG
+                _logger.LogDebug("🎨 Renderizando polígonos COM deformação (calibração manual)");
+#endif
                 RenderizarPoligonosComDeformacao();
             }
             else
             {
-                var msg = $"[{DateTime.Now:HH:mm:ss.fff}]    🎨 Renderizando polígonos SEM deformação (mover mapa ou modo normal)";
-                _logger.LogWarning(msg);
-                Console.WriteLine(msg);
-                System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+#if DEBUG
+                _logger.LogDebug("🎨 Renderizando polígonos SEM deformação (mover mapa ou modo normal)");
+#if DEBUG
+                _logger.LogDebug("🎨 Renderizando polígonos SEM deformação (mover mapa ou modo normal)");
+#endif
                 RenderizarPoligonos();
             }
         }
@@ -1553,18 +1556,16 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         if (ModoCalibracaoAtivo && !ModoMoverMapa)
         {
             MostrarPoligonosDuranteArrasto = false;  // ⭐ Layer 3: OCULTAR polígonos durante arrasto (apenas calibração)
-            var msg = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] ⭐ INÍCIO - Modo Calibração (polígonos ocultos) ⭐";
-            _logger.LogWarning(msg);
-            Console.WriteLine(msg);
-            System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+#if DEBUG
+            _logger.LogDebug("🖱️ [DRAG] INÍCIO - Modo Calibração (polígonos ocultos)");
+#endif
         }
         else if (ModoMoverMapa)
         {
             // ✅ Em modo "Mover Mapa", mantém polígonos VISÍVEIS (MostrarPoligonosDuranteArrasto fica true)
-            var msg = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] 🖐️ INÍCIO - Modo Mover Mapa (polígonos VISÍVEIS) 🖐️";
-            _logger.LogInformation(msg);
-            Console.WriteLine(msg);
-            System.IO.File.AppendAllText("drag_status.log", msg + Environment.NewLine);
+#if DEBUG
+            _logger.LogDebug("🖱️ [DRAG] INÍCIO - Modo Mover Mapa (polígonos VISÍVEIS)");
+#endif
         }
     }
 
@@ -1576,30 +1577,34 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         _isDragging = false;
         _suspendHandlerUpdates = false;  // Layer 2: Reativar PropertyChanged de handlers
 
-        var msg1 = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] ⭐⭐⭐ FIM - Renderizando posição final... ⭐⭐⭐";
-        System.IO.File.AppendAllText("drag_status.log", msg1 + Environment.NewLine);
+#if DEBUG
+        _logger.LogDebug("🖱️ [DRAG] FIM - Renderizando posição final...");
+#endif
 
         // Força renderização ANTES de reativar visibilidade (evita frames intermédios)
         if (MapaAtual != null && MostrarMapaIridologico)
         {
             if (ModoCalibracaoAtivo && !ModoMoverMapa)
             {
-                var msg2 = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] → Renderizando COM deformação";
-                System.IO.File.AppendAllText("drag_status.log", msg2 + Environment.NewLine);
+#if DEBUG
+                _logger.LogDebug("🖱️ [DRAG] → Renderizando COM deformação");
+#endif
                 RenderizarPoligonosComDeformacao();
             }
             else
             {
-                var msg3 = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] → Renderizando SEM deformação";
-                System.IO.File.AppendAllText("drag_status.log", msg3 + Environment.NewLine);
+#if DEBUG
+                _logger.LogDebug("🖱️ [DRAG] → Renderizando SEM deformação");
+#endif
                 RenderizarPoligonos();
             }
         }
 
         // ⭐ Layer 3: REATIVAR visibilidade APÓS renderização completa
         MostrarPoligonosDuranteArrasto = true;
-        var msg4 = $"[{DateTime.Now:HH:mm:ss.fff}] 🖱️ [DRAG] ✅ Layer 3 reativada - polígonos visíveis";
-        System.IO.File.AppendAllText("drag_status.log", msg4 + Environment.NewLine);
+#if DEBUG
+        _logger.LogDebug("🖱️ [DRAG] ✅ Layer 3 reativada - polígonos visíveis");
+#endif
     }
 
     public void TransladarCalibracao(string? tipo, double deltaX, double deltaY)
@@ -1633,6 +1638,9 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             metricasPre,
             contextoPre);
 
+        // ⚡ CRÍTICO: Preservar estado anterior de _suspendHandlerUpdates
+        // Se já estava suspenso (por BeginDrag), não deve ser reativado no finally
+        var previousSuspendState = _suspendHandlerUpdates;
         _suspendHandlerUpdates = true;
         try
         {
@@ -1662,7 +1670,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         }
         finally
         {
-            _suspendHandlerUpdates = false;
+            // ⚡ CRÍTICO: Restaurar estado anterior em vez de forçar false
+            _suspendHandlerUpdates = previousSuspendState;
         }
 
         AtualizarTransformacoesGlobais();
@@ -1747,7 +1756,30 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     /// </summary>
     public void RecalcularPoligonosComDeformacao()
     {
+        RecalcularPoligonosComDeformacao(throttle: false);
+    }
+
+    /// <summary>
+    /// Recalcula polígonos com deformação baseada em handlers
+    /// </summary>
+    /// <param name="throttle">Se true, aplica throttle (mínimo 50ms entre atualizações)</param>
+    public void RecalcularPoligonosComDeformacao(bool throttle)
+    {
         if (MapaAtual == null) return;
+
+        // ⚡ PERFORMANCE: Throttle durante drag para reduzir overhead
+        if (throttle && _isDragging)
+        {
+            var elapsed = (DateTime.Now - _lastRenderTime).TotalMilliseconds;
+            if (elapsed < RenderThrottleMs)
+            {
+#if DEBUG
+                _logger.LogTrace("⏭️ Render throttled (last render {Elapsed}ms ago)", elapsed);
+#endif
+                return; // Skip render - too soon
+            }
+            _lastRenderTime = DateTime.Now;
+        }
 
         // 🔧 DEFORMAÇÃO COM HANDLERS: Usar posições reais dos handlers para calcular raios deformados
         if (ModoCalibracaoAtivo && (HandlersPupila.Count > 0 || HandlersIris.Count > 0))

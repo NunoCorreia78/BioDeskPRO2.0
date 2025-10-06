@@ -8,6 +8,10 @@ x86/
 build/
 bld/
 
+# Exception: Allow Debug source code folders (not build outputs)
+!src/**/Debug/
+!src/**/Debug/*.cs
+
 # Visual Studio cache/options
 .vs/
 .vscode/
@@ -23,6 +27,12 @@ bld/
 # Logs
 *.log
 LOGS_DEBUG.txt
+drag_status.log
+drag_debug.log
+console_debug.log
+src/drag_debug.log
+src/DebugOutput/drag_debug.log
+DebugOutput/*.log
 
 # Temporary files
 *.tmp
