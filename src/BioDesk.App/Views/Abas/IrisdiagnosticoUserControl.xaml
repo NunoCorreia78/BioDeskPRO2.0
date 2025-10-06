@@ -137,7 +137,7 @@
 
                     <!-- Botão Adicionar (verde claro) -->
                     <Button Grid.Column="0"
-                            Content="⊕"
+                            Content="📁"
                             Command="{Binding AdicionarImagemCommand}"
                             Background="#9CAF97"
                             Foreground="White"
@@ -207,7 +207,7 @@
 
                     <!-- Botão Remover (vermelho terroso) -->
                     <Button Grid.Column="2"
-                            Content="🗑️"
+                            Content="❌"
                             Command="{Binding RemoverImagemCommand}"
                             Background="#C85959"
                             Foreground="White"
@@ -830,7 +830,7 @@
                 <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1" Padding="16" Margin="0,12,0,0">
                     <StackPanel>
                         <!-- Toggle Mapa Iridológico -->
-                        <ToggleButton Content="�️ Mostrar Mapa"
+                        <ToggleButton Content="🔍 Mostrar Mapa"
                                       IsChecked="{Binding MostrarMapaIridologico, Mode=TwoWay}"
                                       HorizontalAlignment="Stretch"
                                       Height="36"
@@ -881,11 +881,11 @@
                                 <ToolTip>
                                     <StackPanel MaxWidth="250">
                                         <TextBlock Text="Modo Mover Mapa" FontWeight="Bold" FontSize="13"/>
-                                        <TextBlock Text="Arraste para reposicionar o mapa iridológico completo" 
+                                        <TextBlock Text="Arraste para reposicionar o mapa iridológico completo"
                                                    TextWrapping="Wrap"
                                                    Margin="0,4,0,0"/>
-                                        <TextBlock Text="O mapa move-se em tempo real enquanto arrasta" 
-                                                   FontStyle="Italic" 
+                                        <TextBlock Text="O mapa move-se em tempo real enquanto arrasta"
+                                                   FontStyle="Italic"
                                                    Foreground="#6B8E63"
                                                    TextWrapping="Wrap"
                                                    Margin="0,2,0,0"/>
@@ -1049,11 +1049,11 @@
                                 <ToolTip>
                                     <StackPanel MaxWidth="250">
                                         <TextBlock Text="Modo Ajuste Fino" FontWeight="Bold" FontSize="13"/>
-                                        <TextBlock Text="Mostra pontos de controle (handlers) para ajustar a deformação local do mapa" 
+                                        <TextBlock Text="Mostra pontos de controle (handlers) para ajustar a deformação local do mapa"
                                                    TextWrapping="Wrap"
                                                    Margin="0,4,0,0"/>
-                                        <TextBlock Text="Arraste os handlers para adaptar o mapa à íris" 
-                                                   FontStyle="Italic" 
+                                        <TextBlock Text="Arraste os handlers para adaptar o mapa à íris"
+                                                   FontStyle="Italic"
                                                    Foreground="#6B8E63"
                                                    TextWrapping="Wrap"
                                                    Margin="0,2,0,0"/>
