@@ -140,7 +140,16 @@ dotnet build --no-incremental  # Rebuild completo
 ```
 
 ### IntelliSense com Erros mas Build OK?
-- Recarregar janela VS Code: `Ctrl+Shift+P` → "Reload Window"
+**Sintoma:** Problems Panel mostra 170+ erros mas `dotnet build` = 0 erros
+
+**Causa:** Cache do OmniSharp desatualizado
+
+**Solução Rápida:**
+1. `Ctrl+Shift+P` → "Restart C# Language Server"
+2. Aguardar 10 segundos
+3. Verificar: Problems Panel = 0 erros ✅
+
+**Alternativa:** `Ctrl+Shift+P` → "Reload Window"
 
 ---
 

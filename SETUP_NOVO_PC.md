@@ -125,6 +125,21 @@ dotnet build --no-incremental
 - ✅ **Normal**: Packages .NET Framework no .NET 8
 - ✅ **Funcionam perfeitamente**: Compatibilidade testada
 
+### IntelliSense com 170+ Erros mas Build OK
+**Sintoma:** Problems Panel mostra 170+ erros mas `dotnet build` = 0 erros
+
+**Causa:** Cache do OmniSharp (C# Language Server) desatualizado após `dotnet clean`
+
+**Solução Rápida (10 segundos):**
+1. `Ctrl+Shift+P` → "Restart C# Language Server"
+2. Aguardar 10 segundos para reanálise completa
+3. Problems Panel deve mostrar 0 erros
+
+**Solução Alternativa:**
+- `Ctrl+Shift+P` → "Reload Window"
+
+**Prevenção:** Sempre reiniciar OmniSharp após `dotnet clean + build`
+
 ---
 
 ## 📖 Documentação Adicional
