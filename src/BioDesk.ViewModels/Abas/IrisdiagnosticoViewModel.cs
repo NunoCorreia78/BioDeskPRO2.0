@@ -272,12 +272,25 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     private const double PUPILA_NORMALIZED_THRESHOLD = RAIO_NOMINAL_PUPILA / RAIO_NOMINAL_IRIS;
     private const double PUPILA_TRANSITION_WIDTH = 0.04;
 
-    private const double MAPA_ZOOM_MIN = 0.6;
-    private const double MAPA_ZOOM_MAX = 1.6;
+    private const double MAPA_ZOOM_MIN = 0.4;
+    private const double MAPA_ZOOM_MAX = 2.5;
     private const double MAPA_ZOOM_STEP = 0.1;
 
     [ObservableProperty]
     private double _mapaZoom = 1.0;
+
+    // === FERRAMENTA DE DESENHO (CANETA) ===
+    [ObservableProperty]
+    private bool _modoDesenhoAtivo = false;
+
+    [ObservableProperty]
+    private string _corDesenho = "#C85959"; // Vermelho terroso default
+
+    [ObservableProperty]
+    private double _espessuraDesenho = 2.0;
+
+    [ObservableProperty]
+    private ObservableCollection<StrokeModel> _strokes = new();
 
     public IrisdiagnosticoViewModel(
         IUnitOfWork unitOfWork,
@@ -295,7 +308,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
         if (DebugArrastoAtivo)
         {
-            _dragDebugService.StartSession("IrisdiagnosticoViewModel inicializado");
+            _dragDebugService.RecordEvent(DragDebugEventType.DragStart, "IrisdiagnosticoViewModel inicializado");
             RegistarEstadoAtual("VM inicializada");
         }
     }
@@ -903,11 +916,76 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         OnPropertyChanged(nameof(CountTotal));
     }
 
+    // === COMANDOS FERRAMENTA DE DESENHO ===
+    
+    /// <summary>
+    /// Limpa todos os desenhos do canvas
+    /// </summary>
+    [RelayCommand]
+    private void LimparDesenhos()
+    {
+        try
+        {
+            Strokes.Clear();
+            _logger.LogInformation("🗑️ Todos os desenhos foram limpos");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao limpar desenhos");
+        }
+    }
+
+    /// <summary>
+    /// Desfaz o último desenho
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanDesfazerDesenho))]
+    private void DesfazerDesenho()
+    {
+        try
+        {
+            if (Strokes.Count > 0)
+            {
+                var ultimoStroke = Strokes[Strokes.Count - 1];
+                Strokes.RemoveAt(Strokes.Count - 1);
+                _logger.LogInformation("↶ Desenho desfeito: {Count} pontos", ultimoStroke.Points.Count);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao desfazer desenho");
+        }
+    }
+
+    private bool CanDesfazerDesenho() => Strokes.Count > 0;
+
+    /// <summary>
+    /// Adiciona um novo stroke à coleção
+    /// </summary>
+    public void AdicionarStroke(StrokeModel stroke)
+    {
+        if (stroke == null || stroke.Points.Count == 0)
+        {
+            _logger.LogWarning("⚠️ Tentativa de adicionar stroke vazio ou nulo");
+            return;
+        }
+
+        try
+        {
+            Strokes.Add(stroke);
+            DesfazerDesenhoCommand.NotifyCanExecuteChanged();
+            _logger.LogDebug("✏️ Stroke adicionado: {Count} pontos, cor {Color}", stroke.Points.Count, stroke.Color);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao adicionar stroke");
+        }
+    }
+
     partial void OnDebugArrastoAtivoChanged(bool value)
     {
         if (value)
         {
-            _dragDebugService.StartSession("Debug de arrasto ativado");
+            _dragDebugService.RecordEvent(DragDebugEventType.DragStart, "Debug de arrasto ativado");
             RegistarEstadoAtual("Debug toggle ON");
         }
     }
@@ -984,6 +1062,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
         if (value && IrisImagemSelecionada != null)
         {
+            EnsureHandlersInitialized();
             _ = CarregarMapaIridologicoAsync();
         }
         else
@@ -1027,6 +1106,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
             // Renderizar polígonos
             RenderizarPoligonos();
+
+            EnsureHandlersInitialized();
         }
         catch (Exception ex)
         {
@@ -1073,6 +1154,21 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         _logger.LogInformation("🎨 Renderizados {Count} polígonos para {Zonas}",
             PoligonosZonas.Count,
             MapaAtual.Zonas.Count);
+    }
+
+    private void EnsureHandlersInitialized()
+    {
+        if (HandlersIris.Count > 0 && HandlersPupila.Count > 0)
+        {
+            return;
+        }
+
+        if (_atualizandoContagemHandlers)
+        {
+            return;
+        }
+
+        InicializarHandlers();
     }
 
     /// <summary>
@@ -1146,9 +1242,6 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             }
 
             AtualizarTransformacoesGlobais();
-
-            MapaZoom = 1.0;
-            ModoMoverMapa = false;
 
             RegistrarCalibracao(
                 "Handlers inicializados: Pupila={0}, Íris={1}, Offset={2}°",
@@ -1368,8 +1461,6 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             }
             else
             {
-#if DEBUG
-                _logger.LogDebug("🎨 Renderizando polígonos SEM deformação (mover mapa ou modo normal)");
 #if DEBUG
                 _logger.LogDebug("🎨 Renderizando polígonos SEM deformação (mover mapa ou modo normal)");
 #endif
@@ -2052,6 +2143,14 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     /// <summary>
     /// Observador: quando modo calibração ativa, inicializa handlers
     /// </summary>
+    partial void OnModoMoverMapaChanged(bool value)
+    {
+        if (value)
+        {
+            EnsureHandlersInitialized();
+        }
+    }
+
     partial void OnModoCalibracaoAtivoChanged(bool value)
     {
         if (value)

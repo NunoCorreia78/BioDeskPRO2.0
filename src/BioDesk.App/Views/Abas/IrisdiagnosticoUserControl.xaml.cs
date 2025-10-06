@@ -480,7 +480,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
         }
 
         TrackDragEvent(
-            DragDebugEventType.CoordinateTransform,
+            DragDebugEventType.HandlerTranslation,
             "TransformToVisual (Mapa → Handlers)",
             new Dictionary<string, double>
             {
@@ -510,6 +510,106 @@ public partial class IrisdiagnosticoUserControl : UserControl
             }
             
             MapaOverlayCanvas.ReleaseMouseCapture();
+        }
+    }
+
+    // === EVENT HANDLERS PARA FERRAMENTA DE DESENHO ===
+
+    /// <summary>
+    /// Handler para mudança de cor no desenho
+    /// </summary>
+    private void CorDesenho_Checked(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+        if (sender is not RadioButton radioButton) return;
+        if (radioButton.Tag is not string cor) return;
+
+        viewModel.CorDesenho = cor;
+    }
+
+    /// <summary>
+    /// Handler para mudança de espessura no desenho
+    /// </summary>
+    private void EspessuraDesenho_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+        viewModel.EspessuraDesenho = e.NewValue;
+    }
+
+    // Estado para captura do stroke atual
+    private bool _isDrawing = false;
+    private BioDesk.Domain.Models.StrokeModel? _currentStroke;
+
+    /// <summary>
+    /// Inicia desenho de um novo stroke
+    /// </summary>
+    private void DesenhoCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+        if (!viewModel.ModoDesenhoAtivo) return;
+
+        var canvas = sender as Canvas;
+        if (canvas == null) return;
+
+        _isDrawing = true;
+        var position = e.GetPosition(canvas);
+
+        // Criar novo stroke com cor e espessura atuais
+        _currentStroke = new BioDesk.Domain.Models.StrokeModel(viewModel.CorDesenho, viewModel.EspessuraDesenho);
+        _currentStroke.Points.Add(new BioDesk.Domain.Models.SimplePoint(position.X, position.Y));
+
+        canvas.CaptureMouse();
+    }
+
+    /// <summary>
+    /// Adiciona pontos ao stroke durante o movimento
+    /// </summary>
+    private void DesenhoCanvas_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isDrawing || _currentStroke == null) return;
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+        if (!viewModel.ModoDesenhoAtivo) return;
+
+        var canvas = sender as Canvas;
+        if (canvas == null) return;
+
+        var position = e.GetPosition(canvas);
+        _currentStroke.Points.Add(new BioDesk.Domain.Models.SimplePoint(position.X, position.Y));
+    }
+
+    /// <summary>
+    /// Finaliza o stroke e adiciona ao ViewModel
+    /// </summary>
+    private void DesenhoCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isDrawing || _currentStroke == null) return;
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+
+        var canvas = sender as Canvas;
+        canvas?.ReleaseMouseCapture();
+
+        // Adicionar stroke final ao ViewModel
+        if (_currentStroke.Points.Count > 1)
+        {
+            viewModel.AdicionarStroke(_currentStroke);
+        }
+
+        _isDrawing = false;
+        _currentStroke = null;
+    }
+
+    /// <summary>
+    /// Cancela desenho se mouse sair do canvas
+    /// </summary>
+    private void DesenhoCanvas_MouseLeave(object sender, MouseEventArgs e)
+    {
+        if (_isDrawing)
+        {
+            var canvas = sender as Canvas;
+            canvas?.ReleaseMouseCapture();
+
+            _isDrawing = false;
+            _currentStroke = null;
         }
     }
 }

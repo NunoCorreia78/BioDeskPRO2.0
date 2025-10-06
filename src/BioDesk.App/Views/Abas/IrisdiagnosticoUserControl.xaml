@@ -18,6 +18,9 @@
         <!-- Converter: Raio para Diâmetro (raio * 2) -->
         <converters:DiameterConverter x:Key="DiameterConverter"/>
 
+        <!-- Converter: List<SimplePoint> para PointCollection -->
+        <converters:SimplePointCollectionConverter x:Key="SimplePointCollectionConverter"/>
+
         <!-- Converter: Centro para Offset (centro - raio) -->
         <converters:CenterOffsetConverter x:Key="CenterOffsetConverter"/>
     </UserControl.Resources>
@@ -283,7 +286,19 @@
                 MouseLeftButtonUp="MapaOverlayCanvas_MouseLeftButtonUp"
                 MouseLeave="MapaOverlayCanvas_MouseLeave">
                             <Canvas.RenderTransform>
-                                <ScaleTransform ScaleY="-1" CenterY="475"/>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleY="-1"
+                                                    CenterX="{Binding CentroIrisX}"
+                                                    CenterY="{Binding CentroIrisY}"/>
+                                    <ScaleTransform
+                                        ScaleX="{Binding MapaZoom}"
+                                        ScaleY="{Binding MapaZoom}"
+                                        CenterX="{Binding CentroIrisX}"
+                                        CenterY="{Binding CentroIrisY}"/>
+                                    <TranslateTransform
+                                        X="{Binding TranslateX}"
+                                        Y="{Binding TranslateY}"/>
+                                </TransformGroup>
                             </Canvas.RenderTransform>
                             <Canvas.Style>
                                 <Style TargetType="Canvas">
@@ -326,8 +341,16 @@
                                                  Stroke="#3F4A3D"
                                                  StrokeThickness="2"
                                                  Fill="{Binding CorPreenchimento}"
-                                                 Cursor="Hand"
-                                                 ToolTip="{Binding Nome}">
+                                                 Cursor="Hand">
+                                            <!-- Tooltip com nome e descrição -->
+                                            <Polygon.ToolTip>
+                                                <ToolTip MaxWidth="300" Background="#F7F9F6" Foreground="#3F4A3D" BorderBrush="#E3E9DE" BorderThickness="1">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,4"/>
+                                                        <TextBlock Text="{Binding Descricao}" FontSize="11" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                </ToolTip>
+                                            </Polygon.ToolTip>
                                             <Polygon.Style>
                                                 <Style TargetType="Polygon">
                                                     <Setter Property="Opacity" Value="{Binding DataContext.OpacidadeMapa, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource PercentToOpacityConverter}}"/>
@@ -468,9 +491,9 @@
                                      Cursor="SizeAll"
                                      Tag="Pupila"
                                      Panel.ZIndex="200"
-                                     MouseLeftButtonDown="CentroHandler_MouseDown"
-                                     MouseMove="CentroHandler_MouseMove"
-                                     MouseLeftButtonUp="CentroHandler_MouseUp">
+                                     MouseLeftButtonDown="Handler_MouseDown"
+                                     MouseMove="Handler_MouseMove"
+                                     MouseLeftButtonUp="Handler_MouseUp">
                                 <Ellipse.RenderTransform>
                                     <TransformGroup>
                                         <TranslateTransform X="-9" Y="-9"/>
@@ -508,9 +531,9 @@
                                      Cursor="SizeAll"
                                      Tag="Iris"
                                      Panel.ZIndex="200"
-                                     MouseLeftButtonDown="CentroHandler_MouseDown"
-                                     MouseMove="CentroHandler_MouseMove"
-                                     MouseLeftButtonUp="CentroHandler_MouseUp">
+                                     MouseLeftButtonDown="Handler_MouseDown"
+                                     MouseMove="Handler_MouseMove"
+                                     MouseLeftButtonUp="Handler_MouseUp">
                                 <Ellipse.RenderTransform>
                                     <TransformGroup>
                                         <TranslateTransform X="-9" Y="-9"/>
@@ -540,6 +563,51 @@
                                 </Ellipse.Style>
                             </Ellipse>
                         </Canvas>
+
+                        <!-- LAYER 5: Canvas de Desenho (visível só em modo desenho) -->
+                        <Canvas x:Name="DesenhoCanvas"
+                                Width="950" Height="950"
+                                Panel.ZIndex="4"
+                                Background="Transparent"
+                                MouseLeftButtonDown="DesenhoCanvas_MouseLeftButtonDown"
+                                MouseMove="DesenhoCanvas_MouseMove"
+                                MouseLeftButtonUp="DesenhoCanvas_MouseLeftButtonUp"
+                                MouseLeave="DesenhoCanvas_MouseLeave">
+                            <Canvas.Style>
+                                <Style TargetType="Canvas">
+                                    <!-- Hit-test apenas quando modo desenho ativo -->
+                                    <Setter Property="IsHitTestVisible" Value="False"/>
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ModoDesenhoAtivo}" Value="True">
+                                            <Setter Property="IsHitTestVisible" Value="True"/>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Setter Property="Cursor" Value="Cross"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Canvas.Style>
+
+                            <!-- Renderização dos strokes -->
+                            <ItemsControl ItemsSource="{Binding Strokes}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Polyline Points="{Binding Points, Converter={StaticResource SimplePointCollectionConverter}}"
+                                                  Stroke="{Binding Color}"
+                                                  StrokeThickness="{Binding Thickness}"
+                                                  StrokeLineJoin="Round"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  IsHitTestVisible="False"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Canvas>
                     </Canvas>
                 </Viewbox>
             </Grid>
@@ -565,179 +633,198 @@
                            Foreground="#3F4A3D"
                            Margin="0,0,0,12"/>
 
-                <!-- Controlos Zoom + Color Picker -->
-                <Grid Grid.Row="1" Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Controlos de Zoom -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="🔍 Zoom:" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Margin="0,0,8,0"/>
-
-                        <Button Content="−" Command="{Binding ZoomOutCommand}" Width="30" Height="30"
-                                Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" FontSize="16" FontWeight="Bold" Margin="0,0,4,0" Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
+                <!-- Ferramenta de Desenho (Caneta) -->
+                <Border Grid.Row="1" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1" Padding="12" Margin="0,0,0,12">
+                    <StackPanel>
+                        <!-- Toggle Modo Desenho -->
+                        <ToggleButton x:Name="ModoDesenhoToggle"
+                                      Content="✏️ Modo Desenho"
+                                      IsChecked="{Binding ModoDesenhoAtivo, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch"
+                                      Height="32"
+                                      FontSize="12" FontWeight="SemiBold"
+                                      Cursor="Hand"
+                                      Margin="0,0,0,12">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Background" Value="#E3E9DE"/>
+                                    <Setter Property="Foreground" Value="#3F4A3D"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
                                     <Setter Property="Template">
                                         <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                     <Style.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter Property="Background" Value="#6B8E63"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#D3D9CE"/>
+                                            <Setter Property="Background" Value="#879B83"/>
                                         </Trigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Button.Style>
-                        </Button>
+                            </ToggleButton.Style>
+                        </ToggleButton>
 
-                        <TextBlock Text="{Binding ZoomLevel, StringFormat='{}{0:F1}x'}" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Width="40" TextAlignment="Center" Margin="4,0"/>
-
-                        <Button Content="+" Command="{Binding ZoomInCommand}" Width="30" Height="30"
-                                Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" FontSize="16" FontWeight="Bold" Margin="0,0,8,0" Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <!-- Controlos de Desenho (visíveis apenas quando ativo) -->
+                        <StackPanel Visibility="{Binding ModoDesenhoAtivo, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <!-- Seletor de Cor -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="🎨 Cor:" FontSize="11" Foreground="#5A6558" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <!-- Vermelho Terroso -->
+                                    <RadioButton x:Name="CorVermelha" GroupName="CorDesenho" IsChecked="True" Width="24" Height="24" Margin="0,0,4,0" Cursor="Hand" Tag="#C85959" Checked="CorDesenho_Checked">
+                                        <RadioButton.Template>
+                                            <ControlTemplate TargetType="RadioButton">
+                                                <Border Background="#C85959" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" Width="24" Height="24">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                                    <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
                                                 </Border>
                                             </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#D3D9CE"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-
-                        <Button Content="↺ Reset" Command="{Binding ResetZoomCommand}"
-                                Background="#E3E9DE" Foreground="#3F4A3D" Padding="8,4" BorderThickness="0" FontSize="11" Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </RadioButton.Template>
+                                    </RadioButton>
+                                    <!-- Verde Musgo -->
+                                    <RadioButton x:Name="CorVerde" GroupName="CorDesenho" Width="24" Height="24" Margin="0,0,4,0" Cursor="Hand" Tag="#6B8E63" Checked="CorDesenho_Checked">
+                                        <RadioButton.Template>
+                                            <ControlTemplate TargetType="RadioButton">
+                                                <Border Background="#6B8E63" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" Width="24" Height="24">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                                    <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
                                                 </Border>
                                             </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#D3D9CE"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                                        </RadioButton.Template>
+                                    </RadioButton>
+                                    <!-- Azul Petróleo -->
+                                    <RadioButton x:Name="CorAzul" GroupName="CorDesenho" Width="24" Height="24" Margin="0,0,4,0" Cursor="Hand" Tag="#5B7C99" Checked="CorDesenho_Checked">
+                                        <RadioButton.Template>
+                                            <ControlTemplate TargetType="RadioButton">
+                                                <Border Background="#5B7C99" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" Width="24" Height="24">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                                    <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </RadioButton.Template>
+                                    </RadioButton>
+                                    <!-- Amarelo Mostarda -->
+                                    <RadioButton x:Name="CorAmarela" GroupName="CorDesenho" Width="24" Height="24" Cursor="Hand" Tag="#D4A849" Checked="CorDesenho_Checked">
+                                        <RadioButton.Template>
+                                            <ControlTemplate TargetType="RadioButton">
+                                                <Border Background="#D4A849" BorderBrush="#E3E9DE" BorderThickness="2" CornerRadius="12" Width="24" Height="24">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                                                    <Setter Property="BorderBrush" Value="#3F4A3D"/>
+                                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </RadioButton.Template>
+                                    </RadioButton>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Slider de Espessura -->
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="📏 Espessura:" FontSize="11" Foreground="#5A6558" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Slider x:Name="EspessuraSlider" Grid.Column="1" Minimum="1" Maximum="5" Value="2" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" ValueChanged="EspessuraDesenho_ValueChanged"/>
+                                <TextBlock Grid.Column="2" Text="{Binding Value, ElementName=EspessuraSlider, StringFormat='{}{0:F0}px'}" FontSize="11" Foreground="#3F4A3D" VerticalAlignment="Center" Width="30" TextAlignment="Right" Margin="8,0,0,0"/>
+                            </Grid>
+
+                            <!-- Botões Limpar e Desfazer -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="🗑️ Limpar" Command="{Binding LimparDesenhosCommand}"
+                                        Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" Height="28" FontSize="11" Cursor="Hand" Margin="0,0,4,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#D3D9CE"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Button Grid.Column="1" Content="↶ Desfazer" Command="{Binding DesfazerDesenhoCommand}"
+                                        Background="#E3E9DE" Foreground="#3F4A3D" BorderThickness="0" Height="28" FontSize="11" Cursor="Hand" Margin="4,0,0,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#D3D9CE"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
-
-                    <!-- Paleta de Cores TERROSA -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
-                        <TextBlock Text="🎨 Cor:" FontSize="12" Foreground="#3F4A3D" VerticalAlignment="Center" Margin="0,0,8,0"/>
-
-                        <!-- Vermelho Terroso #C85959 -->
-                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Margin="0,0,4,0" Cursor="Hand">
-                            <RadioButton.Template>
-                                <ControlTemplate TargetType="RadioButton">
-                                    <Border Background="#C85959" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
-                                        </Border.Effect>
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </ControlTemplate>
-                            </RadioButton.Template>
-                        </RadioButton>
-
-                        <!-- Verde Musgo #6B8E63 -->
-                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Margin="0,0,4,0" Cursor="Hand">
-                            <RadioButton.Template>
-                                <ControlTemplate TargetType="RadioButton">
-                                    <Border Background="#6B8E63" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
-                                        </Border.Effect>
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </ControlTemplate>
-                            </RadioButton.Template>
-                        </RadioButton>
-
-                        <!-- Azul Petróleo #5B7C99 -->
-                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Margin="0,0,4,0" Cursor="Hand">
-                            <RadioButton.Template>
-                                <ControlTemplate TargetType="RadioButton">
-                                    <Border Background="#5B7C99" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
-                                        </Border.Effect>
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </ControlTemplate>
-                            </RadioButton.Template>
-                        </RadioButton>
-
-                        <!-- Amarelo Mostarda #D4A849 -->
-                        <RadioButton GroupName="CorMarca" Width="30" Height="30" Cursor="Hand">
-                            <RadioButton.Template>
-                                <ControlTemplate TargetType="RadioButton">
-                                    <Border Background="#D4A849" BorderBrush="#E3E9DE" BorderThickness="3" CornerRadius="6" Width="30" Height="30">
-                                        <Border.Effect>
-                                            <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.2"/>
-                                        </Border.Effect>
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="#3F4A3D"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </ControlTemplate>
-                            </RadioButton.Template>
-                        </RadioButton>
-                    </StackPanel>
-                </Grid>
+                </Border>
 
                 <!-- Controles de Calibração do Mapa -->
                 <Border Grid.Row="2" Background="White" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1" Padding="16" Margin="0,12,0,0">
@@ -1052,4 +1139,5 @@
         </Border>
     </Grid>
 </UserControl>
+
 
