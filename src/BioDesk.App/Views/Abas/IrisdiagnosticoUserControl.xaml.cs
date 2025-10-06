@@ -370,18 +370,17 @@ public partial class IrisdiagnosticoUserControl : UserControl
         double deltaX = current.X - _ultimaPosicaoMapa.X;
         double deltaY = current.Y - _ultimaPosicaoMapa.Y;
 
-        // Detectar inversão Y (ScaleY=-1 no RenderTransform)
+        // ✅ CORRIGIDO: Inverter deltaY porque o mapa tem ScaleY=-1 (flip vertical)
+        // Mouse para cima (deltaY negativo) deve mover mapa para cima (TranslateY negativo)
+        // Mas devido ao flip, precisamos inverter o sinal
         double scaleY = 1.0;
         if (MapaOverlayCanvas?.RenderTransform is Transform renderTransform)
         {
             var matrix = renderTransform.Value;
             scaleY = matrix.M22; // ScaleY component
 
-            // Se ScaleY negativo, inverter deltaY para movimento intuitivo
-            if (scaleY < 0)
-            {
-                deltaY = -deltaY;
-            }
+            // ScaleY é -1 devido ao flip, então NÃO invertemos (mantemos movimento natural)
+            // O flip já inverte visualmente, queremos que o movimento siga o mouse
         }
 
         // Determinar tipo de calibração ativa
@@ -419,11 +418,11 @@ public partial class IrisdiagnosticoUserControl : UserControl
             metricsPost,
             BuildContext(viewModel, tipo));
 
-        // ⚡ PERFORMANCE: Throttle recalculações durante drag (max 1 a cada 50ms)
-        // Reduz overhead de limpar/repopular PoligonosZonas em cada frame
+        // ✅ CORRIGIDO: Recalcular sempre para movimento fluido
+        // O throttle causava "solavancos" no movimento visual
         if (viewModel.ModoMoverMapa)
         {
-            viewModel.RecalcularPoligonosComDeformacao(throttle: true);
+            viewModel.RecalcularPoligonosComDeformacao(throttle: false);
         }
 
         _ultimaPosicaoMapa = current;
