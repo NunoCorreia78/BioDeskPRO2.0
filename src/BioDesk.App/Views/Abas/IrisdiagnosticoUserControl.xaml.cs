@@ -325,13 +325,13 @@ public partial class IrisdiagnosticoUserControl : UserControl
     {
         if (HandlersCanvas == null) return;
         if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
-        
+
         // ✅ SIMPLIFICADO: Só requer ModoMoverMapa OU ModoCalibracaoAtivo (não ambos)
         if (!viewModel.ModoMoverMapa && !viewModel.ModoCalibracaoAtivo) return;
 
         // ⭐ Iniciar sessão de drag (previne renderizações intermédias)
         viewModel.BeginDrag();
-        
+
         // ✅ NOVO: Cursor de movimento durante drag
         if (MapaOverlayCanvas != null)
         {
@@ -449,13 +449,13 @@ public partial class IrisdiagnosticoUserControl : UserControl
         }
 
         _isDraggingMapa = false;
-        
+
         // ✅ NOVO: Restaurar cursor normal
         if (MapaOverlayCanvas != null)
         {
             MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
         }
-        
+
         MapaOverlayCanvas.ReleaseMouseCapture();
         e.Handled = true;
     }
@@ -501,13 +501,13 @@ public partial class IrisdiagnosticoUserControl : UserControl
         if (_isDraggingMapa)
         {
             _isDraggingMapa = false;
-            
+
             // ✅ NOVO: Restaurar cursor
             if (MapaOverlayCanvas != null)
             {
                 MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
             }
-            
+
             MapaOverlayCanvas.ReleaseMouseCapture();
         }
     }

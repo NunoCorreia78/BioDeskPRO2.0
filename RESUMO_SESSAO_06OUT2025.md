@@ -49,7 +49,7 @@ if (MapaOverlayCanvas?.RenderTransform is Transform renderTransform) {
 **Problema**: Movimento visual com saltos/stutters, não fluido
 
 **Causa Raíz**:
-- Método `RecalcularPoligonosComDeformacao(throttle: true)` 
+- Método `RecalcularPoligonosComDeformacao(throttle: true)`
 - O `throttle: true` adiciona delay de 50ms entre atualizações
 - Polígonos só atualizavam a cada 50ms → movimento visualmente aos solavancos
 
@@ -225,10 +225,10 @@ code .
 ### Warnings Esperados (37 total)
 1. **NU1701** (18×) - AForge packages .NET Framework compatibility
    - ✅ **OK**: Pacotes funcionam perfeitamente no .NET 8
-   
+
 2. **CA1063** (4×) - Dispose pattern em CameraService/RealCameraService
    - ⚠️ **Low Priority**: Funcionalidade não afectada
-   
+
 3. **CS8602** (3×) - Nullable reference warnings
    - ✅ **OK**: Guardas null-check existem no runtime
 
@@ -240,9 +240,9 @@ code .
 
 ## 📞 Contacto e Suporte
 
-**Desenvolvedor**: Nuno Correia  
-**Repositório**: https://github.com/NunoCorreia78/BioDeskPRO2.0  
-**Última Sincronização**: 06 de Outubro 2025, ~23:00  
+**Desenvolvedor**: Nuno Correia
+**Repositório**: https://github.com/NunoCorreia78/BioDeskPRO2.0
+**Última Sincronização**: 06 de Outubro 2025, ~23:00
 **Commit Actual**: `771d80e`
 
 ---

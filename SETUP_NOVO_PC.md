@@ -206,9 +206,9 @@ INavigationService
 
 ## 📞 Suporte
 
-**Repositório**: https://github.com/NunoCorreia78/BioDeskPRO2.0  
-**Branch**: main  
-**Última Sincronização**: 06/10/2025, ~23:00  
+**Repositório**: https://github.com/NunoCorreia78/BioDeskPRO2.0
+**Branch**: main
+**Última Sincronização**: 06/10/2025, ~23:00
 **Hash Actual**: `5fa0608`
 
 ---

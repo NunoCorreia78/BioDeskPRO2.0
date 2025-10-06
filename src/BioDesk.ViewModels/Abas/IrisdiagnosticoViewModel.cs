@@ -192,7 +192,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     private bool _atualizandoContagemHandlers;
     private bool _suspendHandlerUpdates;
     private bool _isDragging = false;  // ⭐ Flag para prevenir renderização durante arrasto
-    
+
     // ⚡ PERFORMANCE: Throttling para RecalcularPoligonosComDeformacao durante drag
     private DateTime _lastRenderTime = DateTime.MinValue;
     private const int RenderThrottleMs = 50; // Mínimo 50ms entre renderizações durante drag
@@ -917,7 +917,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     }
 
     // === COMANDOS FERRAMENTA DE DESENHO ===
-    
+
     /// <summary>
     /// Limpa todos os desenhos do canvas
     /// </summary>
@@ -1642,7 +1642,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     {
         _isDragging = true;
         _suspendHandlerUpdates = true;  // Layer 2: Suspender PropertyChanged de handlers
-        
+
         // ✅ NOVO: Só oculta polígonos em modo calibração (handlers), não em modo "Mover Mapa"
         if (ModoCalibracaoAtivo && !ModoMoverMapa)
         {

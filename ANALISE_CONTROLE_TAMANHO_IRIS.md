@@ -1,7 +1,7 @@
 # 📐 Análise Completa: Controle de Tamanho da Iris e Mapa Sobreposto
 
-**Data:** 06/10/2025  
-**Branch analisado:** `copilot/fix-dac30c61-7617-4edb-91e2-a9f8ae0e12e7`  
+**Data:** 06/10/2025
+**Branch analisado:** `copilot/fix-dac30c61-7617-4edb-91e2-a9f8ae0e12e7`
 **Status das alterações propostas:** ✅ CORRETAS (focam em performance/logging, não alteram dimensões)
 
 ---
@@ -25,7 +25,7 @@
        Stretch="Uniform"
        Panel.ZIndex="1">
 ```
-**Controla:** 
+**Controla:**
 - **Width/Height:** Tamanho máximo da imagem da iris
 - **Stretch="Uniform":** Mantém proporção circular (centraliza automaticamente)
 
@@ -40,7 +40,7 @@
         <ScaleTransform ScaleY="-1" CenterY="475"/>
     </Canvas.RenderTransform>
 ```
-**Controla:** 
+**Controla:**
 - **Width/Height:** Tamanho do canvas do mapa (igual à iris)
 - **CenterY="475":** Centro do flip vertical (950/2 = 475)
 
@@ -238,17 +238,17 @@ Adicionar **TransformGroup** com Scale + Translate:
         <TransformGroup>
             <!-- 1. Flip vertical (mapa invertido) -->
             <ScaleTransform ScaleY="-1" CenterY="475"/>
-            
+
             <!-- 2. Escala global do mapa (binding ao MapaZoom) -->
-            <ScaleTransform 
-                ScaleX="{Binding MapaZoom}" 
+            <ScaleTransform
+                ScaleX="{Binding MapaZoom}"
                 ScaleY="{Binding MapaZoom}"
-                CenterX="475" 
+                CenterX="475"
                 CenterY="475"/>
-            
+
             <!-- 3. Translação para mover mapa -->
-            <TranslateTransform 
-                X="{Binding TranslateX}" 
+            <TranslateTransform
+                X="{Binding TranslateX}"
                 Y="{Binding TranslateY}"/>
         </TransformGroup>
     </Canvas.RenderTransform>
@@ -274,7 +274,7 @@ Adicionar **TransformGroup** com Scale + Translate:
 ### ⚠️ NENHUMA alteração às dimensões do Canvas/Imagem
 As propostas do agente **NÃO tocam** em:
 - Canvas Width/Height
-- Image Width/Height  
+- Image Width/Height
 - Padding do Border
 - ScaleTransform CenterY
 
