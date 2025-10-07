@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using BioDesk.Services.Navigation;
 using BioDesk.ViewModels;
@@ -224,6 +225,67 @@ namespace BioDesk.App
 
                 MessageBox.Show($"Erro ao navegar: {ex.Message}", "Erro",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Atalhos de teclado globais
+        /// Ctrl+N = Novo Paciente | Ctrl+S = Guardar | Ctrl+L = Lista Pacientes | Ctrl+D = Dashboard
+        /// </summary>
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            try
+            {
+                // Ctrl+N → Criar Novo Paciente
+                if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    _logger.LogInformation("⌨️ Atalho Ctrl+N detectado - Navegando para Novo Paciente");
+                    _navigationService.NavigateTo("NovoPaciente");
+                    e.Handled = true;
+                    return;
+                }
+
+                // Ctrl+L → Lista de Pacientes
+                if (e.Key == Key.L && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    _logger.LogInformation("⌨️ Atalho Ctrl+L detectado - Navegando para Lista de Pacientes");
+                    _navigationService.NavigateTo("ListaPacientes");
+                    e.Handled = true;
+                    return;
+                }
+
+                // Ctrl+D → Dashboard
+                if (e.Key == Key.D && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    _logger.LogInformation("⌨️ Atalho Ctrl+D detectado - Navegando para Dashboard");
+                    _navigationService.NavigateTo("Dashboard");
+                    e.Handled = true;
+                    return;
+                }
+
+                // Ctrl+S → Guardar (se estiver em FichaPaciente)
+                if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    _logger.LogInformation("⌨️ Atalho Ctrl+S detectado - Tentando guardar");
+
+                    var contentControl = this.FindName("ContentArea") as ContentControl;
+                    if (contentControl?.Content is FrameworkElement fe &&
+                        fe.DataContext is FichaPacienteViewModel vm)
+                    {
+                        _logger.LogInformation("✅ FichaPacienteViewModel detectado - Executando GuardarCompletoCommand");
+                        _ = vm.GuardarCompletoCommand.ExecuteAsync(null);
+                        e.Handled = true;
+                    }
+                    else
+                    {
+                        _logger.LogInformation("⚠️ Ctrl+S pressionado mas não está em FichaPaciente");
+                    }
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "💥 Erro ao processar atalho de teclado");
             }
         }
     }

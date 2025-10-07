@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.Extensions.Logging;
@@ -41,6 +42,23 @@ public partial class DashboardViewModel : NavigationViewModelBase, IDisposable
 
     [ObservableProperty]
     private int _emailsPendentes;
+
+    // ✨ NOVOS Cards de Status
+    [ObservableProperty]
+    private int _emailsAgendados;
+
+    [ObservableProperty]
+    private int _fichasIncompletas;
+
+    [ObservableProperty]
+    private int _proximasConsultas;
+
+    // 🔌 Status Hardware (Iridoscópio e Medicina Quântica)
+    [ObservableProperty]
+    private bool _iridoscopioConectado = false;
+
+    [ObservableProperty]
+    private bool _medicinaQuanticaConectada = false;
 
     [ObservableProperty]
     private ObservableCollection<Paciente> _pacientesRecentes = new();
@@ -183,6 +201,37 @@ public partial class DashboardViewModel : NavigationViewModelBase, IDisposable
                     TimeSpan.FromMinutes(1)
                 );
 
+                // ✨ NOVOS Cards de Status
+                // Emails agendados (pendentes de envio automático)
+                EmailsAgendados = await _cache.GetOrCreateAsync(
+                    "Dashboard:EmailsAgendados",
+                    async () => await _unitOfWork.Comunicacoes.CountAsync(c =>
+                        c.Status == StatusComunicacao.Agendado && !c.IsEnviado),
+                    TimeSpan.FromMinutes(2)
+                );
+
+                // Fichas incompletas (pacientes sem todos os dados biográficos)
+                FichasIncompletas = await _cache.GetOrCreateAsync(
+                    "Dashboard:FichasIncompletas",
+                    async () => {
+                        var pacientes = await _unitOfWork.Pacientes.GetAllAsync();
+                        return System.Linq.Enumerable.Count(pacientes, p =>
+                            p.Contacto == null ||
+                            string.IsNullOrWhiteSpace(p.Contacto.EmailPrincipal) ||
+                            string.IsNullOrWhiteSpace(p.Contacto.TelefonePrincipal) ||
+                            p.DataNascimento == null);
+                    },
+                    TimeSpan.FromMinutes(5)
+                );
+
+                // Próximas consultas (7 dias)
+                var proximosDias = DateTime.Today.AddDays(7);
+                ProximasConsultas = await _cache.GetOrCreateAsync(
+                    "Dashboard:ProximasConsultas",
+                    async () => await _unitOfWork.Sessoes.CountByPeriodoAsync(DateTime.Now, proximosDias),
+                    TimeSpan.FromMinutes(5)
+                );
+
                 // Pacientes recentes (cache 5 min)
                 var pacientesRecentes = await _cache.GetOrCreateAsync(
                     "Dashboard:PacientesRecentes",
@@ -195,8 +244,8 @@ public partial class DashboardViewModel : NavigationViewModelBase, IDisposable
                 UltimaAtualizacao = DateTime.Now;
                 StatusMessage = $"✅ Sistema ativo - Atualizado às {UltimaAtualizacao:HH:mm:ss}";
 
-                _logger.LogInformation("✅ Estatísticas carregadas: {Total} pacientes, {Hoje} consultas hoje",
-                    TotalPacientes, ConsultasHoje);
+                _logger.LogInformation("✅ Estatísticas carregadas: {Total} pacientes, {Hoje} consultas hoje, {Agendados} emails agendados",
+                    TotalPacientes, ConsultasHoje, EmailsAgendados);
 
             }, "Carregar estatísticas", _logger);
         }

@@ -1,175 +1,253 @@
-<UserControl x:Class="BioDesk.App.Views.Abas.DadosBiograficosUserControl"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="800">
+<UserControl
+    x:Class="BioDesk.App.Views.Abas.DadosBiograficosUserControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
 
-    <!-- UserControl.Resources removidos para usar apenas estilos globais do App.xaml -->
+    <!--  UserControl.Resources removidos para usar apenas estilos globais do App.xaml  -->
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+    <ScrollViewer Padding="20" VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
-        <StackPanel>
-            <!-- Identificação Pessoal -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="👤 Identificação Pessoal" FontSize="18" FontWeight="SemiBold"
-                             Foreground="#3F4A3D" Margin="0,0,0,20"/>
+            <StackPanel>
+                <!--  Identificação Pessoal  -->
+                <Border
+                    Margin="0,0,0,20"
+                    Padding="25"
+                    Background="White"
+                    BorderBrush="#E3E9DE"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                    <StackPanel>
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Foreground="#3F4A3D"
+                            Text="👤 Identificação Pessoal" />
 
-                    <!-- LINHA 1: Nome Completo | Nome Preferencial -->
-                    <UniformGrid Rows="1" Columns="2" Margin="0,0,0,15">
-                        <!-- Nome Completo -->
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Nome Completo *" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding PacienteAtual.NomeCompleto, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
+                        <!--  LINHA 1: Nome Completo | Nome Preferencial  -->
+                        <UniformGrid
+                            Margin="0,0,0,15"
+                            Columns="2"
+                            Rows="1">
+                            <!--  Nome Completo  -->
+                            <StackPanel Margin="0,0,15,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Nome Completo *" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding PacienteAtual.NomeCompleto, UpdateSourceTrigger=PropertyChanged}" />
+                                <!--  ⚠️ ERRO: Nome  -->
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="10"
+                                    Foreground="Red"
+                                    Text="{Binding ErroNomeCompleto}"
+                                    Visibility="{Binding ErroNomeCompleto, Converter={StaticResource StringToVisibilityConverter}}" />
+                            </StackPanel>
 
-                        <!-- Nome Preferencial -->
-                        <StackPanel Margin="15,0,0,0">
-                            <TextBlock Text="Nome Preferencial" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding PacienteAtual.NomePreferido, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
-                    </UniformGrid>
+                            <!--  Nome Preferencial  -->
+                            <StackPanel Margin="15,0,0,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Nome Preferencial" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding PacienteAtual.NomePreferido, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </UniformGrid>
 
-                    <!-- LINHA 2: Data Nascimento (Idade) | Género | Profissão -->
-                    <UniformGrid Rows="1" Columns="3" Margin="0,0,0,15">
-                        <!-- Data de Nascimento -->
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Data de Nascimento *" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding PacienteAtual.DataNascimento, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource FlexibleDateConverter}}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     ToolTip="Formatos aceitos: dd/MM/yyyy, dd-MM-yyyy, yyyy-MM-dd, etc."/>
-                            <TextBlock Text="{Binding IdadePaciente, FallbackValue='-- anos'}"
-                                     FontSize="10" Foreground="#5A6558" Margin="0,2,0,0"/>
-                        </StackPanel>
+                        <!--  LINHA 2: Data Nascimento (Idade) | Género | Profissão  -->
+                        <UniformGrid
+                            Margin="0,0,0,15"
+                            Columns="3"
+                            Rows="1">
+                            <!--  Data de Nascimento  -->
+                            <StackPanel Margin="0,0,15,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Data de Nascimento *" />
+                                <TextBox
+                                    Style="{StaticResource FieldTextBoxStyle}"
+                                    Text="{Binding PacienteAtual.DataNascimento, Mode=TwoWay, UpdateSourceTrigger=LostFocus, Converter={StaticResource FlexibleDateConverter}}"
+                                    ToolTip="Escreva ddmmaaaa ou dd/mm/aaaa" />
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="10"
+                                    Foreground="#5A6558"
+                                    Text="{Binding IdadePaciente, FallbackValue='-- anos'}" />
+                                <!--  ⚠️ ERRO: Data Nascimento  -->
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="10"
+                                    Foreground="Red"
+                                    Text="{Binding ErroDataNascimento}"
+                                    Visibility="{Binding ErroDataNascimento, Converter={StaticResource StringToVisibilityConverter}}" />
+                            </StackPanel>
 
-                        <!-- Género -->
-                        <StackPanel Margin="15,0,15,0">
-                            <TextBlock Text="Género" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox Text="{Binding PacienteAtual.Genero, UpdateSourceTrigger=PropertyChanged}"
+                            <!--  Género  -->
+                            <StackPanel Margin="15,0,15,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Género" />
+                                <ComboBox
                                     IsEditable="False"
-                                    Style="{StaticResource FieldComboBoxStyle}">
-                                <ComboBoxItem Content="" />  <!-- ⭐ Opção vazia por defeito -->
-                                <ComboBoxItem Content="Masculino"/>
-                                <ComboBoxItem Content="Feminino"/>
-                                <ComboBoxItem Content="Outro"/>
-                            </ComboBox>
-                        </StackPanel>
+                                    Style="{StaticResource FieldComboBoxStyle}"
+                                    Text="{Binding PacienteAtual.Genero, UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBoxItem Content="" />  
+                                    <!--  ⭐ Opção vazia por defeito  -->
+                                    <ComboBoxItem Content="Masculino" />
+                                    <ComboBoxItem Content="Feminino" />
+                                    <ComboBoxItem Content="Outro" />
+                                </ComboBox>
+                            </StackPanel>
 
-                        <!-- Profissão -->
-                        <StackPanel Margin="15,0,0,0">
-                            <TextBlock Text="Profissão" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding PacienteAtual.Profissao, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
-                    </UniformGrid>
+                            <!--  Profissão  -->
+                            <StackPanel Margin="15,0,0,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Profissão" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding PacienteAtual.Profissao, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </UniformGrid>
 
-                    <!-- LINHA 3: NIF | Como teve conhecimento | Especifique -->
-                    <UniformGrid Rows="1" Columns="3" Margin="0,0,0,20">
-                        <!-- NIF -->
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="NIF" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding PacienteAtual.NIF, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
+                        <!--  LINHA 3: NIF | Como teve conhecimento | Especifique  -->
+                        <UniformGrid
+                            Margin="0,0,0,20"
+                            Columns="3"
+                            Rows="1">
+                            <!--  NIF  -->
+                            <StackPanel Margin="0,0,15,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="NIF" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding PacienteAtual.NIF, UpdateSourceTrigger=PropertyChanged}" />
+                                <!--  ⚠️ ERRO: NIF  -->
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="10"
+                                    Foreground="Red"
+                                    Text="{Binding ErroNIF}"
+                                    Visibility="{Binding ErroNIF, Converter={StaticResource StringToVisibilityConverter}}" />
+                            </StackPanel>
 
-                        <!-- Como teve conhecimento -->
-                        <StackPanel Margin="15,0,15,0">
-                            <TextBlock Text="Como teve conhecimento" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox x:Name="ProvenienciaComboBox"
-                                    Text="{Binding PacienteAtual.Proveniencia, UpdateSourceTrigger=PropertyChanged}"
+                            <!--  Como teve conhecimento  -->
+                            <StackPanel Margin="15,0,15,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Como teve conhecimento" />
+                                <ComboBox
+                                    x:Name="ProvenienciaComboBox"
                                     IsEditable="False"
-                                    Style="{StaticResource FieldComboBoxStyle}">
-                                <ComboBoxItem Content="Recomendação médica"/>
-                                <ComboBoxItem Content="Amigo/Familiar"/>
-                                <ComboBoxItem Content="Internet/Site"/>
-                                <ComboBoxItem Content="Redes Sociais"/>
-                                <ComboBoxItem Content="Publicidade"/>
-                                <ComboBoxItem Content="Outro"/>
-                            </ComboBox>
-                        </StackPanel>
+                                    Style="{StaticResource FieldComboBoxStyle}"
+                                    Text="{Binding PacienteAtual.Proveniencia, UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBoxItem Content="Recomendação médica" />
+                                    <ComboBoxItem Content="Amigo/Familiar" />
+                                    <ComboBoxItem Content="Internet/Site" />
+                                    <ComboBoxItem Content="Redes Sociais" />
+                                    <ComboBoxItem Content="Publicidade" />
+                                    <ComboBoxItem Content="Outro" />
+                                </ComboBox>
+                            </StackPanel>
 
-                        <!-- Especifique (campo condicional) -->
-                        <StackPanel Margin="15,0,0,0"
-                                  Visibility="{Binding ElementName=ProvenienciaComboBox, Path=SelectedItem.Content, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter='Outro'}">
-                            <TextBlock Text="Especifique" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox x:Name="OutroProvenienciaTextBox"
-                                   Text="{Binding PacienteAtual.ProvenienciaOutro, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"
-                                   Tag="Como nos conheceu..."/>
-                        </StackPanel>
-                    </UniformGrid>
-                </StackPanel>
-            </Border>
+                            <!--  Especifique (campo condicional)  -->
+                            <StackPanel Margin="15,0,0,0" Visibility="{Binding ElementName=ProvenienciaComboBox, Path=SelectedItem.Content, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter='Outro'}">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Especifique" />
+                                <TextBox
+                                    x:Name="OutroProvenienciaTextBox"
+                                    Style="{StaticResource FieldTextBoxStyle}"
+                                    Tag="Como nos conheceu..."
+                                    Text="{Binding PacienteAtual.ProvenienciaOutro, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
 
-            <!-- Contactos -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="12" Padding="25">
-                <StackPanel>
-                    <TextBlock Text="📞 Contactos" FontSize="18" FontWeight="SemiBold"
-                             Foreground="#3F4A3D" Margin="0,0,0,20"/>
+                <!--  Contactos  -->
+                <Border
+                    Padding="25"
+                    Background="White"
+                    BorderBrush="#E3E9DE"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                    <StackPanel>
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Foreground="#3F4A3D"
+                            Text="📞 Contactos" />
 
-                    <UniformGrid Rows="2" Columns="3" Margin="0,0,0,20">
-                        <!-- LINHA 1: Telefone | Telefone Alternativo | Email -->
+                        <UniformGrid
+                            Margin="0,0,0,20"
+                            Columns="3"
+                            Rows="2">
+                            <!--  LINHA 1: Telefone | Telefone Alternativo | Email  -->
 
-                        <!-- Telefone -->
-                        <StackPanel Margin="0,0,15,15">
-                            <TextBlock Text="Telefone" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding ContactoAtual.TelefonePrincipal, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
+                            <!--  Telefone  -->
+                            <StackPanel Margin="0,0,15,15">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Telefone" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding ContactoAtual.TelefonePrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                                <!--  ⚠️ ERRO: Telefone  -->
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="10"
+                                    Foreground="Red"
+                                    Text="{Binding ErroTelefonePrincipal}"
+                                    Visibility="{Binding ErroTelefonePrincipal, Converter={StaticResource StringToVisibilityConverter}}" />
+                            </StackPanel>
 
-                        <!-- Telefone Alternativo -->
-                        <StackPanel Margin="15,0,15,15">
-                            <TextBlock Text="Telefone Alternativo" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding ContactoAtual.TelefoneAlternativo, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
+                            <!--  Telefone Alternativo  -->
+                            <StackPanel Margin="15,0,15,15">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Telefone Alternativo" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding ContactoAtual.TelefoneAlternativo, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
 
-                        <!-- Email -->
-                        <StackPanel Margin="15,0,0,15">
-                            <TextBlock Text="Email" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding ContactoAtual.EmailPrincipal, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
+                            <!--  Email  -->
+                            <StackPanel Margin="15,0,0,15">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Email" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding ContactoAtual.EmailPrincipal, UpdateSourceTrigger=PropertyChanged}" />
+                                <!--  ⚠️ ERRO: Email  -->
+                                <TextBlock
+                                    Margin="0,2,0,0"
+                                    FontSize="10"
+                                    Foreground="Red"
+                                    Text="{Binding ErroEmail}"
+                                    Visibility="{Binding ErroEmail, Converter={StaticResource StringToVisibilityConverter}}" />
+                            </StackPanel>
 
-                        <!-- LINHA 2: Morada | Código Postal | Localidade -->
+                            <!--  LINHA 2: Morada | Código Postal | Localidade  -->
 
-                        <!-- Morada -->
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Morada" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding ContactoAtual.RuaAvenida, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
+                            <!--  Morada  -->
+                            <StackPanel Margin="0,0,15,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Morada" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding ContactoAtual.RuaAvenida, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
 
-                        <!-- Código Postal -->
-                        <StackPanel Margin="15,0,15,0">
-                            <TextBlock Text="Código Postal" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding ContactoAtual.CodigoPostal, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
+                            <!--  Código Postal  -->
+                            <StackPanel Margin="15,0,15,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Código Postal" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding ContactoAtual.CodigoPostal, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
 
-                        <!-- Localidade -->
-                        <StackPanel Margin="15,0,0,0">
-                            <TextBlock Text="Localidade" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding ContactoAtual.Localidade, UpdateSourceTrigger=PropertyChanged}"
-                                   Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
-                    </UniformGrid>
-                </StackPanel>
-            </Border>
+                            <!--  Localidade  -->
+                            <StackPanel Margin="15,0,0,0">
+                                <TextBlock Style="{StaticResource FieldLabelStyle}" Text="Localidade" />
+                                <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding ContactoAtual.Localidade, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
 
-            <!-- Informação sobre campos obrigatórios -->
-            <Border Background="#F7F9F6" BorderBrush="#E3E9DE" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,20,0,0">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="ℹ️" FontSize="16" Margin="0,0,8,0"/>
-                    <TextBlock Text="Apenas Nome Completo e Data de Nascimento são obrigatórios" FontSize="12"
-                             Foreground="#5A6558" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-        </StackPanel>
+                <!--  Informação sobre campos obrigatórios  -->
+                <Border
+                    Margin="0,20,0,0"
+                    Padding="15"
+                    Background="#F7F9F6"
+                    BorderBrush="#E3E9DE"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,8,0"
+                            FontSize="16"
+                            Text="ℹ️" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Foreground="#5A6558"
+                            Text="Apenas Nome Completo e Data de Nascimento são obrigatórios" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </Grid>
     </ScrollViewer>
 </UserControl>

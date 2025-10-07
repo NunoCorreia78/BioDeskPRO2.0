@@ -22,8 +22,8 @@ public class Paciente
     [StringLength(200)]
     public string NomeCompleto { get; set; } = string.Empty;
 
-    [Required]
-    public DateTime DataNascimento { get; set; }
+    // ⭐ NULLABLE - Pode ficar vazio até utilizador preencher
+    public DateTime? DataNascimento { get; set; }
 
     [Required]
     [StringLength(20)]
@@ -68,10 +68,11 @@ public class Paciente
 
     // === PROPRIEDADES CALCULADAS ===
     /// <summary>
-    /// Idade calculada automaticamente
+    /// Idade calculada automaticamente (null se DataNascimento não preenchida)
     /// </summary>
-    public int Idade => DateTime.Now.Year - DataNascimento.Year -
-        (DateTime.Now.DayOfYear < DataNascimento.DayOfYear ? 1 : 0);
+    public int? Idade => DataNascimento.HasValue
+        ? DateTime.Now.Year - DataNascimento.Value.Year - (DateTime.Now.DayOfYear < DataNascimento.Value.DayOfYear ? 1 : 0)
+        : null;
 
     // === NAVEGAÇÃO PARA OUTRAS ENTIDADES ===
     public virtual Contacto? Contacto { get; set; }

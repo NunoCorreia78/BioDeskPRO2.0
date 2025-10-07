@@ -193,183 +193,183 @@
         </LinearGradientBrush>
       </Border.Background>
       <!--  WrapPanel permite quebra automática sem scrollbar  -->
-      <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
-          <Button
-            x:Name="BtnAba1"
-            Command="{Binding NavegarParaAbaCommand}"
-            CommandParameter="1"
-            Content="👤 Dados">
-            <Button.Style>
-              <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding AbaAtiva}" Value="1">
-                    <Setter Property="Background">
-                      <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Offset="0" Color="#9CAF97" />
-                          <GradientStop Offset="1" Color="#87A082" />
-                        </LinearGradientBrush>
-                      </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
+      <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal">
+        <Button
+          x:Name="BtnAba1"
+          Command="{Binding NavegarParaAbaCommand}"
+          CommandParameter="1"
+          Content="👤 Dados">
+          <Button.Style>
+            <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="1">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#9CAF97" />
+                        <GradientStop Offset="1" Color="#87A082" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Foreground" Value="White" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
 
-          <Button
-            x:Name="BtnAba2"
-            Command="{Binding NavegarParaAbaCommand}"
-            CommandParameter="2"
-            Content="📋 Saúde">
-            <Button.Style>
-              <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding AbaAtiva}" Value="2">
-                    <Setter Property="Background">
-                      <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Offset="0" Color="#9CAF97" />
-                          <GradientStop Offset="1" Color="#87A082" />
-                        </LinearGradientBrush>
-                      </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
+        <Button
+          x:Name="BtnAba2"
+          Command="{Binding NavegarParaAbaCommand}"
+          CommandParameter="2"
+          Content="📋 Saúde">
+          <Button.Style>
+            <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="2">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#9CAF97" />
+                        <GradientStop Offset="1" Color="#87A082" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Foreground" Value="White" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
 
-          <Button
-            x:Name="BtnAba3"
-            Command="{Binding NavegarParaAbaCommand}"
-            CommandParameter="3"
-            Content="📜 Consents">
-            <Button.Style>
-              <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding AbaAtiva}" Value="3">
-                    <Setter Property="Background">
-                      <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Offset="0" Color="#9CAF97" />
-                          <GradientStop Offset="1" Color="#87A082" />
-                        </LinearGradientBrush>
-                      </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
+        <Button
+          x:Name="BtnAba3"
+          Command="{Binding NavegarParaAbaCommand}"
+          CommandParameter="3"
+          Content="📜 Consents">
+          <Button.Style>
+            <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="3">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#9CAF97" />
+                        <GradientStop Offset="1" Color="#87A082" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Foreground" Value="White" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
 
-          <Button
-            x:Name="BtnAba4"
-            Command="{Binding NavegarParaAbaCommand}"
-            CommandParameter="4"
-            Content="📋 Consultas">
-            <Button.Style>
-              <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding AbaAtiva}" Value="4">
-                    <Setter Property="Background">
-                      <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Offset="0" Color="#9CAF97" />
-                          <GradientStop Offset="1" Color="#87A082" />
-                        </LinearGradientBrush>
-                      </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
+        <Button
+          x:Name="BtnAba4"
+          Command="{Binding NavegarParaAbaCommand}"
+          CommandParameter="4"
+          Content="📋 Consultas">
+          <Button.Style>
+            <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="4">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#9CAF97" />
+                        <GradientStop Offset="1" Color="#87A082" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Foreground" Value="White" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
 
-          <Button
-            x:Name="BtnAba5"
-            Command="{Binding NavegarParaAbaCommand}"
-            CommandParameter="5"
-            Content="👁️ Íris">
-            <Button.Style>
-              <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding AbaAtiva}" Value="5">
-                    <Setter Property="Background">
-                      <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Offset="0" Color="#9CAF97" />
-                          <GradientStop Offset="1" Color="#87A082" />
-                        </LinearGradientBrush>
-                      </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
+        <Button
+          x:Name="BtnAba5"
+          Command="{Binding NavegarParaAbaCommand}"
+          CommandParameter="5"
+          Content="👁️ Íris">
+          <Button.Style>
+            <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="5">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#9CAF97" />
+                        <GradientStop Offset="1" Color="#87A082" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Foreground" Value="White" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
 
-          <Button
-            x:Name="BtnAba6"
-            Command="{Binding NavegarParaAbaCommand}"
-            CommandParameter="6"
-            Content="📧 Emails">
-            <Button.Style>
-              <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding AbaAtiva}" Value="6">
-                    <Setter Property="Background">
-                      <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Offset="0" Color="#9CAF97" />
-                          <GradientStop Offset="1" Color="#87A082" />
-                        </LinearGradientBrush>
-                      </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
+        <Button
+          x:Name="BtnAba6"
+          Command="{Binding NavegarParaAbaCommand}"
+          CommandParameter="6"
+          Content="📧 Emails">
+          <Button.Style>
+            <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="6">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#9CAF97" />
+                        <GradientStop Offset="1" Color="#87A082" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Foreground" Value="White" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
 
-          <Button
-            x:Name="BtnAba7"
-            Command="{Binding NavegarParaAbaCommand}"
-            CommandParameter="7"
-            Content="🌿 Terapias"
-            IsEnabled="False"
-            ToolTip="Módulo em desenvolvimento futuro">
-            <Button.Style>
-              <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding AbaAtiva}" Value="7">
-                    <Setter Property="Background">
-                      <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                          <GradientStop Offset="0" Color="#9CAF97" />
-                          <GradientStop Offset="1" Color="#87A082" />
-                        </LinearGradientBrush>
-                      </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="White" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
+        <Button
+          x:Name="BtnAba7"
+          Command="{Binding NavegarParaAbaCommand}"
+          CommandParameter="7"
+          Content="🌿 Terapias"
+          IsEnabled="False"
+          ToolTip="Módulo em desenvolvimento futuro">
+          <Button.Style>
+            <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="7">
+                  <Setter Property="Background">
+                    <Setter.Value>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="#9CAF97" />
+                        <GradientStop Offset="1" Color="#87A082" />
+                      </LinearGradientBrush>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Foreground" Value="White" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
       </WrapPanel>
     </Border>
 
@@ -468,8 +468,9 @@
           Orientation="Horizontal">
           <Button
             Command="{Binding GuardarRascunhoCommand}"
-            Content="💾 Guardar Rascunho"
-            Style="{StaticResource SecondaryButtonStyle}" />
+            Content="💾 Guardar"
+            Style="{StaticResource SecondaryButtonStyle}"
+            ToolTip="Guardar paciente (Ctrl+S)" />
           <TextBlock
             Margin="12,0,0,0"
             VerticalAlignment="Center"

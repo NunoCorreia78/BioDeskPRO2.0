@@ -10,7 +10,8 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Background="#FCFDFB"
-        Closing="MainWindow_Closing">
+        Closing="MainWindow_Closing"
+        KeyDown="Window_KeyDown">
 
     <Grid>
         <Grid.RowDefinitions>

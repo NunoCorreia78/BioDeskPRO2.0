@@ -1,48 +1,70 @@
-<UserControl x:Class="BioDesk.App.Views.Abas.ComunicacaoUserControl"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:BioDesk.ViewModels.Abas;assembly=BioDesk.ViewModels"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=vm:ComunicacaoViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1200"
-             Background="Transparent">
+<UserControl
+    x:Class="BioDesk.App.Views.Abas.ComunicacaoUserControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:BioDesk.App.Converters"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:vm="clr-namespace:BioDesk.ViewModels.Abas;assembly=BioDesk.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vm:ComunicacaoViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="1200"
+    Background="Transparent"
+    mc:Ignorable="d">
 
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+        <!--  Conversor para inverter bool (IsLoading=true → IsEnabled=false)  -->
+        <local:InverseBooleanConverter x:Key="InverseBoolConverter" />
     </UserControl.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>  <!-- Header -->
-            <RowDefinition Height="*"/>    <!-- Conteúdo principal -->
+            <RowDefinition Height="Auto" />  
+            <!--  Header  -->
+            <RowDefinition Height="*" />    
+            <!--  Conteúdo principal  -->
         </Grid.RowDefinitions>
 
-        <!-- Header com status de conexão -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-            <TextBlock Text="📧 Comunicação e Seguimento" FontSize="20" FontWeight="Bold" Foreground="#3F4A3D" VerticalAlignment="Center"/>
+        <!--  Header com status de conexão  -->
+        <StackPanel
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            Orientation="Horizontal">
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="20"
+                FontWeight="Bold"
+                Foreground="#3F4A3D"
+                Text="📧 Comunicação e Seguimento" />
 
-            <!-- Indicador Online/Offline -->
-            <Border Padding="8,4" CornerRadius="4" Margin="16,0,0,0">
+            <!--  Indicador Online/Offline  -->
+            <Border
+                Margin="16,0,0,0"
+                Padding="8,4"
+                CornerRadius="4">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="#4CAF50"/>
+                        <Setter Property="Background" Value="#4CAF50" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding TemConexao}" Value="False">
-                                <Setter Property="Background" Value="#F44336"/>
+                                <Setter Property="Background" Value="#F44336" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <TextBlock Foreground="White" FontWeight="SemiBold" FontSize="12">
+                <TextBlock
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="White">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="🟢 Online"/>
+                            <Setter Property="Text" Value="🟢 Online" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding TemConexao}" Value="False">
-                                    <Setter Property="Text" Value="🔴 Offline"/>
+                                    <Setter Property="Text" Value="🔴 Offline" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -50,387 +72,500 @@
                 </TextBlock>
             </Border>
 
-            <!-- Badge fila -->
-            <Border Background="#FFA726" Padding="8,4" CornerRadius="4" Margin="8,0">
+            <!--  Badge fila  -->
+            <Border
+                Margin="8,0"
+                Padding="8,4"
+                Background="#FFA726"
+                CornerRadius="4">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding MensagensNaFila}" Value="0">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding MensagensNaFila, Converter={x:Null}, FallbackValue=0}" Value="0">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <TextBlock Foreground="White" FontWeight="SemiBold" FontSize="12">
-                    <Run Text="📬"/>
-                    <Run Text="{Binding MensagensNaFila, Mode=OneWay}"/>
-                    <Run Text="na fila"/>
+                <TextBlock
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="White">
+                    <Run Text="📬" />
+                    <Run Text="{Binding MensagensNaFila, Mode=OneWay}" />
+                    <Run Text="na fila" />
                 </TextBlock>
             </Border>
         </StackPanel>
 
-        <!-- Conteúdo principal: 2 Colunas -->
+        <!--  Conteúdo principal: 2 Colunas  -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="450"/>  <!-- Coluna Esquerda: Documentos + Histórico -->
-                <ColumnDefinition Width="*"/>    <!-- Coluna Direita: Formulário Email -->
+                <ColumnDefinition Width="450" />  
+                <!--  Coluna Esquerda: Documentos + Histórico  -->
+                <ColumnDefinition Width="*" />    
+                <!--  Coluna Direita: Formulário Email  -->
             </Grid.ColumnDefinitions>
 
-            <!-- ═════════════════════════════════════════════════ -->
-            <!-- COLUNA ESQUERDA: Documentos + Histórico          -->
-            <!-- ═════════════════════════════════════════════════ -->
-            <ScrollViewer Grid.Column="0"
-                          VerticalScrollBarVisibility="Auto"
-                          Margin="0,0,12,0">
+            <!--  ═════════════════════════════════════════════════  -->
+            <!--  COLUNA ESQUERDA: Documentos + Histórico  -->
+            <!--  ═════════════════════════════════════════════════  -->
+            <ScrollViewer
+                Grid.Column="0"
+                Margin="0,0,12,0"
+                VerticalScrollBarVisibility="Auto">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>  <!-- Card Documentos -->
-                        <RowDefinition Height="12"/>    <!-- Espaçamento -->
-                        <RowDefinition Height="Auto"/>  <!-- ⭐ Histórico com altura automática -->
+                        <RowDefinition Height="Auto" />  
+                        <!--  Card Documentos  -->
+                        <RowDefinition Height="12" />    
+                        <!--  Espaçamento  -->
+                        <RowDefinition Height="Auto" />  
+                        <!--  ⭐ Histórico com altura automática  -->
                     </Grid.RowDefinitions>
 
-                <!-- ────────────────────────────────────────────── -->
-                <!-- 📁 DOCUMENTOS DO PACIENTE                      -->
-                <!-- ────────────────────────────────────────────── -->
-                <Border Grid.Row="0" Background="#F7F9F6" Padding="16" CornerRadius="8">
-                    <StackPanel>
-                        <DockPanel Margin="0,0,0,12">
-                            <TextBlock Text="📁 DOCUMENTOS DO PACIENTE"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Foreground="#3F4A3D"
-                                       DockPanel.Dock="Left"
-                                       VerticalAlignment="Center"/>
+                    <!--  ──────────────────────────────────────────────  -->
+                    <!--  📁 DOCUMENTOS DO PACIENTE  -->
+                    <!--  ──────────────────────────────────────────────  -->
+                    <Border
+                        Grid.Row="0"
+                        Padding="16"
+                        Background="#F7F9F6"
+                        CornerRadius="8">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,12">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    DockPanel.Dock="Left"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Foreground="#3F4A3D"
+                                    Text="📁 DOCUMENTOS DO PACIENTE" />
 
-                            <Button Command="{Binding CarregarDocumentosPacienteCommand}"
-                                    Background="#9CAF97"
-                                    Foreground="White"
+                                <Button
+                                    Margin="8,0,0,0"
                                     Padding="6,4"
-                                    Margin="8,0,0,0"
-                                    Cursor="Hand"
-                                    BorderThickness="0"
-                                    DockPanel.Dock="Right"
-                                    VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🔄" Margin="0,0,4,0" FontSize="12"/>
-                                    <TextBlock Text="Atualizar" FontSize="11"/>
-                                </StackPanel>
-                            </Button>
-                        </DockPanel>
-
-                        <!-- Status Loading -->
-                        <Border Background="#FFF3E0"
-                                Padding="8"
-                                CornerRadius="4"
-                                Margin="0,0,0,8"
-                                Visibility="{Binding CarregandoDocumentos, Converter={StaticResource BoolToVisibility}}">
-                            <TextBlock Text="⏳ A carregar documentos..."
-                                       FontSize="11"
-                                       Foreground="#F57C00"
-                                       FontWeight="SemiBold"
-                                       TextAlignment="Center"/>
-                        </Border>
-
-                        <!-- Lista de Documentos -->
-                        <ListBox ItemsSource="{Binding DocumentosPaciente}"
-                                 MaxHeight="200"
-                                 Background="White"
-                                 BorderBrush="#E3E9DE"
-                                 BorderThickness="1"
-                                 MouseDoubleClick="ListBoxDocumentos_MouseDoubleClick">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                    <Setter Property="Padding" Value="8"/>
-                                    <Setter Property="Cursor" Value="Hand"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#F0F4EF"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid ToolTip="{Binding Tooltip, Mode=OneTime}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <!-- Checkbox -->
-                                        <CheckBox Grid.Column="0"
-                                                  IsChecked="{Binding Selecionado}"
-                                                  VerticalAlignment="Center"
-                                                  Margin="0,0,8,0"/>
-
-                                        <!-- Info do documento -->
-                                        <StackPanel Grid.Column="1">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Icone, Mode=OneTime}"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="#3F4A3D"
-                                                           Margin="0,0,4,0"/>
-                                                <TextBlock Text="{Binding NomeExibicao, Mode=OneTime}"
-                                                           FontSize="12"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="#3F4A3D"/>
-                                            </StackPanel>
-                                            <TextBlock Text="{Binding DataFormatada, Mode=OneTime}"
-                                                       FontSize="10"
-                                                       Foreground="#5A6558"/>
-                                        </StackPanel>
-
-                                        <!-- Tamanho -->
-                                        <TextBlock Grid.Column="2"
-                                                   Text="{Binding TamanhoFormatado, Mode=OneTime}"
-                                                   FontSize="10"
-                                                   Foreground="#9CAF97"
-                                                   FontWeight="SemiBold"
-                                                   VerticalAlignment="Center"
-                                                   Margin="8,0,0,0"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-
-                        <!-- Ações -->
-                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <Button Command="{Binding AnexarDocumentosSelecionadosCommand}"
-                                    Background="#4CAF50"
-                                    Foreground="White"
-                                    Padding="10,6"
-                                    Cursor="Hand"
-                                    BorderThickness="0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="📎" Margin="0,0,4,0"/>
-                                    <TextBlock Text="Anexar Selecionados" FontSize="12" FontWeight="SemiBold"/>
-                                </StackPanel>
-                            </Button>
-
-                            <Button Command="{Binding SelecionarTodosDocumentosCommand}"
-                                    CommandParameter="True"
+                                    VerticalAlignment="Center"
                                     Background="#9CAF97"
-                                    Foreground="White"
-                                    Padding="8,6"
+                                    BorderThickness="0"
+                                    Command="{Binding CarregarDocumentosPacienteCommand}"
+                                    Cursor="Hand"
+                                    DockPanel.Dock="Right"
+                                    Foreground="White">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock
+                                            Margin="0,0,4,0"
+                                            FontSize="12"
+                                            Text="🔄" />
+                                        <TextBlock FontSize="11" Text="Atualizar" />
+                                    </StackPanel>
+                                </Button>
+                            </DockPanel>
+
+                            <!--  Status Loading  -->
+                            <Border
+                                Margin="0,0,0,8"
+                                Padding="8"
+                                Background="#FFF3E0"
+                                CornerRadius="4"
+                                Visibility="{Binding CarregandoDocumentos, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    Foreground="#F57C00"
+                                    Text="⏳ A carregar documentos..."
+                                    TextAlignment="Center" />
+                            </Border>
+
+                            <!--  Lista de Documentos  -->
+                            <ListBox
+                                MaxHeight="200"
+                                Background="White"
+                                BorderBrush="#E3E9DE"
+                                BorderThickness="1"
+                                ItemsSource="{Binding DocumentosPaciente}"
+                                MouseDoubleClick="ListBoxDocumentos_MouseDoubleClick">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Padding" Value="8" />
+                                        <Setter Property="Cursor" Value="Hand" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#F0F4EF" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ToolTip="{Binding Tooltip, Mode=OneTime}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!--  Checkbox  -->
+                                            <CheckBox
+                                                Grid.Column="0"
+                                                Margin="0,0,8,0"
+                                                VerticalAlignment="Center"
+                                                IsChecked="{Binding Selecionado}" />
+
+                                            <!--  Info do documento  -->
+                                            <StackPanel Grid.Column="1">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock
+                                                        Margin="0,0,4,0"
+                                                        FontSize="12"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="#3F4A3D"
+                                                        Text="{Binding Icone, Mode=OneTime}" />
+                                                    <TextBlock
+                                                        FontSize="12"
+                                                        FontWeight="SemiBold"
+                                                        Foreground="#3F4A3D"
+                                                        Text="{Binding NomeExibicao, Mode=OneTime}" />
+                                                </StackPanel>
+                                                <TextBlock
+                                                    FontSize="10"
+                                                    Foreground="#5A6558"
+                                                    Text="{Binding DataFormatada, Mode=OneTime}" />
+                                            </StackPanel>
+
+                                            <!--  Tamanho  -->
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                FontSize="10"
+                                                FontWeight="SemiBold"
+                                                Foreground="#9CAF97"
+                                                Text="{Binding TamanhoFormatado, Mode=OneTime}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <!--  Ações  -->
+                            <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                <Button
+                                    Padding="10,6"
+                                    Background="#4CAF50"
+                                    BorderThickness="0"
+                                    Command="{Binding AnexarDocumentosSelecionadosCommand}"
+                                    Cursor="Hand"
+                                    Foreground="White">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Margin="0,0,4,0" Text="📎" />
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Text="Anexar Selecionados" />
+                                    </StackPanel>
+                                </Button>
+
+                                <Button
                                     Margin="8,0,0,0"
-                                    Cursor="Hand"
-                                    BorderThickness="0">
-                                <TextBlock Text="✓ Todos" FontSize="11"/>
-                            </Button>
-
-                            <Button Command="{Binding SelecionarTodosDocumentosCommand}"
-                                    CommandParameter="False"
-                                    Background="#CFD8CA"
-                                    Foreground="#5A6558"
                                     Padding="8,6"
-                                    Margin="4,0,0,0"
+                                    Background="#9CAF97"
+                                    BorderThickness="0"
+                                    Command="{Binding SelecionarTodosDocumentosCommand}"
+                                    CommandParameter="True"
                                     Cursor="Hand"
-                                    BorderThickness="0">
-                                <TextBlock Text="⊗ Limpar" FontSize="11"/>
-                            </Button>
+                                    Foreground="White">
+                                    <TextBlock FontSize="11" Text="✓ Todos" />
+                                </Button>
+
+                                <Button
+                                    Margin="4,0,0,0"
+                                    Padding="8,6"
+                                    Background="#CFD8CA"
+                                    BorderThickness="0"
+                                    Command="{Binding SelecionarTodosDocumentosCommand}"
+                                    CommandParameter="False"
+                                    Cursor="Hand"
+                                    Foreground="#5A6558">
+                                    <TextBlock FontSize="11" Text="⊗ Limpar" />
+                                </Button>
+                            </StackPanel>
+
+                            <!--  Status  -->
+                            <TextBlock
+                                Margin="0,8,0,0"
+                                FontSize="11"
+                                FontStyle="Italic"
+                                Foreground="#5A6558"
+                                Text="{Binding StatusDocumentos}"
+                                TextAlignment="Center" />
                         </StackPanel>
+                    </Border>
 
-                        <!-- Status -->
-                        <TextBlock Text="{Binding StatusDocumentos}"
-                                   FontSize="11"
-                                   Foreground="#5A6558"
-                                   Margin="0,8,0,0"
-                                   TextAlignment="Center"
-                                   FontStyle="Italic"/>
-                    </StackPanel>
-                </Border>
+                    <!--  ──────────────────────────────────────────────  -->
+                    <!--  📜 HISTÓRICO DE COMUNICAÇÕES  -->
+                    <!--  ──────────────────────────────────────────────  -->
+                    <Border
+                        Grid.Row="2"
+                        Padding="16"
+                        Background="#F7F9F6"
+                        BorderBrush="#E3E9DE"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                        <StackPanel>
+                            <!--  Header com título e informação útil  -->
+                            <DockPanel Margin="0,0,0,10">
+                                <StackPanel
+                                    VerticalAlignment="Center"
+                                    DockPanel.Dock="Left"
+                                    Orientation="Horizontal">
+                                    <TextBlock
+                                        Margin="0,0,6,0"
+                                        FontSize="14"
+                                        Text="📜" />
+                                    <TextBlock
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        Foreground="#3F4A3D"
+                                        Text="Histórico" />
+                                </StackPanel>
 
-                <!-- ────────────────────────────────────────────── -->
-                <!-- 📜 HISTÓRICO DE COMUNICAÇÕES                   -->
-                <!-- ────────────────────────────────────────────── -->
-                <Border Grid.Row="2" Background="#F7F9F6" Padding="16" CornerRadius="8" BorderBrush="#E3E9DE" BorderThickness="1">
-                    <StackPanel>
-                        <!-- Header com título e informação útil -->
-                        <DockPanel Margin="0,0,0,10">
-                            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="📜" FontSize="14" Margin="0,0,6,0"/>
-                                <TextBlock Text="Histórico"
-                                           FontSize="13"
-                                           FontWeight="SemiBold"
-                                           Foreground="#3F4A3D"/>
-                            </StackPanel>
+                                <!--  Informação útil no canto direito  -->
+                                <StackPanel
+                                    HorizontalAlignment="Right"
+                                    DockPanel.Dock="Right"
+                                    Orientation="Horizontal">
+                                    <TextBlock
+                                        Margin="0,0,4,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="11"
+                                        Text="📤" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="11"
+                                        Foreground="#5A6558">
+                                        <Run Text="{Binding TotalEnviados, Mode=OneWay}" />
+                                        <Run Text="enviados" />
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="8,0,8,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="11"
+                                        Foreground="#5A6558"
+                                        Text="•" />
+                                    <TextBlock
+                                        Margin="0,0,4,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="11"
+                                        Text="⏰" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="11"
+                                        Foreground="#5A6558"
+                                        Text="{Binding ProximoAgendamento, Mode=OneWay}" />
+                                </StackPanel>
+                            </DockPanel>
 
-                            <!-- Informação útil no canto direito -->
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                                <TextBlock Text="📤" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                <TextBlock FontSize="11" Foreground="#5A6558" VerticalAlignment="Center">
-                                    <Run Text="{Binding TotalEnviados, Mode=OneWay}"/>
-                                    <Run Text="enviados"/>
-                                </TextBlock>
-                                <TextBlock Text="•" FontSize="11" Foreground="#5A6558" Margin="8,0,8,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="⏰" FontSize="11" Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding ProximoAgendamento, Mode=OneWay}"
-                                           FontSize="11"
-                                           Foreground="#5A6558"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </DockPanel>
+                            <!--  DataGrid do Histórico  -->
+                            <DataGrid
+                                AlternatingRowBackground="#F0F4EF"
+                                AutoGenerateColumns="False"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                CanUserAddRows="False"
+                                GridLinesVisibility="None"
+                                HeadersVisibility="Column"
+                                IsReadOnly="True"
+                                ItemsSource="{Binding HistoricoComunicacoes}"
+                                RowBackground="White">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn
+                                        Width="90"
+                                        Binding="{Binding DataCriacao, StringFormat='{}{0:dd/MM HH:mm}'}"
+                                        Header="Data" />
+                                    <DataGridTextColumn
+                                        Width="60"
+                                        Binding="{Binding Tipo}"
+                                        Header="Tipo" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Assunto}"
+                                        Header="Assunto" />
+                                    <DataGridTextColumn
+                                        Width="80"
+                                        Binding="{Binding Status}"
+                                        Header="Status" />
 
-                        <!-- DataGrid do Histórico -->
-                        <DataGrid ItemsSource="{Binding HistoricoComunicacoes}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  IsReadOnly="True"
-                                  HeadersVisibility="Column"
-                                  GridLinesVisibility="None"
-                                  Background="Transparent"
-                                  BorderThickness="0"
-                                  RowBackground="White"
-                                  AlternatingRowBackground="#F0F4EF">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Data"
-                                                    Binding="{Binding DataCriacao, StringFormat='{}{0:dd/MM HH:mm}'}"
-                                                    Width="90"/>
-                                <DataGridTextColumn Header="Tipo"
-                                                    Binding="{Binding Tipo}"
-                                                    Width="60"/>
-                                <DataGridTextColumn Header="Assunto"
-                                                    Binding="{Binding Assunto}"
-                                                    Width="*"/>
-                                <DataGridTextColumn Header="Status"
-                                                    Binding="{Binding Status}"
-                                                    Width="80"/>
-
-                                <!-- Ações (Cancelar para emails Agendados) -->
-                                <DataGridTemplateColumn Header="Ações" Width="70">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.CancelarEmailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Background="#F44336"
-                                                    Foreground="White"
+                                    <!--  Ações (Cancelar para emails Agendados)  -->
+                                    <DataGridTemplateColumn Width="70" Header="Ações">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button
                                                     Padding="4,2"
-                                                    Cursor="Hand"
+                                                    Background="#F44336"
                                                     BorderThickness="0"
-                                                    FontSize="9">
-                                                <Button.Style>
-                                                    <Style TargetType="Button">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status}" Value="2">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Button.Style>
-                                                <TextBlock Text="Cancelar"/>
-                                            </Button>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
+                                                    Command="{Binding DataContext.CancelarEmailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Cursor="Hand"
+                                                    FontSize="9"
+                                                    Foreground="White">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="2">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                    <TextBlock Text="Cancelar" />
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
                             </DataGrid>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </ScrollViewer>
 
-            <!-- ═════════════════════════════════════════════════ -->
-            <!-- COLUNA DIREITA: Formulário de Email              -->
-            <!-- ═════════════════════════════════════════════════ -->
-            <Border Grid.Column="1" Background="#F7F9F6" Padding="20" CornerRadius="8">
+            <!--  ═════════════════════════════════════════════════  -->
+            <!--  COLUNA DIREITA: Formulário de Email  -->
+            <!--  ═════════════════════════════════════════════════  -->
+            <Border
+                Grid.Column="1"
+                Padding="20"
+                Background="#F7F9F6"
+                CornerRadius="8">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
-                        <TextBlock Text="✉️ Enviar Email"
-                                   FontSize="18"
-                                   FontWeight="SemiBold"
-                                   Foreground="#3F4A3D"
-                                   Margin="0,0,0,16"/>
+                        <TextBlock
+                            Margin="0,0,0,16"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Foreground="#3F4A3D"
+                            Text="✉️ Enviar Email" />
 
-                        <!-- Para -->
-                        <TextBlock Text="Para:" FontSize="13" Foreground="#5A6558" Margin="0,0,0,6" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding Destinatario, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="10"
-                                 FontSize="13"
-                                 Background="White"
-                                 BorderBrush="#E3E9DE"
-                                 BorderThickness="1"
-                                 Margin="0,0,0,16"/>
+                        <!--  Para  -->
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="#5A6558"
+                            Text="Para:" />
+                        <TextBox
+                            Margin="0,0,0,16"
+                            Padding="10"
+                            Background="White"
+                            BorderBrush="#E3E9DE"
+                            BorderThickness="1"
+                            FontSize="13"
+                            Text="{Binding Destinatario, UpdateSourceTrigger=PropertyChanged}" />
 
-                        <!-- Template -->
-                        <TextBlock Text="Template:" FontSize="13" Foreground="#5A6558" Margin="0,0,0,6" FontWeight="SemiBold"/>
-                        <ComboBox ItemsSource="{Binding Templates}"
-                                  SelectedItem="{Binding TemplateSelecionado}"
-                                  Padding="10"
-                                  FontSize="13"
-                                  Margin="0,0,0,16"/>
+                        <!--  Template  -->
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="#5A6558"
+                            Text="Template:" />
+                        <ComboBox
+                            Margin="0,0,0,16"
+                            Padding="10"
+                            FontSize="13"
+                            ItemsSource="{Binding Templates}"
+                            SelectedItem="{Binding TemplateSelecionado}"
+                            ToolTip="Escolha um template pré-definido ou 'Personalizado' para escrever livremente" />
 
-                        <!-- Assunto -->
-                        <TextBlock Text="Assunto:" FontSize="13" Foreground="#5A6558" Margin="0,0,0,6" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding Assunto, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="10"
-                                 FontSize="13"
-                                 Background="White"
-                                 BorderBrush="#E3E9DE"
-                                 BorderThickness="1"
-                                 Margin="0,0,0,16"/>
+                        <!--  Assunto  -->
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="#5A6558"
+                            Text="Assunto:" />
+                        <TextBox
+                            Margin="0,0,0,16"
+                            Padding="10"
+                            Background="White"
+                            BorderBrush="#E3E9DE"
+                            BorderThickness="1"
+                            FontSize="13"
+                            Text="{Binding Assunto, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="Escreva um assunto claro e profissional" />
 
-                        <!-- Corpo -->
-                        <TextBlock Text="Mensagem:" FontSize="13" Foreground="#5A6558" Margin="0,0,0,6" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding Corpo, UpdateSourceTrigger=PropertyChanged}"
-                                 Height="240"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Padding="10"
-                                 FontSize="13"
-                                 Background="White"
-                                 BorderBrush="#E3E9DE"
-                                 BorderThickness="1"
-                                 Margin="0,0,0,16"/>
+                        <!--  Corpo  -->
+                        <TextBlock
+                            Margin="0,0,0,6"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Foreground="#5A6558"
+                            Text="Mensagem:" />
+                        <TextBox
+                            Height="240"
+                            Margin="0,0,0,16"
+                            Padding="10"
+                            AcceptsReturn="True"
+                            Background="White"
+                            BorderBrush="#E3E9DE"
+                            BorderThickness="1"
+                            FontSize="13"
+                            Text="{Binding Corpo, UpdateSourceTrigger=PropertyChanged}"
+                            TextWrapping="Wrap"
+                            ToolTip="Corpo do email. Pode usar múltiplas linhas com Enter"
+                            VerticalScrollBarVisibility="Auto" />
 
-                        <!-- Anexos -->
+                        <!--  Anexos  -->
                         <StackPanel Margin="0,0,0,16">
                             <DockPanel Margin="0,0,0,10">
-                                <TextBlock Text="📎 Anexos:"
-                                           FontSize="13"
-                                           Foreground="#5A6558"
-                                           FontWeight="SemiBold"
-                                           DockPanel.Dock="Left"
-                                           VerticalAlignment="Center"/>
-                                <Button Command="{Binding AdicionarAnexoCommand}"
-                                        Background="#9CAF97"
-                                        Foreground="White"
-                                        Padding="10,6"
-                                        Margin="12,0,0,0"
-                                        Cursor="Hand"
-                                        BorderThickness="0"
-                                        DockPanel.Dock="Left">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    DockPanel.Dock="Left"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    Foreground="#5A6558"
+                                    Text="📎 Anexos:" />
+                                <Button
+                                    Margin="12,0,0,0"
+                                    Padding="10,6"
+                                    Background="#9CAF97"
+                                    BorderThickness="0"
+                                    Command="{Binding AdicionarAnexoCommand}"
+                                    Cursor="Hand"
+                                    DockPanel.Dock="Left"
+                                    Foreground="White"
+                                    ToolTip="Anexar ficheiros do computador (documentos, imagens, PDFs)">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="📎" Margin="0,0,4,0"/>
-                                        <TextBlock Text="Anexar Ficheiro" FontSize="12"/>
+                                        <TextBlock Margin="0,0,4,0" Text="📎" />
+                                        <TextBlock FontSize="12" Text="Anexar Ficheiro" />
                                     </StackPanel>
                                 </Button>
 
-                                <!-- ⭐ NOVO: Botão Selecionar Templates -->
-                                <Button Click="BtnSelecionarTemplates_Click"
-                                        Background="#879B83"
-                                        Foreground="White"
-                                        Padding="10,6"
-                                        Margin="8,0,0,0"
-                                        Cursor="Hand"
-                                        BorderThickness="0"
-                                        DockPanel.Dock="Left"
-                                        ToolTip="Selecionar templates PDF para anexar">
+                                <!--  ⭐ NOVO: Botão Selecionar Templates  -->
+                                <Button
+                                    Margin="8,0,0,0"
+                                    Padding="10,6"
+                                    Background="#879B83"
+                                    BorderThickness="0"
+                                    Click="BtnSelecionarTemplates_Click"
+                                    Cursor="Hand"
+                                    DockPanel.Dock="Left"
+                                    Foreground="White"
+                                    ToolTip="Selecionar templates PDF da pasta Templates/PDFs/ para anexar">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="📋" Margin="0,0,4,0"/>
-                                        <TextBlock Text="Selecionar Templates" FontSize="12"/>
+                                        <TextBlock Margin="0,0,4,0" Text="📋" />
+                                        <TextBlock FontSize="12" Text="Selecionar Templates" />
                                     </StackPanel>
                                 </Button>
 
-                                <!-- ⭐ NOVO: Botão Adicionar Novo Template -->
+                                <!--  ⭐ REMOVIDO: Botão deve estar nas Configurações, não na ficha do paciente  -->
+                                <!--
                                 <Button Command="{Binding AdicionarNovoTemplatePdfCommand}"
                                         Background="#7A8C73"
                                         Foreground="White"
@@ -439,48 +574,53 @@
                                         Cursor="Hand"
                                         BorderThickness="0"
                                         DockPanel.Dock="Left"
-                                        ToolTip="Adicionar novo template PDF à biblioteca">
+                                        ToolTip="Copiar novo ficheiro PDF para a pasta Templates/PDFs/ para uso futuro">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="➕" Margin="0,0,4,0"/>
                                         <TextBlock Text="Adicionar Template" FontSize="12"/>
                                     </StackPanel>
                                 </Button>
+                                -->
 
-                                <TextBlock Text="{Binding StatusAnexos}"
-                                           FontSize="11"
-                                           Foreground="#5A6558"
-                                           VerticalAlignment="Center"
-                                           Margin="12,0,0,0"
-                                           DockPanel.Dock="Left"/>
+                                <TextBlock
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center"
+                                    DockPanel.Dock="Left"
+                                    FontSize="11"
+                                    Foreground="#5A6558"
+                                    Text="{Binding StatusAnexos}" />
                             </DockPanel>
 
-                            <!-- Lista de anexos -->
+                            <!--  Lista de anexos  -->
                             <ItemsControl ItemsSource="{Binding Anexos}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="White"
-                                                BorderBrush="#E3E9DE"
-                                                BorderThickness="1"
-                                                CornerRadius="4"
-                                                Padding="8,6"
-                                                Margin="0,0,0,6">
+                                        <Border
+                                            Margin="0,0,0,6"
+                                            Padding="8,6"
+                                            Background="White"
+                                            BorderBrush="#E3E9DE"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Right"
-                                                        Command="{Binding DataContext.RemoverAnexoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        Background="Transparent"
-                                                        BorderThickness="0"
-                                                        Foreground="#F44336"
-                                                        Cursor="Hand"
-                                                        Padding="4">
-                                                    <TextBlock Text="❌" FontSize="12"/>
+                                                <Button
+                                                    Padding="4"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Command="{Binding DataContext.RemoverAnexoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Cursor="Hand"
+                                                    DockPanel.Dock="Right"
+                                                    Foreground="#F44336">
+                                                    <TextBlock FontSize="12" Text="❌" />
                                                 </Button>
-                                                <TextBlock Text="{Binding}"
-                                                           FontSize="12"
-                                                           Foreground="#3F4A3D"
-                                                           VerticalAlignment="Center"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           ToolTip="{Binding}"/>
+                                                <TextBlock
+                                                    VerticalAlignment="Center"
+                                                    FontSize="12"
+                                                    Foreground="#3F4A3D"
+                                                    Text="{Binding}"
+                                                    TextTrimming="CharacterEllipsis"
+                                                    ToolTip="{Binding}" />
                                             </DockPanel>
                                         </Border>
                                     </DataTemplate>
@@ -488,38 +628,71 @@
                             </ItemsControl>
                         </StackPanel>
 
-                        <!-- ⭐ AGENDAMENTO DE ENVIO: Enviar agora ou agendar para data futura -->
-                        <CheckBox IsChecked="{Binding AgendarEnvio}"
-                                  Content="📅 Agendar envio para data futura"
-                                  FontSize="12"
-                                  FontWeight="SemiBold"
-                                  Foreground="#FF9800"
-                                  Margin="0,0,0,10"/>
+                        <!--  ⭐ AGENDAMENTO DE ENVIO: Enviar agora ou agendar para data futura  -->
+                        <CheckBox
+                            Margin="0,0,0,10"
+                            Content="📅 Agendar envio para data futura"
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Foreground="#FF9800"
+                            IsChecked="{Binding AgendarEnvio}" />
 
-                        <StackPanel Margin="20,0,0,20"
-                                    Visibility="{Binding AgendarEnvio, Converter={StaticResource BoolToVisibility}}">
-                            <TextBlock Text="Data e hora de envio:" FontSize="11" Foreground="#5A6558" Margin="0,0,0,6"/>
-                            <DatePicker SelectedDate="{Binding DataEnvioAgendado}"
-                                        FontSize="12"
-                                        Margin="0,0,0,8"
-                                        Width="200"
-                                        HorizontalAlignment="Left"/>
-                            <TextBlock Text="⚠️ O email será enviado automaticamente na data escolhida"
-                                       FontSize="10"
-                                       FontStyle="Italic"
-                                       Foreground="#FF9800"/>
+                        <StackPanel Margin="20,0,0,20" Visibility="{Binding AgendarEnvio, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock
+                                Margin="0,0,0,6"
+                                FontSize="11"
+                                Foreground="#5A6558"
+                                Text="Data e hora de envio:" />
+                            <DatePicker
+                                Width="200"
+                                Margin="0,0,0,8"
+                                HorizontalAlignment="Left"
+                                FontSize="12"
+                                SelectedDate="{Binding DataEnvioAgendado}"
+                                ToolTip="Escolha a data futura para envio automático do email" />
+                            <TextBlock
+                                FontSize="10"
+                                FontStyle="Italic"
+                                Foreground="#FF9800"
+                                Text="⚠️ O email será enviado automaticamente na data escolhida" />
                         </StackPanel>
 
-                        <!-- Botão Enviar -->
-                        <Button Command="{Binding EnviarEmailCommand}"
-                                Background="#9CAF97"
-                                Foreground="White"
-                                Padding="16,12"
-                                Cursor="Hand"
-                                BorderThickness="0">
+                        <!--  Botão Enviar  -->
+                        <Button
+                            Padding="16,12"
+                            Background="#9CAF97"
+                            BorderThickness="0"
+                            Command="{Binding EnviarEmailCommand}"
+                            Cursor="Hand"
+                            Foreground="White"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"
+                            ToolTip="Ctrl+Enter para enviar rapidamente">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="📤" FontSize="16" Margin="0,0,8,0"/>
-                                <TextBlock Text="Enviar Email" FontSize="14" FontWeight="SemiBold"/>
+                                <!--  Loading State: Mostra spinner se IsLoading=true  -->
+                                <TextBlock Margin="0,0,8,0" FontSize="16">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="📤" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                                    <Setter Property="Text" Value="⏳" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock FontSize="14" FontWeight="SemiBold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Enviar Email" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                                    <Setter Property="Text" Value="A enviar..." />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
                         </Button>
                     </StackPanel>

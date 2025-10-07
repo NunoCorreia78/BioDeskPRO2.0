@@ -221,3 +221,4 @@ public class StringToBoolConverter : IValueConverter
         return Binding.DoNothing;
     }
 }
+

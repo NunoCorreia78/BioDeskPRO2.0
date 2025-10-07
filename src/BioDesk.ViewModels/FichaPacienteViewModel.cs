@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -200,7 +201,21 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     /// </summary>
     private void OnPacientePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        // ⚠️ Ignorar mudanças durante carregamento de dados da BD
+        // ✅ VALIDAÇÃO EM TEMPO REAL (sempre, mesmo durante loading)
+        if (e.PropertyName == nameof(Paciente.NomeCompleto) && PacienteAtual != null)
+        {
+            ValidarNomeCompleto(PacienteAtual.NomeCompleto);
+        }
+        else if (e.PropertyName == nameof(Paciente.DataNascimento) && PacienteAtual != null)
+        {
+            ValidarDataNascimento(PacienteAtual.DataNascimento);
+        }
+        else if (e.PropertyName == nameof(Paciente.NIF) && PacienteAtual != null)
+        {
+            ValidarNIF(PacienteAtual.NIF);
+        }
+
+        // ⚠️ Ignorar mudanças de IsDirty durante carregamento de dados da BD
         if (_isLoadingData) return;
 
         if (!IsDirty)
@@ -215,7 +230,17 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     /// </summary>
     private void OnContactoPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        // ⚠️ Ignorar mudanças durante carregamento de dados da BD
+        // ✅ VALIDAÇÃO EM TEMPO REAL (sempre, mesmo durante loading)
+        if (e.PropertyName == nameof(Contacto.EmailPrincipal) && ContactoAtual != null)
+        {
+            ValidarEmail(ContactoAtual.EmailPrincipal);
+        }
+        else if (e.PropertyName == nameof(Contacto.TelefonePrincipal) && ContactoAtual != null)
+        {
+            ValidarTelefone(ContactoAtual.TelefonePrincipal);
+        }
+
+        // ⚠️ Ignorar mudanças de IsDirty durante carregamento de dados da BD
         if (_isLoadingData) return;
 
         if (!IsDirty)
@@ -233,6 +258,204 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     {
         IsDirty = true;
         _logger.LogDebug("Formulário marcado como alterado (IsDirty = true)");
+    }
+
+    #endregion
+
+    #region Validação em Tempo Real
+
+    // ===== PROPRIEDADES DE ERRO =====
+
+    [ObservableProperty]
+    private string? _erroEmail;
+
+    [ObservableProperty]
+    private string? _erroTelefonePrincipal;
+
+    [ObservableProperty]
+    private string? _erroNIF;
+
+    [ObservableProperty]
+    private string? _erroDataNascimento;
+
+    [ObservableProperty]
+    private string? _erroNomeCompleto;
+
+    // ===== MÉTODOS DE VALIDAÇÃO =====
+
+    /// <summary>
+    /// Valida email em tempo real
+    /// </summary>
+    private void ValidarEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            ErroEmail = null; // Campo vazio não é erro
+            return;
+        }
+
+        // Validações progressivas
+        if (!email.Contains("@"))
+        {
+            ErroEmail = "⚠️ Email deve conter @";
+            return;
+        }
+
+        var parts = email.Split('@');
+        if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]) || string.IsNullOrWhiteSpace(parts[1]))
+        {
+            ErroEmail = "⚠️ Email incompleto";
+            return;
+        }
+
+        if (!parts[1].Contains("."))
+        {
+            ErroEmail = "⚠️ Domínio do email inválido";
+            return;
+        }
+
+        // Email válido
+        ErroEmail = null;
+    }
+
+    /// <summary>
+    /// Valida telefone português (9 dígitos)
+    /// </summary>
+    private void ValidarTelefone(string? telefone)
+    {
+        if (string.IsNullOrWhiteSpace(telefone))
+        {
+            ErroTelefonePrincipal = null; // Campo vazio não é erro
+            return;
+        }
+
+        // Remover espaços e caracteres especiais
+        var digits = new string(telefone.Where(char.IsDigit).ToArray());
+
+        if (digits.Length < 9)
+        {
+            ErroTelefonePrincipal = $"⚠️ Telefone deve ter 9 dígitos ({digits.Length}/9)";
+            return;
+        }
+
+        if (digits.Length > 9)
+        {
+            ErroTelefonePrincipal = "⚠️ Telefone tem dígitos a mais";
+            return;
+        }
+
+        // Validar prefixos válidos portugueses
+        if (!digits.StartsWith("2") && !digits.StartsWith("9"))
+        {
+            ErroTelefonePrincipal = "⚠️ Número português deve começar por 2 ou 9";
+            return;
+        }
+
+        // Telefone válido
+        ErroTelefonePrincipal = null;
+    }
+
+    /// <summary>
+    /// Valida NIF português (9 dígitos + algoritmo de verificação)
+    /// </summary>
+    private void ValidarNIF(string? nif)
+    {
+        if (string.IsNullOrWhiteSpace(nif))
+        {
+            ErroNIF = null; // Campo vazio não é erro
+            return;
+        }
+
+        // Remover espaços
+        nif = nif.Trim();
+
+        // Validar comprimento
+        if (nif.Length != 9)
+        {
+            ErroNIF = $"⚠️ NIF deve ter 9 dígitos ({nif.Length}/9)";
+            return;
+        }
+
+        // Validar se são todos dígitos
+        if (!nif.All(char.IsDigit))
+        {
+            ErroNIF = "⚠️ NIF deve conter apenas números";
+            return;
+        }
+
+        // Algoritmo de validação do NIF português
+        int checkDigit = int.Parse(nif[8].ToString());
+        int sum = 0;
+
+        for (int i = 0; i < 8; i++)
+        {
+            sum += int.Parse(nif[i].ToString()) * (9 - i);
+        }
+
+        int mod = sum % 11;
+        int expectedCheckDigit = mod < 2 ? 0 : 11 - mod;
+
+        if (checkDigit != expectedCheckDigit)
+        {
+            ErroNIF = "⚠️ NIF inválido (dígito de controlo incorreto)";
+            return;
+        }
+
+        // NIF válido
+        ErroNIF = null;
+    }
+
+    /// <summary>
+    /// Valida data de nascimento (não pode ser futura nem ter mais de 120 anos)
+    /// </summary>
+    private void ValidarDataNascimento(DateTime? dataNascimento)
+    {
+        if (dataNascimento == null)
+        {
+            ErroDataNascimento = null;
+            return;
+        }
+
+        var hoje = DateTime.Now;
+
+        // Data no futuro
+        if (dataNascimento > hoje)
+        {
+            ErroDataNascimento = "⚠️ Data não pode ser no futuro";
+            return;
+        }
+
+        // Idade maior que 120 anos
+        var idade = hoje.Year - dataNascimento.Value.Year;
+        if (idade > 120)
+        {
+            ErroDataNascimento = "⚠️ Data muito antiga (idade > 120 anos)";
+            return;
+        }
+
+        // Data válida
+        ErroDataNascimento = null;
+    }
+
+    /// <summary>
+    /// Valida nome completo (mínimo 3 caracteres)
+    /// </summary>
+    private void ValidarNomeCompleto(string? nome)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            ErroNomeCompleto = "⚠️ Nome é obrigatório";
+            return;
+        }
+
+        if (nome.Length < 3)
+        {
+            ErroNomeCompleto = $"⚠️ Nome muito curto ({nome.Length}/3 caracteres)";
+            return;
+        }
+
+        // Nome válido
+        ErroNomeCompleto = null;
     }
 
     #endregion
@@ -273,6 +496,31 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             if (PacienteAtual == null)
             {
                 ErrorMessage = "❌ Nenhum paciente para guardar";
+                return;
+            }
+
+            // ⭐ VALIDAÇÃO OBRIGATÓRIA ANTES DE GUARDAR
+            var erros = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(PacienteAtual.NomeCompleto) || PacienteAtual.NomeCompleto.Trim().Length < 3)
+                erros.Add("• Nome Completo (mínimo 3 caracteres)");
+
+            if (!PacienteAtual.DataNascimento.HasValue || PacienteAtual.DataNascimento == DateTime.MinValue)
+                erros.Add("• Data de Nascimento");
+
+            if (!string.IsNullOrEmpty(ErroNIF))
+                erros.Add("• NIF inválido");
+
+            if (!string.IsNullOrEmpty(ErroTelefonePrincipal))
+                erros.Add("• Telefone inválido");
+
+            if (!string.IsNullOrEmpty(ErroEmail))
+                erros.Add("• Email inválido");
+
+            if (erros.Any())
+            {
+                ErrorMessage = "❌ Corrija os seguintes campos obrigatórios:\n" + string.Join("\n", erros);
+                _logger.LogWarning("⚠️ Tentativa de guardar com {Count} erros de validação", erros.Count);
                 return;
             }
 
@@ -615,7 +863,7 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             Id = 0, // ⭐ 0 = NOVO (será auto-incrementado pela BD)
             NumeroProcesso = $"P{DateTime.Now:yyyyMMddHHmmss}", // Gerar número único
             NomeCompleto = "", // Vazio para preenchimento
-            DataNascimento = DateTime.Today.AddYears(-30), // Default 30 anos
+            DataNascimento = null, // ⭐ NULL - Campo fica vazio até utilizador preencher
             Genero = "", // ⭐ VAZIO por defeito (utilizador escolhe)
             NIF = "",
             Nacionalidade = "Portuguesa",
