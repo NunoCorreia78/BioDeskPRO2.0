@@ -169,11 +169,11 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <!-- Logo da Clínica -->
-                        <Image Source="/Assets/Images/logo.png" Stretch="Uniform" MaxHeight="60" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <Image Source="/Assets/Images/Logo.png" Stretch="Uniform" MaxHeight="60" HorizontalAlignment="Center" Margin="0,0,0,16">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Style.Triggers>
-                                        <!-- Se logo.png não existir, esconde a Image -->
+                                        <!-- Se Logo.png não existir, esconde a Image -->
                                         <Trigger Property="Source" Value="{x:Null}">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                         </Trigger>

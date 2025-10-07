@@ -1,13 +1,14 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-06 12:15:05 ===
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-07 16:42:51 ===
 PacienteId: 2
 NomePaciente: Maria Fernanda Costa
 NomeNormalizado: mariafernandacosta
-BaseDirectory: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2
+BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 
-PastaPacienteRaiz: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\Pacientes
+PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes
 Pasta existe? True
 
-Total de pastas em Pacientes/: 5
+Total de pastas em Pacientes/: 6
+  - Alexandre Diego Vieira da Mata
   - Carlos António Pereira
   - João Silva Santos
   - Maria Fernanda Costa
@@ -16,6 +17,7 @@ Total de pastas em Pacientes/: 5
 
 NomeComUnderscores: maria_fernanda_costa
 Buscando pastas que contenham: 'mariafernandacosta' OU 'maria_fernanda_costa'
+  Pasta 'Alexandre Diego Vieira da Mata' (normalizado: 'alexandrediegovieiradamata') → match: False
   Pasta 'Carlos António Pereira' (normalizado: 'carlosantóniopereira') → match: False
   Pasta 'João Silva Santos' (normalizado: 'joãosilvasantos') → match: False
   Pasta 'Maria Fernanda Costa' (normalizado: 'mariafernandacosta') → match: True
@@ -24,7 +26,7 @@ Buscando pastas que contenham: 'mariafernandacosta' OU 'maria_fernanda_costa'
 
 Pastas encontradas para o paciente: 2
 
-📂 Buscando em: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria Fernanda Costa
+📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria Fernanda Costa
   Subpastas: 2
     - Consentimentos
     - DeclaracoesSaude
@@ -36,7 +38,7 @@ Pastas encontradas para o paciente: 2
     ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251003_193322.pdf
     ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251003_195919.pdf
 
-📂 Buscando em: C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria_Fernanda_Costa
+📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria_Fernanda_Costa
   Subpastas: 1
     - IrisImagens
   PDFs encontrados: 0

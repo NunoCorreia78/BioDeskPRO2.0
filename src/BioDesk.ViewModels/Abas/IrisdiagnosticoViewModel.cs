@@ -360,11 +360,17 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
             _logger.LogInformation("🔍 Imagens filtradas para Paciente {Id}: {Count}", PacienteAtual.Id, imagensDoPaciente.Count);
 
-            // Log detalhado de cada imagem
+            // ✅ AUDITADO: Log detalhado de cada imagem + verificação de existência de ficheiro
             foreach (var img in imagensDoPaciente)
             {
-                _logger.LogInformation("  📷 Imagem ID={Id}, Olho={Olho}, Caminho={Caminho}, Data={Data}",
-                    img.Id, img.Olho, img.CaminhoImagem, img.DataCaptura);
+                var existe = System.IO.File.Exists(img.CaminhoImagem);
+                _logger.LogInformation("  📷 Imagem ID={Id}, Olho={Olho}, Caminho={Caminho}, Data={Data}, Existe={Existe}",
+                    img.Id, img.Olho, img.CaminhoImagem, img.DataCaptura, existe);
+
+                if (!existe)
+                {
+                    _logger.LogWarning("  ⚠️ ALERTA: Ficheiro não encontrado no disco!");
+                }
             }
 
             IrisImagens = new ObservableCollection<IrisImagem>(imagensDoPaciente);
@@ -879,10 +885,26 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
     /// <summary>
     /// Hook para quando a imagem selecionada mudar → carregar marcas
+    /// ✅ AUDITADO: Logging detalhado para diagnóstico de imagens não visíveis
     /// </summary>
     partial void OnIrisImagemSelecionadaChanged(IrisImagem? value)
     {
-        _logger.LogInformation($"🔍 DEBUG: Seleção mudou! Valor: {value?.Olho ?? "NULL"}");
+        if (value != null)
+        {
+            var existe = System.IO.File.Exists(value.CaminhoImagem);
+            _logger.LogInformation("🔍 SELEÇÃO MUDOU → Olho: {Olho}, ID: {Id}, Caminho: {Caminho}, Existe: {Existe}",
+                value.Olho, value.Id, value.CaminhoImagem, existe);
+
+            if (!existe)
+            {
+                _logger.LogError("❌ CRÍTICO: Ficheiro da imagem selecionada NÃO EXISTE no disco!");
+                ErrorMessage = $"Ficheiro de imagem não encontrado: {System.IO.Path.GetFileName(value.CaminhoImagem)}";
+            }
+        }
+        else
+        {
+            _logger.LogInformation("🔍 SELEÇÃO MUDOU → NULL (nenhuma imagem selecionada)");
+        }
 
         if (value != null)
         {
