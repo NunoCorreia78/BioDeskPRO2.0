@@ -67,7 +67,7 @@ try {
     dotnet user-secrets set "Email:Sender" "$email" --project src/BioDesk.App
     dotnet user-secrets set "Email:Password" "$passwordPlainText" --project src/BioDesk.App
     dotnet user-secrets set "Email:SenderName" "$nome" --project src/BioDesk.App
-    
+
     Write-Host ""
     Write-Host "✅ Configuração concluída com sucesso!" -ForegroundColor Green
     Write-Host ""

@@ -1,4 +1,4 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-07 16:42:51 ===
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-07 19:41:35 ===
 PacienteId: 2
 NomePaciente: Maria Fernanda Costa
 NomeNormalizado: mariafernandacosta

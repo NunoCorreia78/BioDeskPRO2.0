@@ -1,6 +1,6 @@
 # ✅ SOLUÇÃO COMPLETA: SISTEMA DE EMAIL - 07 OUT 2025
 
-**Status:** ✅ RESOLVIDO  
+**Status:** ✅ RESOLVIDO
 **Data:** 07 de Outubro de 2025
 
 ---
@@ -130,25 +130,25 @@ dotnet user-secrets list --project src/BioDesk.App
 ## 📋 TROUBLESHOOTING
 
 ### Erro: "Email:Sender não configurado"
-**Causa:** User Secrets vazios  
+**Causa:** User Secrets vazios
 **Solução:** Configurar via interface gráfica ou comandos acima
 
 ### Erro: "Authentication failed"
-**Causa:** App Password incorreta ou expirada  
-**Solução:** 
+**Causa:** App Password incorreta ou expirada
+**Solução:**
 1. Gerar nova App Password no Gmail
 2. Atualizar na interface da aplicação
 3. Testar novamente
 
 ### Erro: "Unable to connect to SMTP server"
-**Causa:** Sem conexão à internet ou firewall  
+**Causa:** Sem conexão à internet ou firewall
 **Solução:**
 1. Verificar conexão
 2. Verificar se porto 587 está aberto
 3. Desativar temporariamente antivírus/firewall
 
 ### Emails ficam "Agendados" mas não enviam
-**Causa:** Credenciais não configuradas corretamente  
+**Causa:** Credenciais não configuradas corretamente
 **Solução:**
 1. Verificar User Secrets: `dotnet user-secrets list --project src/BioDesk.App`
 2. Reconfigurar via interface
@@ -281,6 +281,6 @@ O sistema de email está **100% funcional** e **pronto para uso**. A interface g
 
 ---
 
-**Última atualização:** 07 de Outubro de 2025, 18:45  
-**Autor:** GitHub Copilot + Nuno Correia  
+**Última atualização:** 07 de Outubro de 2025, 18:45
+**Autor:** GitHub Copilot + Nuno Correia
 **Versão:** BioDeskPro 2.0

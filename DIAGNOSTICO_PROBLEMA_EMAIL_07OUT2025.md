@@ -1,6 +1,6 @@
 # 🔍 DIAGNÓSTICO: PROBLEMA ENVIO DE EMAILS
 
-**Data:** 07 de Outubro de 2025  
+**Data:** 07 de Outubro de 2025
 **Status:** ✅ RESOLVIDO
 
 ---
@@ -26,10 +26,10 @@ O `EmailService` (ficheiro: `src/BioDesk.Services/Email/EmailService.cs`) lê cr
 
 ```csharp
 // Linha 29-32
-private string SmtpUsername => _configuration["Email:Sender"] 
+private string SmtpUsername => _configuration["Email:Sender"]
     ?? throw new InvalidOperationException("Email:Sender não configurado");
-    
-private string SmtpPassword => _configuration["Email:Password"] 
+
+private string SmtpPassword => _configuration["Email:Password"]
     ?? throw new InvalidOperationException("Email:Password não configurado");
 ```
 

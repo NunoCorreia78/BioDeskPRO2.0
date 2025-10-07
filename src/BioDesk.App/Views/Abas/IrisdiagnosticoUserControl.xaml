@@ -28,8 +28,8 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>  <!-- Direito: ~20% -->
-            <ColumnDefinition Width="3*"/>  <!-- Mapa Central: ~60% (AUMENTADO para imagens maiores) -->
-            <ColumnDefinition Width="1*"/>  <!-- Esquerdo: ~20% -->
+            <ColumnDefinition Width="2.5*"/>  <!-- Mapa Central: ~50% (mais quadrado) -->
+            <ColumnDefinition Width="1.5*"/>  <!-- Esquerdo: ~30% -->
         </Grid.ColumnDefinitions>
 
         <!-- COLUNA 0: DIREITO - Galeria de Imagens -->
@@ -251,16 +251,16 @@
         <Border Grid.Column="1"
                 Background="#F7F9F6"
                 CornerRadius="8"
-                Padding="4"
+                Padding="0"
                 Margin="8,0">
             <Grid>
                 <!-- Canvas Central com Imagem + Mapa Sobreposto (sem título para ganhar espaço) -->
                 <Viewbox Stretch="Uniform">
-                    <Canvas Width="1400" Height="1400" Background="White">
+                    <Canvas Width="1600" Height="1600" Background="White">
 
                         <!-- LAYER 0: Placeholder quando não há imagem selecionada ✅ AUDITADO -->
                         <TextBlock Panel.ZIndex="0"
-                                   Canvas.Left="200" Canvas.Top="650"
+                                   Canvas.Left="300" Canvas.Top="750"
                                    Width="1000"
                                    Text="📷 Selecione uma imagem de íris na galeria à esquerda"
                                    FontSize="48"
@@ -281,7 +281,7 @@
 
                         <!-- LAYER 1: Imagem da Íris Real (sempre visível) -->
                         <Image x:Name="IrisCentralImage"
-                               Width="1400" Height="1400"
+                               Width="1600" Height="1600"
                                Source="{Binding IrisImagemSelecionada.CaminhoImagem, Converter={StaticResource PathToImageConverter}}"
                                Stretch="Uniform"
                                Panel.ZIndex="1">
@@ -299,7 +299,7 @@
 
                         <!-- LAYER 2: Mapa Iridológico (polígonos com FLIP VERTICAL) -->
             <Canvas x:Name="MapaOverlayCanvas"
-                Width="1400" Height="1400"
+                Width="1600" Height="1600"
                 Panel.ZIndex="2"
                 Background="Transparent"
                 MouseLeftButtonDown="MapaOverlayCanvas_MouseLeftButtonDown"

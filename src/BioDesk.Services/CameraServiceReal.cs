@@ -128,20 +128,50 @@ public class RealCameraService : ICameraService, IDisposable
             // Clonar frame (AForge reutiliza o bitmap)
             var frame = (Bitmap)eventArgs.Frame.Clone();
 
-            // Guardar última captura
+            // 🎯 CROP QUADRADO CENTRAL (para íris)
+            var croppedFrame = CropToSquare(frame);
+            frame.Dispose();
+
+            // Guardar última captura (já em formato quadrado)
             _lastCapturedFrame?.Dispose();
-            _lastCapturedFrame = (Bitmap)frame.Clone();
+            _lastCapturedFrame = croppedFrame;
 
             // Converter para byte[] e emitir evento
-            byte[] frameBytes = BitmapToByteArray(frame);
+            byte[] frameBytes = BitmapToByteArray(croppedFrame);
             FrameAvailable?.Invoke(this, frameBytes);
-
-            frame.Dispose();
         }
         catch
         {
             // Silenciar erros de conversão
         }
+    }
+
+    /// <summary>
+    /// Faz crop quadrado central da imagem (para captura de íris)
+    /// </summary>
+    private Bitmap CropToSquare(Bitmap source)
+    {
+        int width = source.Width;
+        int height = source.Height;
+
+        // Calcular dimensão quadrada (menor lado)
+        int size = Math.Min(width, height);
+
+        // Calcular offset para centralizar
+        int offsetX = (width - size) / 2;
+        int offsetY = (height - size) / 2;
+
+        // Criar bitmap quadrado
+        var squareBitmap = new Bitmap(size, size);
+        using (var g = Graphics.FromImage(squareBitmap))
+        {
+            g.DrawImage(source,
+                new Rectangle(0, 0, size, size),           // Destino: quadrado completo
+                new Rectangle(offsetX, offsetY, size, size), // Origem: centro da imagem
+                GraphicsUnit.Pixel);
+        }
+
+        return squareBitmap;
     }
 
     public async Task StopPreviewAsync()
