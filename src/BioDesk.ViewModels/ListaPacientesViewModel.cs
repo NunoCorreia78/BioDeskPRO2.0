@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using BioDesk.Data.Repositories;
 using BioDesk.Domain.Entities;
 using BioDesk.Services.Navigation;
@@ -155,6 +156,75 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
     {
         TextoPesquisa = string.Empty;
         await CarregarTodosPacientesAsync();
+    }
+
+    /// <summary>
+    /// Eliminar paciente da base de dados
+    /// ATENÇÃO: Ação IRREVERSÍVEL com confirmação obrigatória
+    /// </summary>
+    [RelayCommand]
+    private async Task EliminarPaciente(Paciente? paciente)
+    {
+        if (paciente == null)
+        {
+            _logger.LogWarning("⚠️ Tentativa de eliminar paciente nulo");
+            return;
+        }
+
+        // Diálogo de confirmação OBRIGATÓRIO
+        var result = MessageBox.Show(
+            $"Tem a certeza que deseja eliminar o paciente:\n\n" +
+            $"👤 {paciente.NomeCompleto}\n" +
+            $"📋 Processo: {paciente.NumeroProcesso}\n\n" +
+            $"⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n" +
+            $"Todos os dados associados (consultas, emails, documentos) serão perdidos.",
+            "⚠️ Confirmar Eliminação",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            try
+            {
+                IsLoading = true;
+                _logger.LogWarning("🗑️ Eliminando paciente {Id}: {Nome}", paciente.Id, paciente.NomeCompleto);
+
+                // Eliminar da BD via repository
+                _unitOfWork.Pacientes.Remove(paciente);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Remover da ObservableCollection
+                Pacientes.Remove(paciente);
+                TotalPacientes = Pacientes.Count;
+
+                _logger.LogInformation("✅ Paciente {Nome} eliminado com sucesso", paciente.NomeCompleto);
+                
+                MessageBox.Show(
+                    $"Paciente '{paciente.NomeCompleto}' eliminado com sucesso.",
+                    "✅ Eliminação Concluída",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao eliminar paciente {Id}", paciente.Id);
+                
+                MessageBox.Show(
+                    $"Erro ao eliminar paciente:\n\n{ex.Message}",
+                    "❌ Erro de Eliminação",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+        else
+        {
+            _logger.LogInformation("ℹ️ Eliminação de paciente cancelada pelo utilizador");
+        }
     }
 }
 
