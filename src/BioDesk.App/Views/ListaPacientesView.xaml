@@ -318,6 +318,46 @@
                         <DataGridTextColumn Header="Género" Binding="{Binding Genero}" Width="120"/>
                         <DataGridTextColumn Header="NIF" Binding="{Binding NIF}" Width="120"/>
                         <DataGridTextColumn Header="Última Atualização" Binding="{Binding DataUltimaAtualizacao, StringFormat=dd/MM/yyyy HH:mm}" Width="180"/>
+                        
+                        <!-- Coluna de Ações: Eliminar Paciente -->
+                        <DataGridTemplateColumn Header="Ações" Width="120" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="🗑️ Eliminar"
+                                            Command="{Binding DataContext.EliminarPacienteCommand,
+                                                      RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="#EF4444"
+                                            Foreground="White"
+                                            Padding="10,5"
+                                            BorderThickness="0"
+                                            Cursor="Hand"
+                                            ToolTip="Eliminar paciente da base de dados (IRREVERSÍVEL!)">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Opacity" Value="1"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    CornerRadius="4"
+                                                                    Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#DC2626"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
