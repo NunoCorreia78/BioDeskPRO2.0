@@ -10,6 +10,7 @@ using BioDesk.Data;
 using BioDesk.Domain.Entities;
 using BioDesk.Services.Email;
 using BioDesk.Services.Documentos;
+using BioDesk.Services.Templates;
 using BioDesk.ViewModels.Base;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -29,6 +30,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
     private readonly BioDeskDbContext _dbContext;
     private readonly IDocumentoService _documentoService;
     private readonly IDocumentosPacienteService _documentosPacienteService;
+    private readonly ITemplateService _templateService;
 
     [ObservableProperty] private Paciente? _pacienteAtual;
     [ObservableProperty] private ObservableCollection<Comunicacao> _historicoComunicacoes = new();
@@ -143,13 +145,15 @@ public partial class ComunicacaoViewModel : ViewModelBase
         IEmailService emailService,
         BioDeskDbContext dbContext,
         IDocumentoService documentoService,
-        IDocumentosPacienteService documentosPacienteService)
+        IDocumentosPacienteService documentosPacienteService,
+        ITemplateService templateService)
     {
         _logger = logger;
         _emailService = emailService;
         _dbContext = dbContext;
         _documentoService = documentoService;
         _documentosPacienteService = documentosPacienteService;
+        _templateService = templateService;
 
         _logger.LogInformation("ComunicacaoViewModel inicializado");
 
@@ -821,6 +825,157 @@ Naturopatia - Osteopatia - Medicina Bioenergética
         {
             _logger.LogError(ex, "❌ Erro ao abrir documento: {Nome}", documento.Nome);
             ErrorMessage = $"Erro ao abrir documento: {ex.Message}";
+        }
+    }
+
+    // ============================
+    // ⭐ NOVO: GESTÃO DE TEMPLATES PDF
+    // ============================
+
+    [ObservableProperty] private ObservableCollection<TemplateInfo> _templatesDisponiveis = new();
+    [ObservableProperty] private TemplateInfo? _templateSelecionadoInfo;
+    [ObservableProperty] private bool _carregandoTemplates = false;
+
+    /// <summary>
+    /// Carrega lista de templates disponíveis
+    /// </summary>
+    [RelayCommand]
+    private async Task CarregarTemplatesAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            CarregandoTemplates = true;
+            
+            var templates = await _templateService.ListarTemplatesAsync();
+            
+            TemplatesDisponiveis.Clear();
+            foreach (var template in templates)
+            {
+                TemplatesDisponiveis.Add(template);
+            }
+
+            CarregandoTemplates = false;
+
+            _logger.LogInformation("📚 {Count} templates carregados", templates.Count);
+        });
+    }
+
+    /// <summary>
+    /// Envia template selecionado para o paciente por e-mail
+    /// </summary>
+    [RelayCommand]
+    private async Task EnviarTemplateAsync(TemplateInfo? template)
+    {
+        if (PacienteAtual == null)
+        {
+            ErrorMessage = "Nenhum paciente selecionado!";
+            return;
+        }
+
+        if (template == null)
+        {
+            ErrorMessage = "Selecione um template primeiro!";
+            return;
+        }
+
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            IsLoading = true;
+
+            _logger.LogInformation("📧 Enviando template '{Nome}' para paciente {Paciente}...", 
+                template.Nome, PacienteAtual.NomeCompleto);
+
+            bool sucesso = await _templateService.EnviarTemplateParaPacienteAsync(
+                pacienteId: PacienteAtual.Id,
+                templateNome: template.Nome);
+
+            if (sucesso)
+            {
+                SuccessMessage = $"✅ Template '{template.NomeAmigavel}' enviado com sucesso!";
+                _logger.LogInformation("✅ Template enviado com sucesso");
+
+                // Recarregar histórico para mostrar novo e-mail
+                await CarregarHistoricoAsync();
+            }
+            else
+            {
+                ErrorMessage = $"❌ Erro ao enviar template '{template.NomeAmigavel}'";
+                _logger.LogError("❌ Falha ao enviar template");
+            }
+
+            IsLoading = false;
+        });
+    }
+
+    /// <summary>
+    /// Copia template para a pasta de documentos do paciente
+    /// </summary>
+    [RelayCommand]
+    private async Task CopiarTemplateParaPacienteAsync(TemplateInfo? template)
+    {
+        if (PacienteAtual == null)
+        {
+            ErrorMessage = "Nenhum paciente selecionado!";
+            return;
+        }
+
+        if (template == null)
+        {
+            ErrorMessage = "Selecione um template primeiro!";
+            return;
+        }
+
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            IsLoading = true;
+
+            _logger.LogInformation("📄 Copiando template '{Nome}' para pasta do paciente {Paciente}...", 
+                template.Nome, PacienteAtual.NomeCompleto);
+
+            string caminhoDestino = await _templateService.CopiarTemplateParaPacienteAsync(
+                pacienteId: PacienteAtual.Id,
+                templateNome: template.Nome);
+
+            SuccessMessage = $"✅ Template copiado para: {Path.GetFileName(caminhoDestino)}";
+            _logger.LogInformation("✅ Template copiado: {Caminho}", caminhoDestino);
+
+            // Recarregar documentos para mostrar novo ficheiro
+            await CarregarDocumentosPacienteAsync();
+
+            IsLoading = false;
+        });
+    }
+
+    /// <summary>
+    /// Anexa template ao e-mail (adiciona à lista de anexos)
+    /// </summary>
+    [RelayCommand]
+    private void AnexarTemplate(TemplateInfo? template)
+    {
+        if (template == null)
+        {
+            ErrorMessage = "Selecione um template primeiro!";
+            return;
+        }
+
+        if (!_templateService.TemplateExiste(template.Nome))
+        {
+            ErrorMessage = $"Template '{template.Nome}' não encontrado!";
+            return;
+        }
+
+        var caminhoTemplate = _templateService.ObterCaminhoTemplate(template.Nome);
+        if (caminhoTemplate != null && !Anexos.Contains(caminhoTemplate))
+        {
+            Anexos.Add(caminhoTemplate);
+            AtualizarStatusAnexos();
+            
+            SuccessMessage = $"📎 Template '{template.NomeAmigavel}' anexado ao e-mail";
+            _logger.LogInformation("📎 Template anexado: {Nome}", template.Nome);
+        }
+        else
+        {
+            ErrorMessage = "Template já está anexado!";
         }
     }
 }
