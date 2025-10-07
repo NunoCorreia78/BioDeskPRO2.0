@@ -297,7 +297,7 @@ Criar sistema de **templates reutilizáveis** para:
   "versao": "1.0",
   "dataCriacao": "2025-10-07",
   "autor": "BioDeskPro",
-  
+
   "campos": [
     {
       "id": "titulo",
@@ -349,7 +349,7 @@ Criar sistema de **templates reutilizáveis** para:
       "obrigatorio": false
     }
   ],
-  
+
   "formatoPDF": {
     "cabecalho": {
       "incluirLogo": true,
@@ -379,11 +379,11 @@ Criar sistema de **templates reutilizáveis** para:
   "categoria": "Email",
   "descricao": "Email automático de confirmação de agendamento",
   "versao": "1.0",
-  
+
   "assunto": "✅ Consulta Confirmada - {{DataConsulta}} às {{HoraConsulta}}",
-  
+
   "corpo": "Olá {{NomePaciente}},\n\nA sua consulta de {{TipoConsulta}} foi confirmada para:\n\n📅 Data: {{DataConsulta}}\n🕐 Hora: {{HoraConsulta}}\n📍 Local: {{LocalConsulta}}\n\n{{MensagemPersonalizada}}\n\nEm caso de necessidade de reagendamento, por favor contacte-nos com pelo menos 24h de antecedência.\n\nAtenciosamente,\n{{NomeTerapeuta}}\n{{ContactoTerapeuta}}",
-  
+
   "variaveis": [
     { "id": "NomePaciente", "tipo": "texto", "origem": "Paciente.Nome" },
     { "id": "DataConsulta", "tipo": "data", "origem": "Consulta.Data" },
@@ -394,9 +394,9 @@ Criar sistema de **templates reutilizáveis** para:
     { "id": "NomeTerapeuta", "tipo": "texto", "origem": "Configuracoes.Terapeuta.Nome" },
     { "id": "ContactoTerapeuta", "tipo": "texto", "origem": "Configuracoes.Terapeuta.Contacto" }
   ],
-  
+
   "anexos": [],
-  
+
   "configuracoes": {
     "enviarAutomaticamente": false,
     "permitirEdicao": true,
@@ -422,22 +422,22 @@ public interface ITemplateService
 {
     // Listar templates por categoria
     Task<List<TemplateInfo>> ListarTemplatesAsync(CategoriaTemplate? categoria = null);
-    
+
     // Carregar template específico
     Task<Template> CarregarTemplateAsync(string templateId);
-    
+
     // Preencher template com dados do paciente
     Task<TemplatePreeenchido> PreencherTemplateAsync(string templateId, int pacienteId, Dictionary<string, object>? dadosAdicionais = null);
-    
+
     // Gerar PDF a partir de template preenchido
     Task<string> GerarPDFAsync(TemplatePreeenchido templatePreenchido, string caminhoDestino);
-    
+
     // Enviar template por email
     Task<bool> EnviarTemplatePorEmailAsync(string templateId, int pacienteId, Dictionary<string, object>? dadosAdicionais = null);
-    
+
     // Criar/editar template (admin)
     Task<bool> SalvarTemplateAsync(Template template);
-    
+
     // Eliminar template
     Task<bool> EliminarTemplateAsync(string templateId);
 }
@@ -513,51 +513,51 @@ public partial class TemplateViewModel : ViewModelBase
 {
     private readonly ITemplateService _templateService;
     private readonly IPacienteService _pacienteService;
-    
+
     [ObservableProperty]
     private ObservableCollection<TemplateInfo> _templatesPrescricao = new();
-    
+
     [ObservableProperty]
     private ObservableCollection<TemplateInfo> _templatesEmail = new();
-    
+
     [ObservableProperty]
     private TemplateInfo? _templateSelecionado;
-    
+
     [ObservableProperty]
     private bool _isPreenchendoTemplate;
-    
+
     public TemplateViewModel(ITemplateService templateService, IPacienteService pacienteService)
     {
         _templateService = templateService;
         _pacienteService = pacienteService;
     }
-    
+
     [RelayCommand]
     private async Task CarregarTemplatesAsync()
     {
         var prescricoes = await _templateService.ListarTemplatesAsync(CategoriaTemplate.Prescricao);
         TemplatesPrescricao = new ObservableCollection<TemplateInfo>(prescricoes);
-        
+
         var emails = await _templateService.ListarTemplatesAsync(CategoriaTemplate.Email);
         TemplatesEmail = new ObservableCollection<TemplateInfo>(emails);
     }
-    
+
     [RelayCommand]
     private async Task SelecionarTemplateAsync(TemplateInfo template)
     {
         TemplateSelecionado = template;
         // Abrir UI de preenchimento
     }
-    
+
     [RelayCommand]
     private async Task GerarPDFAsync()
     {
         if (TemplateSelecionado == null) return;
-        
+
         IsPreenchendoTemplate = true;
-        
+
         // Lógica de preenchimento e geração de PDF
-        
+
         IsPreenchendoTemplate = false;
     }
 }
@@ -577,7 +577,7 @@ public partial class TemplateViewModel : ViewModelBase
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        
+
         <!-- Coluna 0: Lista de Templates -->
         <Border Grid.Column="0" Background="#F7F9F6" Padding="12">
             <StackPanel>
@@ -590,7 +590,7 @@ public partial class TemplateViewModel : ViewModelBase
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                
+
                 <TextBlock Text="📧 Emails" FontWeight="Bold" Margin="0,16,0,8"/>
                 <ListBox ItemsSource="{Binding TemplatesEmail}"
                          SelectedItem="{Binding TemplateSelecionado}">
@@ -602,28 +602,28 @@ public partial class TemplateViewModel : ViewModelBase
                 </ListBox>
             </StackPanel>
         </Border>
-        
+
         <!-- Coluna 1: Formulário de Preenchimento -->
         <Border Grid.Column="1" Background="White" Padding="24">
             <ScrollViewer>
                 <StackPanel>
                     <TextBlock Text="{Binding TemplateSelecionado.Nome}"
                                FontSize="24" FontWeight="Bold" Margin="0,0,0,16"/>
-                    
+
                     <!-- Campos dinâmicos do template -->
                     <ItemsControl ItemsSource="{Binding TemplateSelecionado.Campos}">
                         <!-- DataTemplate dinâmico baseado no tipo de campo -->
                     </ItemsControl>
-                    
+
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
-                        <Button Content="📄 Gerar PDF" 
+                        <Button Content="📄 Gerar PDF"
                                 Command="{Binding GerarPDFCommand}"
                                 Background="#9CAF97"
                                 Foreground="White"
                                 Padding="16,8"
                                 Margin="0,0,12,0"/>
-                        
-                        <Button Content="📧 Enviar Email" 
+
+                        <Button Content="📧 Enviar Email"
                                 Command="{Binding EnviarEmailCommand}"
                                 Background="#87A4D4"
                                 Foreground="White"
@@ -656,13 +656,13 @@ public partial class TemplateViewModel : ViewModelBase
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
-        <ComboBox Grid.Row="0" 
+
+        <ComboBox Grid.Row="0"
                   ItemsSource="{Binding TemplatesEmail}"
                   SelectedItem="{Binding TemplateSelecionado}"
                   DisplayMemberPath="Nome"
                   Margin="0,0,0,12"/>
-        
+
         <Button Grid.Row="1"
                 Content="📧 Carregar Template"
                 Command="{Binding CarregarTemplateCommand}"
@@ -685,7 +685,7 @@ public partial class TemplateViewModel : ViewModelBase
 
 ```xaml
 <!-- Adicionar em DashboardView.xaml -->
-<Button Content="📋 Nova Prescrição (Template)" 
+<Button Content="📋 Nova Prescrição (Template)"
         Command="{Binding AbrirTemplateCommand}"
         Background="#9CAF97"
         Foreground="White"
@@ -783,8 +783,8 @@ public partial class TemplateViewModel : ViewModelBase
 
 ---
 
-**Autor**: GitHub Copilot  
-**Data**: 07 de outubro de 2025  
-**Versão**: 1.0  
-**Baseado em**: RESUMO_SESSAO_04OUT2025.md (linhas 100-120)  
+**Autor**: GitHub Copilot
+**Data**: 07 de outubro de 2025
+**Versão**: 1.0
+**Baseado em**: RESUMO_SESSAO_04OUT2025.md (linhas 100-120)
 **Status**: 📋 Documentação Completa

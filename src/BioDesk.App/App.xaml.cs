@@ -253,6 +253,9 @@ Inner Exceptions:
         services.AddSingleton<IDocumentoService, DocumentoService>();
         services.AddSingleton<IDocumentosPacienteService, DocumentosPacienteService>();
 
+        // === TEMPLATE SERVICES (Templates PDF) ===
+        services.AddSingleton<BioDesk.Services.Templates.ITemplatesPdfService, BioDesk.Services.Templates.TemplatesPdfService>();
+
         // === CAMERA SERVICE (captura REAL de íris via USB com AForge.NET) ===
         services.AddSingleton<ICameraService, RealCameraService>();
 
@@ -279,6 +282,7 @@ Inner Exceptions:
         services.AddTransient<RegistoConsultasViewModel>(); // ABA 4: Registo de Sessões
         services.AddTransient<IrisdiagnosticoViewModel>(); // ✅ ABA 5: Irisdiagnóstico
         services.AddTransient<ComunicacaoViewModel>(); // ✅ ABA 6: Comunicação
+        services.AddTransient<SelecionarTemplatesViewModel>(); // ⭐ NOVO: Pop-up de templates PDF
 
         // Views - SISTEMA LIMPO
         services.AddSingleton<MainWindow>();

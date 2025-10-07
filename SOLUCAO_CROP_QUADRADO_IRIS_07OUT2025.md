@@ -210,7 +210,7 @@ Antes de confirmar solução:
 
 ---
 
-**Autor**: GitHub Copilot  
-**Data**: 07 de outubro de 2025  
-**Versão**: 1.0  
+**Autor**: GitHub Copilot
+**Data**: 07 de outubro de 2025
+**Versão**: 1.0
 **Status**: ✅ Implementado, aguardando testes

@@ -55,20 +55,20 @@
 <Canvas Width="1400" Height="1400">
     <!-- LAYER 0: Placeholder (Z-Index: 0) -->
     <TextBlock Panel.ZIndex="0" .../>
-    
+
     <!-- LAYER 1: Imagem Real da Íris (Z-Index: 1) -->
     <Image x:Name="IrisCentralImage"
            Width="1400" Height="1400"
            Stretch="Uniform"
            Panel.ZIndex="1"/>
-    
+
     <!-- LAYER 2: Mapa Iridológico + Polígonos (Z-Index: 2) -->
     <Canvas x:Name="MapaOverlayCanvas"
             Width="1400" Height="1400"
             Panel.ZIndex="2">
         <!-- Polígonos das zonas -->
         <ItemsControl ItemsSource="{Binding PoligonosZonas}"/>
-        
+
         <!-- Círculos de calibração -->
         <Ellipse ... /> <!-- Círculo Pupila -->
         <Ellipse ... /> <!-- Círculo Limbo -->

@@ -25,7 +25,7 @@ public class TemplateService : ITemplateService
     {
         _logger = logger;
         _pacienteRepository = pacienteRepository;
-        
+
         // Pasta Templates/ na raiz do projeto
         _templatesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "Templates");
         _logger.LogInformation("TemplateService inicializado. Pasta templates: {Path}", _templatesPath);
@@ -36,7 +36,7 @@ public class TemplateService : ITemplateService
         try
         {
             var emailsPath = Path.Combine(_templatesPath, "Emails");
-            
+
             if (!Directory.Exists(emailsPath))
             {
                 _logger.LogWarning("Pasta de templates de email não encontrada: {Path}", emailsPath);
@@ -93,8 +93,8 @@ public class TemplateService : ITemplateService
     }
 
     public async Task<EmailPreenchido> PreencherTemplateEmailAsync(
-        string templateId, 
-        int pacienteId, 
+        string templateId,
+        int pacienteId,
         Dictionary<string, string>? dadosAdicionais = null)
     {
         try

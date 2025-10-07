@@ -1,0 +1,9 @@
+# Template: Exemplo de uso
+
+Este é um template PDF de exemplo. Substitua este ficheiro pelos seus próprios PDFs.
+
+Os nomes dos ficheiros serão convertidos automaticamente:
+- `Escoliose_Dorsal.pdf` → "Escoliose Dorsal"
+- `Dieta_Anti_Inflamatoria.pdf` → "Dieta Anti Inflamatória"
+
+Coloque os seus PDFs de protocolos, dietas e exercícios aqui!

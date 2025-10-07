@@ -34,7 +34,7 @@ Maximizar o aproveitamento do espaço no canvas de visualização da íris, redu
 </Grid.ColumnDefinitions>
 ```
 
-**Solução**: 
+**Solução**:
 - Coluna central reduzida para **50%** → mais próxima de quadrado
 - Coluna direita aumentada para **30%** → controlos mais espaçosos
 
@@ -75,7 +75,7 @@ Maximizar o aproveitamento do espaço no canvas de visualização da íris, redu
 </Viewbox>
 ```
 
-**Razão**: 
+**Razão**:
 - `Stretch="Fill"` causava **distorção horizontal** da imagem
 - `Stretch="Uniform"` mantém **proporções corretas** (1:1)
 - Com coluna mais estreita, o Uniform renderiza mais próximo de quadrado
@@ -238,8 +238,8 @@ Viewbox Uniform: renderiza 960x960px (se imagem for quadrada)
 
 ---
 
-**Autor**: GitHub Copilot  
-**Data**: 07 de outubro de 2025  
-**Versão**: 1.0  
-**Status**: ✅ Implementado e testado  
+**Autor**: GitHub Copilot
+**Data**: 07 de outubro de 2025
+**Versão**: 1.0
+**Status**: ✅ Implementado e testado
 **Integra com**: SOLUCAO_CROP_QUADRADO_IRIS_07OUT2025.md

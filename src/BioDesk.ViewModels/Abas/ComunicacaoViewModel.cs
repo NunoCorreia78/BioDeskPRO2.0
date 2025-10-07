@@ -10,6 +10,7 @@ using BioDesk.Data;
 using BioDesk.Domain.Entities;
 using BioDesk.Services.Email;
 using BioDesk.Services.Documentos;
+using BioDesk.Services.Templates;
 using BioDesk.ViewModels.Base;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -29,6 +30,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
     private readonly BioDeskDbContext _dbContext;
     private readonly IDocumentoService _documentoService;
     private readonly IDocumentosPacienteService _documentosPacienteService;
+    private readonly ITemplatesPdfService _templatesPdfService;
 
     [ObservableProperty] private Paciente? _pacienteAtual;
     [ObservableProperty] private ObservableCollection<Comunicacao> _historicoComunicacoes = new();
@@ -129,6 +131,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
     // Templates
     public ObservableCollection<string> Templates { get; } = new()
     {
+        "Envio de Documentos", // ⭐ NOVO: Template para anexar documentos
         "Prescrição",
         "Confirmação de Consulta",
         "Follow-up",
@@ -143,13 +146,15 @@ public partial class ComunicacaoViewModel : ViewModelBase
         IEmailService emailService,
         BioDeskDbContext dbContext,
         IDocumentoService documentoService,
-        IDocumentosPacienteService documentosPacienteService)
+        IDocumentosPacienteService documentosPacienteService,
+        ITemplatesPdfService templatesPdfService)
     {
         _logger = logger;
         _emailService = emailService;
         _dbContext = dbContext;
         _documentoService = documentoService;
         _documentosPacienteService = documentosPacienteService;
+        _templatesPdfService = templatesPdfService;
 
         _logger.LogInformation("ComunicacaoViewModel inicializado");
 
@@ -192,6 +197,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
         // ⭐ CORREÇÃO: Preencher ASSUNTO automaticamente
         Assunto = value switch
         {
+            "Envio de Documentos" => "Documentação Anexa", // ⭐ NOVO
             "Prescrição" => "Prescrição de Tratamento",
             "Confirmação de Consulta" => "Confirmação de Consulta",
             "Follow-up" => "Acompanhamento de Tratamento",
@@ -201,6 +207,19 @@ public partial class ComunicacaoViewModel : ViewModelBase
 
         Corpo = value switch
         {
+            "Envio de Documentos" => $@"Olá {PacienteAtual.NomeCompleto},
+
+Conforme solicitado, segue em anexo a documentação necessária.
+
+Se tiver alguma dúvida, estou à disposição.
+
+Cumprimentos,
+
+Nuno Correia - Terapias Naturais
+Naturopatia - Osteopatia - Medicina Bioenergética
+📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
+🌿 Cuidar de si, naturalmente",
+
             "Prescrição" => $@"Olá {PacienteAtual.NomeCompleto},
 
 Conforme conversado na consulta, segue em anexo a prescrição recomendada.
@@ -384,6 +403,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 // Limpar formulário
                 Assunto = string.Empty;
                 Corpo = string.Empty;
+                TemplateSelecionado = "Personalizado"; // ⭐ CORREÇÃO: Limpar dropdown
                 AgendarEnvio = false;
                 DataEnvioAgendado = DateTime.Now.AddDays(1).Date.AddHours(9);
                 Anexos.Clear();
@@ -468,6 +488,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
             // Limpar formulário
             Assunto = string.Empty;
             Corpo = string.Empty;
+            TemplateSelecionado = "Personalizado"; // ⭐ CORREÇÃO: Limpar dropdown
             Anexos.Clear(); // ⭐ Limpar anexos
             StatusAnexos = string.Empty;
 
@@ -591,6 +612,113 @@ Naturopatia - Osteopatia - Medicina Bioenergética
         }
     }
 
+    /// <summary>
+    /// ⭐ NOVO: Abre pop-up para selecionar templates PDF
+    /// Templates selecionados são adicionados automaticamente aos anexos
+    /// </summary>
+    [RelayCommand]
+    private async Task SelecionarTemplatesPdfAsync()
+    {
+        if (PacienteAtual == null)
+        {
+            ErrorMessage = "Nenhum paciente selecionado!";
+            return;
+        }
+
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            // Criar lista de templates disponíveis
+            var templates = await _templatesPdfService.ListarTemplatesAsync();
+
+            if (!templates.Any())
+            {
+                ErrorMessage = "Nenhum template PDF encontrado na pasta Templates/PDFs/";
+                _logger.LogWarning("⚠️ Pasta de templates vazia");
+                return;
+            }
+
+            // Criar ViewModels para binding
+            var templatesVm = templates.Select(t => new TemplatePdfViewModel(
+                t.Nome,
+                t.CaminhoCompleto,
+                t.NomeFicheiro,
+                t.TamanhoFormatado))
+                .ToList();
+
+            // TODO: Mostrar pop-up de seleção
+            // Por agora, vamos usar uma abordagem simples sem pop-up custom
+            // O pop-up será adicionado na próxima fase
+
+            _logger.LogInformation("📋 Listados {Count} templates para seleção", templates.Count);
+
+        }, "Erro ao selecionar templates", _logger);
+    }
+
+    /// <summary>
+    /// ⭐ NOVO: Abre file picker para adicionar novo template PDF à pasta Templates/PDFs/
+    /// </summary>
+    [RelayCommand]
+    private async Task AdicionarNovoTemplatePdfAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            await Task.CompletedTask; // Suprime warning CS1998 (diálogo é síncrono)
+
+            // Abrir file picker para selecionar PDF
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Selecionar Template PDF",
+                Filter = "Ficheiros PDF (*.pdf)|*.pdf",
+                Multiselect = false,
+                CheckFileExists = true
+            };
+
+            if (dialog.ShowDialog() != true)
+            {
+                _logger.LogDebug("📋 Utilizador cancelou seleção de template");
+                return;
+            }
+
+            var sourceFile = dialog.FileName;
+            var fileName = System.IO.Path.GetFileName(sourceFile);
+
+            // Calcular caminho da pasta Templates/PDFs/
+            var templatesPdfPath = System.IO.Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "../../../../Templates/PDFs");
+
+            var templatesPdfFullPath = System.IO.Path.GetFullPath(templatesPdfPath);
+
+            // Garantir que pasta existe
+            System.IO.Directory.CreateDirectory(templatesPdfFullPath);
+
+            var destFile = System.IO.Path.Combine(templatesPdfFullPath, fileName);
+
+            // Verificar se já existe
+            if (System.IO.File.Exists(destFile))
+            {
+                var msgBox = System.Windows.MessageBox.Show(
+                    $"O ficheiro '{fileName}' já existe na pasta de templates.\n\nDeseja substituir?",
+                    "Template Existente",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Question);
+
+                if (msgBox != System.Windows.MessageBoxResult.Yes)
+                {
+                    _logger.LogDebug("📋 Utilizador cancelou substituição de template existente");
+                    return;
+                }
+            }
+
+            // Copiar ficheiro
+            System.IO.File.Copy(sourceFile, destFile, overwrite: true);
+
+            SuccessMessage = $"✅ Template '{fileName}' adicionado com sucesso!";
+            _logger.LogInformation("📋 Template adicionado: {File} → {Dest}", sourceFile, destFile);
+
+        }, "Erro ao adicionar template", _logger);
+    }
+
     private void AtualizarStatusAnexos()
     {
         if (Anexos.Count == 0)
@@ -622,13 +750,26 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         IsLoading = true;
 
+        // ⭐ CORREÇÃO: Limpar cache do EF Core para garantir dados frescos da BD
+        foreach (var entry in _dbContext.ChangeTracker.Entries<Comunicacao>())
+        {
+            entry.Reload();
+        }
+
         var historico = await _dbContext.Comunicacoes
+            .AsNoTracking() // ⭐ Garantir dados frescos da BD (não cache)
             .Where(c => c.PacienteId == PacienteAtual.Id && !c.IsDeleted)
             .OrderByDescending(c => c.DataCriacao)
             .Take(10)  // ⭐ Limitar aos últimos 10 para melhor performance
             .ToListAsync();
 
-        HistoricoComunicacoes = new ObservableCollection<Comunicacao>(historico);
+        HistoricoComunicacoes.Clear();
+        foreach (var comunicacao in historico)
+        {
+            HistoricoComunicacoes.Add(comunicacao);
+        }
+
+        _logger.LogInformation("📋 Histórico recarregado: {Count} comunicações", historico.Count);
 
         IsLoading = false;
     }

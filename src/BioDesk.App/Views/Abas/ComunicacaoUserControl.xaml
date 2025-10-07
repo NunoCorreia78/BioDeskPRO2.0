@@ -413,6 +413,39 @@
                                         <TextBlock Text="Anexar Ficheiro" FontSize="12"/>
                                     </StackPanel>
                                 </Button>
+
+                                <!-- ⭐ NOVO: Botão Selecionar Templates -->
+                                <Button Click="BtnSelecionarTemplates_Click"
+                                        Background="#879B83"
+                                        Foreground="White"
+                                        Padding="10,6"
+                                        Margin="8,0,0,0"
+                                        Cursor="Hand"
+                                        BorderThickness="0"
+                                        DockPanel.Dock="Left"
+                                        ToolTip="Selecionar templates PDF para anexar">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="📋" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Selecionar Templates" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- ⭐ NOVO: Botão Adicionar Novo Template -->
+                                <Button Command="{Binding AdicionarNovoTemplatePdfCommand}"
+                                        Background="#7A8C73"
+                                        Foreground="White"
+                                        Padding="10,6"
+                                        Margin="8,0,0,0"
+                                        Cursor="Hand"
+                                        BorderThickness="0"
+                                        DockPanel.Dock="Left"
+                                        ToolTip="Adicionar novo template PDF à biblioteca">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="➕" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Adicionar Template" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+
                                 <TextBlock Text="{Binding StatusAnexos}"
                                            FontSize="11"
                                            Foreground="#5A6558"

@@ -1,0 +1,246 @@
+<Window x:Class="BioDesk.App.Views.Dialogs.SelecionarTemplatesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodels="clr-namespace:BioDesk.ViewModels.Abas;assembly=BioDesk.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewmodels:SelecionarTemplatesViewModel}"
+        Title="📋 Selecionar Templates de Tratamento"
+        Height="600" Width="700"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        ShowInTaskbar="False"
+        Background="#FCFDFB">
+
+    <Window.Resources>
+        <!-- Estilo para CheckBox com visual moderno -->
+        <Style x:Key="TemplateCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#3F4A3D"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,8,0,8"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Estilo para botão Preview (olho) -->
+        <Style x:Key="PreviewButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#9CAF97"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="0"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E3E9DE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo para botões principais -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#9CAF97"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#879B83"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo para botão secundário (cancelar) -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="#E3E9DE"/>
+            <Setter Property="Foreground" Value="#3F4A3D"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Título -->
+            <RowDefinition Height="Auto"/> <!-- Pesquisa -->
+            <RowDefinition Height="Auto"/> <!-- Selecionar todos -->
+            <RowDefinition Height="*"/>    <!-- Lista templates -->
+            <RowDefinition Height="Auto"/> <!-- Status -->
+            <RowDefinition Height="Auto"/> <!-- Botões -->
+        </Grid.RowDefinitions>
+
+        <!-- Título -->
+        <TextBlock Grid.Row="0"
+                   Text="Selecione os templates que deseja anexar ao email:"
+                   FontSize="14"
+                   Foreground="#5A6558"
+                   Margin="0,0,0,16"/>
+
+        <!-- Campo de pesquisa -->
+        <Border Grid.Row="1"
+                Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="6"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ícone pesquisa -->
+                <TextBlock Grid.Column="0"
+                           Text="🔍"
+                           FontSize="16"
+                           Margin="12,0,8,0"
+                           VerticalAlignment="Center"/>
+
+                <!-- TextBox pesquisa -->
+                <TextBox Grid.Column="1"
+                         Text="{Binding TextoPesquisa, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="14"
+                         Padding="4,8"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         VerticalAlignment="Center">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Foreground" Value="#3F4A3D"/>
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <VisualBrush Stretch="None" AlignmentX="Left">
+                                                <VisualBrush.Visual>
+                                                    <TextBlock Text="Pesquisar templates..."
+                                                               Foreground="#5A6558"
+                                                               FontSize="14"
+                                                               Opacity="0.6"/>
+                                                </VisualBrush.Visual>
+                                            </VisualBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+            </Grid>
+        </Border>
+
+        <!-- Selecionar todos -->
+        <CheckBox Grid.Row="2"
+                  Content="☑ Selecionar todos"
+                  IsChecked="{Binding SelecionarTodos}"
+                  Style="{StaticResource TemplateCheckBoxStyle}"
+                  FontWeight="SemiBold"
+                  Margin="0,0,0,12"/>
+
+        <!-- Lista de templates -->
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="6"
+                Margin="0,0,0,12">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding TemplatesFiltrados}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#F2F5F0"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="12,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/> <!-- CheckBox -->
+                                        <ColumnDefinition Width="*"/>    <!-- Nome + Tamanho -->
+                                        <ColumnDefinition Width="Auto"/> <!-- Botão Preview -->
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- CheckBox -->
+                                    <CheckBox Grid.Column="0"
+                                              IsChecked="{Binding Selecionado}"
+                                              VerticalAlignment="Center"
+                                              Margin="0,0,12,0"/>
+
+                                    <!-- Nome e tamanho -->
+                                    <StackPanel Grid.Column="1"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Nome}"
+                                                   FontSize="14"
+                                                   FontWeight="Medium"
+                                                   Foreground="#3F4A3D"/>
+                                        <TextBlock Text="{Binding TamanhoFormatado}"
+                                                   FontSize="12"
+                                                   Foreground="#5A6558"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+
+                                    <!-- Botão Preview -->
+                                    <Button Grid.Column="2"
+                                            Content="👁"
+                                            Command="{Binding DataContext.PreviewTemplateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding CaminhoCompleto}"
+                                            Style="{StaticResource PreviewButtonStyle}"
+                                            ToolTip="Visualizar PDF"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Status (templates selecionados) -->
+        <TextBlock Grid.Row="4"
+                   Text="{Binding StatusSelecao}"
+                   FontSize="13"
+                   Foreground="#5A6558"
+                   FontWeight="Medium"
+                   Margin="0,0,0,16"
+                   HorizontalAlignment="Center"/>
+
+        <!-- Botões de ação -->
+        <StackPanel Grid.Row="5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <Button Content="❌ Cancelar"
+                    Click="BtnCancelar_Click"
+                    Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Content="✅ Adicionar Anexos"
+                    Click="BtnAdicionar_Click"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    IsEnabled="{Binding TemTemplatesSelecionados}"/>
+        </StackPanel>
+    </Grid>
+</Window>
