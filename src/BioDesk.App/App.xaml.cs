@@ -253,6 +253,9 @@ Inner Exceptions:
         services.AddSingleton<IDocumentoService, DocumentoService>();
         services.AddSingleton<IDocumentosPacienteService, DocumentosPacienteService>();
 
+        // === TEMPLATE SERVICE (templates PDF para enviar aos pacientes) ===
+        services.AddScoped<Services.Templates.ITemplateService, Services.Templates.TemplateService>();
+
         // === CAMERA SERVICE (captura REAL de íris via USB com AForge.NET) ===
         services.AddSingleton<ICameraService, RealCameraService>();
 
