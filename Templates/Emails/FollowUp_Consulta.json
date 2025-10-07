@@ -1,0 +1,15 @@
+{
+  "id": "email_followup_consulta",
+  "nome": "Follow-up Pós-Consulta",
+  "categoria": "Email",
+  "descricao": "Email de acompanhamento após consulta",
+  "versao": "1.0",
+  "assunto": "🌿 Como se sente após a consulta?",
+  "corpo": "Olá {{NomePaciente}},\n\nEspero que se encontre bem!\n\nJá passou uma semana desde a sua consulta de {{TipoConsulta}} e gostaria de saber como se sente.\n\n📋 Por favor, informe-me sobre:\n• Como está a evolução dos sintomas?\n• Está a seguir as recomendações?\n• Tem alguma dúvida ou dificuldade?\n• Notou alguma melhoria ou alteração?\n\nEstou disponível para esclarecer qualquer questão ou ajustar o plano de tratamento, se necessário.\n\nResponda este email ou contacte-me por telefone.\n\nContinuação de boas melhoras!\n\n{{NomeTerapeuta}}\nBioDeskPro - Terapias Naturais\n{{ContactoTerapeuta}}",
+  "variaveis": [
+    "NomePaciente",
+    "TipoConsulta",
+    "NomeTerapeuta",
+    "ContactoTerapeuta"
+  ]
+}

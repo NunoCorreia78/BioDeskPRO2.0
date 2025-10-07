@@ -1,0 +1,17 @@
+{
+  "id": "email_confirmacao_consulta",
+  "nome": "Confirmação de Consulta",
+  "categoria": "Email",
+  "descricao": "Email automático de confirmação de agendamento",
+  "versao": "1.0",
+  "assunto": "✅ Consulta Confirmada - {{DataConsulta}} às {{HoraConsulta}}",
+  "corpo": "Olá {{NomePaciente}},\n\nA sua consulta de {{TipoConsulta}} foi confirmada para:\n\n📅 Data: {{DataConsulta}}\n🕐 Hora: {{HoraConsulta}}\n📍 Local: BioDeskPro - Clínica de Terapias Naturais\n\nPor favor, chegue 10 minutos antes da hora marcada.\n\nEm caso de necessidade de reagendamento, contacte-nos com pelo menos 24h de antecedência através do email ou telefone.\n\nAtenciosamente,\n{{NomeTerapeuta}}\nBioDeskPro - Terapias Naturais\n{{ContactoTerapeuta}}",
+  "variaveis": [
+    "NomePaciente",
+    "DataConsulta",
+    "HoraConsulta",
+    "TipoConsulta",
+    "NomeTerapeuta",
+    "ContactoTerapeuta"
+  ]
+}

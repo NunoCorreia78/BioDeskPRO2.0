@@ -1,0 +1,16 @@
+{
+  "id": "email_lembrete_consulta",
+  "nome": "Lembrete de Consulta",
+  "categoria": "Email",
+  "descricao": "Lembrete enviado 24h antes da consulta",
+  "versao": "1.0",
+  "assunto": "🔔 Lembrete: Consulta Amanhã às {{HoraConsulta}}",
+  "corpo": "Olá {{NomePaciente}},\n\nEste é um lembrete da sua consulta agendada para amanhã:\n\n📅 Data: {{DataConsulta}}\n🕐 Hora: {{HoraConsulta}}\n📍 Local: BioDeskPro - Clínica de Terapias Naturais\n\n💡 Recomendações:\n• Chegue 10 minutos antes\n• Traga exames ou relatórios médicos recentes (se aplicável)\n• Vista roupa confortável\n\nSe precisar reagendar, contacte-nos o quanto antes.\n\nAté amanhã!\n\n{{NomeTerapeuta}}\nBioDeskPro - Terapias Naturais\n{{ContactoTerapeuta}}",
+  "variaveis": [
+    "NomePaciente",
+    "DataConsulta",
+    "HoraConsulta",
+    "NomeTerapeuta",
+    "ContactoTerapeuta"
+  ]
+}
