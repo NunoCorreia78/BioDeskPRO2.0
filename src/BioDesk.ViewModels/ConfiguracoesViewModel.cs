@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using BioDesk.Services.Email;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -242,5 +244,73 @@ public partial class ConfiguracoesViewModel : ObservableObject
         StatusBorder = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#93C5FD"));
         StatusForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E40AF"));
         MostrarStatus = true;
+    }
+
+    /// <summary>
+    /// Adicionar novo template PDF para prescrições
+    /// </summary>
+    [RelayCommand]
+    private async Task AdicionarNovoTemplatePdf()
+    {
+        try
+        {
+            // OpenFileDialog para selecionar PDF
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Selecionar Template PDF",
+                Filter = "Ficheiros PDF (*.pdf)|*.pdf",
+                Multiselect = false
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Copiar para pasta Templates
+                var templatesFolder = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory, 
+                    "Templates");
+                
+                Directory.CreateDirectory(templatesFolder);
+                
+                var fileName = Path.GetFileName(dialog.FileName);
+                var destinationPath = Path.Combine(templatesFolder, fileName);
+                
+                // Verificar se já existe
+                if (File.Exists(destinationPath))
+                {
+                    var result = MessageBox.Show(
+                        $"Já existe um template com o nome '{fileName}'.\n\nDeseja substituir?",
+                        "Template Existente",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    
+                    if (result != MessageBoxResult.Yes)
+                    {
+                        _logger.LogInformation("ℹ️ Utilizador cancelou substituição de template");
+                        return;
+                    }
+                }
+                
+                File.Copy(dialog.FileName, destinationPath, overwrite: true);
+                
+                _logger.LogInformation("✅ Template PDF copiado: {FileName}", fileName);
+                
+                MessageBox.Show(
+                    $"Template '{fileName}' adicionado com sucesso!\n\nPasta: {templatesFolder}",
+                    "✅ Template Adicionado",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao adicionar template PDF");
+            MessageBox.Show(
+                $"Erro ao adicionar template:\n\n{ex.Message}",
+                "❌ Erro",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        
+        await Task.CompletedTask;
     }
 }

@@ -32,98 +32,293 @@
                       Margin="0,5,0,0"/>
         </StackPanel>
 
-        <!-- Conteúdo Principal -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <!-- Secção: Configurações de Email -->
-                <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                       CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                            <TextBlock Text="📧" FontSize="20" Margin="0,0,10,0"/>
-                            <TextBlock Text="Configurações de Email"
-                                      FontSize="18" FontWeight="SemiBold"
-                                      Foreground="{StaticResource TextoPrincipal}"
-                                      VerticalAlignment="Center"/>
-                        </StackPanel>
+        <!-- Conteúdo Principal: TabControl com 4 Secções -->
+        <TabControl Grid.Row="1" TabStripPlacement="Left" Margin="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" 
+                                           FontSize="14" 
+                                           Padding="20,15"/>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="#E3E9DE"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#9CAF97"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TabControl.Resources>
 
-                        <!-- Email Remetente -->
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Email de Envio *"
-                                      Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding EmailRemetente, UpdateSourceTrigger=PropertyChanged}"
-                                    Style="{StaticResource FieldTextBoxStyle}"
-                                    Tag="exemplo@gmail.com"/>
-                            <TextBlock Text="Email da conta Gmail que enviará as comunicações"
-                                      FontSize="10" Foreground="{StaticResource TextoSecundario}"
-                                      Margin="0,4,0,0"/>
-                        </StackPanel>
-
-                        <!-- App Password do Gmail -->
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="App Password do Gmail *"
-                                      Style="{StaticResource FieldLabelStyle}"/>
-                            <PasswordBox x:Name="PasswordBox"
-                                        Style="{StaticResource FieldPasswordBoxStyle}"
-                                        PasswordChanged="PasswordBox_PasswordChanged"/>
-                            <TextBlock Text="⚠️ Use uma App Password, não a senha normal da conta"
-                                      FontSize="10" Foreground="#D97706"
-                                      Margin="0,4,0,0"/>
-                        </StackPanel>
-
-                        <!-- Nome do Remetente -->
-                        <StackPanel Margin="0,0,0,20">
-                            <TextBlock Text="Nome do Remetente"
-                                      Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding NomeRemetente, UpdateSourceTrigger=PropertyChanged}"
-                                    Style="{StaticResource FieldTextBoxStyle}"
-                                    Tag="Clínica de Terapias Naturais"/>
-                            <TextBlock Text="Nome que aparecerá nos emails enviados"
-                                      FontSize="10" Foreground="{StaticResource TextoSecundario}"
-                                      Margin="0,4,0,0"/>
-                        </StackPanel>
-
-                        <!-- Instruções de Segurança -->
-                        <Border Background="#FEF3C7" BorderBrush="#FCD34D" BorderThickness="1"
-                               CornerRadius="8" Padding="15">
+            <!-- TAB 1: EMAIL (CONTEÚDO EXISTENTE) -->
+            <TabItem Header="📧 Email">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="30">
+                        <!-- Secção: Configurações de Email -->
+                        <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
+                               CornerRadius="12" Padding="25" Margin="0,0,0,20">
                             <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <TextBlock Text="🔐" FontSize="16" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Como Obter uma App Password do Gmail"
-                                              FontWeight="SemiBold" FontSize="13"
-                                              Foreground="#92400E"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                    <TextBlock Text="📧" FontSize="20" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Configurações de Email"
+                                              FontSize="18" FontWeight="SemiBold"
+                                              Foreground="{StaticResource TextoPrincipal}"
+                                              VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#92400E" LineHeight="18">
-                                    <Run Text="1. Aceda a:"/>
-                                    <Run Text="https://myaccount.google.com/apppasswords" FontWeight="SemiBold"/>
-                                    <LineBreak/>
-                                    <Run Text="2. Faça login na sua conta Gmail"/>
-                                    <LineBreak/>
-                                    <Run Text="3. Clique em 'Criar' e escolha um nome (ex: BioDeskPro)"/>
-                                    <LineBreak/>
-                                    <Run Text="4. Copie a password gerada (16 caracteres) e cole aqui"/>
-                                    <LineBreak/>
-                                    <LineBreak/>
-                                    <Run Text="⚠️ Esta password é diferente da senha normal da sua conta e é mais segura!" FontWeight="SemiBold"/>
-                                </TextBlock>
+
+                                <!-- Email Remetente -->
+                                <StackPanel Margin="0,0,0,15">
+                                    <TextBlock Text="Email de Envio *"
+                                              Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox Text="{Binding EmailRemetente, UpdateSourceTrigger=PropertyChanged}"
+                                            Style="{StaticResource FieldTextBoxStyle}"
+                                            Tag="exemplo@gmail.com"/>
+                                    <TextBlock Text="Email da conta Gmail que enviará as comunicações"
+                                              FontSize="10" Foreground="{StaticResource TextoSecundario}"
+                                              Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <!-- App Password do Gmail -->
+                                <StackPanel Margin="0,0,0,15">
+                                    <TextBlock Text="App Password do Gmail *"
+                                              Style="{StaticResource FieldLabelStyle}"/>
+                                    <PasswordBox x:Name="PasswordBox"
+                                                Style="{StaticResource FieldPasswordBoxStyle}"
+                                                PasswordChanged="PasswordBox_PasswordChanged"/>
+                                    <TextBlock Text="⚠️ Use uma App Password, não a senha normal da conta"
+                                              FontSize="10" Foreground="#D97706"
+                                              Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <!-- Nome do Remetente -->
+                                <StackPanel Margin="0,0,0,20">
+                                    <TextBlock Text="Nome do Remetente"
+                                              Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox Text="{Binding NomeRemetente, UpdateSourceTrigger=PropertyChanged}"
+                                            Style="{StaticResource FieldTextBoxStyle}"
+                                            Tag="Clínica de Terapias Naturais"/>
+                                    <TextBlock Text="Nome que aparecerá nos emails enviados"
+                                              FontSize="10" Foreground="{StaticResource TextoSecundario}"
+                                              Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <!-- Instruções de Segurança -->
+                                <Border Background="#FEF3C7" BorderBrush="#FCD34D" BorderThickness="1"
+                                       CornerRadius="8" Padding="15">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                            <TextBlock Text="🔐" FontSize="16" Margin="0,0,8,0"/>
+                                            <TextBlock Text="Como Obter uma App Password do Gmail"
+                                                      FontWeight="SemiBold" FontSize="13"
+                                                      Foreground="#92400E"/>
+                                        </StackPanel>
+                                        <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#92400E" LineHeight="18">
+                                            <Run Text="1. Aceda a:"/>
+                                            <Run Text="https://myaccount.google.com/apppasswords" FontWeight="SemiBold"/>
+                                            <LineBreak/>
+                                            <Run Text="2. Faça login na sua conta Gmail"/>
+                                            <LineBreak/>
+                                            <Run Text="3. Clique em 'Criar' e escolha um nome (ex: BioDeskPro)"/>
+                                            <LineBreak/>
+                                            <Run Text="4. Copie a password gerada (16 caracteres) e cole aqui"/>
+                                            <LineBreak/>
+                                            <LineBreak/>
+                                            <Run Text="⚠️ Esta password é diferente da senha normal da sua conta e é mais segura!" FontWeight="SemiBold"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Status de Configuração -->
+                        <Border Background="{Binding StatusBackground}" BorderBrush="{Binding StatusBorder}"
+                               BorderThickness="1" CornerRadius="8" Padding="15"
+                               Visibility="{Binding MostrarStatus, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding StatusIcon}" FontSize="16" Margin="0,0,10,0"/>
+                                <TextBlock Text="{Binding StatusMensagem}" FontSize="12"
+                                          Foreground="{Binding StatusForeground}"
+                                          TextWrapping="Wrap" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                </Border>
+                </ScrollViewer>
+            </TabItem>
 
-                <!-- Status de Configuração -->
-                <Border Background="{Binding StatusBackground}" BorderBrush="{Binding StatusBorder}"
-                       BorderThickness="1" CornerRadius="8" Padding="15"
-                       Visibility="{Binding MostrarStatus, Converter={StaticResource BoolToVisibility}}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding StatusIcon}" FontSize="16" Margin="0,0,10,0"/>
-                        <TextBlock Text="{Binding StatusMensagem}" FontSize="12"
-                                  Foreground="{Binding StatusForeground}"
-                                  TextWrapping="Wrap" VerticalAlignment="Center"/>
+            <!-- TAB 2: TEMPLATES PDF (NOVO) -->
+            <TabItem Header="📄 Templates PDF">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="30">
+                        <TextBlock Text="📄 Gestão de Templates PDF" 
+                                   FontSize="20" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#3F4A3D" 
+                                   Margin="0,0,0,20"/>
+
+                        <TextBlock Text="Templates disponíveis para prescrições e documentos" 
+                                   FontSize="13" 
+                                   Foreground="#5A6558" 
+                                   Margin="0,0,0,30"/>
+
+                        <!-- Botão Adicionar Novo Template -->
+                        <Button Command="{Binding AdicionarNovoTemplatePdfCommand}"
+                                Background="#9CAF97"
+                                Foreground="White"
+                                Padding="15,10"
+                                Margin="0,0,0,20"
+                                HorizontalAlignment="Left"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                ToolTip="Copiar ficheiro PDF para a pasta Templates">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="6"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="➕" FontSize="16" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="Adicionar Template PDF" FontSize="14"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#879B83"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Lista de Templates (binding futuro) -->
+                        <Border Background="White" 
+                                BorderBrush="#E3E9DE" 
+                                BorderThickness="1" 
+                                CornerRadius="8" 
+                                Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="📂 Templates Encontrados:" 
+                                           FontWeight="SemiBold" 
+                                           Margin="0,0,0,10"/>
+                                
+                                <!-- TODO: Adicionar ListBox com binding a TemplatesPdf -->
+                                <TextBlock Text="(Lista de templates será implementada em versão futura)" 
+                                           FontStyle="Italic" 
+                                           Foreground="#999"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- TAB 3: PREFERÊNCIAS (NOVO) -->
+            <TabItem Header="🎨 Preferências">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="30">
+                        <TextBlock Text="🎨 Preferências do Sistema" 
+                                   FontSize="20" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#3F4A3D" 
+                                   Margin="0,0,0,20"/>
+
+                        <TextBlock Text="(Funcionalidades futuras: Temas, Idioma, Formato de Data)" 
+                                   FontStyle="Italic" 
+                                   Foreground="#999"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- TAB 4: SISTEMA (NOVO) -->
+            <TabItem Header="🔧 Sistema">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="30">
+                        <TextBlock Text="🔧 Informações do Sistema" 
+                                   FontSize="20" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="#3F4A3D" 
+                                   Margin="0,0,0,20"/>
+
+                        <!-- Informações de Versão -->
+                        <Border Background="White" 
+                                BorderBrush="#E3E9DE" 
+                                BorderThickness="1" 
+                                CornerRadius="8" 
+                                Padding="20" 
+                                Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="💻 Versão" 
+                                           FontWeight="SemiBold" 
+                                           Margin="0,0,0,10"/>
+                                <TextBlock Text="BioDeskPro2 v1.0.0" 
+                                           FontSize="14"/>
+                                <TextBlock Text=".NET 8.0 | WPF | SQLite" 
+                                           FontSize="12" 
+                                           Foreground="#999" 
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Base de Dados -->
+                        <Border Background="White" 
+                                BorderBrush="#E3E9DE" 
+                                BorderThickness="1" 
+                                CornerRadius="8" 
+                                Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="💾 Base de Dados" 
+                                           FontWeight="SemiBold" 
+                                           Margin="0,0,0,10"/>
+                                <TextBlock Text="biodesk.db (SQLite)" 
+                                           FontSize="14"/>
+                                <Button Content="📂 Abrir Pasta" 
+                                        Padding="10,5" 
+                                        HorizontalAlignment="Left" 
+                                        Margin="0,10,0,0"
+                                        Background="#9CAF97"
+                                        Foreground="White"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        ToolTip="Abrir pasta com ficheiro da base de dados">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}"
+                                                                CornerRadius="4"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#879B83"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
 
         <!-- Rodapé com Botões -->
         <Border Grid.Row="2" Padding="0,20,0,0" BorderBrush="#E3E9DE" BorderThickness="0,1,0,0">
