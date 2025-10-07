@@ -9,7 +9,7 @@ namespace BioDesk.App.Views;
 
 /// <summary>
 /// UserControl para ficha completa de paciente com navegação por separadores
-/// Sistema de 6 abas sequenciais: Dados Biográficos → Declaração → Consentimentos → Consultas → Comunicação → Terapias
+/// Sistema de 7 abas sequenciais: Dados Biográficos → Declaração → Consentimentos → Consultas → Íris → Emails → Terapias
 /// </summary>
 public partial class FichaPacienteView : UserControl
 {
@@ -18,6 +18,7 @@ public partial class FichaPacienteView : UserControl
     private DeclaracaoSaudeViewModel? _declaracaoSaudeViewModel;
     private ConsentimentosViewModel? _consentimentosViewModel;
     private IrisdiagnosticoViewModel? _irisdiagnosticoViewModel;
+    private TerapiaBioenergeticaViewModel? _terapiaBioenergeticaViewModel;
 
     public FichaPacienteView()
     {
@@ -68,6 +69,11 @@ public partial class FichaPacienteView : UserControl
                 _irisdiagnosticoViewModel = app.ServiceProvider?.GetRequiredService<IrisdiagnosticoViewModel>();
             }
 
+            if (_terapiaBioenergeticaViewModel == null)
+            {
+                _terapiaBioenergeticaViewModel = app.ServiceProvider?.GetRequiredService<TerapiaBioenergeticaViewModel>();
+            }
+
             // ✅ Configurar DataContext dos UserControls
             if (DeclaracaoSaudeUserControl != null && _declaracaoSaudeViewModel != null)
             {
@@ -112,6 +118,19 @@ public partial class FichaPacienteView : UserControl
                 if (newViewModel.PacienteAtual != null)
                 {
                     await _irisdiagnosticoViewModel.CarregarDadosAsync(newViewModel.PacienteAtual);
+                }
+            }
+
+            // ✅ Configurar DataContext do UserControl de Terapia Bioenergética
+            if (TerapiaBioenergeticaUserControl != null && _terapiaBioenergeticaViewModel != null)
+            {
+                TerapiaBioenergeticaUserControl.DataContext = _terapiaBioenergeticaViewModel;
+
+                // Passar paciente para o ViewModel de Terapia
+                if (newViewModel.PacienteAtual != null)
+                {
+                    _terapiaBioenergeticaViewModel.SetPacienteAtual(newViewModel.PacienteAtual);
+                    await _terapiaBioenergeticaViewModel.CarregarProtocolosAsync();
                 }
             }
 
@@ -191,6 +210,8 @@ public partial class FichaPacienteView : UserControl
             IrisdiagnosticoUserControl.Visibility = Visibility.Collapsed;
         if (ComunicacaoUserControl != null)
             ComunicacaoUserControl.Visibility = Visibility.Collapsed;
+        if (TerapiaBioenergeticaUserControl != null)
+            TerapiaBioenergeticaUserControl.Visibility = Visibility.Collapsed;
 
         // Mostrar o correto
         switch (abaAtiva)
@@ -226,6 +247,13 @@ public partial class FichaPacienteView : UserControl
                 {
                     ComunicacaoUserControl.Visibility = Visibility.Visible;
                     System.Diagnostics.Debug.WriteLine("✅ CODE-BEHIND: Comunicacao VISÍVEL");
+                }
+                break;
+            case 7:
+                if (TerapiaBioenergeticaUserControl != null)
+                {
+                    TerapiaBioenergeticaUserControl.Visibility = Visibility.Visible;
+                    System.Diagnostics.Debug.WriteLine("✅ CODE-BEHIND: TerapiaBioenergetica VISÍVEL");
                 }
                 break;
             default:

@@ -282,6 +282,7 @@ Inner Exceptions:
         services.AddTransient<RegistoConsultasViewModel>(); // ABA 4: Registo de Sessões
         services.AddTransient<IrisdiagnosticoViewModel>(); // ✅ ABA 5: Irisdiagnóstico
         services.AddTransient<ComunicacaoViewModel>(); // ✅ ABA 6: Comunicação
+        services.AddTransient<TerapiaBioenergeticaViewModel>(); // ✅ ABA 7: Terapias Bioenergéticas
         services.AddTransient<SelecionarTemplatesViewModel>(); // ⭐ NOVO: Pop-up de templates PDF
 
         // Views - SISTEMA LIMPO
