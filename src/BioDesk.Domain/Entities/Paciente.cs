@@ -66,6 +66,14 @@ public class Paciente
     /// </summary>
     public string? ProgressoAbas { get; set; }
 
+    // === INFORMAÇÃO CLÍNICA ATUAL ===
+    /// <summary>
+    /// Medicação, suplementação e terapia atual do paciente
+    /// Campo editável na aba Consultas para referência rápida
+    /// </summary>
+    [StringLength(2000)]
+    public string? TerapiaAtual { get; set; }
+
     // === PROPRIEDADES CALCULADAS ===
     /// <summary>
     /// Idade calculada automaticamente (null se DataNascimento não preenchida)

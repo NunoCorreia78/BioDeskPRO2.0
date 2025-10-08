@@ -28,6 +28,7 @@ public partial class RegistoConsultasViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<Sessao> _sessoes = new();
     [ObservableProperty] private string _avaliacao = string.Empty;
     [ObservableProperty] private string _planoTerapeutico = string.Empty;
+    [ObservableProperty] private string _terapiaAtual = string.Empty; // ✅ NOVO: Medicação/Suplementação/Terapia atual
     [ObservableProperty] private bool _mostrarPrescricao = false; // ✅ CORRIGIDO: Começa fechado
     [ObservableProperty] private ObservableCollection<SuplementoItem> _suplementos = new();
     [ObservableProperty] private string _observacoesPrescricao = string.Empty;
@@ -73,6 +74,14 @@ public partial class RegistoConsultasViewModel : ViewModelBase
             }
 
             _logger.LogInformation("💾 Salvando consulta na BD para paciente ID {PacienteId}", PacienteAtual.Id);
+
+            // ✅ ATUALIZAR TERAPIA ATUAL DO PACIENTE (sempre que guardar consulta)
+            if (PacienteAtual.TerapiaAtual != TerapiaAtual)
+            {
+                PacienteAtual.TerapiaAtual = TerapiaAtual;
+                _unitOfWork.Pacientes.Update(PacienteAtual);
+                _logger.LogInformation("💊 Terapia Atual atualizada no paciente");
+            }
 
             // ✅ CRIAR NOVA SESSÃO E SALVAR NA BD
             var novaSessao = new Sessao
@@ -299,6 +308,7 @@ public partial class RegistoConsultasViewModel : ViewModelBase
     public void SetPaciente(Paciente paciente)
     {
         PacienteAtual = paciente;
+        TerapiaAtual = paciente.TerapiaAtual ?? string.Empty; // ✅ NOVO: Carregar terapia atual do paciente
         _ = CarregarSessoesAsync(paciente.Id);
     }
 

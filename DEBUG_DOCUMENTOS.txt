@@ -1,7 +1,7 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-07 22:37:59 ===
-PacienteId: 8
-NomePaciente: ss
-NomeNormalizado: ss
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-08 10:27:38 ===
+PacienteId: 10
+NomePaciente: Vicenta Constança Rabaça Miséria Tibúrcio
+NomeNormalizado: vicentaconstançarabaçamisériatibúrcio
 BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes
@@ -15,8 +15,8 @@ Total de pastas em Pacientes/: 6
   - Maria_Fernanda_Costa
   - Nuno Filipe Correia
 
-NomeComUnderscores: ss
-Buscando pastas que contenham: 'ss' OU 'ss'
+NomeComUnderscores: vicenta_constança_rabaça_miséria_tibúrcio
+Buscando pastas que contenham: 'vicentaconstançarabaçamisériatibúrcio' OU 'vicenta_constança_rabaça_miséria_tibúrcio'
   Pasta 'Alexandre Diego Vieira da Mata' (normalizado: 'alexandrediegovieiradamata') → match: False
   Pasta 'Carlos António Pereira' (normalizado: 'carlosantóniopereira') → match: False
   Pasta 'João Silva Santos' (normalizado: 'joãosilvasantos') → match: False

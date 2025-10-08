@@ -113,12 +113,33 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- COLUNA DIREITA (60%): 2 Campos + Botão Guardar -->
+        <!-- COLUNA DIREITA (60%): Campo Terapia Atual + 2 Campos + Botão Guardar -->
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20">
+                <!-- CAMPO NOVO: Terapia Atual do Paciente -->
+                <Border Background="#FFF9E6" BorderBrush="#FFD700" BorderThickness="2" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="💊 " FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="TERAPIA ATUAL DO PACIENTE" FontSize="14" FontWeight="SemiBold" Foreground="#856404" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="Medicação | Suplementação | Terapia em curso" FontSize="11" Foreground="#856404" Margin="0,0,0,8" FontStyle="Italic"/>
+                        <TextBox Text="{Binding TerapiaAtual, UpdateSourceTrigger=PropertyChanged}"
+                                 Height="120"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Padding="10"
+                                 FontSize="13"
+                                 Background="White"
+                                 BorderBrush="#FFD700"
+                                 BorderThickness="1"/>
+                    </StackPanel>
+                </Border>
+
                 <TextBlock Text="Avaliação Clínica" FontSize="16" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
                 <TextBox Text="{Binding Avaliacao, UpdateSourceTrigger=PropertyChanged}"
-                         Height="280"
+                         Height="200"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Visible"
@@ -131,7 +152,7 @@
 
                 <TextBlock Text="Plano Terapêutico" FontSize="16" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
                 <TextBox Text="{Binding PlanoTerapeutico, UpdateSourceTrigger=PropertyChanged}"
-                         Height="280"
+                         Height="200"
                          AcceptsReturn="True"
                          TextWrapping="Wrap"
                          VerticalScrollBarVisibility="Visible"

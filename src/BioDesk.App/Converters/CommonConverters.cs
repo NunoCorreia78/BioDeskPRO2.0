@@ -222,3 +222,19 @@ public class StringToBoolConverter : IValueConverter
     }
 }
 
+/// <summary>
+/// Converte null/objeto para bool (null = false, não-null = true)
+/// Usado para habilitar/desabilitar botões baseado em seleção
+/// </summary>
+public class NullToBoolConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return value != null;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
