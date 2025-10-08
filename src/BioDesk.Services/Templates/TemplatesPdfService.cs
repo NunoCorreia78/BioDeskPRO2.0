@@ -22,12 +22,8 @@ public class TemplatesPdfService : ITemplatesPdfService
     {
         _logger = logger;
 
-        // Calcular caminho da pasta Templates/PDFs/
-        // De: bin/Debug/net8.0-windows7.0/
-        // Para: Templates/PDFs/
-        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        _templatesPdfPath = Path.Combine(baseDir, "../../../../Templates/PDFs");
-        _templatesPdfPath = Path.GetFullPath(_templatesPdfPath);
+        // Usar PathService para obter caminho dos templates (funciona em Debug e Release)
+        _templatesPdfPath = Path.Combine(PathService.TemplatesPath, "PDFs");
 
         _logger.LogInformation("📋 TemplatesPdfService inicializado. Pasta: {Path}", _templatesPdfPath);
 
