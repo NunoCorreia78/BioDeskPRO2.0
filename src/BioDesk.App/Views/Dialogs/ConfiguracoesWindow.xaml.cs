@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Extensions.Logging;
 using BioDesk.ViewModels;
 
@@ -7,7 +8,7 @@ namespace BioDesk.App.Views.Dialogs;
 
 /// <summary>
 /// ConfiguracoesWindow - Janela modal para configurar dados da clínica
-/// Permite editar: Nome, Morada, Telefone, Email, NIPC, Logo
+/// Permite editar: Nome, Morada, Telefone, Email, NIPC, Logo, Configurações SMTP
 /// </summary>
 public partial class ConfiguracoesWindow : Window
 {
@@ -17,15 +18,15 @@ public partial class ConfiguracoesWindow : Window
     public ConfiguracoesWindow(ConfiguracaoClinicaViewModel viewModel, ILogger<ConfiguracoesWindow> logger)
     {
         InitializeComponent();
-        
+
         _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         _logger = logger;
-        
+
         DataContext = _viewModel;
-        
+
         // Subscrever evento de sucesso para fechar a janela
         _viewModel.ConfiguracaoSalvaComSucesso += OnConfiguracaoSalvaComSucesso;
-        
+
         _logger?.LogInformation("📋 ConfiguracoesWindow inicializada");
     }
 
@@ -43,6 +44,18 @@ public partial class ConfiguracoesWindow : Window
         Close();
     }
 
+    /// <summary>
+    /// Evento disparado quando a senha SMTP é alterada
+    /// Como PasswordBox não permite binding direto, usamos evento
+    /// </summary>
+    private void SmtpPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is PasswordBox passwordBox)
+        {
+            _viewModel.SmtpPassword = passwordBox.Password;
+        }
+    }
+
     protected override void OnClosed(EventArgs e)
     {
         // Limpar subscrição de evento
@@ -50,7 +63,7 @@ public partial class ConfiguracoesWindow : Window
         {
             _viewModel.ConfiguracaoSalvaComSucesso -= OnConfiguracaoSalvaComSucesso;
         }
-        
+
         base.OnClosed(e);
     }
 }

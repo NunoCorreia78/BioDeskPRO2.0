@@ -25,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Configuração appsettings.json -->
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <!-- Logo: embede o Logo.png (Windows é case-insensitive, então logo.png = Logo.png) -->
     <Resource Include="Assets\Images\Logo.png" Condition="Exists('Assets\Images\Logo.png')" />
     <!-- Assinatura: copiar para output para File.ReadAllBytes() -->

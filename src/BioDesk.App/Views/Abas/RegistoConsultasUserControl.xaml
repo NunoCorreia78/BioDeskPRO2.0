@@ -213,7 +213,9 @@
                         <DataGrid ItemsSource="{Binding Suplementos}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderBrush="#E3E9DE" BorderThickness="1" Margin="0,0,0,16" RowHeight="40">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Suplemento" Binding="{Binding Suplemento, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                <DataGridTextColumn Header="Forma de Tomar" Binding="{Binding FormaTomar, UpdateSourceTrigger=PropertyChanged}" Width="3*"/>
+                                <DataGridTextColumn Header="Dosagem" Binding="{Binding Dosagem, UpdateSourceTrigger=PropertyChanged}" Width="1.5*"/>
+                                <DataGridTextColumn Header="Forma de Tomar" Binding="{Binding FormaTomar, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                <DataGridTextColumn Header="Observações" Binding="{Binding Observacoes, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
                                 <DataGridTemplateColumn Header="" Width="Auto">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>

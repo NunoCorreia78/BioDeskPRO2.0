@@ -284,13 +284,7 @@
                                 Visibility="{Binding IsLoadingStats, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                         </StackPanel>
 
-                        <!--  Botão Configurações  -->
-                        <Button
-                            Grid.Column="2"
-                            Click="AbrirConfiguracoes_Click"
-                            Content="⚙️ Configurações"
-                            Style="{StaticResource ActionButtonStyle}"
-                            ToolTip="Configurar email e outras opções do sistema" />
+                        <!--  REMOVIDO: Botão duplicado - já existe no topo  -->
                     </Grid>
 
                     <!--  LAYOUT DEFINITIVO: 4x2 (8 Cards)  -->

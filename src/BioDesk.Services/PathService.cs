@@ -14,11 +14,12 @@ public static class PathService
     /// <summary>
     /// Detecta se está em modo debug (VS Code/Visual Studio)
     /// </summary>
-    private static readonly bool IsDebugMode = Debugger.IsAttached;
+    private static readonly bool IsDebugMode = Debugger.IsAttached ||
+        Directory.GetCurrentDirectory().Contains("BioDeskPro2");
 
     /// <summary>
     /// Pasta raiz de dados da aplicação
-    /// DEBUG: [Projeto]\Data
+    /// DEBUG: [Projeto]
     /// RELEASE: C:\ProgramData\BioDeskPro2
     /// </summary>
     public static string AppDataPath
@@ -29,8 +30,7 @@ public static class PathService
             {
                 // Modo Debug: Pasta do projeto (desenvolvimento)
                 var projectRoot = AppContext.BaseDirectory;
-                // Se estiver em bin/Debug/net8.0-windows, sobe 3 níveis até src/BioDesk.App
-                // Depois sobe mais 2 níveis até raiz do projeto
+                // Se estiver em bin/Debug/net8.0-windows, sobe 5 níveis até raiz do projeto
                 if (projectRoot.Contains("bin"))
                 {
                     projectRoot = Path.GetFullPath(Path.Combine(projectRoot, "..", "..", "..", "..", ".."));

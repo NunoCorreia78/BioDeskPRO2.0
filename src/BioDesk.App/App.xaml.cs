@@ -142,6 +142,27 @@ Inner Exceptions:
             Console.WriteLine("✅ Estrutura de pastas criada");
             Console.WriteLine(PathService.GetDiagnosticInfo());
 
+            // 🔍 DIAGNÓSTICO ADICIONAL PathService (8 OUT 2025)
+            Console.WriteLine("\n" + new string('=', 80));
+            Console.WriteLine("🔍 DIAGNÓSTICO DETALHADO PathService");
+            Console.WriteLine(new string('=', 80));
+            Console.WriteLine($"📂 Debugger.IsAttached: {System.Diagnostics.Debugger.IsAttached}");
+            Console.WriteLine($"📂 CurrentDirectory: {System.IO.Directory.GetCurrentDirectory()}");
+            Console.WriteLine($"📂 BaseDirectory: {AppContext.BaseDirectory}");
+            Console.WriteLine($"📂 Contains 'BioDeskPro2': {System.IO.Directory.GetCurrentDirectory().Contains("BioDeskPro2")}");
+            Console.WriteLine($"📂 PathService.AppDataPath: {PathService.AppDataPath}");
+            Console.WriteLine($"📂 PathService.DatabasePath: {PathService.DatabasePath}");
+            Console.WriteLine($"📂 Database EXISTS: {System.IO.File.Exists(PathService.DatabasePath)}");
+
+            // Verificar qual BD está a ser usada
+            if (System.IO.File.Exists(PathService.DatabasePath))
+            {
+                var fileInfo = new System.IO.FileInfo(PathService.DatabasePath);
+                Console.WriteLine($"📂 Database SIZE: {fileInfo.Length / 1024} KB");
+                Console.WriteLine($"📂 Database MODIFIED: {fileInfo.LastWriteTime:dd/MM/yyyy HH:mm:ss}");
+            }
+            Console.WriteLine(new string('=', 80) + "\n");
+
             // Configurar cultura portuguesa para toda a aplicação
             var culture = new CultureInfo("pt-PT");
             Thread.CurrentThread.CurrentCulture = culture;
@@ -165,6 +186,9 @@ Inner Exceptions:
             _host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
+                    // ⚡ Carregar appsettings.json primeiro
+                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
                     // ⚡ CRITICAL: Garantir carregamento de User Secrets em WPF
                     config.AddUserSecrets<App>();
                 })
@@ -279,7 +303,8 @@ Inner Exceptions:
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
         services.AddTransient<ListaPacientesViewModel>(); // ✅ LISTA DE PACIENTES
-        services.AddTransient<ConfiguracoesViewModel>(); // ✅ CONFIGURAÇÕES
+        services.AddTransient<ConfiguracoesViewModel>(); // ✅ CONFIGURAÇÕES (Email SMTP)
+        services.AddTransient<ConfiguracaoClinicaViewModel>(); // ✅ CONFIGURAÇÃO CLÍNICA
 
         // ViewModels das Abas
         services.AddTransient<DeclaracaoSaudeViewModel>();
@@ -293,6 +318,7 @@ Inner Exceptions:
         services.AddSingleton<MainWindow>();
         services.AddTransient<Views.DashboardView>();
         services.AddTransient<Views.ConsultasView>();
+        services.AddTransient<Views.Dialogs.ConfiguracoesWindow>(); // ✅ JANELA CONFIGURAÇÕES CLÍNICA
         services.AddTransient<Views.FichaPacienteView>();
         services.AddTransient<Views.ListaPacientesView>(); // ✅ LISTA DE PACIENTES
         services.AddTransient<Views.ConfiguracoesView>(); // ✅ CONFIGURAÇÕES

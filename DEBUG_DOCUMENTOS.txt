@@ -1,17 +1,29 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-08 13:46:03 ===
-PacienteId: 2
-NomePaciente: Maria Fernanda Costa
-NomeNormalizado: mariafernandacosta
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-08 22:40:03 ===
+PacienteId: 4
+NomePaciente: Nuno Filipe Correia
+NomeNormalizado: nunofilipecorreia
 BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes
 Pasta existe? True
 
-Total de pastas em Pacientes/: 0
+Total de pastas em Pacientes/: 3
+  - Luís Manuel Pinguelo Vilhalva
+  - Maria João Moacho Boquinhas
+  - Nuno Filipe Correia
 
-NomeComUnderscores: maria_fernanda_costa
-Buscando pastas que contenham: 'mariafernandacosta' OU 'maria_fernanda_costa'
+NomeComUnderscores: nuno_filipe_correia
+Buscando pastas que contenham: 'nunofilipecorreia' OU 'nuno_filipe_correia'
+  Pasta 'Luís Manuel Pinguelo Vilhalva' (normalizado: 'luísmanuelpinguelovilhalva') → match: False
+  Pasta 'Maria João Moacho Boquinhas' (normalizado: 'mariajoãomoachoboquinhas') → match: False
+  Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: True
 
-Pastas encontradas para o paciente: 0
+Pastas encontradas para o paciente: 1
 
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 0
+📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Nuno Filipe Correia
+  Subpastas: 1
+    - Prescricoes
+  PDFs encontrados: 1
+    ✅ Prescricoes\Prescricao_20251008_173501.pdf
+
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 1

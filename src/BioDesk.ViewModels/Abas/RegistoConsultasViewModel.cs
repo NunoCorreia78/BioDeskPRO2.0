@@ -166,20 +166,20 @@ public partial class RegistoConsultasViewModel : ViewModelBase
 
             IsLoading = true;
 
+            // ⚠️ REMOVIDO: Diagnostico = Avaliacao (NÃO ir buscar dados da ficha)
+            // ✅ NOVO: Campo Diagnostico preenchido manualmente pelo utilizador
             var dados = new DadosPrescricao
             {
                 NomePaciente = PacienteAtual.NomeCompleto,
                 DataPrescricao = DateTime.Now,
-                Diagnostico = Avaliacao ?? "Sem diagnóstico especificado",
+                Diagnostico = ObservacoesPrescricao ?? "", // ✅ CAMPO MANUAL (não vem da ficha)
                 Itens = Suplementos.Select(s => new ItemPrescricao
                 {
                     Nome = s.Suplemento ?? "Suplemento não especificado",
-                    Dosagem = "",
+                    Dosagem = s.Dosagem ?? "",                           // ✅ USAR campo Dosagem
                     Frequencia = s.FormaTomar ?? "Conforme indicado",
-                    Observacoes = ""
-                }).ToList(),
-                InstrucoesGerais = ObservacoesPrescricao ?? "",
-                DuracaoTratamento = "30 dias"
+                    Observacoes = s.Observacoes ?? ""                    // ✅ USAR campo Observacoes
+                }).ToList()
             };
 
             _logger.LogWarning("✅ Dados preparados: {Count} itens", dados.Itens.Count);
@@ -341,7 +341,9 @@ public partial class RegistoConsultasViewModel : ViewModelBase
 public partial class SuplementoItem : ObservableObject
 {
     [ObservableProperty] private string _suplemento = string.Empty;
+    [ObservableProperty] private string _dosagem = string.Empty;         // ✅ NOVO
     [ObservableProperty] private string _formaTomar = string.Empty;
+    [ObservableProperty] private string _observacoes = string.Empty;     // ✅ NOVO
 }
 
 public class ConsultaValidator : AbstractValidator<RegistoConsultasViewModel>
