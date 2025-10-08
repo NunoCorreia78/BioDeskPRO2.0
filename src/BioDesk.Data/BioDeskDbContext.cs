@@ -22,7 +22,7 @@ public class BioDeskDbContext : DbContext
   public DbSet<Consulta> Consultas { get; set; } = null!;
   public DbSet<Consentimento> Consentimentos { get; set; } = null!;
   public DbSet<IrisAnalise> IrisAnalises { get; set; } = null!;
-  
+
   // === CONFIGURAÇÃO GLOBAL ===
   public DbSet<ConfiguracaoClinica> ConfiguracaoClinica { get; set; } = null!;
 
@@ -443,7 +443,7 @@ public class BioDeskDbContext : DbContext
                 CriadoEm = DateTime.Now.AddDays(-10),
                 IsDeleted = false
             },
-            
+
             // Sessões para Maria Costa (ID=2)
             new Sessao
             {
@@ -478,7 +478,7 @@ public class BioDeskDbContext : DbContext
                 CriadoEm = DateTime.Now.AddDays(-1),
                 IsDeleted = false
             },
-            
+
             // Sessão para Carlos Pereira (ID=3) - Multi-abordagem
             new Sessao
             {
@@ -507,21 +507,21 @@ public class BioDeskDbContext : DbContext
     {
             // Sessão 1 (João) - Osteopatia
             new AbordagemSessao { Id = 1, SessaoId = 1, TipoAbordagem = TipoAbordagem.Osteopatia },
-            
+
             // Sessão 2 (João) - Osteopatia
             new AbordagemSessao { Id = 2, SessaoId = 2, TipoAbordagem = TipoAbordagem.Osteopatia },
-            
+
             // Sessão 3 (João) - Naturopatia + Medicina Bioenergética
             new AbordagemSessao { Id = 3, SessaoId = 3, TipoAbordagem = TipoAbordagem.Naturopatia, Observacoes = "Suplementação adaptogénica" },
             new AbordagemSessao { Id = 4, SessaoId = 3, TipoAbordagem = TipoAbordagem.MedicinaBioenergetica, Observacoes = "Equilíbrio energético" },
-            
+
             // Sessão 4 (Maria) - Osteopatia
             new AbordagemSessao { Id = 5, SessaoId = 4, TipoAbordagem = TipoAbordagem.Osteopatia },
-            
+
             // Sessão 5 (Maria) - Osteopatia + Iridologia
             new AbordagemSessao { Id = 6, SessaoId = 5, TipoAbordagem = TipoAbordagem.Osteopatia },
             new AbordagemSessao { Id = 7, SessaoId = 5, TipoAbordagem = TipoAbordagem.Iridologia, Observacoes = "Análise constitucional" },
-            
+
             // Sessão 6 (Carlos) - Multi-abordagem (Osteopatia + Mesoterapia + Naturopatia)
             new AbordagemSessao { Id = 8, SessaoId = 6, TipoAbordagem = TipoAbordagem.Osteopatia, Observacoes = "Técnicas articulares joelhos e ombro" },
             new AbordagemSessao { Id = 9, SessaoId = 6, TipoAbordagem = TipoAbordagem.Mesoterapia, Observacoes = "Infiltrações anti-inflamatórias" },
