@@ -31,6 +31,49 @@ public partial class IrisdiagnosticoUserControl : UserControl
         {
             _dragDebugService = app.ServiceProvider.GetService<IDragDebugService>();
         }
+
+        // ✅ CRÍTICO: Libertar mouse capture quando UserControl fica invisível
+        // Resolve bug onde manipulação da íris bloqueia cliques em outras abas
+        this.IsVisibleChanged += IrisdiagnosticoUserControl_IsVisibleChanged;
+    }
+
+    /// <summary>
+    /// ✅ CORREÇÃO CRÍTICA: Reset completo quando UserControl fica invisível
+    /// Previne que Canvas capturado bloqueie cliques em outras abas
+    /// </summary>
+    private void IrisdiagnosticoUserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        // Quando fica invisível, libertar TODOS os captures
+        if (this.Visibility != Visibility.Visible)
+        {
+            // Reset estado de drag do mapa
+            if (_isDraggingMapa)
+            {
+                _isDraggingMapa = false;
+                if (MapaOverlayCanvas != null)
+                {
+                    MapaOverlayCanvas.Cursor = Cursors.Arrow;
+                    MapaOverlayCanvas.ReleaseMouseCapture();
+                }
+            }
+
+            // Reset estado de desenho
+            if (_isDrawing)
+            {
+                _isDrawing = false;
+                if (DesenhoCanvas != null)
+                {
+                    DesenhoCanvas.ReleaseMouseCapture();
+                }
+            }
+
+            // ✅ Libertar capture de QUALQUER elemento que possa estar capturado
+            // Força WPF a limpar o estado global de mouse capture
+            if (Mouse.Captured != null)
+            {
+                Mouse.Capture(null);
+            }
+        }
     }
 
     /// <summary>
