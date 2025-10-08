@@ -419,10 +419,10 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Ellipse Width="16" Height="16"
+                                        <Ellipse Width="22" Height="22"
                                                  Fill="#5B7C99"
                                                  Stroke="White"
-                                                 StrokeThickness="2"
+                                                 StrokeThickness="3"
                                                  Cursor="Hand"
                                                  IsHitTestVisible="True"
                                                  MouseLeftButtonDown="Handler_MouseDown"
@@ -446,8 +446,8 @@
                                                         </DataTrigger>
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Setter Property="Opacity" Value="1"/>
-                                                            <Setter Property="Width" Value="20"/>
-                                                            <Setter Property="Height" Value="20"/>
+                                                            <Setter Property="Width" Value="26"/>
+                                                            <Setter Property="Height" Value="26"/>
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -466,10 +466,10 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Ellipse Width="16" Height="16"
+                                        <Ellipse Width="22" Height="22"
                                                  Fill="#6B8E63"
                                                  Stroke="White"
-                                                 StrokeThickness="2"
+                                                 StrokeThickness="3"
                                                  Cursor="Hand"
                                                  IsHitTestVisible="True"
                                                  MouseLeftButtonDown="Handler_MouseDown"
@@ -493,8 +493,8 @@
                                                         </DataTrigger>
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Setter Property="Opacity" Value="1"/>
-                                                            <Setter Property="Width" Value="20"/>
-                                                            <Setter Property="Height" Value="20"/>
+                                                            <Setter Property="Width" Value="26"/>
+                                                            <Setter Property="Height" Value="26"/>
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>

@@ -246,8 +246,8 @@ public partial class IrisdiagnosticoUserControl : UserControl
         // Atualizar posição do handler
         if (_currentHandler is IrisdiagnosticoViewModel.CalibrationHandler handler)
         {
-            handler.X = position.X - 8; // -8 para centralizar ellipse 16x16
-            handler.Y = position.Y - 8;
+            handler.X = position.X - 11; // -11 para centralizar ellipse 22x22
+            handler.Y = position.Y - 11;
 
 #if DEBUG
             System.Diagnostics.Debug.WriteLine($"📍 POSITION UPDATE: X={handler.X:F2}, Y={handler.Y:F2}");
