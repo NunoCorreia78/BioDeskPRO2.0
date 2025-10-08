@@ -19,6 +19,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<HistoricoMedico> HistoricoMedico { get; }
     IRepository<IrisImagem> IrisImagens { get; }
     IRepository<IrisMarca> IrisMarcas { get; }
+    IRepository<ConfiguracaoClinica> ConfiguracaoClinica { get; }
 
     /// <summary>
     /// Salva todas as alterações em uma transação atômica

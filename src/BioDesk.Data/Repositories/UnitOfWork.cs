@@ -24,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
     private IRepository<HistoricoMedico>? _historicoMedico;
     private IRepository<IrisImagem>? _irisImagens;
     private IRepository<IrisMarca>? _irisMarcas;
+    private IRepository<ConfiguracaoClinica>? _configuracaoClinica;
 
     public UnitOfWork(BioDeskDbContext context)
     {
@@ -99,6 +100,15 @@ public class UnitOfWork : IUnitOfWork
         {
             _irisMarcas ??= new Repository<IrisMarca>(_context);
             return _irisMarcas;
+        }
+    }
+
+    public IRepository<ConfiguracaoClinica> ConfiguracaoClinica
+    {
+        get
+        {
+            _configuracaoClinica ??= new Repository<ConfiguracaoClinica>(_context);
+            return _configuracaoClinica;
         }
     }
 
