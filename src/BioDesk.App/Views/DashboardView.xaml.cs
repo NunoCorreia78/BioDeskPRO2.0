@@ -31,7 +31,7 @@ public partial class DashboardView : UserControl
         _navigationService = navigationService;
     }
 
-    private void BtnConfiguracoes_Click(object sender, RoutedEventArgs e)
+    private void AbrirConfiguracoes_Click(object sender, RoutedEventArgs e)
     {
         try
         {
