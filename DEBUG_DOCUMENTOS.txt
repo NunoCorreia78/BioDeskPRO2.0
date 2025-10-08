@@ -1,7 +1,7 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-08 10:27:38 ===
-PacienteId: 10
-NomePaciente: Vicenta Constança Rabaça Miséria Tibúrcio
-NomeNormalizado: vicentaconstançarabaçamisériatibúrcio
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-08 11:57:17 ===
+PacienteId: 2
+NomePaciente: Maria Fernanda Costa
+NomeNormalizado: mariafernandacosta
 BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes
@@ -15,15 +15,32 @@ Total de pastas em Pacientes/: 6
   - Maria_Fernanda_Costa
   - Nuno Filipe Correia
 
-NomeComUnderscores: vicenta_constança_rabaça_miséria_tibúrcio
-Buscando pastas que contenham: 'vicentaconstançarabaçamisériatibúrcio' OU 'vicenta_constança_rabaça_miséria_tibúrcio'
+NomeComUnderscores: maria_fernanda_costa
+Buscando pastas que contenham: 'mariafernandacosta' OU 'maria_fernanda_costa'
   Pasta 'Alexandre Diego Vieira da Mata' (normalizado: 'alexandrediegovieiradamata') → match: False
   Pasta 'Carlos António Pereira' (normalizado: 'carlosantóniopereira') → match: False
   Pasta 'João Silva Santos' (normalizado: 'joãosilvasantos') → match: False
-  Pasta 'Maria Fernanda Costa' (normalizado: 'mariafernandacosta') → match: False
-  Pasta 'Maria_Fernanda_Costa' (normalizado: 'mariafernandacosta') → match: False
+  Pasta 'Maria Fernanda Costa' (normalizado: 'mariafernandacosta') → match: True
+  Pasta 'Maria_Fernanda_Costa' (normalizado: 'mariafernandacosta') → match: True
   Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: False
 
-Pastas encontradas para o paciente: 0
+Pastas encontradas para o paciente: 2
 
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 0
+📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria Fernanda Costa
+  Subpastas: 2
+    - Consentimentos
+    - DeclaracoesSaude
+  PDFs encontrados: 6
+    ✅ Consentimentos\Consentimento_🌿_Naturopatia_-_Consulta_Geral_Maria_Fernanda_Costa_20251001_233728.pdf
+    ✅ Consentimentos\Consentimento_💆_Massagem_Terapêutica_Maria_Fernanda_Costa_20251001_213236.pdf
+    ✅ Consentimentos\Consentimento_🔐_RGPD_-_Proteção_de_Dados_Pessoais_Maria_Fernanda_Costa_20251001_223306.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251001_233619.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251003_193322.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Maria_Fernanda_Costa_20251003_195919.pdf
+
+📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes\Maria_Fernanda_Costa
+  Subpastas: 1
+    - IrisImagens
+  PDFs encontrados: 0
+
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 6

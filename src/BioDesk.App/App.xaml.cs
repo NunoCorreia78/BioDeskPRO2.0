@@ -137,6 +137,11 @@ Inner Exceptions:
         {
             Console.WriteLine("🔧 OnStartup iniciado...");
 
+            // 🏗️ CRIAR ESTRUTURA DE PASTAS (Debug ou Release)
+            PathService.EnsureDirectories();
+            Console.WriteLine("✅ Estrutura de pastas criada");
+            Console.WriteLine(PathService.GetDiagnosticInfo());
+
             // Configurar cultura portuguesa para toda a aplicação
             var culture = new CultureInfo("pt-PT");
             Thread.CurrentThread.CurrentCulture = culture;
@@ -231,7 +236,7 @@ Inner Exceptions:
 
         // === DATABASE: EF Core + SQLite ===
         services.AddDbContext<BioDeskDbContext>(options =>
-            options.UseSqlite("Data Source=biodesk.db")); // Relative to App folder
+            options.UseSqlite($"Data Source={PathService.DatabasePath}")); // ✅ Usa PathService (Debug: projeto | Release: ProgramData)
 
         // === REPOSITORY PATTERN + UNIT OF WORK ===
         services.AddScoped<IUnitOfWork, UnitOfWork>();
