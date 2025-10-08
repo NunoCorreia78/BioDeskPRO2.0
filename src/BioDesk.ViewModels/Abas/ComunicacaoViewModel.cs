@@ -682,12 +682,9 @@ Naturopatia - Osteopatia - Medicina Bioenergética
             var sourceFile = dialog.FileName;
             var fileName = System.IO.Path.GetFileName(sourceFile);
 
-            // Calcular caminho da pasta Templates/PDFs/
-            var templatesPdfPath = System.IO.Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "../../../../Templates/PDFs");
-
-            var templatesPdfFullPath = System.IO.Path.GetFullPath(templatesPdfPath);
+            // Usar PathService para obter caminho dos templates (Debug/Release)
+            var templatesPdfFullPath = System.IO.Path.Combine(
+                BioDesk.Services.PathService.TemplatesPath, "PDFs");
 
             // Garantir que pasta existe
             System.IO.Directory.CreateDirectory(templatesPdfFullPath);
