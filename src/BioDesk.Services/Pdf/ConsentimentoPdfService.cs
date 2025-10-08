@@ -33,11 +33,8 @@ public class ConsentimentoPdfService
 
         try
         {
-            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: BaseDirectory\Pacientes\[Nome]\Consentimentos\
-            // Subir da pasta bin/Debug/net8.0-windows até raiz do projeto
-            var binDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            var baseDirectory = Path.GetFullPath(Path.Combine(binDirectory, "..", "..", "..", "..", ".."));
-            var pastaPaciente = Path.Combine(baseDirectory, "Pacientes", dados.NomePaciente);
+            // ✅ USAR PathService PARA GARANTIR COMPATIBILIDADE DEBUG/RELEASE
+            var pastaPaciente = PathService.GetPacienteDocumentPath(dados.NomePaciente, "");
             var pastaConsentimentos = Path.Combine(pastaPaciente, "Consentimentos");
             Directory.CreateDirectory(pastaConsentimentos);
 
