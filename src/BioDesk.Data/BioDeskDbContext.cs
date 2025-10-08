@@ -22,6 +22,9 @@ public class BioDeskDbContext : DbContext
   public DbSet<Consulta> Consultas { get; set; } = null!;
   public DbSet<Consentimento> Consentimentos { get; set; } = null!;
   public DbSet<IrisAnalise> IrisAnalises { get; set; } = null!;
+  
+  // === CONFIGURAÇÃO GLOBAL ===
+  public DbSet<ConfiguracaoClinica> ConfiguracaoClinica { get; set; } = null!;
 
   // === DECLARAÇÃO DE SAÚDE (ABA 2) ===
   public DbSet<DeclaracaoSaude> DeclaracoesSaude { get; set; } = null!;
@@ -248,6 +251,38 @@ public class BioDeskDbContext : DbContext
 
       entity.Property(e => e.Observacoes)
                 .HasMaxLength(1000);
+    });
+
+    // === CONFIGURAÇÃO GLOBAL DA CLÍNICA ===
+    modelBuilder.Entity<ConfiguracaoClinica>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+
+      // Garantir que existe apenas UMA configuração (Id = 1)
+      entity.Property(e => e.Id)
+                  .ValueGeneratedNever(); // Id não é auto-incremento
+
+      entity.Property(e => e.NomeClinica)
+                  .IsRequired()
+                  .HasMaxLength(200);
+
+      entity.Property(e => e.Morada)
+                  .HasMaxLength(500);
+
+      entity.Property(e => e.Telefone)
+                  .HasMaxLength(50);
+
+      entity.Property(e => e.Email)
+                  .HasMaxLength(100);
+
+      entity.Property(e => e.NIPC)
+                  .HasMaxLength(20);
+
+      entity.Property(e => e.LogoPath)
+                  .HasMaxLength(500);
+
+      entity.Property(e => e.DataAtualizacao)
+                  .IsRequired();
     });
 
     // === DADOS DE SEED ===
@@ -495,75 +530,19 @@ public class BioDeskDbContext : DbContext
 
     modelBuilder.Entity<AbordagemSessao>().HasData(abordagensSessoes);
 
-    // === CONFIGURAÇÃO COMUNICAÇÃO (ABA 5) ===
-    modelBuilder.Entity<Comunicacao>(entity =>
+    // SEED: Configuração Global da Clínica (Id fixo = 1)
+    var configuracaoClinica = new ConfiguracaoClinica
     {
-      entity.HasKey(e => e.Id);
+      Id = 1,
+      NomeClinica = "Minha Clínica",
+      Morada = null,
+      Telefone = null,
+      Email = null,
+      NIPC = null,
+      LogoPath = null,
+      DataAtualizacao = DateTime.UtcNow
+    };
 
-      // Índices para performance
-      entity.HasIndex(e => e.PacienteId)
-                  .HasDatabaseName("IX_Comunicacoes_PacienteId");
-
-      entity.HasIndex(e => e.DataEnvio)
-                  .HasDatabaseName("IX_Comunicacoes_DataEnvio");
-
-      entity.HasIndex(e => new { e.IsEnviado, e.ProximaTentativa })
-                  .HasDatabaseName("IX_Comunicacoes_FilaRetry");
-
-      entity.HasIndex(e => e.Status)
-                  .HasDatabaseName("IX_Comunicacoes_Status");
-
-      // Relacionamento com Paciente
-      entity.HasOne(c => c.Paciente)
-                  .WithMany()
-                  .HasForeignKey(c => c.PacienteId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-      // Relacionamento com Anexos
-      entity.HasMany(c => c.Anexos)
-                  .WithOne(a => a.Comunicacao)
-                  .HasForeignKey(a => a.ComunicacaoId)
-                  .OnDelete(DeleteBehavior.Cascade);
-    });
-
-    modelBuilder.Entity<AnexoComunicacao>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.ComunicacaoId)
-                  .HasDatabaseName("IX_AnexosComunicacoes_ComunicacaoId");
-    });
-
-    // === CONFIGURAÇÃO IRISDIAGNÓSTICO ===
-    modelBuilder.Entity<IrisImagem>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                  .HasDatabaseName("IX_IrisImagens_PacienteId");
-
-      entity.HasIndex(e => e.DataCaptura)
-                  .HasDatabaseName("IX_IrisImagens_DataCaptura");
-
-      // Relacionamento com Paciente
-      entity.HasOne(i => i.Paciente)
-                  .WithMany()
-                  .HasForeignKey(i => i.PacienteId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-      // Relacionamento com Marcas
-      entity.HasMany(i => i.Marcas)
-                  .WithOne(m => m.IrisImagem)
-                  .HasForeignKey(m => m.IrisImagemId)
-                  .OnDelete(DeleteBehavior.Cascade);
-    });
-
-    modelBuilder.Entity<IrisMarca>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.IrisImagemId)
-                  .HasDatabaseName("IX_IrisMarcas_IrisImagemId");
-    });
+    modelBuilder.Entity<ConfiguracaoClinica>().HasData(configuracaoClinica);
   }
 }
