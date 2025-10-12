@@ -8,7 +8,7 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   d:DesignHeight="800"
   d:DesignWidth="1200"
-  Background="{StaticResource FundoPrincipal}"
+  Background="{DynamicResource FundoPrincipal}"
   mc:Ignorable="d">
 
   <UserControl.Resources>
@@ -175,7 +175,7 @@
     </Style>
   </UserControl.Resources>
 
-  <Grid Panel.ZIndex="100" Background="{StaticResource FundoPrincipal}">
+  <Grid Panel.ZIndex="100" Background="{DynamicResource FundoPrincipal}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <!--  Separadores/Abas  -->
