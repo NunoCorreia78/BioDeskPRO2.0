@@ -10,7 +10,7 @@ namespace BioDesk.App.Views;
 
 /// <summary>
 /// UserControl para ficha completa de paciente com navegação por separadores
-/// Sistema de 6 abas sequenciais: Dados Biográficos → Declaração → Consentimentos → Consultas → Comunicação → Terapias
+/// Sistema de 7 abas sequenciais: Dados Biográficos → Declaração Saúde → Consentimentos → Consultas → Irisdiagnóstico → Comunicação → Terapias
 /// </summary>
 public partial class FichaPacienteView : UserControl
 {

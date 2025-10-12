@@ -13,14 +13,13 @@ using BioDesk.Services.Navigation;
 using BioDesk.Services.Cache;
 using BioDesk.Data.Repositories;
 using BioDesk.Domain.Entities;
-using BioDesk.ViewModels.Documentos;
 using System.Linq;
 
 namespace BioDesk.ViewModels;
 
 /// <summary>
 /// ViewModel para ficha completa de paciente com navegação por separadores
-/// Implementa sistema de 6 abas com validação progressiva
+/// Implementa sistema de 7 abas com validação progressiva
 /// </summary>
 public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposable
 {
@@ -28,11 +27,6 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cache;
     private bool _disposed = false;
-
-    /// <summary>
-    /// ViewModel para gestão de documentos externos do paciente.
-    /// </summary>
-    public DocumentosExternosViewModel DocumentosExternosViewModel { get; }
 
     /// <summary>
     /// ⭐ Flag para evitar marcar IsDirty durante carregamento de dados da BD
@@ -43,14 +37,12 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
         INavigationService navigationService,
         ILogger<FichaPacienteViewModel> logger,
         IUnitOfWork unitOfWork,
-        ICacheService cache,
-        DocumentosExternosViewModel documentosExternosViewModel)
+        ICacheService cache)
         : base(navigationService)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-        DocumentosExternosViewModel = documentosExternosViewModel ?? throw new ArgumentNullException(nameof(documentosExternosViewModel));
 
         _logger.LogInformation("🔍 FichaPacienteViewModel - INICIANDO construtor...");
 
@@ -625,14 +617,8 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     {
         if (parameter is string abaStr && int.TryParse(abaStr, out int numeroAba))
         {
-            if (numeroAba >= 1 && numeroAba <= 8)  // ✅ Agora aceita aba 8 (Terapias)
+            if (numeroAba >= 1 && numeroAba <= 7)  // ✅ Agora 7 abas (removido DocumentosExternos)
             {
-                // Inicializar DocumentosExternosViewModel quando navegar para aba 7
-                if (numeroAba == 7 && PacienteAtual != null && PacienteAtual.Id > 0)
-                {
-                    _ = DocumentosExternosViewModel.InicializarParaPacienteAsync(PacienteAtual.Id);
-                }
-
                 AbaAtiva = numeroAba;
                 AtualizarProgresso();
                 _logger.LogInformation("Navegação para aba {NumeroAba}", numeroAba);
@@ -643,7 +629,7 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     [RelayCommand]
     private void ProximaAba()
     {
-        if (AbaAtiva < 8)  // ✅ Agora permite avançar até aba 8 (Terapias)
+        if (AbaAtiva < 7)  // ✅ Última aba é Terapias (7)
         {
             // Marcar aba atual como completada
             AbasCompletadas[AbaAtiva - 1] = true;
@@ -813,13 +799,13 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     private void AtualizarProgresso()
     {
         int abasCompletas = AbasCompletadas.Count(c => c);
-        double percentagem = (double)abasCompletas / 6 * 100;
+        double percentagem = (double)abasCompletas / 7 * 100;
 
-        PercentagemProgresso = $"{abasCompletas}/6 etapas completas ({percentagem:F0}%)";
+        PercentagemProgresso = $"{abasCompletas}/7 etapas completas ({percentagem:F0}%)";
         ProgressoNumerico = percentagem;
 
         // Controlar navegação
-        PodeAvancarAba = AbaAtiva < 6;
+        PodeAvancarAba = AbaAtiva < 7;
     }
 
     private void AtualizarCorEstado()
@@ -877,8 +863,8 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             IdadePaciente = $"{paciente.Idade} anos";
             EstadoRegisto = paciente.EstadoRegisto;
 
-            // ✅ Restaurar última aba ativa (1-8, default = 1)
-            AbaAtiva = paciente.LastActiveTab > 0 && paciente.LastActiveTab <= 8 ? paciente.LastActiveTab : 1;
+            // ✅ Restaurar última aba ativa (1-7, default = 1)
+            AbaAtiva = paciente.LastActiveTab > 0 && paciente.LastActiveTab <= 7 ? paciente.LastActiveTab : 1;
 
             // TODO: Carregar estado das abas se estiver salvo em ProgressoAbas (JSON)
             AtualizarCorEstado();
