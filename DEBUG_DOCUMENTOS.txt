@@ -1,7 +1,7 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-12 18:45:35 ===
-PacienteId: 4
-NomePaciente: Nuno Filipe Correia
-NomeNormalizado: nunofilipecorreia
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-12 19:48:10 ===
+PacienteId: 2
+NomePaciente: Maria Fernanda Costa
+NomeNormalizado: mariafernandacosta
 BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes
@@ -14,22 +14,14 @@ Total de pastas em Pacientes/: 5
   - Nuno Filipe Correia
   - Susana Daniela Silva Freita
 
-NomeComUnderscores: nuno_filipe_correia
-Buscando pastas que contenham: 'nunofilipecorreia' OU 'nuno_filipe_correia'
+NomeComUnderscores: maria_fernanda_costa
+Buscando pastas que contenham: 'mariafernandacosta' OU 'maria_fernanda_costa'
   Pasta 'Jorge Maria Barreto Rosado Pereira' (normalizado: 'jorgemariabarretorosadopereira') → match: False
   Pasta 'Luís Manuel Pinguelo Vilhalva' (normalizado: 'luísmanuelpinguelovilhalva') → match: False
   Pasta 'Maria João Moacho Boquinhas' (normalizado: 'mariajoãomoachoboquinhas') → match: False
-  Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: True
+  Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: False
   Pasta 'Susana Daniela Silva Freita' (normalizado: 'susanadanielasilvafreita') → match: False
 
-Pastas encontradas para o paciente: 1
+Pastas encontradas para o paciente: 0
 
-📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Nuno Filipe Correia
-  Subpastas: 1
-    - Prescricoes
-  PDFs encontrados: 3
-    ✅ Prescricoes\Prescricao_20251008_173501.pdf
-    ✅ Prescricoes\Prescricao_20251009_112634.pdf
-    ✅ Prescricoes\Prescricao_20251009_122522.pdf
-
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 3
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 0

@@ -39,7 +39,7 @@ public class PacienteRepository : Repository<Paciente>, IPacienteRepository
     public async Task<IEnumerable<Paciente>> SearchByNomeAsync(string nome)
     {
         var nomeNormalizado = nome.ToLowerInvariant().Trim();
-        
+
         return await _dbSet
             .Where(p => p.NomeCompleto.ToLower().Contains(nomeNormalizado))
             .OrderBy(p => p.NomeCompleto)
