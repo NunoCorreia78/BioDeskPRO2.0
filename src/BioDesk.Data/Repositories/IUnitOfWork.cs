@@ -16,7 +16,6 @@ public interface IUnitOfWork : IDisposable
     IRepository<Contacto> Contactos { get; }
     IRepository<Consentimento> Consentimentos { get; }
     IRepository<Comunicacao> Comunicacoes { get; }
-    IRepository<HistoricoMedico> HistoricoMedico { get; }
     IRepository<IrisImagem> IrisImagens { get; }
     IRepository<IrisMarca> IrisMarcas { get; }
     IRepository<ConfiguracaoClinica> ConfiguracaoClinica { get; }

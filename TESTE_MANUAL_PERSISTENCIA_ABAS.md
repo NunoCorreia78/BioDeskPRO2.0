@@ -1,6 +1,6 @@
 # 🧪 TESTE MANUAL - Persistência Estado Abas
-**Data**: 12 de Outubro de 2025  
-**Feature**: Sprint 2 - Tarefa 6/6  
+**Data**: 12 de Outubro de 2025
+**Feature**: Sprint 2 - Tarefa 6/6
 **Commit**: `8e4697b`
 
 ---
@@ -135,9 +135,9 @@ Ao mudar de aba, deve aparecer:
 
 ### Query SQL:
 ```sql
-SELECT Id, NomeCompleto, LastActiveTab 
-FROM Pacientes 
-ORDER BY Id 
+SELECT Id, NomeCompleto, LastActiveTab
+FROM Pacientes
+ORDER BY Id
 LIMIT 5;
 ```
 
@@ -165,15 +165,15 @@ LIMIT 5;
 ## 🐛 TROUBLESHOOTING
 
 ### Problema: Sempre abre na Aba 1
-**Possível causa**: Auto-save não está a executar  
+**Possível causa**: Auto-save não está a executar
 **Solução**: Verificar logs, aguardar 2+ segundos após mudar aba
 
 ### Problema: Erro ao salvar
-**Possível causa**: Paciente ainda não foi salvo (Id = 0)  
+**Possível causa**: Paciente ainda não foi salvo (Id = 0)
 **Solução**: Normal, só salva para pacientes existentes
 
 ### Problema: Aplicação não executa
-**Solução**: 
+**Solução**:
 ```bash
 dotnet build
 dotnet run --project src/BioDesk.App
@@ -183,8 +183,8 @@ dotnet run --project src/BioDesk.App
 
 ## 📝 RELATÓRIO DE TESTE
 
-**Testador**: _______________________  
-**Data**: 12/10/2025  
+**Testador**: _______________________
+**Data**: 12/10/2025
 
 | Cenário | Status | Observações |
 |---------|--------|-------------|

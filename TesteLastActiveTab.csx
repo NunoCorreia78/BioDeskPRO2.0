@@ -41,7 +41,7 @@ foreach (var p in pacientes)
         8 => "Terapias",
         _ => "Invalida"
     };
-    
+
     Console.WriteLine($"[{p.Id}] {p.NomeCompleto,-30} -> Aba {p.LastActiveTab} ({abaName})");
 }
 

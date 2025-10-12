@@ -90,7 +90,6 @@ public class Paciente
     // === NAVEGAÇÃO PARA OUTRAS ENTIDADES ===
     public virtual Contacto? Contacto { get; set; }
     public virtual DeclaracaoSaude? DeclaracaoSaude { get; set; } // ⭐ Aba 2 - Declaração de Saúde
-    public virtual ICollection<HistoricoMedico> HistoricoMedico { get; set; } = [];
     public virtual ICollection<Consulta> Consultas { get; set; } = [];
     public virtual ICollection<Consentimento> Consentimentos { get; set; } = [];
     public virtual ICollection<IrisAnalise> IrisAnalises { get; set; } = [];

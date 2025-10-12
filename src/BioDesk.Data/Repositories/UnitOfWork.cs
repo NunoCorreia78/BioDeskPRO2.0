@@ -21,7 +21,6 @@ public class UnitOfWork : IUnitOfWork
     private IRepository<Contacto>? _contactos;
     private IRepository<Consentimento>? _consentimentos;
     private IRepository<Comunicacao>? _comunicacoes;
-    private IRepository<HistoricoMedico>? _historicoMedico;
     private IRepository<IrisImagem>? _irisImagens;
     private IRepository<IrisMarca>? _irisMarcas;
     private IRepository<ConfiguracaoClinica>? _configuracaoClinica;
@@ -75,15 +74,6 @@ public class UnitOfWork : IUnitOfWork
         {
             _comunicacoes ??= new Repository<Comunicacao>(_context);
             return _comunicacoes;
-        }
-    }
-
-    public IRepository<HistoricoMedico> HistoricoMedico
-    {
-        get
-        {
-            _historicoMedico ??= new Repository<HistoricoMedico>(_context);
-            return _historicoMedico;
         }
     }
 

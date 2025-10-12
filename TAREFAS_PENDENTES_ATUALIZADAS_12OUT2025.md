@@ -1,7 +1,7 @@
 # 📋 TAREFAS PENDENTES ATUALIZADAS - BioDeskPro2
 
-**Data:** 12 de outubro de 2025 (pós-commit 0c81c89)  
-**Status Build:** ✅ 0 errors, 0 warnings  
+**Data:** 12 de outubro de 2025 (pós-commit 0c81c89)
+**Status Build:** ✅ 0 errors, 0 warnings
 **Status Funcional:** ✅ 100% operacional
 
 ---
@@ -14,7 +14,7 @@
 3. ✅ Auto-save Terapia (testado e funcional) - 15 min
 4. ✅ Documentação REGRAS_CONSULTAS.md - 15 min
 
-**Total investido:** ~75 minutos  
+**Total investido:** ~75 minutos
 **Progresso:** 4/6 tarefas P2 completadas (67%)
 
 ---
@@ -39,8 +39,8 @@
 - Serializar `ProgressoAbas` (JSON) para guardar quais abas foram preenchidas
 - No método `CarregarDadosAsync()`, restaurar `AbaAtiva` se existir
 
-**Estimativa:** 1-2 horas  
-**Prioridade:** P2-baixo (nice-to-have)  
+**Estimativa:** 1-2 horas
+**Prioridade:** P2-baixo (nice-to-have)
 **Impacto:** UX +15%
 
 ---
@@ -62,8 +62,8 @@
 - Integrar no fluxo de e-mail (botão "Selecionar Template")
 - Adicionar filtros (por tipo, data, paciente)
 
-**Estimativa:** 20-30 minutos  
-**Prioridade:** P2-médio (productivity boost)  
+**Estimativa:** 20-30 minutos
+**Prioridade:** P2-médio (productivity boost)
 **Impacto:** Produtividade +20%
 
 ---
@@ -82,8 +82,8 @@
 - Criar deformação elíptica (não circular perfeita)
 - Útil para íris assimétricas
 
-**Estimativa:** 3-4 horas (feature complexa)  
-**Prioridade:** P3-baixo (edge case)  
+**Estimativa:** 3-4 horas (feature complexa)
+**Prioridade:** P3-baixo (edge case)
 **Impacto:** Precisão +5% (casos raros)
 
 ---
@@ -100,8 +100,8 @@
 - Para MVVM puro: usar IDialogService ou Messenger
 - Refactoring arquitetural (não funcional)
 
-**Estimativa:** 1-2 horas  
-**Prioridade:** P3-baixo (architectural purity)  
+**Estimativa:** 1-2 horas
+**Prioridade:** P3-baixo (architectural purity)
 **Impacto:** Arquitetura +5% (já funciona)
 
 ---
@@ -125,8 +125,8 @@ historicoExistente.Alergias = Alergias;
 // ... etc
 ```
 
-**Estimativa:** 30-45 minutos  
-**Prioridade:** P3-médio (auditoria)  
+**Estimativa:** 30-45 minutos
+**Prioridade:** P3-médio (auditoria)
 **Impacto:** Rastreabilidade +10%
 
 ---
@@ -142,8 +142,8 @@ historicoExistente.Alergias = Alergias;
 - Usar CommunityToolkit.Mvvm.Messaging ou evento custom
 - Melhor fluxo guiado (wizard-like)
 
-**Estimativa:** 1 hora  
-**Prioridade:** P3-baixo (UX enhancement)  
+**Estimativa:** 1 hora
+**Prioridade:** P3-baixo (UX enhancement)
 **Impacto:** UX +8%
 
 ---
@@ -191,8 +191,8 @@ historicoExistente.Alergias = Alergias;
 ## 🎯 RECOMENDAÇÕES - PLANO DE AÇÃO
 
 ### **OPÇÃO A - Deploy Imediato (Recomendado)**
-**Status:** Sistema 100% funcional, production-ready  
-**Benefício:** Entregar valor imediato aos utilizadores  
+**Status:** Sistema 100% funcional, production-ready
+**Benefício:** Entregar valor imediato aos utilizadores
 **Risco:** Baixo (0 bugs conhecidos)
 
 ```bash
@@ -207,8 +207,8 @@ historicoExistente.Alergias = Alergias;
 ---
 
 ### **OPÇÃO B - Sprint 2 (Refactoring + Nice-to-Have)**
-**Duração:** 2-3 horas trabalho  
-**Benefício:** UX +15%, Produtividade +20%  
+**Duração:** 2-3 horas trabalho
+**Benefício:** UX +15%, Produtividade +20%
 **Risco:** Baixo (features isoladas)
 
 ```bash
@@ -223,8 +223,8 @@ Total: 2.5-3.5 horas
 ---
 
 ### **OPÇÃO C - Sprint 3 (Refactoring Arquitetural)**
-**Duração:** 6-8 horas trabalho  
-**Benefício:** Código mais limpo, arquitetura MVVM pura  
+**Duração:** 6-8 horas trabalho
+**Benefício:** Código mais limpo, arquitetura MVVM pura
 **Risco:** Médio (mudanças estruturais)
 
 ```bash
@@ -286,9 +286,9 @@ Total: 6-9 horas
 
 ## 🎯 CONCLUSÃO FINAL
 
-> **Sistema BioDeskPro2 está PRODUCTION-READY com 67% dos P2 completados.**  
-> 2 tarefas restantes são nice-to-have e podem ser implementadas em Sprint 2.  
-> 5 tarefas P3 são refactoring arquitetural (baixa prioridade).  
+> **Sistema BioDeskPro2 está PRODUCTION-READY com 67% dos P2 completados.**
+> 2 tarefas restantes são nice-to-have e podem ser implementadas em Sprint 2.
+> 5 tarefas P3 são refactoring arquitetural (baixa prioridade).
 > **Recomendação:** Deploy imediato + Sprint 2 após feedback real.
 
 ---

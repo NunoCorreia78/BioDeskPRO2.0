@@ -18,7 +18,6 @@ public class BioDeskDbContext : DbContext
   // === ENTIDADES PRINCIPAIS ===
   public DbSet<Paciente> Pacientes { get; set; } = null!;
   public DbSet<Contacto> Contactos { get; set; } = null!;
-  public DbSet<HistoricoMedico> HistoricosMedicos { get; set; } = null!;
   public DbSet<Consulta> Consultas { get; set; } = null!;
   public DbSet<Consentimento> Consentimentos { get; set; } = null!;
   public DbSet<IrisAnalise> IrisAnalises { get; set; } = null!;
@@ -70,11 +69,6 @@ public class BioDeskDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
       // Relacionamentos 1:N
-      entity.HasMany(p => p.HistoricoMedico)
-                .WithOne(h => h.Paciente)
-                .HasForeignKey(h => h.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
-
       entity.HasMany(p => p.Consultas)
                 .WithOne(c => c.Paciente)
                 .HasForeignKey(c => c.PacienteId)
@@ -108,15 +102,6 @@ public class BioDeskDbContext : DbContext
 
       entity.HasIndex(e => e.EmailPrincipal)
                 .HasDatabaseName("IX_Contactos_EmailPrincipal");
-    });
-
-    // === CONFIGURAÇÃO HISTÓRICO MÉDICO ===
-    modelBuilder.Entity<HistoricoMedico>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                .HasDatabaseName("IX_HistoricosMedicos_PacienteId");
     });
 
     // === CONFIGURAÇÃO CONSULTA ===

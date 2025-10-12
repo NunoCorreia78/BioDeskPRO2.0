@@ -417,28 +417,8 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
         {
             try
             {
-                // ✅ GRAVAR HISTÓRICO MÉDICO NA BD
-                var todosHistoricos = await _unitOfWork.HistoricoMedico.GetAllAsync();
-                var historicoExistente = todosHistoricos.FirstOrDefault(h => h.PacienteId == PacienteAtual.Id);
-
-                if (historicoExistente != null)
-                {
-                    // Atualizar existente
-                    // TODO: Mapear propriedades do ViewModel para o histórico
-                    _unitOfWork.HistoricoMedico.Update(historicoExistente);
-                }
-                else
-                {
-                    // Criar novo
-                    var novoHistorico = new HistoricoMedico
-                    {
-                        PacienteId = PacienteAtual.Id,
-                        DataCriacao = DateTime.Now
-                        // TODO: Mapear propriedades do ViewModel
-                    };
-                    await _unitOfWork.HistoricoMedico.AddAsync(novoHistorico);
-                }
-
+                // Rascunho salvo automaticamente via ObservableProperties
+                // DeclaracaoSaude já é persistida via FichaPacienteViewModel
                 await _unitOfWork.SaveChangesAsync();
                 _logger.LogInformation("✅ Rascunho da declaração de saúde guardado");
             }

@@ -1,7 +1,7 @@
 # 📋 REGRAS DE GESTÃO DE CONSULTAS - BioDeskPro2
 
-**Data:** 12 de outubro de 2025  
-**Versão:** 1.0  
+**Data:** 12 de outubro de 2025
+**Versão:** 1.0
 **Aplicável a:** Aba 4 - Registo de Consultas/Sessões
 
 ---
@@ -138,7 +138,7 @@ Em casos **extremamente raros** (ex: dados sensíveis incorretos, RGPD):
 - Administrador pode aceder à **base de dados SQLite** diretamente
 - Alterações requerem **justificação escrita** e são registadas em log
 
-**Ficheiro BD:** `BioDeskPro2.db` (pasta raiz aplicação)  
+**Ficheiro BD:** `BioDeskPro2.db` (pasta raiz aplicação)
 **Ferramenta:** DB Browser for SQLite
 
 ---
@@ -173,16 +173,16 @@ public class Sessao
 ## ⚠️ AVISOS IMPORTANTES
 
 ### **NÃO TENTAR:**
-❌ Editar `BioDeskPro2.db` sem backup  
-❌ Apagar consultas antigas para "limpar" histórico  
-❌ Usar ferramentas externas sem conhecimento técnico  
-❌ Alterar timestamps manualmente  
+❌ Editar `BioDeskPro2.db` sem backup
+❌ Apagar consultas antigas para "limpar" histórico
+❌ Usar ferramentas externas sem conhecimento técnico
+❌ Alterar timestamps manualmente
 
 ### **SEMPRE FAZER:**
-✅ Criar **backup diário** da base de dados  
-✅ Usar funcionalidades do sistema (não workarounds externos)  
-✅ Documentar **motivo** de cada consulta criada  
-✅ Seguir **fluxo de correção** descrito neste documento  
+✅ Criar **backup diário** da base de dados
+✅ Usar funcionalidades do sistema (não workarounds externos)
+✅ Documentar **motivo** de cada consulta criada
+✅ Seguir **fluxo de correção** descrito neste documento
 
 ---
 

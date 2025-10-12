@@ -21,7 +21,7 @@ public class PacienteRepository : Repository<Paciente>, IPacienteRepository
     {
         return await _dbSet
             .Include(p => p.Contacto)
-            .Include(p => p.HistoricoMedico)
+            .Include(p => p.DeclaracaoSaude) // ⭐ Aba 2 - Declaração de Saúde
             .Include(p => p.Consultas)
             .Include(p => p.Consentimentos)
             .Include(p => p.IrisAnalises)

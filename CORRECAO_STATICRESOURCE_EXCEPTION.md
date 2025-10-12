@@ -1,7 +1,7 @@
 # 🐛 CORREÇÃO: StaticResource Exception Line 63
 
-**Data**: 12 de Outubro de 2025  
-**Erro**: "StaticResource exception Line 63" ao abrir FichaPacienteView  
+**Data**: 12 de Outubro de 2025
+**Erro**: "StaticResource exception Line 63" ao abrir FichaPacienteView
 **Status**: ✅ **RESOLVIDO**
 
 ---
@@ -97,8 +97,8 @@ dotnet build --no-incremental
 ### Logs Esperados
 **ANTES** (com erro):
 ```
-System.Windows.Markup.XamlParseException: 
-Cannot find resource named 'FundoPrincipal'. 
+System.Windows.Markup.XamlParseException:
+Cannot find resource named 'FundoPrincipal'.
 Resource names are case sensitive.
 ```
 
@@ -113,8 +113,8 @@ Resource names are case sensitive.
 ##Files affected:
   c:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.App\Views\FichaPacienteView.xaml
 
-**Linhas alteradas**: 2 (linha 11, linha 178)  
-**Build**: 100% limpo (0 erros)  
+**Linhas alteradas**: 2 (linha 11, linha 178)
+**Build**: 100% limpo (0 erros)
 **Impacto**: Zero impacto visual, resolução de timing issue
 
 ---
@@ -162,12 +162,12 @@ Resource names are case sensitive.
     xmlns="..."
     xmlns:x="..."
     Background="{DynamicResource FundoPrincipal}"> <!-- ✅ SEMPRE DynamicResource -->
-    
+
     <UserControl.Resources>
         <!-- Recursos locais podem usar StaticResource -->
         <SolidColorBrush x:Key="LocalColor">#FF0000</SolidColorBrush>
     </UserControl.Resources>
-    
+
     <Grid Background="{StaticResource LocalColor}"/> <!-- ✅ Local = StaticResource OK -->
 </UserControl>
 ```
@@ -176,13 +176,13 @@ Resource names are case sensitive.
 
 ## ✅ CONCLUSÃO
 
-**Problema**: StaticResource timing issue em FichaPacienteView  
-**Solução**: DynamicResource para recursos globais  
-**Resultado**: 0 erros, aplicação estável  
-**Tempo correção**: ~5 minutos  
+**Problema**: StaticResource timing issue em FichaPacienteView
+**Solução**: DynamicResource para recursos globais
+**Resultado**: 0 erros, aplicação estável
+**Tempo correção**: ~5 minutos
 **Impacto utilizador**: Zero (bug invisível, apenas debug logs)
 
 ---
 
-**Status Final**: ✅ RESOLVIDO E DOCUMENTADO  
+**Status Final**: ✅ RESOLVIDO E DOCUMENTADO
 **Próximos passos**: Aplicar mesmo pattern em outras views se necessário
