@@ -22,6 +22,7 @@ using BioDesk.Services.AutoSave;
 using BioDesk.Services.Documentos;
 using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
+using BioDesk.ViewModels.UserControls;
 using BioDesk.Services.Debug;
 
 namespace BioDesk.App;
@@ -266,6 +267,7 @@ Inner Exceptions:
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPacienteRepository, PacienteRepository>();
         services.AddScoped<ISessaoRepository, SessaoRepository>();
+        services.AddScoped<BioDesk.Data.Repositories.IProtocoloRepository, BioDesk.Data.Repositories.ProtocoloRepository>(); // ⚡ TERAPIAS BIOENERGÉTICAS
 
         // === CACHE SERVICE (Singleton para performance) ===
         services.AddMemoryCache();
@@ -309,6 +311,26 @@ Inner Exceptions:
         services.AddScoped<Services.Pdf.PrescricaoPdfService>();
         services.AddScoped<Services.Pdf.DeclaracaoSaudePdfService>();
 
+        // === EXCEL IMPORT SERVICE (EPPlus - Terapias Bioenergéticas) ===
+        services.AddScoped<BioDesk.Services.Excel.IExcelImportService, BioDesk.Services.Excel.ExcelImportService>();
+
+        // === HTTP CLIENT FACTORY (para Random.org atmospheric RNG) ===
+        services.AddHttpClient("RandomOrg", client =>
+        {
+            client.BaseAddress = new Uri("https://www.random.org/");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+
+        // === RNG SERVICE (True Random Number Generator - Terapias Bioenergéticas) ===
+        services.AddSingleton<BioDesk.Services.Rng.IRngService, BioDesk.Services.Rng.RngService>();
+
+        // === TIEPIE HARDWARE SERVICE (Handyscope HS5 - Gerador de Sinais) ===
+        // 🔴 MODO REAL: Hardware físico conectado via USB (LibTiePie SDK)
+        services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.RealTiePieHardwareService>();
+        
+        // ⚡ MODO DUMMY: Para testes sem hardware (descomentar linha abaixo e comentar linha acima)
+        // services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.DummyTiePieHardwareService>();
+
         // === VIEWMODELS ===
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<FichaPacienteViewModel>();
@@ -322,6 +344,7 @@ Inner Exceptions:
         services.AddTransient<RegistoConsultasViewModel>(); // ABA 4: Registo de Sessões
         services.AddTransient<IrisdiagnosticoViewModel>(); // ✅ ABA 5: Irisdiagnóstico
         services.AddTransient<ComunicacaoViewModel>(); // ✅ ABA 6: Comunicação
+        services.AddTransient<TerapiasBioenergeticasUserControlViewModel>(); // ✅ ABA 8: Terapias (RNG + TiePie)
         services.AddTransient<SelecionarTemplatesViewModel>(); // ⭐ NOVO: Pop-up de templates PDF
 
         // Views - SISTEMA LIMPO

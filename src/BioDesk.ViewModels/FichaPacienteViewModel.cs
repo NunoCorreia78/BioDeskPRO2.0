@@ -500,7 +500,7 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     /// Controla quais abas foram completadas
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<bool> _abasCompletadas = new() { false, false, false, false, false, false };
+    private ObservableCollection<bool> _abasCompletadas = new() { false, false, false, false, false, false, false, false };  // ✅ 8 abas (0-7)
 
     #endregion
 
@@ -625,7 +625,7 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     {
         if (parameter is string abaStr && int.TryParse(abaStr, out int numeroAba))
         {
-            if (numeroAba >= 1 && numeroAba <= 7)
+            if (numeroAba >= 1 && numeroAba <= 8)  // ✅ Agora aceita aba 8 (Terapias)
             {
                 // Inicializar DocumentosExternosViewModel quando navegar para aba 7
                 if (numeroAba == 7 && PacienteAtual != null && PacienteAtual.Id > 0)
@@ -643,7 +643,7 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     [RelayCommand]
     private void ProximaAba()
     {
-        if (AbaAtiva < 7)
+        if (AbaAtiva < 8)  // ✅ Agora permite avançar até aba 8 (Terapias)
         {
             // Marcar aba atual como completada
             AbasCompletadas[AbaAtiva - 1] = true;

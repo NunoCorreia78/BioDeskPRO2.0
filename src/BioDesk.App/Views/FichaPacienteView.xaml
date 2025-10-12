@@ -350,12 +350,12 @@
           Command="{Binding NavegarParaAbaCommand}"
           CommandParameter="8"
           Content="🌿 Terapias"
-          IsEnabled="False"
-          ToolTip="Módulo em desenvolvimento futuro">
+          IsEnabled="True"
+          ToolTip="Terapias Bioenergéticas (RNG + TiePie HS5)">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
-                <DataTrigger Binding="{Binding AbaAtiva}" Value="7">
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="8">
                   <Setter Property="Background">
                     <Setter.Value>
                       <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -419,13 +419,11 @@
           Panel.ZIndex="20"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=6}" />
 
-        <!--  Texto para aba 8 (em desenvolvimento)  -->
-        <TextBlock
-          Margin="20"
-          FontSize="16"
-          Foreground="{StaticResource TextoPrincipal}"
-          Text="{Binding ConteudoAbaAtiva}"
-          TextWrapping="Wrap"
+        <!--  UserControl para Aba 8: Terapias Bioenergéticas (RNG + TiePie HS5)  -->
+        <abas:TerapiasUserControl
+          x:Name="TerapiasUserControl"
+          Panel.ZIndex="15"
+          Background="Transparent"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=8}" />
       </Grid>
 

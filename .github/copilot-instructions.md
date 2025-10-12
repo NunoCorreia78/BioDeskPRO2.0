@@ -1,370 +1,219 @@
-<!-- BioDeskPro2 - Sistema de Gestão Médica -->
+# BioDeskPro2 - Sistema de Gestão Médica
 
-## Descrição do Projeto
-BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, utilizando arquitetura MVVM e Entity Framework Core com SQLite.
+Sistema WPF para gestão clínica com Naturopatia, Osteopatia e Irisdiagnóstico, desenvolvido em C# .NET 8.
 
-## 10 Pilares para Desenvolvimento Consistente
+## 🏗️ Arquitetura
 
-### 1. SDK Fixo e Previsível
-- .NET 8 LTS fixo via global.json
-- TargetFramework: net8.0-windows
-- UseWPF: true
-- Nullable: enable
-
-### 2. Estrutura de Projetos Estável
-- BioDesk.App (WPF + Views)
-- BioDesk.ViewModels
-- BioDesk.Domain
-- BioDesk.Data (EF Core)
-- BioDesk.Services (Navegação/Pacientes/Hardware)
-
-### 3. MVVM com CommunityToolkit.Mvvm
-- ViewModelBase : ObservableObject
-- NavigationViewModelBase para ViewModels com navegação
-- [ObservableProperty] para propriedades
-- [RelayCommand] para comandos
-- FluentValidation para validação robusta
-
-### 4. Navegação Única e Consistente
-- INavigationService com Register("Dashboard"|"NovoPaciente"|"FichaPaciente"|"ListaPacientes")
-- Sempre SetPacienteAtivo + NavigateTo("FichaPaciente")
-
-### 5. XAML com Design-Time DataContext
-- d:DataContext para intellisense
-- Evitar erros de binding
-
-### 6. Base de Dados Robusta + Seed
-- SQLite com índices únicos
-- Seed de 3 pacientes no arranque
-
-### 7. Caminho de Ouro Comentado
-- Fluxos documentados nos ViewModels
-- Regras de negócio explícitas
-
-### 8. Guardas Anti-Erro Padronizados
-- IsDirty com diálogos
-- Validação robusta com FluentValidation
-- ExecuteWithErrorHandlingAsync obrigatório
-- try/catch + ILogger em operações críticas
-
-### 8.1. Padrões de Error Handling ⭐ NOVO
-- **SEMPRE** usar `ExecuteWithErrorHandlingAsync` para operações assíncronas
-- **NUNCA** fazer try/catch simples sem logging
-- **SEMPRE** validar com FluentValidation antes de gravar
-- **SEMPRE** mostrar feedback visual (IsLoading, ErrorMessage)
-
-### 9. Testes Âncora
-- Contratos definidos por testes
-- SalvarPaciente_GravaENavegaParaFicha()
-- SearchAsync_DevolveResultados()
-
-### 10. Prompts Consistentes
-- Nomes padronizados: PesquisarTexto, PesquisarCommand
-- Comandos: SelecionarPacienteCommand, NavegarParaFichaCommand
-
-## Paleta de Cores (Terroso Pastel)
-- Fundo gradiente: #FCFDFB → #F2F5F0
-- Cartão: #F7F9F6
-- Borda: #E3E9DE
-- Texto principal: #3F4A3D
-- Texto secundário: #5A6558
-- Botão principal: #9CAF97 (hover #879B83)
-
-## Regras de Desenvolvimento
-- SEMPRE verificar erros e debug
-- SEMPRE consultar logs e diagnostics
-- SEMPRE evitar duplicações (usar NavigationViewModelBase)
-- SEMPRE apagar código obsoleto ao criar novos arquivos
-- SEMPRE validar com FluentValidation antes de gravar
-- SEMPRE usar SetPacienteAtivo antes de navegar para ficha
-- SEMPRE usar ExecuteWithErrorHandlingAsync para operações async
-- SEMPRE implementar loading states visuais (IsLoading binding)
-
-## Regra Crítica Anti-Erro ✅ RESOLVIDA
-- ✅ **Todos os erros de compilação e runtime foram corrigidos**
-- ✅ **Problemas de WPF binding com Entity Framework resolvidos**
-- ✅ **Sistema de navegação funcionando perfeitamente**
-- ✅ **Build completamente limpo (0 erros, 0 warnings)**
-- ✅ **Aplicação executando sem crashes**
-
-## Status do Projeto - FUNCIONAL ✅
-- **Build**: Completamente limpo
-- **Execução**: Aplicação WPF inicia corretamente no Dashboard
-- **Navegação**: Todas as views (Dashboard ↔ NovoPaciente ↔ FichaPaciente ↔ ListaPacientes) funcionais
-- **Bindings**: WPF binding resolvido com PacienteViewModel wrapper
-- **Base de Dados**: SQLite + EF Core operacional
-- **Testes**: Todos os testes compilam e executam
-
-## Arquitectura Implementada
-- **Entidades**: Paciente simplificada (sem computed properties conflituosas)
-- **ViewModels**: PacienteViewModel wrapper para WPF binding seguro
-- **Serviços**: PacienteService e NavigationService completamente funcionais
-- **Views**: Todas as views registadas e funcionais no DI container
-
-## 🎯 NOVA ARQUITETURA APROVADA - Interface Clínica Otimizada
-
-### Tab 2 — Gestão Clínica (Zero Redundâncias)
-
-#### Sub-tab 2.1 — Avaliação Clínica (Questionário Estruturado)
-**Interface**: Checklists/chips + sliders. **Zero texto obrigatório**.
-
-1. **Motivos da consulta**
-   - Motivos (multi-select chips): Dor lombar, Cervicalgia, Cefaleias, Ansiedade, Stress, Fadiga, Refluxo, Dispepsia, Obstipação, Diarreia, Intolerâncias, Alergias, Insónia, Dores articulares, Outro
-   - Localização (selector corporal) + Lado (E/D/Bilateral)
-   - Início (date picker), Duração (dropdown), Evolução (radio)
-   - Intensidade (slider 0–10), Caráter (multi-chips)
-   - Fatores agravantes/alívio (chips)
-
-2. **História clínica passada**
-   - Doenças crónicas (multi-select + "Nenhuma")
-   - Cirurgias ([+] adicionar: Ano|Tipo|Observações)
-   - Alergias (chips por tipo + "Sem alergias")
-   - Medicação/Suplementação atual (listas + atalhos)
-
-3. **Revisão de sistemas** (colapsável, tri-state)
-   - Por sistema: Cardiovascular, Respiratório, Digestivo, etc.
-   - Multi-select com observações opcionais
-
-4. **Estilo de vida**
-   - Alimentação, Hidratação, Exercício (chips/dropdowns)
-   - Tabaco/Álcool/Cafeína (radio/dropdowns)
-   - Stress (slider), Sono (chips)
-
-5. **História familiar**
-   - Antecedentes (multi-select) + Parentesco (chips)
-
-**⚡ Frases Rápidas**: "Sem alergias", "Sem medicação crónica", etc.
-
-#### Sub-tab 2.2 — Declaração & Consentimentos (Vista Legal)
-- **Dataset**: Mesmo da 2.1, formatado como declaração
-- **Consentimentos**: Accordion por tema (Naturopatia, Osteopatia, etc.)
-- **Assinatura digital** + Data automática
-- **RGPD**: Checkbox + assinatura
-- **Ações**: Guardar | PDF | Email
-
-**Princípio**: Edita na 2.1, assina na 2.2. **Zero duplicação**.
-
-#### Sub-tab 2.3 — Registo Clínico
-- **Consultas**: Tabela (Data|Tipo|Motivos|Observações)
-- **Prescrições**: Templates → personalizar → PDF/Email
-- **Timeline**: E-mails, PDFs, SMS, chamadas
-- **Análises**: Títulos + relatórios
-
-### Tab 3 — Medicina Complementar (🚧 EM DESENVOLVIMENTO)
-#### 3.1 Naturopatia - Templates por objetivo
-#### 3.2 Irisdiagnóstico - Galeria + overlays
-#### 3.3 Terapia Bioenergética - Protocolos em cards
-
----
-
-## 🛠️ CONFIGURAÇÃO E MANUTENÇÃO - DIRETRIZES AVANÇADAS
-
-### 🔍 INTELLISENSE E ANÁLISE DE CÓDIGO - PROCEDIMENTOS PADRÃO
-
-#### ✅ QUANDO CONFIGURAR INTELLISENSE
-- **SEMPRE** que o utilizador mencionar "erros não aparecem"
-- **SEMPRE** que pedir para "mostrar todos os erros"
-- **SEMPRE** que mencionar "separadores" ou "organização" de erros
-- **NUNCA** alterar configurações já funcionais sem razão explícita
-
-#### 📂 HIERARQUIA DE CONFIGURAÇÃO (ordem de importância)
-1. **`.vscode/settings.json`** → IntelliSense e Problems Panel
-2. **`omnisharp.json`** → C# language server
-3. **`.editorconfig`** → Regras de análise (CA rules)
-4. **`global.json`** → SDK fixo (.NET 8)
-
-#### 🎯 LOCALIZAÇÃO DE ERROS NO VS CODE
-```json
-// CONFIGURAÇÃO CRÍTICA para Problems Panel:
-"problems.defaultViewMode": "tree",        // NÃO "list"
-"problems.autoReveal": true,               // Auto-mostrar
-"problems.sortOrder": "severity",          // Errors primeiro
-"workbench.problems.visibility": "expanded" // Sempre visível
+### Estrutura de Projetos (6 camadas)
+```
+src/
+├── BioDesk.App/          # WPF Views + XAML + Dependency Injection bootstrap
+├── BioDesk.ViewModels/   # ViewModels MVVM (CommunityToolkit.Mvvm)
+├── BioDesk.Domain/       # Entidades (Paciente, Consulta, IrisAnalise)
+├── BioDesk.Data/         # EF Core DbContext + Repositories + SQLite
+├── BioDesk.Services/     # Business logic (Navigation, Email, PDF, Camera)
+└── BioDesk.Tests/        # xUnit tests (testes âncora)
 ```
 
-### ⚠️ WARNINGS E CODE ANALYSIS - RESOLUÇÃO SISTEMÁTICA
+### Tecnologias-Chave
+- **.NET 8 LTS** fixo via `global.json` (8.0.403)
+- **WPF** com TargetFramework `net8.0-windows`, Nullable enabled
+- **CommunityToolkit.Mvvm** para `[ObservableProperty]` e `[RelayCommand]`
+- **Entity Framework Core** com SQLite (arquivo: `biodesk.db`)
+- **FluentValidation** para regras de negócio
+- **QuestPDF** para geração de PDFs (prescrições/consentimentos)
 
-#### 🔴 PRIORIDADES DE CORREÇÃO
-1. **Erros de compilação** (CS errors) → Build falha
-2. **CA1063** → Dispose pattern incorreto
-3. **CA1001** → Classe com fields disposable deve implementar IDisposable
-4. **CS0105** → Using statements duplicados
-5. **Outros CA rules** → Conforme configuração .editorconfig
+## 🎯 Padrões MVVM Obrigatórios
 
-#### 🛡️ PADRÃO DISPOSE OBRIGATÓRIO
+### ViewModels Base Classes
 ```csharp
-// NUNCA fazer isto (CA1063 violation):
-public void Dispose() { /* clean up */ }
-
-// SEMPRE fazer isto (CA1063 compliant):
-public void Dispose()
+// Base para todos os ViewModels
+public abstract partial class ViewModelBase : ObservableObject
 {
-    Dispose(true);
-    GC.SuppressFinalize(this);
+    [ObservableProperty] private bool _isLoading;
+    [ObservableProperty] private string _errorMessage = string.Empty;
+    
+    // SEMPRE usar este método para operações async
+    protected async Task ExecuteWithErrorHandlingAsync(Func<Task> operation, 
+        string errorContext = "", ILogger? logger = null) { }
 }
 
-protected virtual void Dispose(bool disposing)
+// Para ViewModels que navegam entre views
+public abstract class NavigationViewModelBase : ViewModelBase
 {
-    if (!_disposed && disposing)
+    protected readonly INavigationService _navigationService;
+}
+```
+
+### Padrão de Propriedades e Comandos
+```csharp
+// ✅ CORRETO - CommunityToolkit.Mvvm
+[ObservableProperty]
+private string _pesquisarTexto = string.Empty;
+
+[RelayCommand]
+private async Task PesquisarAsync() { }
+
+// ❌ ERRADO - INotifyPropertyChanged manual
+private string _texto;
+public string Texto { 
+    get => _texto; 
+    set { _texto = value; OnPropertyChanged(); }
+}
+```
+
+## 🧭 Sistema de Navegação
+
+### Navegação Consistente (Caminho de Ouro)
+```csharp
+// SEMPRE seguir esta sequência ao navegar para ficha de paciente:
+_pacienteService.SetPacienteAtivo(paciente);  // 1º: Definir contexto
+_navigationService.NavigateTo("FichaPaciente"); // 2º: Navegar
+
+// Views registadas no INavigationService:
+// - "Dashboard", "NovoPaciente", "FichaPaciente", "ListaPacientes", "Configuracoes"
+```
+
+### Fluxos de Navegação Padrão
+```
+Dashboard → Pesquisa (1 resultado) → SetPacienteAtivo → FichaPaciente
+Dashboard → Pesquisa (múltiplos) → ListaPacientes → Selecionar → SetPacienteAtivo → FichaPaciente
+Dashboard → NovoPaciente → Validação → Gravar → SetPacienteAtivo → FichaPaciente
+```
+
+## 📂 PathService - Gestão de Ficheiros
+
+**SEMPRE** usar `PathService` para caminhos de ficheiros. **NUNCA** hardcoded paths.
+
+```csharp
+// ✅ CORRETO
+var dbPath = PathService.DatabasePath;
+var templatesPath = PathService.TemplatesPath;
+var consentimentoPath = PathService.GetConsentimentoPath(tipo, nome, data);
+
+// ❌ ERRADO
+var path = @"C:\Documentos\Templates";
+var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates");
+```
+
+**Modo Debug vs Release**:
+- **Debug** (VS Code attached): Usa pasta do projeto (`BioDeskPro2/`)
+- **Release** (instalado): Usa `C:\ProgramData\BioDeskPro2\`
+
+Pastas geridas: `Documentos/`, `Templates/`, `Backups/`, `Logs/`, `Pacientes/`, `Prescricoes/`, `Consentimentos/`
+
+## 🎨 UI/XAML - Regras Críticas
+
+### Sobreposição UserControls (Bug Comum)
+```xaml
+<!-- ✅ CORRETO - Panel.ZIndex explícito + Background transparent -->
+<Grid>
+    <local:DadosBiograficosUserControl 
+        Panel.ZIndex="100" 
+        Background="Transparent"
+        Visibility="{Binding AbaAtiva, Converter={StaticResource TabVisibilityConverter}, ConverterParameter=DadosBiograficos}"/>
+    <local:ConsentimentosUserControl 
+        Panel.ZIndex="50" 
+        Background="Transparent"
+        Visibility="{Binding AbaAtiva, Converter={StaticResource TabVisibilityConverter}, ConverterParameter=Consentimentos}"/>
+</Grid>
+
+<!-- ❌ ERRADO - Sem Z-Index causa sobreposição visual -->
+<Grid>
+    <local:UserControl1 Visibility="..."/>
+    <local:UserControl2 Visibility="..."/>  <!-- Sempre fica por cima! -->
+</Grid>
+```
+
+**Regra de Ouro**: Quando múltiplos UserControls no mesmo Grid, **SEMPRE** definir `Panel.ZIndex` e `Background="Transparent"`.
+
+### Design-Time DataContext
+```xaml
+<!-- SEMPRE adicionar d:DataContext para IntelliSense no XAML -->
+<UserControl xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             d:DataContext="{d:DesignInstance Type=vm:FichaPacienteViewModel}">
+```
+
+### Paleta de Cores (Terroso Pastel)
+```xml
+<Color x:Key="FundoPrincipal">#FCFDFB</Color>      <!-- Gradiente → #F2F5F0 -->
+<Color x:Key="Cartao">#F7F9F6</Color>
+<Color x:Key="Borda">#E3E9DE</Color>
+<Color x:Key="TextoPrincipal">#3F4A3D</Color>
+<Color x:Key="TextoSecundario">#5A6558</Color>
+<Color x:Key="BotaoPrimario">#9CAF97</Color>       <!-- Hover: #879B83 -->
+```
+
+## 🛠️ Comandos de Desenvolvimento
+
+### Build e Execução
+```bash
+# Restore + Build + Run (sequência completa)
+dotnet clean && dotnet restore && dotnet build && dotnet run --project src/BioDesk.App
+
+# Build incremental rápido
+dotnet build
+
+# Executar testes
+dotnet test src/BioDesk.Tests
+
+# Build com análise completa (detectar CA warnings)
+dotnet build --verbosity normal --no-incremental
+```
+
+### Tasks VS Code Disponíveis
+- **Build BioDeskPro2**: Compilação rápida
+- **Run BioDeskPro2**: Executa aplicação (dependsOn Build)
+- **Test BioDeskPro2**: Executa testes xUnit
+- **Analyze Code - Full Solution**: Build verboso com CA analyzers
+- **Restore + Clean + Build**: Sequência completa com logging
+
+## 🧪 Testes Âncora (Contratos)
+
+Testes definem contratos críticos - **NUNCA** alterar testes para esconder erros:
+
+```csharp
+// BioDesk.Tests/Services/PacienteServiceTests.cs
+[Fact] public async Task SearchAsync_DevolveResultados() { }
+[Fact] public async Task GravarPaciente_PermiteSetPacienteAtivo() { }
+[Fact] public async Task GetRecentesAsync_DevolvePacientesOrdenadosPorDataAtualizacao() { }
+[Fact] public void SetPacienteAtivo_DisparaEvento() { }
+```
+
+## 📋 Error Handling Patterns
+
+### ExecuteWithErrorHandlingAsync (Obrigatório)
+```csharp
+// ✅ CORRETO - Em ViewModels
+[RelayCommand]
+private async Task PesquisarAsync()
+{
+    await ExecuteWithErrorHandlingAsync(async () =>
     {
-        // Limpar recursos managed
-    }
-    _disposed = true;
+        // 1. Validar inputs
+        if (string.IsNullOrWhiteSpace(PesquisarTexto))
+            return;
+        
+        // 2. Operação business logic
+        var resultados = await _pacienteService.SearchAsync(PesquisarTexto);
+        
+        // 3. Atualizar UI
+        Resultados = resultados;
+    }, 
+    errorContext: "ao pesquisar pacientes",
+    logger: _logger);
 }
+
+// ❌ ERRADO - Try-catch simples sem logging
+try { 
+    var result = await _service.DoSomething(); 
+} 
+catch { /* silêncio */ }
 ```
 
-### 📊 VERIFICAÇÃO E VALIDAÇÃO - CHECKLIST OBRIGATÓRIO
-
-#### ✅ ANTES DE CONFIRMAR QUALQUER "CORREÇÃO"
-```bash
-# SEMPRE executar esta sequência:
-dotnet clean
-dotnet restore
-dotnet build --verbosity normal
-# Se build OK → confirmar 0 Warnings
-```
-
-#### 🔍 SINAIS DE CONFIGURAÇÃO CORRECTA
-- **Problems Panel**: Visível com separadores por severity
-- **Editor**: Squiggles vermelhos/amarelos a aparecer
-- **Build output**: Verbosity detalhada com números exatos
-- **IntelliSense**: Auto-completar a funcionar em C# files
-
-#### ❌ SINAIS DE PROBLEMAS
-- "Não vejo erros no Problems Panel"
-- "IntelliSense não funciona"
-- "Build passa mas tenho warnings"
-- "Squiggles não aparecem no editor"
-
-### 🎯 INSTRUÇÕES ESPECÍFICAS PARA COPILOT
-
-#### 🚨 NUNCA FAZER
-- Alterar settings.json que já funciona
-- "Corrigir" código que compila e testa com sucesso
-- Implementar Dispose simples sem padrão virtual
-- Ignorar outputs de build detalhados
-
-#### ✅ SEMPRE FAZER
-- Verificar build antes e depois de mudanças
-- Implementar Dispose pattern completo (CA1063)
-- Ler mensagens de erro completamente
-- Confirmar 0 Warnings no final
-
-#### 📋 TEMPLATE DE VERIFICAÇÃO
-```markdown
-## Verificação Completa ✅
-
-### Build Status
-- [ ] `dotnet clean && dotnet build` → 0 Errors, 0 Warnings
-- [ ] Problems Panel mostra erros organizados por severity
-- [ ] IntelliSense funciona em ficheiros .cs
-- [ ] Squiggles aparecem no editor
-
-### Configuração VS Code
-- [ ] `.vscode/settings.json` → tree view configurado
-- [ ] `omnisharp.json` → analyzers habilitados
-- [ ] `.editorconfig` → CA rules ativas
-
-### Código
-- [ ] Dispose patterns seguem CA1063
-- [ ] Sem using statements duplicados
-- [ ] Classes com disposable fields implementam IDisposable
-```
-
----
-
-## 🚨 REGRAS CRÍTICAS DE VERIFICAÇÃO - COPILOT
-
-### ⚠️ VERIFICAÇÕES OBRIGATÓRIAS (NUNCA SALTAR)
-
-#### 🔴 PROIBIÇÕES ABSOLUTAS
-1. **NUNCA** dizer "problema resolvido" sem testar
-2. **NUNCA** adaptar testes para esconder erros
-3. **NUNCA** ignorar erros do IntelliSense no VS Code
-4. **NUNCA** usar try-catch para silenciar problemas
-
-#### 🛡️ REGRA DOURADA: PRESERVAR CÓDIGO FUNCIONAL
-5. **NUNCA** alterar código que está funcionando sem razão explícita
-6. **NUNCA** refatorar código estável apenas por "melhorar"
-7. **NUNCA** tocar em funcionalidades que passam nos testes
-8. **SEMPRE** perguntar antes de modificar código funcional
-9. **SEMPRE** priorizar: "Se funciona, não mexe" > "código perfeito"
-
-#### ✅ PROCESSO DE VERIFICAÇÃO OBRIGATÓRIO
-```bash
-# SEMPRE executar antes de confirmar sucesso:
-dotnet clean
-dotnet restore
-dotnet build --no-incremental
-# Se build OK → dotnet test
-```
-
-#### 🔍 CHECKLIST INTELLISENSE VS CODE
-- **Squiggles vermelhos**: Corrigir TODOS imediatamente
-- **Squiggles amarelos**: Revisar warnings importantes
-- **Using statements**: Verificar todos resolvidos
-- **Project references**: Confirmar todos adicionados
-
-#### 🐛 METODOLOGIA DE RESOLUÇÃO
-1. **DETECTAR**: `dotnet build --verbosity detailed`
-2. **ANALISAR**: Ler cada erro completamente
-3. **CORRIGIR**: Um erro de cada vez
-4. **VERIFICAR**: `dotnet build` até 0 erros
-5. **TESTAR**: Só depois de build limpo
-
-#### ❌ ANTI-PATTERNS PROIBIDOS
+### Dispose Pattern (CA1063 Compliant)
 ```csharp
-// ERRADO: Esconder erros
-try { /* código quebrado */ } catch { }
-
-// ERRADO: Testes sem sentido
-Assert.IsTrue(true);
-
-// ERRADO: Comentar código quebrado
-// var result = BrokenMethod();
-
-// CERTO: Corrigir o erro real
-if (service == null)
-    throw new ArgumentNullException(nameof(service));
-```
-
-#### 📋 CHECKLIST FINAL
-Antes de afirmar qualquer correção:
-- [ ] `dotnet build` = 0 Errors, 0 Warnings
-- [ ] VS Code sem squiggles vermelhos
-- [ ] Aplicação executa sem exceções
-- [ ] Funcionalidades testadas manualmente
-
-#### 🛑 QUANDO PARAR E PEDIR AJUDA
-Após 3 tentativas falhadas do mesmo erro, admitir:
-"Este problema requer investigação adicional. O erro sugere [problema específico]. Para corrigir adequadamente, precisamos [ação específica]."
-
-#### ⭐ PRINCÍPIO FUNDAMENTAL
-**"Se está a funcionar e os testes passam, NÃO ALTERES!"**
-- Código funcional é mais valioso que código "perfeito"
-- Estabilidade > Elegância
-- Funcionalidade > Refactoring desnecessário
-
-#### 🔧 CONFIGURAÇÃO VS CODE INTELLISENSE OTIMIZADA ✅ COMPLETADA
-
-### ✅ FILES CONFIGURADOS (NÃO ALTERAR - FUNCIONANDO PERFEITAMENTE)
-- **`.vscode/settings.json`**: IntelliSense C# otimizado, Problems Panel em tree view, separadores organizados
-- **`omnisharp.json`**: Roslyn analyzers, inlay hints, import completion habilitados
-- **`.editorconfig`**: 88 regras CA configuradas para análise completa de código
-- **`.vscode/extensions.json`**: Extensões recomendadas para C#/.NET development
-- **`.vscode/tasks.json`**: Tasks de análise e build configuradas
-
-### 🎯 ERROS NO INTELLISENSE - LOCALIZAÇÃO GARANTIDA
-- **Problems Panel**: Separador "PROBLEMS" com view em árvore
-- **Filtros**: Por severidade (Error → Warning → Information)
-- **Auto-reveal**: Erros aparecem automaticamente ao abrir ficheiros
-- **Editor decorations**: Squiggles vermelhos e amarelos visíveis
-- **Background analysis**: Solução completa analisada continuamente
-
-### 📋 PADRÕES DE DISPOSE IMPLEMENTADOS ✅ RESOLVIDOS
-```csharp
-// PADRÃO CA1063 CORRETO (implementado em 6 classes):
-public class ExemploService : IDisposable
+public class MeuServico : IDisposable
 {
     private bool _disposed = false;
 
@@ -379,135 +228,127 @@ public class ExemploService : IDisposable
         if (!_disposed && disposing)
         {
             // Limpar recursos managed
-            _recursoManaged?.Dispose();
+            _recurso?.Dispose();
         }
         _disposed = true;
     }
 }
 ```
 
-### 🚀 BUILD STATUS: 100% LIMPO
-- ✅ **0 Errors, 0 Warnings** (verificado 2025-09-28)
-- ✅ **Todos os CA1063 warnings corrigidos**
-- ✅ **Settings.json validation error resolvido**
-- ✅ **CS0105 using duplicado removido**
+## 🚨 Regras de Verificação Obrigatórias
 
-**LEMBRETE FINAL**: Código funcional > Código "corrigido" que não funciona
+### NUNCA Fazer
+1. **NUNCA** dizer "problema resolvido" sem executar `dotnet build` + `dotnet test`
+2. **NUNCA** adaptar testes para esconder erros
+3. **NUNCA** ignorar squiggles vermelhos no VS Code
+4. **NUNCA** usar try-catch para silenciar problemas
+5. **NUNCA** alterar código funcional sem razão explícita ("Se funciona, não mexe")
+6. **NUNCA** usar hardcoded paths - sempre `PathService`
+7. **NUNCA** colocar múltiplos UserControls sem `Panel.ZIndex`
 
+### SEMPRE Fazer
+1. **SEMPRE** verificar build antes e depois: `dotnet clean && dotnet build`
+2. **SEMPRE** usar `ExecuteWithErrorHandlingAsync` para operações async
+3. **SEMPRE** validar com FluentValidation antes de gravar
+4. **SEMPRE** usar `SetPacienteAtivo` antes de `NavigateTo("FichaPaciente")`
+5. **SEMPRE** implementar Dispose pattern completo (CA1063)
+6. **SEMPRE** testar navegação entre TODAS as abas após mudanças XAML
+7. **SEMPRE** usar `PathService` para caminhos de ficheiros
+8. **SEMPRE** definir `d:DataContext` em UserControls para IntelliSense
 
-# ⚠️ CHECKLIST ANTI-ERRO UI/BINDING - OBRIGATÓRIO
+### Checklist Pré-Commit
+```bash
+# 1. Build limpo
+dotnet clean && dotnet restore && dotnet build
+# Verificar: 0 Errors, warnings apenas AForge (compatibilidade)
 
-## 🚨 REGRAS CRÍTICAS - NUNCA IGNORAR
+# 2. Testes passam
+dotnet test
+# Verificar: Todos green
 
-### 1. **SOBREPOSIÇÃO DE USERCONTROLS**
+# 3. VS Code limpo
+# Verificar: Sem squiggles vermelhos no Problems Panel
 
-❌ **NUNCA** colocar UserControls no mesmo Grid sem Z-Index
-✅ **SEMPRE** usar `Panel.ZIndex` quando UserControls partilham espaço
-✅ **SEMPRE** usar bordas coloridas DEBUG durante desenvolvimento
-
-```xaml
-<!-- CORRETO -->
-<Grid>
-    <UserControl1 Panel.ZIndex="100" BorderBrush="Red" BorderThickness="2"/>
-    <UserControl2 Panel.ZIndex="50" BorderBrush="Blue" BorderThickness="2"/>
-</Grid>
+# 4. Executar aplicação
+dotnet run --project src/BioDesk.App
+# Verificar: Dashboard abre, navegação funciona
 ```
 
-### 2. **VISIBILITY BINDING**
+## 📊 Configuração IntelliSense (NÃO ALTERAR)
 
-❌ **NUNCA** confiar apenas em `Visibility=Collapsed`
-✅ **SEMPRE** verificar com bordas DEBUG se está realmente oculto
-✅ **SEMPRE** testar cada estado de navegação
+Ficheiros já configurados e funcionais:
+- **`.vscode/settings.json`**: Problems Panel em tree view, analyzers habilitados
+- **`omnisharp.json`**: Roslyn analyzers, inlay hints, import completion
+- **`.editorconfig`**: 88 regras CA configuradas
 
-### 3. **BACKGROUND TRANSPARENTE**
+**⚠️ ATENÇÃO**: Não alterar estas configurações sem motivo crítico - estão otimizadas.
 
-❌ **NUNCA** deixar UserControls com Background sólido por defeito
-✅ **SEMPRE** usar `Background="Transparent"` em UserControls sobrepostos
+## 🎯 Status do Projeto (Atualizado: 12/10/2025)
 
-### 4. **ORDEM DE RENDERIZAÇÃO**
+### Build Status ✅
+- **0 Errors**, 24 Warnings (apenas AForge camera compatibility)
+- Aplicação WPF executa perfeitamente
+- Todos os testes (xUnit) compilam e passam
 
-❌ **NUNCA** assumir que ordem no XAML = ordem visual
-✅ **SEMPRE** definir explicitamente com Panel.ZIndex
-✅ **SEMPRE** comentar a intenção da ordem
+### Funcionalidades Implementadas ✅
+- **Dashboard**: Pesquisa global, pacientes recentes, cards navegação
+- **Navegação**: Dashboard ↔ NovoPaciente ↔ FichaPaciente ↔ ListaPacientes
+- **Ficha Paciente**: 6 abas (Dados Biográficos, Declaração Saúde, Consentimentos, Registo Consultas, Irisdiagnóstico, Comunicação)
+- **PathService**: Gestão Debug/Release de caminhos (`biodesk.db`, templates, PDFs)
+- **Irisdiagnóstico**: Canvas interativo com zoom, marcas em 2 zonas, menu contextual
+- **Consentimentos**: Templates Naturopatia/Osteopatia com assinatura digital
+- **Prescrições**: Templates globais com QuestPDF (pop-up de seleção)
+- **Auto-save**: Terapia salva automaticamente (debounce 1.5s)
+- **Email**: Queue processor com EmailService + templates
 
-### 5. **TESTE VISUAL OBRIGATÓRIO**
+### Sprint 2 Completado (6/6 tarefas)
+1. ✅ Campo Observações Consentimentos
+2. ✅ Menu Contextual Marcas Íris (editar/cor/remover)
+3. ✅ Auto-save Terapia verificado
+4. ✅ Documentação REGRAS_CONSULTAS.md
+5. ✅ Pop-up Templates Prescrições (SelecionarTemplatesWindow)
+6. ✅ Persistência Estado Abas (ConfiguracaoClinicaViewModel)
 
-✅ **SEMPRE** testar navegação entre TODAS as abas
-✅ **SEMPRE** verificar se conteúdo corresponde ao tab ativo
-✅ **SEMPRE** usar bordas DEBUG até confirmar funcionamento
+### TODO's Eliminados
+- **Início (03/10)**: 40 TODO's
+- **Fim (12/10)**: 13 TODO's
+- **Redução**: 67%
 
-## 🔍 PROCEDIMENTO DEBUG
+## 🔗 Dependency Injection (App.xaml.cs)
 
-### 1. **Identificar Sobreposição**
+```csharp
+// Services (Singleton)
+services.AddSingleton<INavigationService, NavigationService>();
+services.AddSingleton<IEmailService, EmailService>();
+services.AddSingleton<ICameraService, RealCameraService>();
+services.AddSingleton<IIridologyService, IridologyService>();
+services.AddSingleton<IDragDebugService, DragDebugService>();
 
-```xaml
-<!-- Adicionar temporariamente -->
-BorderBrush="Red" BorderThickness="3"    <!-- UserControl 1 -->
-BorderBrush="Blue" BorderThickness="3"   <!-- UserControl 2 -->
+// Data (Scoped)
+services.AddDbContext<BioDeskDbContext>(options =>
+    options.UseSqlite($"Data Source={PathService.DatabasePath}"));
+services.AddScoped<IUnitOfWork, UnitOfWork>();
+services.AddScoped<IPacienteRepository, PacienteRepository>();
+
+// ViewModels (Transient)
+services.AddTransient<DashboardViewModel>();
+services.AddTransient<FichaPacienteViewModel>();
+services.AddTransient<ListaPacientesViewModel>();
+services.AddTransient<ConfiguracoesViewModel>();
 ```
 
-### 2. **Verificar Z-Index**
+## 📖 Documentação Adicional
 
-```xaml
-Panel.ZIndex="100"  <!-- Deve ficar por cima -->
-Panel.ZIndex="50"   <!-- Deve ficar por baixo -->
-```
-
-### 3. **Confirmar Visibility**
-
-- Clicar em cada tab
-- Verificar se aparece apenas a borda correta
-- Confirmar que conteúdo corresponde ao tab
-
-### 4. **Remover DEBUG**
-
-- Só remover bordas depois de 100% confirmado
-- Manter comentários explicativos
-
-## 📋 CHECKLIST PRÉ-COMMIT
-
-□ Todos os UserControls têm Panel.ZIndex definido
-□ Background="Transparent" em UserControls sobrepostos
-□ Testei navegação entre TODAS as abas
-□ Conteúdo corresponde ao tab ativo em todos os casos
-□ Removido borders DEBUG após confirmação
-□ Comentários explicam ordem/prioridade dos controles
-
-## 🚫 ANTI-PATTERNS PROIBIDOS
-
-```xaml
-<!-- ERRADO - Vai causar sobreposição -->
-<Grid>
-    <UserControl1/>
-    <UserControl2/>  <!-- Fica por cima sempre -->
-</Grid>
-
-<!-- ERRADO - Background sólido interfere -->
-<UserControl Background="White">
-
-<!-- ERRADO - Sem Z-Index definido -->
-<UserControl Visibility="{Binding ...}"/>
-```
-
-## ✅ PATTERNS OBRIGATÓRIOS
-
-```xaml
-<!-- CORRETO - Z-Index explícito + Background transparente -->
-<Grid>
-    <UserControl1
-        Panel.ZIndex="100"
-        Background="Transparent"
-        BorderBrush="Red" BorderThickness="2"
-        Visibility="{Binding ...}"/>
-    <UserControl2
-        Panel.ZIndex="50"
-        Background="Transparent"
-        BorderBrush="Blue" BorderThickness="2"
-        Visibility="{Binding ...}"/>
-</Grid>
-```
+Para contexto mais profundo, consultar:
+- **RELATORIO_SPRINT2_COMPLETO_12OUT2025.md**: Últimas implementações
+- **CHECKLIST_ANTI_ERRO_UI.md**: Regras críticas XAML/binding
+- **GUIA_TESTE_DEBUG_PATHSERVICE.md**: Debug PathService em desenvolvimento
+- **REGRAS_CONSULTAS.md**: Por que consultas não podem ser editadas
+- **SISTEMA_CONFIGURACOES.md**: Sistema ConfiguracaoClinicaViewModel
+- **PLANO_DESENVOLVIMENTO_RESTANTE.md**: Roadmap funcionalidades futuras
 
 ---
 
-**LEMBRETE**: Este documento foi criado após o bug de sobreposição UserControls.
-**NUNCA MAIS** deplorar sem seguir este checklist!
+**Princípio Fundamental**: "Se funciona e os testes passam, NÃO ALTERES!"
+Estabilidade > Elegância | Funcionalidade > Refactoring desnecessário
+

@@ -44,6 +44,15 @@ public class BioDeskDbContext : DbContext
   public DbSet<TemplateGlobal> TemplatesGlobais { get; set; } = null!;
   public DbSet<DocumentoExternoPaciente> DocumentosExternosPacientes { get; set; } = null!;
 
+  // === TERAPIAS BIOENERGÉTICAS ===
+  public DbSet<ProtocoloTerapeutico> ProtocolosTerapeuticos { get; set; } = null!;
+  public DbSet<PlanoTerapia> PlanosTerapia { get; set; } = null!;
+  public DbSet<Terapia> Terapias { get; set; } = null!;
+  public DbSet<SessaoTerapia> SessoesTerapia { get; set; } = null!;
+  public DbSet<LeituraBioenergetica> LeiturasBioenergeticas { get; set; } = null!;
+  public DbSet<EventoHardware> EventosHardware { get; set; } = null!;
+  public DbSet<ImportacaoExcelLog> ImportacoesExcelLog { get; set; } = null!;
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
@@ -563,6 +572,78 @@ public class BioDeskDbContext : DbContext
         };
 
     modelBuilder.Entity<AbordagemSessao>().HasData(abordagensSessoes);
+
+    // === CONFIGURAÇÃO TERAPIAS BIOENERGÉTICAS ===
+    modelBuilder.Entity<ProtocoloTerapeutico>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.HasIndex(e => e.ExternalId).IsUnique();
+      entity.HasIndex(e => e.Nome);
+      entity.HasIndex(e => e.Categoria);
+      entity.HasIndex(e => e.Ativo);
+    });
+
+    modelBuilder.Entity<PlanoTerapia>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.HasOne(e => e.Sessao)
+        .WithMany()
+        .HasForeignKey(e => e.SessaoId)
+        .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<Terapia>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.HasOne(e => e.PlanoTerapia)
+        .WithMany(p => p.Terapias)
+        .HasForeignKey(e => e.PlanoTerapiaId)
+        .OnDelete(DeleteBehavior.Cascade);
+      entity.HasOne(e => e.ProtocoloTerapeutico)
+        .WithMany(p => p.Terapias)
+        .HasForeignKey(e => e.ProtocoloTerapeuticoId)
+        .OnDelete(DeleteBehavior.Restrict);
+      entity.HasIndex(e => e.Ordem);
+    });
+
+    modelBuilder.Entity<SessaoTerapia>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.HasOne(e => e.PlanoTerapia)
+        .WithMany(p => p.SessoesTerapia)
+        .HasForeignKey(e => e.PlanoTerapiaId)
+        .OnDelete(DeleteBehavior.Cascade);
+      entity.HasIndex(e => e.InicioEm);
+      entity.HasIndex(e => e.Estado);
+    });
+
+    modelBuilder.Entity<LeituraBioenergetica>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.HasOne(e => e.SessaoTerapia)
+        .WithMany(s => s.Leituras)
+        .HasForeignKey(e => e.SessaoTerapiaId)
+        .OnDelete(DeleteBehavior.Cascade);
+      entity.HasIndex(e => e.Timestamp);
+    });
+
+    modelBuilder.Entity<EventoHardware>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.HasOne(e => e.SessaoTerapia)
+        .WithMany(s => s.EventosHardware)
+        .HasForeignKey(e => e.SessaoTerapiaId)
+        .OnDelete(DeleteBehavior.Cascade);
+      entity.HasIndex(e => e.Timestamp);
+      entity.HasIndex(e => e.TipoEvento);
+    });
+
+    modelBuilder.Entity<ImportacaoExcelLog>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+      entity.HasIndex(e => e.ImportadoEm);
+      entity.HasIndex(e => e.Sucesso);
+    });
 
     // SEED: Configuração Global da Clínica (Id fixo = 1)
     var configuracaoClinica = new ConfiguracaoClinica

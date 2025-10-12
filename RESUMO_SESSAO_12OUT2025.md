@@ -195,7 +195,7 @@ Time Elapsed 00:00:20.61
 ## 🚀 PRÓXIMOS PASSOS (Novo Chat)
 
 ### Opção A: Terapia Bioenergética (RECOMENDADO)
-**Estimativa**: 4-6 horas  
+**Estimativa**: 4-6 horas
 **Prioridade**: ALTA (pedido utilizador)
 
 **Scope**:
@@ -211,7 +211,7 @@ Time Elapsed 00:00:20.61
 - Campos específicos: chakras, meridians, técnicas aplicadas?
 
 ### Opção B: Deploy/Documentação (CONSERVADOR)
-**Estimativa**: 1-2 horas  
+**Estimativa**: 1-2 horas
 **Prioridade**: MÉDIA
 
 **Scope**:
@@ -221,7 +221,7 @@ Time Elapsed 00:00:20.61
 4. Testes finais completos
 
 ### Opção C: Sprint 3 P3 Tasks (OPCIONAL)
-**Estimativa**: 4-6 horas  
+**Estimativa**: 4-6 horas
 **Prioridade**: BAIXA
 
 **Scope**:
@@ -264,16 +264,16 @@ Time Elapsed 00:00:20.61
 - ✅ **Testes do utilizador** são validação crítica
 
 ### Próxima Sessão
-**Objetivo**: Implementar Terapia Bioenergética (Tab 3.3)  
-**Tempo estimado**: 4-6 horas  
+**Objetivo**: Implementar Terapia Bioenergética (Tab 3.3)
+**Tempo estimado**: 4-6 horas
 **Pré-requisitos**: Definir scope com utilizador (dados a capturar)
 
 ---
 
-**Data**: 12 de Outubro 2025, 19:50  
-**Branch**: `copilot/vscode1759877780589`  
-**Último Commit**: `5fd0835` - docs: adicionar documentação limpeza código + backup Sprint 2  
-**Build Status**: ✅ **0 Errors, 24 Warnings (AForge - esperado)**  
+**Data**: 12 de Outubro 2025, 19:50
+**Branch**: `copilot/vscode1759877780589`
+**Último Commit**: `5fd0835` - docs: adicionar documentação limpeza código + backup Sprint 2
+**Build Status**: ✅ **0 Errors, 24 Warnings (AForge - esperado)**
 **Próximo Chat**: 🌿 **Terapia Bioenergética**
 
 ---
