@@ -679,19 +679,19 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 return;
             }
 
-            // Criar ViewModels para binding
-            var templatesVm = templates.Select(t => new TemplatePdfViewModel(
-                t.Nome,
-                t.CaminhoCompleto,
-                t.NomeFicheiro,
-                t.TamanhoFormatado))
-                .ToList();
+            // ✅ Adicionar templates diretamente aos anexos
+            // Integração com pop-up será feita na View (code-behind) para respeitar MVVM
+            foreach (var template in templates)
+            {
+                if (!Anexos.Contains(template.CaminhoCompleto))
+                {
+                    Anexos.Add(template.CaminhoCompleto);
+                }
+            }
 
-            // TODO: Mostrar pop-up de seleção
-            // Por agora, vamos usar uma abordagem simples sem pop-up custom
-            // O pop-up será adicionado na próxima fase
+            AtualizarStatusAnexos();
 
-            _logger.LogInformation("📋 Listados {Count} templates para seleção", templates.Count);
+            _logger.LogInformation("✅ {Count} templates disponíveis para anexar", templates.Count);
 
         }, "Erro ao selecionar templates", _logger);
     }
@@ -758,7 +758,10 @@ Naturopatia - Osteopatia - Medicina Bioenergética
         }, "Erro ao adicionar template", _logger);
     }
 
-    private void AtualizarStatusAnexos()
+    /// <summary>
+    /// ✅ Atualiza o status de anexos (público para ser chamado do code-behind)
+    /// </summary>
+    public void AtualizarStatusAnexos()
     {
         if (Anexos.Count == 0)
         {

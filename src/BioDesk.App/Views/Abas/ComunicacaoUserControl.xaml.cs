@@ -133,8 +133,15 @@ namespace BioDesk.App.Views.Abas
                             }
                         }
 
-                        // Força atualização do status de anexos
-                        // O ViewModel tem um método privado, mas a ObservableCollection notifica automaticamente
+                        // ✅ Atualizar status de anexos após adicionar
+                        viewModel.AtualizarStatusAnexos();
+
+                        // Feedback visual
+                        MessageBox.Show(
+                            $"✅ {templatesSelecionados.Count} template(s) adicionado(s) como anexo(s)!",
+                            "Sucesso",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
                     }
                 }
             }
