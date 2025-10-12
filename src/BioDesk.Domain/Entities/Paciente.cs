@@ -66,6 +66,11 @@ public class Paciente
     /// </summary>
     public string? ProgressoAbas { get; set; }
 
+    /// <summary>
+    /// Última aba ativa (1-8) para restaurar ao reabrir ficha do paciente
+    /// </summary>
+    public int LastActiveTab { get; set; } = 1;
+
     // === INFORMAÇÃO CLÍNICA ATUAL ===
     /// <summary>
     /// Medicação, suplementação e terapia atual do paciente

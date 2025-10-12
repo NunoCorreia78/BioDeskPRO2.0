@@ -127,6 +127,9 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
 
     #region Navegação entre Abas
 
+    /// <summary>
+    /// Aba ativa (1-8). Auto-save quando muda para restaurar ao reabrir paciente.
+    /// </summary>
     [ObservableProperty]
     private int _abaAtiva = 1;
 
@@ -134,6 +137,29 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
     {
         _logger.LogInformation("🔄 ABA MUDOU: Aba ativa agora é {NovaAba}", value);
         AtualizarProgresso();
+
+        // ✅ Persistir última aba ativa automaticamente (só se paciente já foi salvo)
+        if (!_isLoadingData && PacienteAtual != null && PacienteAtual.Id > 0)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var paciente = await _unitOfWork.Pacientes.GetCompleteByIdAsync(PacienteAtual.Id);
+                    if (paciente != null)
+                    {
+                        paciente.LastActiveTab = value;
+                        _unitOfWork.Pacientes.Update(paciente);
+                        await _unitOfWork.SaveChangesAsync();
+                        _logger.LogDebug("💾 Aba {Aba} salva para paciente {Id}", value, PacienteAtual.Id);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "⚠️ Erro ao salvar LastActiveTab");
+                }
+            });
+        }
     }
 
     [ObservableProperty]
@@ -850,6 +876,9 @@ public partial class FichaPacienteViewModel : NavigationViewModelBase, IDisposab
             NumeroProcesso = paciente.NumeroProcesso;
             IdadePaciente = $"{paciente.Idade} anos";
             EstadoRegisto = paciente.EstadoRegisto;
+
+            // ✅ Restaurar última aba ativa (1-8, default = 1)
+            AbaAtiva = paciente.LastActiveTab > 0 && paciente.LastActiveTab <= 8 ? paciente.LastActiveTab : 1;
 
             // TODO: Carregar estado das abas se estiver salvo em ProgressoAbas (JSON)
             AtualizarCorEstado();
