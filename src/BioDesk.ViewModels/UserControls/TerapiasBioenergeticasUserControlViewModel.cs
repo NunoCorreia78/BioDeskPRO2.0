@@ -65,7 +65,7 @@ public partial class TerapiasBioenergeticasUserControlViewModel : ViewModelBase
         _rngService = rngService;
         _tiePieService = tiePieService;
         _logger = logger;
-        
+
         // ✅ Carregar dados de forma síncrona no construtor
         Task.Run(async () => await CarregarDadosAsync()).Wait();
     }
@@ -75,18 +75,18 @@ public partial class TerapiasBioenergeticasUserControlViewModel : ViewModelBase
         try
         {
             _logger.LogInformation("📂 Carregando dados do módulo Terapias...");
-            
+
             // Carregar protocolos da BD
             var protocolos = await _protocoloRepository.GetAllActiveAsync();
             ProtocolosDisponiveis = new ObservableCollection<ProtocoloTerapeutico>(protocolos);
             _logger.LogInformation("✅ {Count} protocolos carregados", protocolos.Count);
-            
+
             // Verificar status do hardware (não bloqueia se falhar)
             try
             {
                 var status = await _tiePieService.GetStatusAsync();
                 AtualizarStatusHardware(status.IsConnected);
-                
+
                 if (status.IsConnected)
                 {
                     _logger.LogInformation("✅ TiePie conectado: {DeviceName}", status.DeviceName);
@@ -172,14 +172,14 @@ public partial class TerapiasBioenergeticasUserControlViewModel : ViewModelBase
     {
         IsLoading = true;
         ErrorMessage = string.Empty;
-        
+
         try
         {
             _logger.LogInformation("🔍 Iniciando teste de hardware TiePie...");
-            
+
             // Testar conexão
             var status = await _tiePieService.GetStatusAsync();
-            
+
             if (!status.IsConnected)
             {
                 var erro = status.ErrorMessage ?? "Dispositivo não detectado";
@@ -189,15 +189,15 @@ public partial class TerapiasBioenergeticasUserControlViewModel : ViewModelBase
                     "2. LibTiePie SDK instalado? (https://www.tiepie.com/)\n" +
                     "3. Drivers do Windows atualizados?\n" +
                     "4. Aplicação executada como Administrador?";
-                    
+
                 AtualizarStatusHardware(false);
                 _logger.LogWarning("⚠️ Teste falhou: {Erro}", erro);
                 return;
             }
-            
+
             // Testar funcionalidade (1 kHz, 1V, 2 segundos)
             var testeOk = await _tiePieService.TestHardwareAsync();
-            
+
             if (testeOk)
             {
                 ErrorMessage = $"✅ Hardware funcionando!\n\n" +
@@ -206,7 +206,7 @@ public partial class TerapiasBioenergeticasUserControlViewModel : ViewModelBase
                     $"Canais: {status.ChannelCount}\n" +
                     $"Freq. Máx: {status.MaxFrequencyHz / 1_000_000.0:N1} MHz\n" +
                     $"Voltagem Máx: {status.MaxVoltageV:N1} V";
-                    
+
                 AtualizarStatusHardware(true);
                 _logger.LogInformation("✅ Teste de hardware bem-sucedido");
             }
@@ -214,7 +214,7 @@ public partial class TerapiasBioenergeticasUserControlViewModel : ViewModelBase
             {
                 ErrorMessage = "⚠️ Hardware conectado mas teste de sinal falhou.\n" +
                     "Verifique se o dispositivo não está em uso por outra aplicação.";
-                    
+
                 AtualizarStatusHardware(true); // Conectado mas com problemas
                 _logger.LogWarning("⚠️ Hardware conectado mas teste falhou");
             }
@@ -227,7 +227,7 @@ public partial class TerapiasBioenergeticasUserControlViewModel : ViewModelBase
                 $"1. Descarregar SDK em: https://www.tiepie.com/en/libtiepie-sdk\n" +
                 $"2. Instalar versão {(Environment.Is64BitProcess ? "64-bit" : "32-bit")}\n" +
                 $"3. Reiniciar aplicação";
-                
+
             AtualizarStatusHardware(false);
             _logger.LogError(ex, "❌ LibTiePie SDK não encontrado");
         }

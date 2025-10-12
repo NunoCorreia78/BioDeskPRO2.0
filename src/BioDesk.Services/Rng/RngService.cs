@@ -25,7 +25,7 @@ public class RngService : IRngService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpClient = httpClientFactory.CreateClient("RandomOrg");
         _fallbackRandom = new Random();
-        
+
         // Iniciar com HardwareCrypto (mais confiável que PseudoRandom)
         CurrentSource = EntropySource.HardwareCrypto;
     }
@@ -40,17 +40,17 @@ public class RngService : IRngService
             throw new InvalidOperationException($"Protocolo '{protocolo.Nome}' não contém frequências");
 
         if (count <= 0 || count > frequencias.Length)
-            throw new ArgumentOutOfRangeException(nameof(count), 
+            throw new ArgumentOutOfRangeException(nameof(count),
                 $"Count deve estar entre 1 e {frequencias.Length}");
 
         try
         {
             // Gerar índices únicos aleatórios
             var indices = await GenerateUniqueRandomIntsAsync(0, frequencias.Length - 1, count);
-            
+
             // Seleccionar frequências pelos índices
             var selectedFreqs = indices.Select(i => frequencias[i]).ToArray();
-            
+
             _logger.LogInformation(
                 "Seleccionadas {Count} frequências de '{Protocolo}' usando {Source}: [{Freqs}]",
                 count, protocolo.Nome, CurrentSource, string.Join(", ", selectedFreqs.Select(f => f.ToString("F2"))));
@@ -151,10 +151,10 @@ public class RngService : IRngService
     {
         var range = (uint)(maxValue - minValue + 1);
         var bytes = new byte[4];
-        
+
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
-        
+
         var randomValue = BitConverter.ToUInt32(bytes, 0);
         return (int)(randomValue % range) + minValue;
     }
@@ -162,10 +162,10 @@ public class RngService : IRngService
     private double GenerateRandomDoubleCrypto()
     {
         var bytes = new byte[4];
-        
+
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
-        
+
         var randomValue = BitConverter.ToUInt32(bytes, 0);
         return randomValue / (double)uint.MaxValue;
     }
@@ -180,10 +180,10 @@ public class RngService : IRngService
         {
             // Random.org API: https://www.random.org/integers/?num=1&min=X&max=Y&col=1&base=10&format=plain
             var url = $"https://www.random.org/integers/?num=1&min={minValue}&max={maxValue}&col=1&base=10&format=plain&rnd=new";
-            
+
             var response = await _httpClient.GetStringAsync(url);
             var trimmed = response.Trim();
-            
+
             if (int.TryParse(trimmed, out int result))
             {
                 _logger.LogDebug("Random.org retornou: {Result}", result);

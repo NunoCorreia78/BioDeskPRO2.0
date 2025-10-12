@@ -71,14 +71,14 @@ namespace BioDeskTest
             try
             {
                 var previewResult = await excelService.PreviewAsync(excelPath, maxLinhas: 20);
-                
+
                 logger.LogInformation("✅ PREVIEW COMPLETO");
                 logger.LogInformation($"Total linhas no ficheiro: {previewResult.TotalLinhasNoFicheiro}");
                 logger.LogInformation($"Linhas retornadas: {previewResult.ProtocolosPreview.Count}");
                 logger.LogInformation("");
                 logger.LogInformation("PRIMEIRAS 20 LINHAS:");
                 logger.LogInformation("-------------------------------------------");
-                
+
                 int i = 1;
                 foreach (var proto in previewResult.ProtocolosPreview)
                 {
@@ -91,7 +91,7 @@ namespace BioDeskTest
                 logger.LogInformation("========================================");
                 logger.LogInformation("Deseja executar importação COMPLETA? (S/N)");
                 logger.LogInformation("========================================");
-                
+
                 var resposta = Console.ReadLine();
                 if (resposta?.ToUpper() == "S")
                 {
@@ -110,7 +110,7 @@ namespace BioDeskTest
                     logger.LogInformation($"Warnings: {importResult.LinhasWarnings}");
                     logger.LogInformation($"Erros: {importResult.LinhasErros}");
                     logger.LogInformation($"Duração: {importResult.DuracaoSegundos:F2}s");
-                    
+
                     if (importResult.Warnings.Count > 0)
                     {
                         logger.LogInformation("");
@@ -118,7 +118,7 @@ namespace BioDeskTest
                         foreach (var w in importResult.Warnings)
                             logger.LogWarning(w);
                     }
-                    
+
                     if (importResult.Erros.Count > 0)
                     {
                         logger.LogInformation("");

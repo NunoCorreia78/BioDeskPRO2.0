@@ -84,7 +84,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
     // === CONSTANTES ===
     private const uint IDKIND_INDEX = 0;
     private const uint DEVICETYPE_GENERATOR = 0x00000002;
-    
+
     // Signal Types (LibTiePie SDK)
     private const uint ST_SINE = 0x00000001;
     private const uint ST_TRIANGLE = 0x00000002;
@@ -96,12 +96,12 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
     public RealTiePieHardwareService(ILogger<RealTiePieHardwareService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
+
         try
         {
             _logger.LogInformation("🔌 RealTiePieHardwareService: Inicializando LibTiePie SDK...");
             LibInit();
-            
+
             var version = LibGetVersion();
             _logger.LogInformation("✅ LibTiePie SDK v{Version} inicializado com sucesso", version);
         }
@@ -126,10 +126,10 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
                 try
                 {
                     _logger.LogInformation("📡 GetStatus: Detectando dispositivos TiePie...");
-                    
+
                     LstUpdate();
                     var deviceCount = LstGetCount();
-                    
+
                     if (deviceCount == 0)
                     {
                         _logger.LogWarning("⚠️ Nenhum dispositivo TiePie detectado via USB");
@@ -142,7 +142,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
 
                     // Abrir primeiro dispositivo
                     _deviceHandle = LstOpenDevice(IDKIND_INDEX, 0, DEVICETYPE_GENERATOR);
-                    
+
                     if (_deviceHandle == IntPtr.Zero)
                     {
                         _logger.LogError("❌ Falha ao abrir dispositivo TiePie (handle nulo)");
@@ -155,13 +155,13 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
 
                     // Obter informações do dispositivo
                     var serialNumber = LstDevGetSerialNumber(IDKIND_INDEX, 0);
-                    
+
                     var nameBuffer = Marshal.AllocHGlobal(256);
                     LstDevGetNameShort(IDKIND_INDEX, 0, nameBuffer, 256);
                     var deviceName = Marshal.PtrToStringAnsi(nameBuffer) ?? "TiePie Handyscope HS5";
                     Marshal.FreeHGlobal(nameBuffer);
 
-                    _logger.LogInformation("✅ Dispositivo conectado: {DeviceName} (S/N: {SerialNumber})", 
+                    _logger.LogInformation("✅ Dispositivo conectado: {DeviceName} (S/N: {SerialNumber})",
                         deviceName, serialNumber);
 
                     return new HardwareStatus
@@ -224,7 +224,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
                         SignalWaveform.Sawtooth => ST_SAWTOOTH,
                         _ => ST_SINE
                     };
-                    
+
                     if (!GenSetSignalType(_deviceHandle, signalType))
                     {
                         _logger.LogError("❌ Falha ao configurar forma de onda");
@@ -290,7 +290,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
                 try
                 {
                     _logger.LogInformation("🛑 Parando todos os canais...");
-                    
+
                     if (_deviceHandle != IntPtr.Zero)
                     {
                         GenStop(_deviceHandle);

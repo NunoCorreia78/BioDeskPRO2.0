@@ -13,7 +13,7 @@ public partial class TerapiasUserControl : UserControl
     public TerapiasUserControl()
     {
         InitializeComponent();
-        
+
         // ✅ Obter ViewModel do DI e definir como DataContext
         var app = (App)System.Windows.Application.Current;
         if (app.ServiceProvider != null)

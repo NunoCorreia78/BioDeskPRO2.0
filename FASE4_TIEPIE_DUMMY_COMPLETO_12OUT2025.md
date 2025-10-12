@@ -1,7 +1,7 @@
 # 🔌 FASE 4 - Integração TiePie Handyscope HS5 (Dummy Mode)
 
-**Data**: 12 de outubro de 2025  
-**Status**: ✅ **COMPLETO** - Infraestrutura Dummy implementada e testada  
+**Data**: 12 de outubro de 2025
+**Status**: ✅ **COMPLETO** - Infraestrutura Dummy implementada e testada
 **Próximo Passo**: Implementar RealTiePieHardwareService quando ligar o aparelho
 
 ---
@@ -57,7 +57,7 @@ public class SignalConfiguration
     public double VoltageV { get; set; } = 1.0;        // ±0.2V a ±8V
     public SignalWaveform Waveform { get; set; } = SignalWaveform.Sine;
     public double DurationSeconds { get; set; } = 60.0;
-    
+
     public bool IsValid() { /* Validação completa */ }
 }
 ```
@@ -91,13 +91,13 @@ public interface ITiePieHardwareService
 {
     // Status e diagnóstico
     Task<HardwareStatus> GetStatusAsync();
-    
+
     // Envio de sinais
     Task<bool> SendSignalAsync(SignalConfiguration config);
-    
+
     // Controlo
     Task StopAllChannelsAsync();
-    
+
     // Múltiplas frequências (sequencial)
     Task<bool> SendMultipleFrequenciesAsync(
         double[] frequencies,
@@ -105,7 +105,7 @@ public interface ITiePieHardwareService
         double voltageV = 1.0,
         SignalWaveform waveform = SignalWaveform.Sine,
         double durationPerFreqSeconds = 60.0);
-    
+
     // Teste de hardware
     Task<bool> TestHardwareAsync(); // 1 kHz, 1V, Sine, 2s
 }
@@ -191,11 +191,11 @@ Total tests: 14
 ```csharp
 // === TIEPIE HARDWARE SERVICE (Handyscope HS5 - Gerador de Sinais) ===
 // ⚡ MODO DUMMY: Para testes sem hardware físico
-services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, 
+services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService,
                       BioDesk.Services.Hardware.DummyTiePieHardwareService>();
 
 // 🔴 AMANHÃ: Trocar para RealTiePieHardwareService quando ligar o aparelho
-// services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, 
+// services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService,
 //                       BioDesk.Services.Hardware.RealTiePieHardwareService>();
 ```
 
@@ -211,17 +211,17 @@ public class TerapiaBioenergeticaViewModel : ViewModelBase
     private readonly IRngService _rngService;
     private readonly ITiePieHardwareService _tiepieService;
     private readonly IProtocoloRepository _protocoloRepository;
-    
+
     [RelayCommand]
     private async Task IniciarTerapiaAsync(Guid protocoloId)
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
             IsLoading = true;
-            
+
             // 1. Carregar protocolo da BD (1,094 protocolos disponíveis)
             var protocolo = await _protocoloRepository.GetByIdAsync(protocoloId);
-            
+
             // 2. Verificar status do hardware
             var status = await _tiepieService.GetStatusAsync();
             if (!status.IsConnected)
@@ -229,15 +229,15 @@ public class TerapiaBioenergeticaViewModel : ViewModelBase
                 ErrorMessage = $"Hardware desconectado: {status.ErrorMessage}";
                 return;
             }
-            
+
             // 3. Configurar fonte de entropia (HardwareCrypto para produção)
             _rngService.CurrentSource = EntropySource.HardwareCrypto;
-            
+
             // 4. Selecionar 5 frequências aleatórias do protocolo
             var frequencias = await _rngService.SelectRandomFrequenciesAsync(protocolo, count: 5);
-            
+
             // Exemplo: [2720.0, 1600.0, 987.6, 2489.0, 1234.5] Hz
-            
+
             // 5. Aplicar frequências via TiePie (Canal 1, 2.5V, Sine, 60s cada)
             var sucesso = await _tiepieService.SendMultipleFrequenciesAsync(
                 frequencies,
@@ -246,7 +246,7 @@ public class TerapiaBioenergeticaViewModel : ViewModelBase
                 waveform: SignalWaveform.Sine,
                 durationPerFreqSeconds: 60.0
             );
-            
+
             if (sucesso)
             {
                 // 6. Gravar sessão na BD
@@ -259,7 +259,7 @@ public class TerapiaBioenergeticaViewModel : ViewModelBase
                     Resultado = "Sessão completada com sucesso"
                 });
             }
-        }, 
+        },
         errorContext: "ao iniciar terapia bioenergética",
         logger: _logger);
     }
@@ -284,22 +284,22 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
 {
     private IntPtr _deviceHandle = IntPtr.Zero;
     private readonly ILogger<RealTiePieHardwareService> _logger;
-    
+
     // P/Invoke declarations (exemplo)
     [DllImport("libtiepie.dll", CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr TiePie_OpenDevice(uint serialNumber);
-    
+
     [DllImport("libtiepie.dll", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool TiePie_SetFrequency(IntPtr handle, int channel, double frequencyHz);
-    
+
     // ... mais P/Invoke para voltagem, forma de onda, start/stop
-    
+
     public async Task<HardwareStatus> GetStatusAsync()
     {
         // Detectar dispositivos USB
         // Retornar status real
     }
-    
+
     public async Task<bool> SendSignalAsync(SignalConfiguration config)
     {
         // Configurar canal no hardware real
@@ -308,7 +308,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
         // TiePie_SetWaveform(_deviceHandle, ...)
         // TiePie_Start(_deviceHandle)
     }
-    
+
     public void Dispose()
     {
         if (_deviceHandle != IntPtr.Zero)

@@ -79,7 +79,7 @@ public class DummyTiePieHardwareServiceTests
     public async Task SendSignal_ConfiguracaoNull_ThrowsArgumentNullException()
     {
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => 
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
             _service.SendSignalAsync(null!));
     }
 

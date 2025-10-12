@@ -122,7 +122,7 @@ Se encontrar termos não traduzidos durante importação:
 ```csharp
 // Interface UI permitirá adicionar traduções
 MedicalTermsTranslator.AddCustomTranslation(
-    "Rare condition XYZ", 
+    "Rare condition XYZ",
     "Condição Rara XYZ"
 );
 

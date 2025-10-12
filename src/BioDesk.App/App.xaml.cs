@@ -327,7 +327,7 @@ Inner Exceptions:
         // === TIEPIE HARDWARE SERVICE (Handyscope HS5 - Gerador de Sinais) ===
         // 🔴 MODO REAL: Hardware físico conectado via USB (LibTiePie SDK)
         services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.RealTiePieHardwareService>();
-        
+
         // ⚡ MODO DUMMY: Para testes sem hardware (descomentar linha abaixo e comentar linha acima)
         // services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.DummyTiePieHardwareService>();
 

@@ -385,7 +385,7 @@ else
 
 **Validação rigorosa**:
 ```csharp
-if (string.IsNullOrWhiteSpace(diseaseEn) || 
+if (string.IsNullOrWhiteSpace(diseaseEn) ||
     diseaseEn.StartsWith("AAA") ||
     frequencias.Count == 0)
 {
@@ -450,6 +450,6 @@ if (string.IsNullOrWhiteSpace(diseaseEn) ||
 
 ---
 
-**Data**: 12 de Outubro de 2025  
-**Duração Sessão**: ~2 horas  
+**Data**: 12 de Outubro de 2025
+**Duração Sessão**: ~2 horas
 **Status Final**: ✅ FASE 2 COMPLETA - Pronto para FASE 3 (RNG Algorithms)

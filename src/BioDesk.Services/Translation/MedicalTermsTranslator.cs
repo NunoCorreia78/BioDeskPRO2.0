@@ -42,7 +42,7 @@ public static class MedicalTermsTranslator
         { "Arteriosclerosis", "Arteriosclerose" },
         { "Arthritis", "Artrite" },
         { "Asthma", "Asma" },
-        
+
         // B
         { "Back pain", "Dor nas Costas" },
         { "Bacteria", "Bactérias" },
@@ -52,7 +52,7 @@ public static class MedicalTermsTranslator
         { "Brain", "Cérebro" },
         { "Bronchitis", "Bronquite" },
         { "Burns", "Queimaduras" },
-        
+
         // C
         { "Cancer", "Cancro" },
         { "Candida", "Candida" },
@@ -69,7 +69,7 @@ public static class MedicalTermsTranslator
         { "Cough", "Tosse" },
         { "Cramps", "Cãibras" },
         { "Cystitis", "Cistite" },
-        
+
         // D
         { "Dandruff", "Caspa" },
         { "Depression", "Depressão" },
@@ -77,7 +77,7 @@ public static class MedicalTermsTranslator
         { "Diarrhea", "Diarreia" },
         { "Digestion", "Digestão" },
         { "Dizziness", "Tonturas" },
-        
+
         // E
         { "Ear", "Ouvido" },
         { "Eczema", "Eczema" },
@@ -86,20 +86,20 @@ public static class MedicalTermsTranslator
         { "Endometriosis", "Endometriose" },
         { "Epilepsy", "Epilepsia" },
         { "Eye", "Olho" },
-        
+
         // F
         { "Fatigue", "Fadiga" },
         { "Fever", "Febre" },
         { "Fibromyalgia", "Fibromialgia" },
         { "Flu", "Gripe" },
         { "Fungus", "Fungos" },
-        
+
         // G
         { "Gallstones", "Cálculos Biliares" },
         { "Gastritis", "Gastrite" },
         { "Gout", "Gota" },
         { "Gums", "Gengivas" },
-        
+
         // H
         { "Headache", "Dor de Cabeça" },
         { "Heart", "Coração" },
@@ -109,7 +109,7 @@ public static class MedicalTermsTranslator
         { "Herpes", "Herpes" },
         { "Hypertension", "Hipertensão" },
         { "Hypotension", "Hipotensão" },
-        
+
         // I
         { "Immune system", "Sistema Imunitário" },
         { "Impotence", "Impotência" },
@@ -118,22 +118,22 @@ public static class MedicalTermsTranslator
         { "Influenza", "Influenza" },
         { "Insomnia", "Insónia" },
         { "Intestine", "Intestino" },
-        
+
         // J
         { "Joint pain", "Dor Articular" },
         { "Jaundice", "Icterícia" },
-        
+
         // K
         { "Kidney", "Rim" },
         { "Kidney stones", "Cálculos Renais" },
-        
+
         // L
         { "Laryngitis", "Laringite" },
         { "Leukemia", "Leucemia" },
         { "Liver", "Fígado" },
         { "Lung", "Pulmão" },
         { "Lymph", "Linfa" },
-        
+
         // M
         { "Malaria", "Malária" },
         { "Measles", "Sarampo" },
@@ -143,18 +143,18 @@ public static class MedicalTermsTranslator
         { "Mononucleosis", "Mononucleose" },
         { "Multiple sclerosis", "Esclerose Múltipla" },
         { "Muscle", "Músculo" },
-        
+
         // N
         { "Nausea", "Náusea" },
         { "Nerve", "Nervo" },
         { "Neuralgia", "Neuralgia" },
         { "Neuropathy", "Neuropatia" },
-        
+
         // O
         { "Obesity", "Obesidade" },
         { "Osteoporosis", "Osteoporose" },
         { "Ovary", "Ovário" },
-        
+
         // P
         { "Pain", "Dor" },
         { "Pancreas", "Pâncreas" },
@@ -162,12 +162,12 @@ public static class MedicalTermsTranslator
         { "Pneumonia", "Pneumonia" },
         { "Prostate", "Próstata" },
         { "Psoriasis", "Psoríase" },
-        
+
         // R
         { "Rash", "Erupção Cutânea" },
         { "Rheumatism", "Reumatismo" },
         { "Rhinitis", "Rinite" },
-        
+
         // S
         { "Sciatica", "Ciática" },
         { "Sinusitis", "Sinusite" },
@@ -176,7 +176,7 @@ public static class MedicalTermsTranslator
         { "Stomach", "Estômago" },
         { "Stress", "Stress" },
         { "Stroke", "AVC" },
-        
+
         // T
         { "Tendonitis", "Tendinite" },
         { "Thyroid", "Tiroide" },
@@ -185,17 +185,17 @@ public static class MedicalTermsTranslator
         { "Tooth", "Dente" },
         { "Tuberculosis", "Tuberculose" },
         { "Tumor", "Tumor" },
-        
+
         // U
         { "Ulcer", "Úlcera" },
         { "Urinary tract", "Trato Urinário" },
         { "Uterus", "Útero" },
-        
+
         // V
         { "Varicose veins", "Varizes" },
         { "Vertigo", "Vertigem" },
         { "Virus", "Vírus" },
-        
+
         // W
         { "Warts", "Verrugas" },
         { "Wounds", "Feridas" }
@@ -287,7 +287,7 @@ public static class MedicalTermsTranslator
     /// </summary>
     public static bool HasExactTranslation(string term)
     {
-        return _englishToPortuguese.ContainsKey(term) || 
+        return _englishToPortuguese.ContainsKey(term) ||
                _germanToPortuguese.ContainsKey(term);
     }
 

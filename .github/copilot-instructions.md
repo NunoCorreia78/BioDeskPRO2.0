@@ -32,9 +32,9 @@ public abstract partial class ViewModelBase : ObservableObject
 {
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string _errorMessage = string.Empty;
-    
+
     // SEMPRE usar este método para operações async
-    protected async Task ExecuteWithErrorHandlingAsync(Func<Task> operation, 
+    protected async Task ExecuteWithErrorHandlingAsync(Func<Task> operation,
         string errorContext = "", ILogger? logger = null) { }
 }
 
@@ -56,8 +56,8 @@ private async Task PesquisarAsync() { }
 
 // ❌ ERRADO - INotifyPropertyChanged manual
 private string _texto;
-public string Texto { 
-    get => _texto; 
+public string Texto {
+    get => _texto;
     set { _texto = value; OnPropertyChanged(); }
 }
 ```
@@ -108,12 +108,12 @@ Pastas geridas: `Documentos/`, `Templates/`, `Backups/`, `Logs/`, `Pacientes/`, 
 ```xaml
 <!-- ✅ CORRETO - Panel.ZIndex explícito + Background transparent -->
 <Grid>
-    <local:DadosBiograficosUserControl 
-        Panel.ZIndex="100" 
+    <local:DadosBiograficosUserControl
+        Panel.ZIndex="100"
         Background="Transparent"
         Visibility="{Binding AbaAtiva, Converter={StaticResource TabVisibilityConverter}, ConverterParameter=DadosBiograficos}"/>
-    <local:ConsentimentosUserControl 
-        Panel.ZIndex="50" 
+    <local:ConsentimentosUserControl
+        Panel.ZIndex="50"
         Background="Transparent"
         Visibility="{Binding AbaAtiva, Converter={StaticResource TabVisibilityConverter}, ConverterParameter=Consentimentos}"/>
 </Grid>
@@ -193,21 +193,21 @@ private async Task PesquisarAsync()
         // 1. Validar inputs
         if (string.IsNullOrWhiteSpace(PesquisarTexto))
             return;
-        
+
         // 2. Operação business logic
         var resultados = await _pacienteService.SearchAsync(PesquisarTexto);
-        
+
         // 3. Atualizar UI
         Resultados = resultados;
-    }, 
+    },
     errorContext: "ao pesquisar pacientes",
     logger: _logger);
 }
 
 // ❌ ERRADO - Try-catch simples sem logging
-try { 
-    var result = await _service.DoSomething(); 
-} 
+try {
+    var result = await _service.DoSomething();
+}
 catch { /* silêncio */ }
 ```
 

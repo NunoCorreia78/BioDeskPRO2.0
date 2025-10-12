@@ -64,7 +64,7 @@ public class ExcelImportService : IExcelImportService
                 // Tentar abrir ficheiro com ExcelDataReader
                 using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
                 using var reader = ExcelReaderFactory.CreateReader(stream);
-                
+
                 if (reader == null)
                     return (false, "Não foi possível ler o ficheiro Excel");
 
@@ -486,7 +486,7 @@ public class ExcelImportService : IExcelImportService
 }
 ```
 
-**IMPORTANTE**: Este código substitui TODO o ficheiro `ExcelImportService.cs`. 
+**IMPORTANTE**: Este código substitui TODO o ficheiro `ExcelImportService.cs`.
 Principais mudanças:
 1. Usa `ExcelDataReader` em vez de `EPPlus`
 2. Regista `CodePagesEncodingProvider` para ler `.xls` antigos

@@ -1,6 +1,6 @@
 # 🌿 BioDesk Tab 7 — Especificação Técnica Completa (v1)
-**Data**: 12 de Outubro de 2025  
-**Origem**: Plano ChatGPT (sessão 68ebfc22-6a80-8011-9861-f9e2899b60d9)  
+**Data**: 12 de Outubro de 2025
+**Origem**: Plano ChatGPT (sessão 68ebfc22-6a80-8011-9861-f9e2899b60d9)
 **Status**: 📋 PLANEADO - Aguarda Implementação
 
 > Implementação integral do módulo de **Terapias Bioenergéticas** "tipo CoRe 5.0, mas moderno", com avaliação (Value %), Improvement %, protocolos em Excel, controlo de voltagem/corrente/frequência (AWG TiePie HS3), biofeedback fisiológico e suporte opcional a RNG físico (Alea/Hologram Generator).
@@ -322,7 +322,7 @@ class TerapiasViewModel : ObservableObject {
 * UI Tab 7 completa (LiveCharts2 + FFT + estados + histórico): 12–16 h
 * Relatórios + export: 3–4 h
 * Documentação final + runbook: 3–4 h
-  
+
 **Total**: ~42–59 h (variável com drivers/FFT e polimento de UI).
 
 ---
@@ -383,7 +383,7 @@ RuleFor(x=>x.FormaOnda).Must(v=> new[]{"Sine","Square","Triangle","Saw"}.Contain
 
 ### ✅ **COMPATÍVEL COM INFRAESTRUTURA ATUAL**:
 
-1. **Base de Dados**: 
+1. **Base de Dados**:
    - `Paciente` e `Sessao` já existem ✅
    - `TipoAbordagem.MedicinaBioenergetica` já definido ✅
    - EF Core Migrations prontas para novas tabelas
@@ -526,7 +526,7 @@ Escolha UMA opção:
 5. Algoritmo Value% determinístico
 6. Importador Excel v1
 ```
-**Tempo**: 2-3 semanas  
+**Tempo**: 2-3 semanas
 **Vantagem**: Funcional rapidamente, testável sem hardware
 
 ### **B) Aguardar Decisões** ⏸️

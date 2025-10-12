@@ -37,11 +37,11 @@ public enum TipoAbordagem
 **Ficheiro**: `src/BioDesk.Data/BioDeskDbContext.cs` (linha 550)
 
 ```csharp
-new AbordagemSessao { 
-    Id = 4, 
-    SessaoId = 3, 
-    TipoAbordagem = TipoAbordagem.MedicinaBioenergetica, 
-    Observacoes = "Equilíbrio energético" 
+new AbordagemSessao {
+    Id = 4,
+    SessaoId = 3,
+    TipoAbordagem = TipoAbordagem.MedicinaBioenergetica,
+    Observacoes = "Equilíbrio energético"
 }
 ```
 
@@ -64,7 +64,7 @@ Existe template de consentimento específico para Medicina Bioenergética no see
 ```bash
 # Procurado em TODOS os ficheiros .md do projeto:
 - "Inergetix" → 0 resultados
-- "terapia quantica" → 0 resultados  
+- "terapia quantica" → 0 resultados
 - "terapia quântica" → 0 resultados
 - "quantum therapy" → 0 resultados
 

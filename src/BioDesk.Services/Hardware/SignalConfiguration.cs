@@ -35,9 +35,9 @@ public class SignalConfiguration
     /// </summary>
     public bool IsValid()
     {
-        return FrequencyHz >= 0.1 
-            && FrequencyHz <= 5_000_000 
-            && VoltageV >= 0.2 
+        return FrequencyHz >= 0.1
+            && FrequencyHz <= 5_000_000
+            && VoltageV >= 0.2
             && VoltageV <= 8.0
             && DurationSeconds > 0;
     }

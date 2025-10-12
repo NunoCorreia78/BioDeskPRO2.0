@@ -33,7 +33,7 @@ public interface ITiePieHardwareService
     /// <param name="waveform">Forma de onda</param>
     /// <param name="durationPerFreqSeconds">Duração por frequência</param>
     Task<bool> SendMultipleFrequenciesAsync(
-        double[] frequencies, 
+        double[] frequencies,
         SignalChannel channel = SignalChannel.Channel1,
         double voltageV = 1.0,
         SignalWaveform waveform = SignalWaveform.Sine,

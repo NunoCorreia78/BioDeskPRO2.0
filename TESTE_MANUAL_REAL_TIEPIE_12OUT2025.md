@@ -1,6 +1,6 @@
 # 🧪 TESTE MANUAL - RealTiePieHardwareService
 
-**Data**: 12 de outubro de 2025  
+**Data**: 12 de outubro de 2025
 **Hardware**: TiePie Handyscope HS5
 
 ---
@@ -34,7 +34,7 @@ Antes de executar a aplicação, confirmar:
    ✅ LibTiePie SDK v[VERSION] inicializado com sucesso
    ```
 
-**ESPERADO**: ✅ SDK inicializa sem erros  
+**ESPERADO**: ✅ SDK inicializa sem erros
 **SE FALHAR**: ❌ `libtiepie.dll NÃO ENCONTRADO!` → Instalar SDK
 
 ---
@@ -136,11 +136,11 @@ Console.WriteLine(sucesso ? "✅ SUCESSO" : "❌ FALHOU");
 ```csharp
 var tiepieService = _host.Services.GetRequiredService<ITiePieHardwareService>();
 
-var formasDeOnda = new[] { 
-    SignalWaveform.Sine, 
-    SignalWaveform.Square, 
-    SignalWaveform.Triangle, 
-    SignalWaveform.Sawtooth 
+var formasDeOnda = new[] {
+    SignalWaveform.Sine,
+    SignalWaveform.Square,
+    SignalWaveform.Triangle,
+    SignalWaveform.Sawtooth
 };
 
 foreach (var waveform in formasDeOnda)
@@ -203,25 +203,25 @@ await tiepieService.SendSignalAsync(config2);
 ## ❌ ERROS COMUNS E SOLUÇÕES
 
 ### Erro 1: `DllNotFoundException: libtiepie.dll`
-**Causa**: LibTiePie SDK não instalado  
+**Causa**: LibTiePie SDK não instalado
 **Solução**: Instalar SDK de https://www.tiepie.com/en/libtiepie-sdk
 
 ### Erro 2: `Nenhum dispositivo TiePie encontrado`
-**Causa**: USB desligado ou drivers não instalados  
+**Causa**: USB desligado ou drivers não instalados
 **Solução**:
 1. Verificar LED no HS5 está aceso
 2. Device Manager → "TiePie Handyscope HS5" sem ⚠️
 3. Reinstalar drivers se necessário
 
 ### Erro 3: `Falha ao abrir dispositivo (handle nulo)`
-**Causa**: Dispositivo já em uso (outro processo)  
+**Causa**: Dispositivo já em uso (outro processo)
 **Solução**:
 1. Fechar TiePie software (se aberto)
 2. Reiniciar aplicação BioDeskPro2
 3. Desligar/religar USB
 
 ### Erro 4: `Falha ao configurar frequência/voltagem`
-**Causa**: Valores fora do range do hardware  
+**Causa**: Valores fora do range do hardware
 **Solução**: Validar configuração com `config.IsValid()` antes de enviar
 
 ---
@@ -271,6 +271,6 @@ await tiepieService.SendSignalAsync(config2);
 
 ---
 
-**Autor**: GitHub Copilot  
-**Data**: 12 de outubro de 2025  
+**Autor**: GitHub Copilot
+**Data**: 12 de outubro de 2025
 **Status**: ⏳ AGUARDA VALIDAÇÃO COM HARDWARE FÍSICO

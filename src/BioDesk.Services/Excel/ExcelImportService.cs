@@ -38,12 +38,12 @@ public class ExcelImportService : IExcelImportService
                 if (!File.Exists(filePath)) return (false, "Não encontrado");
                 var ext = Path.GetExtension(filePath).ToLowerInvariant();
                 if (ext != ".xls" && ext != ".xlsx") return (false, "Formato inválido");
-                
+
                 using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
                 using var reader = ExcelReaderFactory.CreateReader(stream);
                 var dataset = reader.AsDataSet();
                 var table = dataset.Tables[0];
-                
+
                 return table.Rows.Count >= 2 ? (true, string.Empty) : (false, "Vazio");
             }
             catch (Exception ex) { return (false, ex.Message); }
@@ -57,7 +57,7 @@ public class ExcelImportService : IExcelImportService
             var previews = new List<PreviewLine>();
             var erros = new List<string>();
             var warnings = new List<string>();
-            
+
             try
             {
                 var (isValid, errorMessage) = ValidateFileAsync(filePath).Result;
@@ -71,7 +71,7 @@ public class ExcelImportService : IExcelImportService
                 using var reader = ExcelReaderFactory.CreateReader(stream);
                 var dataset = reader.AsDataSet();
                 var table = dataset.Tables[0];
-                
+
                 int totalLinhas = table.Rows.Count;
                 int linhasValidas = 0, linhasWarnings = 0, linhasErros = 0;
 
@@ -84,7 +84,7 @@ public class ExcelImportService : IExcelImportService
                     var nomePt = MedicalTermsTranslator.TranslateToPortuguese(diseaseEn);
                     var freqs = ExtractFrequenciesFromRow(row);
                     linhasValidas++;
-                    
+
                     previews.Add(new PreviewLine
                     {
                         NumeroLinha = i + 1,
@@ -111,14 +111,14 @@ public class ExcelImportService : IExcelImportService
         var stopwatch = Stopwatch.StartNew();
         var erros = new List<string>();
         var warnings = new List<string>();
-        
+
         try
         {
             using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
             using var reader = ExcelReaderFactory.CreateReader(stream);
             var dataset = reader.AsDataSet();
             var table = dataset.Tables[0];
-            
+
             int totalLinhas = table.Rows.Count - 1;
             int linhasOk = 0, linhasWarnings = 0, linhasErros = 0;
 
@@ -144,7 +144,7 @@ public class ExcelImportService : IExcelImportService
                 protocolo.SetFrequencias(freqs.ToArray());
                 await _protocoloRepository.UpsertAsync(protocolo);
                 linhasOk++;
-                
+
                 if (linhasOk % 100 == 0) _logger.LogInformation("{Ok}/{Total}", linhasOk, totalLinhas);
             }
 
