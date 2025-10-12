@@ -293,9 +293,8 @@ Inner Exceptions:
         // === DOCUMENTO EXTERNO PACIENTE SERVICE (Documentos externos dos pacientes) ===
         services.AddScoped<BioDesk.Services.Documentos.IDocumentoExternoPacienteService, BioDesk.Services.Documentos.DocumentoExternoPacienteService>();
 
-        // === TEMPLATE & DOCUMENTO VIEWMODELS ===
+        // === TEMPLATE VIEWMODELS ===
         services.AddTransient<BioDesk.ViewModels.Templates.TemplatesGlobalViewModel>();
-        services.AddTransient<BioDesk.ViewModels.Documentos.DocumentosExternosViewModel>();
 
         // === CAMERA SERVICE (captura REAL de íris via USB com AForge.NET) ===
         services.AddSingleton<ICameraService, RealCameraService>();

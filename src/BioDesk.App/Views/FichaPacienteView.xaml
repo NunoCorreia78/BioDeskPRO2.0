@@ -346,16 +346,16 @@
         </Button>
 
         <Button
-          x:Name="BtnAba8"
+          x:Name="BtnAba7"
           Command="{Binding NavegarParaAbaCommand}"
-          CommandParameter="8"
+          CommandParameter="7"
           Content="🌿 Terapias"
           IsEnabled="True"
           ToolTip="Terapias Bioenergéticas (RNG + TiePie HS5)">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
-                <DataTrigger Binding="{Binding AbaAtiva}" Value="8">
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="7">
                   <Setter Property="Background">
                     <Setter.Value>
                       <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -419,12 +419,12 @@
           Panel.ZIndex="20"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=6}" />
 
-        <!--  UserControl para Aba 8: Terapias Bioenergéticas (RNG + TiePie HS5)  -->
+        <!--  UserControl para Aba 7: Terapias Bioenergéticas (RNG + TiePie HS5)  -->
         <abas:TerapiasUserControl
           x:Name="TerapiasUserControl"
           Panel.ZIndex="15"
           Background="Transparent"
-          Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=8}" />
+          Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=7}" />
       </Grid>
 
     </Border>
