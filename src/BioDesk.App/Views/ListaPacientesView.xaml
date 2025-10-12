@@ -108,10 +108,9 @@
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="Auto" />
-          <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <!--  Search Box  -->
+        <!--  Search Box (Live Search ativo)  -->
         <Border
           Grid.Column="0"
           Padding="12"
@@ -140,9 +139,6 @@
               BorderThickness="0"
               FontSize="14"
               Text="{Binding TextoPesquisa, UpdateSourceTrigger=PropertyChanged}">
-              <TextBox.InputBindings>
-                <KeyBinding Key="Enter" Command="{Binding PesquisarCommand}" />
-              </TextBox.InputBindings>
               <TextBox.Style>
                 <Style TargetType="TextBox">
                   <Style.Triggers>
@@ -154,7 +150,7 @@
                               <TextBlock
                                 FontSize="14"
                                 Foreground="#999"
-                                Text="Pesquisar por nome..." />
+                                Text="Pesquisar por nome (filtra automaticamente)..." />
                             </VisualBrush.Visual>
                           </VisualBrush>
                         </Setter.Value>
@@ -165,90 +161,13 @@
               </TextBox.Style>
             </TextBox>
 
-            <Button
-              Grid.Column="2"
-              Padding="16,8"
-              Background="#9CAF97"
-              BorderThickness="0"
-              Command="{Binding PesquisarCommand}"
-              Content="Pesquisar"
-              Cursor="Hand"
-              FontSize="13"
-              FontWeight="SemiBold"
-              Foreground="White">
-              <Button.Style>
-                <Style TargetType="Button">
-                  <Setter Property="Template">
-                    <Setter.Value>
-                      <ControlTemplate TargetType="Button">
-                        <Border
-                          Padding="{TemplateBinding Padding}"
-                          Background="{TemplateBinding Background}"
-                          CornerRadius="4">
-                          <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                      </ControlTemplate>
-                    </Setter.Value>
-                  </Setter>
-                  <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                      <Setter Property="Background" Value="#879B83" />
-                    </Trigger>
-                  </Style.Triggers>
-                </Style>
-              </Button.Style>
-            </Button>
+            <!--  Botão Pesquisar removido - Live Search ativo  -->
           </Grid>
         </Border>
 
-        <!--  Botão Eliminar Selecionado  -->
-        <Button
-          Grid.Column="1"
-          Margin="12,0,0,0"
-          Padding="16,8"
-          Background="#EF4444"
-          BorderThickness="0"
-          Command="{Binding EliminarPacienteCommand}"
-          CommandParameter="{Binding PacienteSelecionado}"
-          Content="🗑️ Eliminar"
-          Cursor="Hand"
-          FontSize="13"
-          FontWeight="SemiBold"
-          Foreground="White"
-          IsEnabled="{Binding PacienteSelecionado, Converter={StaticResource NullToBoolConverter}}"
-          ToolTip="Eliminar paciente selecionado (IRREVERSÍVEL!)">
-          <Button.Style>
-            <Style TargetType="Button">
-              <Setter Property="Template">
-                <Setter.Value>
-                  <ControlTemplate TargetType="Button">
-                    <Border
-                      Padding="{TemplateBinding Padding}"
-                      Background="{TemplateBinding Background}"
-                      CornerRadius="6"
-                      Opacity="{TemplateBinding Opacity}">
-                      <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                  </ControlTemplate>
-                </Setter.Value>
-              </Setter>
-              <Setter Property="Opacity" Value="1" />
-              <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                  <Setter Property="Opacity" Value="0.4" />
-                  <Setter Property="Cursor" Value="Arrow" />
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter Property="Background" Value="#DC2626" />
-                </Trigger>
-              </Style.Triggers>
-            </Style>
-          </Button.Style>
-        </Button>
-
         <!--  Botão Atualizar  -->
         <Button
-          Grid.Column="2"
+          Grid.Column="1"
           Margin="12,0,0,0"
           Padding="16,8"
           Background="White"
@@ -287,7 +206,7 @@
 
         <!--  Botão Novo Paciente  -->
         <Button
-          Grid.Column="3"
+          Grid.Column="2"
           Margin="12,0,0,0"
           Padding="20,10"
           Background="#4CAF50"
@@ -438,10 +357,51 @@
       Background="#F7F9F6"
       BorderBrush="#E3E9DE"
       BorderThickness="0,1,0,0">
-      <TextBlock FontSize="12" Foreground="#5A6558">
-        <Run Text="💡 Dica:" />
-        <Run Text="Clique duas vezes num paciente para abrir a ficha completa" />
-      </TextBlock>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock FontSize="12" Foreground="#5A6558">
+          <Run Text="💡 Dica:" />
+          <Run Text="Clique duas vezes num paciente para abrir a ficha completa" />
+        </TextBlock>
+
+        <Button
+          Grid.Column="1"
+          Margin="16,0,0,0"
+          Padding="14,8"
+          Background="#EF4444"
+          BorderThickness="0"
+          Command="{Binding EliminarPacienteCommand}"
+          CommandParameter="{Binding PacienteSelecionado}"
+          Cursor="Hand"
+          FontSize="12"
+          FontWeight="SemiBold"
+          Foreground="White"
+          ToolTip="Eliminar paciente selecionado (ação irreversível)">
+          <Button.Style>
+            <Style TargetType="Button">
+              <Setter Property="IsEnabled" Value="False" />
+              <Setter Property="Opacity" Value="0.55" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding PacienteSelecionado, Converter={StaticResource NullToBoolConverter}}" Value="True">
+                  <Setter Property="IsEnabled" Value="True" />
+                  <Setter Property="Opacity" Value="1" />
+                </DataTrigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter Property="Background" Value="#DC2626" />
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Text="🗑️" FontSize="14" Margin="0,0,6,0" />
+            <TextBlock Text="Eliminar Selecionado" />
+          </StackPanel>
+        </Button>
+      </Grid>
     </Border>
   </Grid>
 </UserControl>

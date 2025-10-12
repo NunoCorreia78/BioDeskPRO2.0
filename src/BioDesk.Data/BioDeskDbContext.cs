@@ -41,6 +41,10 @@ public class BioDeskDbContext : DbContext
   public DbSet<IrisImagem> IrisImagens { get; set; } = null!;
   public DbSet<IrisMarca> IrisMarcas { get; set; } = null!;
 
+  // === TEMPLATES GLOBAIS E DOCUMENTOS EXTERNOS ===
+  public DbSet<TemplateGlobal> TemplatesGlobais { get; set; } = null!;
+  public DbSet<DocumentoExternoPaciente> DocumentosExternosPacientes { get; set; } = null!;
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
@@ -283,6 +287,51 @@ public class BioDeskDbContext : DbContext
 
       entity.Property(e => e.DataAtualizacao)
                   .IsRequired();
+    });
+
+    // === CONFIGURAÇÃO TEMPLATES GLOBAIS ===
+    modelBuilder.Entity<TemplateGlobal>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+
+      entity.HasIndex(e => e.Nome)
+                .HasDatabaseName("IX_TemplatesGlobais_Nome");
+
+      entity.HasIndex(e => e.Tipo)
+                .HasDatabaseName("IX_TemplatesGlobais_Tipo");
+
+      entity.HasIndex(e => e.Categoria)
+                .HasDatabaseName("IX_TemplatesGlobais_Categoria");
+
+      entity.HasIndex(e => e.DisponivelEmail)
+                .HasDatabaseName("IX_TemplatesGlobais_DisponivelEmail");
+
+      entity.HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_TemplatesGlobais_IsDeleted");
+    });
+
+    // === CONFIGURAÇÃO DOCUMENTOS EXTERNOS PACIENTE ===
+    modelBuilder.Entity<DocumentoExternoPaciente>(entity =>
+    {
+      entity.HasKey(e => e.Id);
+
+      entity.HasIndex(e => e.PacienteId)
+                .HasDatabaseName("IX_DocumentosExternos_PacienteId");
+
+      entity.HasIndex(e => e.DataDocumento)
+                .HasDatabaseName("IX_DocumentosExternos_DataDocumento");
+
+      entity.HasIndex(e => e.Categoria)
+                .HasDatabaseName("IX_DocumentosExternos_Categoria");
+
+      entity.HasIndex(e => e.IsDeleted)
+                .HasDatabaseName("IX_DocumentosExternos_IsDeleted");
+
+      // Relacionamento com Paciente
+      entity.HasOne(d => d.Paciente)
+                .WithMany()
+                .HasForeignKey(d => d.PacienteId)
+                .OnDelete(DeleteBehavior.Cascade);
     });
 
     // === DADOS DE SEED ===

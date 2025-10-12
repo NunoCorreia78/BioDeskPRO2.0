@@ -10,7 +10,7 @@
     d:DataContext="{d:DesignInstance Type=vm:ComunicacaoViewModel}"
     d:DesignHeight="700"
     d:DesignWidth="1200"
-    Background="Transparent"
+    Background="{StaticResource FundoPrincipal}"
     mc:Ignorable="d">
 
     <UserControl.Resources>

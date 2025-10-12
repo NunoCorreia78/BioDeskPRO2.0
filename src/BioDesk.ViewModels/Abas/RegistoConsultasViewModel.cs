@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using BioDesk.Data.Repositories;
@@ -17,18 +18,30 @@ using Microsoft.Extensions.Logging;
 
 namespace BioDesk.ViewModels.Abas;
 
-public partial class RegistoConsultasViewModel : ViewModelBase
+public partial class RegistoConsultasViewModel : ViewModelBase, IDisposable
 {
     private readonly ILogger<RegistoConsultasViewModel> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly PrescricaoPdfService _pdfService;
     private readonly IDocumentoService _documentoService;
 
+    private readonly TimeSpan _autoSaveDelay = TimeSpan.FromSeconds(1.5);
+    private readonly SemaphoreSlim _autoSaveSemaphore = new(1, 1);
+    private CancellationTokenSource? _autoSaveCancellation;
+    private Task _pendingAutoSaveTask = Task.CompletedTask;
+    private int _autoSaveVersion;
+    private bool _suspendAutoSave;
+    private bool _disposed;
+
     [ObservableProperty] private Paciente? _pacienteAtual;
     [ObservableProperty] private ObservableCollection<Sessao> _sessoes = new();
-    [ObservableProperty] private string _avaliacao = string.Empty;
-    [ObservableProperty] private string _planoTerapeutico = string.Empty;
-    [ObservableProperty] private string _terapiaAtual = string.Empty; // ✅ NOVO: Medicação/Suplementação/Terapia atual
+    [ObservableProperty] private string _notas = string.Empty; // ✅ RENOMEADO de "_avaliacao"
+
+    // ✅ NOVO: Terapia Atual dividida em 3 colunas
+    [ObservableProperty] private string _medicacao = string.Empty;
+    [ObservableProperty] private string _suplementacao = string.Empty;
+    [ObservableProperty] private string _terapias = string.Empty;
+
     [ObservableProperty] private bool _mostrarPrescricao = false; // ✅ CORRIGIDO: Começa fechado
     [ObservableProperty] private ObservableCollection<SuplementoItem> _suplementos = new();
     [ObservableProperty] private string _observacoesPrescricao = string.Empty;
@@ -37,6 +50,10 @@ public partial class RegistoConsultasViewModel : ViewModelBase
     // ✅ NOVO: Modal de Detalhes da Consulta
     [ObservableProperty] private Sessao? _consultaSelecionada;
     [ObservableProperty] private bool _mostrarDetalhes = false;
+
+    partial void OnMedicacaoChanged(string value) => HandleTerapiaAtualAlterada();
+    partial void OnSuplementacaoChanged(string value) => HandleTerapiaAtualAlterada();
+    partial void OnTerapiasChanged(string value) => HandleTerapiaAtualAlterada();
 
     public RegistoConsultasViewModel(
         ILogger<RegistoConsultasViewModel> logger,
@@ -54,6 +71,150 @@ public partial class RegistoConsultasViewModel : ViewModelBase
         _logger.LogWarning("🔧 RegistoConsultasViewModel CONSTRUÍDO!");
     }
 
+    private void HandleTerapiaAtualAlterada()
+    {
+        if (_suspendAutoSave || PacienteAtual == null)
+        {
+            return;
+        }
+
+        CancelPendingAutoSave();
+        DisposeAutoSaveCancellation();
+
+        _autoSaveCancellation = new CancellationTokenSource();
+        var token = _autoSaveCancellation.Token;
+        var version = Interlocked.Increment(ref _autoSaveVersion);
+
+        _pendingAutoSaveTask = DebounceGuardarTerapiaAtualAsync(version, token);
+    }
+
+    private async Task DebounceGuardarTerapiaAtualAsync(int version, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(_autoSaveDelay, cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (version != Volatile.Read(ref _autoSaveVersion))
+            {
+                return;
+            }
+
+            await GuardarTerapiaAtualAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignorar cancelamentos explícitos
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro inesperado no auto-save da terapia atual");
+        }
+    }
+
+    private async Task FlushAutoSaveAsync()
+    {
+        if (PacienteAtual == null)
+        {
+            return;
+        }
+
+        CancelPendingAutoSave();
+
+        try
+        {
+            await _pendingAutoSaveTask.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancelamento esperado quando forçado
+        }
+
+        DisposeAutoSaveCancellation();
+
+        Interlocked.Increment(ref _autoSaveVersion);
+        await GuardarTerapiaAtualAsync();
+    }
+
+    private async Task GuardarTerapiaAtualAsync(CancellationToken cancellationToken = default)
+    {
+        if (PacienteAtual == null || cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        var terapiaAtualCompleta = ConstruirTextoTerapiaAtual();
+
+        var lockTaken = false;
+
+        try
+        {
+            await _autoSaveSemaphore.WaitAsync(cancellationToken);
+            lockTaken = true;
+
+            if (PacienteAtual == null || cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (string.Equals(PacienteAtual.TerapiaAtual, terapiaAtualCompleta, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            if (PacienteAtual.Id == 0)
+            {
+                PacienteAtual.TerapiaAtual = terapiaAtualCompleta;
+                SuccessMessage = "💾 Terapia atual guardada para guardar junto com o paciente";
+                return;
+            }
+
+            await ExecuteWithErrorHandlingAsync(async () =>
+            {
+                var pacienteDb = await _unitOfWork.Pacientes.GetByIdAsync(PacienteAtual.Id);
+                if (pacienteDb == null)
+                {
+                    _logger.LogWarning("⚠️ Paciente ID {PacienteId} não encontrado ao guardar terapia", PacienteAtual.Id);
+                    return;
+                }
+
+                if (string.Equals(pacienteDb.TerapiaAtual, terapiaAtualCompleta, StringComparison.Ordinal))
+                {
+                    PacienteAtual.TerapiaAtual = terapiaAtualCompleta;
+                    return;
+                }
+
+                pacienteDb.TerapiaAtual = terapiaAtualCompleta;
+                pacienteDb.DataUltimaAtualizacao = DateTime.Now;
+
+                await _unitOfWork.SaveChangesAsync();
+
+                PacienteAtual.TerapiaAtual = terapiaAtualCompleta;
+                SuccessMessage = "💾 Terapia atual guardada automaticamente";
+            }, "ao guardar terapia atual automaticamente", _logger);
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancelado - não fazer nada
+        }
+        finally
+        {
+            if (lockTaken)
+            {
+                _autoSaveSemaphore.Release();
+            }
+        }
+    }
+
+    private string ConstruirTextoTerapiaAtual()
+    {
+        return $"Medicação: {Medicacao ?? string.Empty}\n\nSuplementação: {Suplementacao ?? string.Empty}\n\nTerapias: {Terapias ?? string.Empty}";
+    }
+
     [RelayCommand]
     private async Task GuardarConsultaAsync()
     {
@@ -65,6 +226,8 @@ public partial class RegistoConsultasViewModel : ViewModelBase
                 return;
             }
 
+            await FlushAutoSaveAsync();
+
             var validator = new ConsultaValidator();
             var result = await validator.ValidateAsync(this);
             if (!result.IsValid)
@@ -75,10 +238,11 @@ public partial class RegistoConsultasViewModel : ViewModelBase
 
             _logger.LogInformation("💾 Salvando consulta na BD para paciente ID {PacienteId}", PacienteAtual.Id);
 
-            // ✅ ATUALIZAR TERAPIA ATUAL DO PACIENTE (sempre que guardar consulta)
-            if (PacienteAtual.TerapiaAtual != TerapiaAtual)
+            // ✅ ATUALIZAR TERAPIA ATUAL DO PACIENTE (concatenar 3 campos)
+            var terapiaAtualCompleta = ConstruirTextoTerapiaAtual();
+            if (PacienteAtual.TerapiaAtual != terapiaAtualCompleta)
             {
-                PacienteAtual.TerapiaAtual = TerapiaAtual;
+                PacienteAtual.TerapiaAtual = terapiaAtualCompleta;
                 _unitOfWork.Pacientes.Update(PacienteAtual);
                 _logger.LogInformation("💊 Terapia Atual atualizada no paciente");
             }
@@ -88,9 +252,9 @@ public partial class RegistoConsultasViewModel : ViewModelBase
             {
                 PacienteId = PacienteAtual.Id,
                 DataHora = DataConsulta,
-                Motivo = Avaliacao.Length > 50 ? Avaliacao.Substring(0, 50) : Avaliacao,
-                Avaliacao = Avaliacao,
-                Plano = PlanoTerapeutico,
+                Motivo = Notas.Length > 50 ? Notas.Substring(0, 50) : Notas,
+                Avaliacao = Notas, // ✅ Notas vai para campo Avaliacao da BD
+                Plano = string.Empty, // ✅ Campo Plano não é mais usado
                 CriadoEm = DateTime.Now,
                 IsDeleted = false
             };
@@ -102,9 +266,8 @@ public partial class RegistoConsultasViewModel : ViewModelBase
 
             SuccessMessage = "✅ Consulta guardada na base de dados!";
 
-            // Limpar formulário
-            Avaliacao = string.Empty;
-            PlanoTerapeutico = string.Empty;
+            // Limpar apenas os campos específicos da consulta
+            Notas = string.Empty;
             DataConsulta = DateTime.Now;
 
             // Recarregar lista
@@ -305,11 +468,64 @@ public partial class RegistoConsultasViewModel : ViewModelBase
         ConsultaSelecionada = null;
     }
 
-    public void SetPaciente(Paciente paciente)
+    public async Task SetPacienteAsync(Paciente paciente)
     {
+        if (PacienteAtual != null)
+        {
+            await FlushAutoSaveAsync();
+        }
+
         PacienteAtual = paciente;
-        TerapiaAtual = paciente.TerapiaAtual ?? string.Empty; // ✅ NOVO: Carregar terapia atual do paciente
-        _ = CarregarSessoesAsync(paciente.Id);
+
+        _suspendAutoSave = true;
+        _autoSaveVersion = 0;
+
+        try
+        {
+            // ✅ CARREGAR TERAPIA ATUAL e dividir em 3 campos (se existir)
+            if (!string.IsNullOrWhiteSpace(paciente.TerapiaAtual))
+            {
+                var partes = paciente.TerapiaAtual.Split(new[] { "\n\n" }, StringSplitOptions.None);
+                Medicacao = partes.Length > 0 ? partes[0].Replace("Medicação: ", "") : string.Empty;
+                Suplementacao = partes.Length > 1 ? partes[1].Replace("Suplementação: ", "") : string.Empty;
+                Terapias = partes.Length > 2 ? partes[2].Replace("Terapias: ", "") : string.Empty;
+            }
+            else
+            {
+                Medicacao = string.Empty;
+                Suplementacao = string.Empty;
+                Terapias = string.Empty;
+            }
+        }
+        finally
+        {
+            _suspendAutoSave = false;
+        }
+
+        await CarregarSessoesAsync(paciente.Id);
+    }
+
+    private void CancelPendingAutoSave()
+    {
+        try
+        {
+            _autoSaveCancellation?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Já foi descartado
+        }
+    }
+
+    private void DisposeAutoSaveCancellation()
+    {
+        if (_autoSaveCancellation != null)
+        {
+            _autoSaveCancellation.Dispose();
+            _autoSaveCancellation = null;
+        }
+
+        _pendingAutoSaveTask = Task.CompletedTask;
     }
 
     private async Task CarregarSessoesAsync(int id)
@@ -336,6 +552,30 @@ public partial class RegistoConsultasViewModel : ViewModelBase
             IsLoading = false;
         }
     }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            CancelPendingAutoSave();
+
+            DisposeAutoSaveCancellation();
+            _autoSaveSemaphore.Dispose();
+        }
+
+        _disposed = true;
+    }
 }
 
 public partial class SuplementoItem : ObservableObject
@@ -350,7 +590,19 @@ public class ConsultaValidator : AbstractValidator<RegistoConsultasViewModel>
 {
     public ConsultaValidator()
     {
-        RuleFor(x => x.Avaliacao).NotEmpty().WithMessage("Avaliação obrigatória").MaximumLength(2000);
-        RuleFor(x => x.PlanoTerapeutico).NotEmpty().WithMessage("Plano obrigatório").MaximumLength(3000);
+        RuleFor(x => x.Notas).NotEmpty().WithMessage("Campo Notas obrigatório").MaximumLength(3000);
+        // Terapia atual não é obrigatória, mas se preenchida deve ter limite
+        When(x => !string.IsNullOrWhiteSpace(x.Medicacao), () =>
+        {
+            RuleFor(x => x.Medicacao).MaximumLength(1000);
+        });
+        When(x => !string.IsNullOrWhiteSpace(x.Suplementacao), () =>
+        {
+            RuleFor(x => x.Suplementacao).MaximumLength(1000);
+        });
+        When(x => !string.IsNullOrWhiteSpace(x.Terapias), () =>
+        {
+            RuleFor(x => x.Terapias).MaximumLength(1000);
+        });
     }
 }

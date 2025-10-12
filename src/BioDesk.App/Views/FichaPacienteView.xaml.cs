@@ -3,6 +3,7 @@ using System.Windows;
 using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BioDesk.App.Views;
@@ -87,7 +88,7 @@ public partial class FichaPacienteView : UserControl
                 // Passar paciente para o ViewModel de Consultas
                 if (newViewModel.PacienteAtual != null)
                 {
-                    _registoConsultasViewModel.SetPaciente(newViewModel.PacienteAtual);
+                    await _registoConsultasViewModel.SetPacienteAsync(newViewModel.PacienteAtual);
                 }
             }
 
@@ -126,12 +127,19 @@ public partial class FichaPacienteView : UserControl
         }
     }
 
-    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(FichaPacienteViewModel.AbaAtiva) &&
             sender is FichaPacienteViewModel viewModel)
         {
             AtualizarVisibilidadeAbas(viewModel.AbaAtiva);
+        }
+        else if (e.PropertyName == nameof(FichaPacienteViewModel.PacienteAtual) &&
+                 sender is FichaPacienteViewModel fichaVm &&
+                 fichaVm.PacienteAtual != null &&
+                 _registoConsultasViewModel != null)
+        {
+            await _registoConsultasViewModel.SetPacienteAsync(fichaVm.PacienteAtual);
         }
     }
 

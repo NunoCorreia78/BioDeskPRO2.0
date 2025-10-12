@@ -25,6 +25,8 @@ public class UnitOfWork : IUnitOfWork
     private IRepository<IrisImagem>? _irisImagens;
     private IRepository<IrisMarca>? _irisMarcas;
     private IRepository<ConfiguracaoClinica>? _configuracaoClinica;
+    private ITemplateGlobalRepository? _templatesGlobais;
+    private IDocumentoExternoPacienteRepository? _documentosExternos;
 
     public UnitOfWork(BioDeskDbContext context)
     {
@@ -109,6 +111,24 @@ public class UnitOfWork : IUnitOfWork
         {
             _configuracaoClinica ??= new Repository<ConfiguracaoClinica>(_context);
             return _configuracaoClinica;
+        }
+    }
+
+    public ITemplateGlobalRepository TemplatesGlobais
+    {
+        get
+        {
+            _templatesGlobais ??= new TemplateGlobalRepository(_context);
+            return _templatesGlobais;
+        }
+    }
+
+    public IDocumentoExternoPacienteRepository DocumentosExternos
+    {
+        get
+        {
+            _documentosExternos ??= new DocumentoExternoPacienteRepository(_context);
+            return _documentosExternos;
         }
     }
 

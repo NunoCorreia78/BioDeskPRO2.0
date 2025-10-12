@@ -345,13 +345,11 @@ public class PrescricaoPdfService
                 });
             });
 
-            // === NOTA LEGAL ===
-            column.Item().PaddingTop(20).Background(Colors.Yellow.Lighten3).Padding(10).Text(
-                "⚠️ Esta prescrição tem validade de 30 dias. Mantenha este documento em local seguro. " +
-                "Em caso de dúvidas ou reações adversas, contacte imediatamente o profissional responsável.")
-                .FontSize(8)
-                .Italic()
-                .FontColor(Colors.Orange.Darken3);
+            // === NOTA LEGAL (sem barra amarela, texto legal simples) ===
+            column.Item().PaddingTop(20).Padding(10).Text(
+                "Este documento é pessoal e intransponível.")
+                .FontSize(9)
+                .FontColor(Colors.Grey.Darken2);
         });
     }
 

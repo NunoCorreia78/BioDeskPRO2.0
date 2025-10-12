@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using BioDesk.ViewModels.Abas;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +18,12 @@ public partial class SelecionarTemplatesWindow : Window
         InitializeComponent();
 
         // Obter ViewModel do DI container
-        _viewModel = ((App)Application.Current).ServiceProvider
-            .GetRequiredService<SelecionarTemplatesViewModel>();
+        if (Application.Current is not App app || app.ServiceProvider is null)
+        {
+            throw new InvalidOperationException("ServiceProvider não está disponível.");
+        }
+
+        _viewModel = app.ServiceProvider.GetRequiredService<SelecionarTemplatesViewModel>();
 
         DataContext = _viewModel;
 

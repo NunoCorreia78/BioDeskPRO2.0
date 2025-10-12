@@ -47,6 +47,16 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
     }
 
     /// <summary>
+    /// 🔥 LIVE SEARCH: Chamado automaticamente quando TextoPesquisa muda
+    /// Filtra a lista em tempo real sem precisar Enter
+    /// </summary>
+    partial void OnTextoPesquisaChanged(string value)
+    {
+        // Executar pesquisa automaticamente (debounce handled by Task.Delay)
+        _ = PesquisarAsync();
+    }
+
+    /// <summary>
     /// Carregar todos os pacientes ao abrir a view
     /// </summary>
     public async Task OnNavigatedToAsync()
@@ -103,8 +113,8 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
             IsLoading = false;
         }, "Erro ao carregar pacientes");
     }    /// <summary>
-    /// Abrir ficha do paciente selecionado
-    /// </summary>
+         /// Abrir ficha do paciente selecionado
+         /// </summary>
     [RelayCommand]
     private void AbrirFichaPaciente(Paciente? paciente)
     {

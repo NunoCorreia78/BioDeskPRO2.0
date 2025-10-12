@@ -395,7 +395,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
             metrics,
             BuildContext(viewModel, modo));
 
-        MapaOverlayCanvas.CaptureMouse();
+        MapaOverlayCanvas?.CaptureMouse();
         e.Handled = true;
     }
 
@@ -499,7 +499,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
             MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
         }
 
-        MapaOverlayCanvas.ReleaseMouseCapture();
+        MapaOverlayCanvas?.ReleaseMouseCapture();
         e.Handled = true;
     }
 
@@ -551,7 +551,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
                 MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
             }
 
-            MapaOverlayCanvas.ReleaseMouseCapture();
+            MapaOverlayCanvas?.ReleaseMouseCapture();
         }
     }
 

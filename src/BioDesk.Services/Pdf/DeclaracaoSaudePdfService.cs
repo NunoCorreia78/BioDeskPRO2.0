@@ -5,6 +5,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using BioDesk.Data.Repositories;
+using BioDesk.Domain.Entities;
 
 namespace BioDesk.Services.Pdf;
 
@@ -15,9 +17,13 @@ namespace BioDesk.Services.Pdf;
 public class DeclaracaoSaudePdfService
 {
     private readonly ILogger<DeclaracaoSaudePdfService> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeclaracaoSaudePdfService(ILogger<DeclaracaoSaudePdfService> logger)
+    public DeclaracaoSaudePdfService(
+        IUnitOfWork unitOfWork,
+        ILogger<DeclaracaoSaudePdfService> logger)
     {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Configurar licença QuestPDF (Community License)
@@ -33,6 +39,32 @@ public class DeclaracaoSaudePdfService
 
         try
         {
+            // 🏥 CARREGAR CONFIGURAÇÃO DA CLÍNICA (logo + dados)
+            ConfiguracaoClinica? config = null;
+            string? logoPath = null;
+
+            try
+            {
+                config = _unitOfWork.ConfiguracaoClinica.GetByIdAsync(1).Result;
+                if (config?.LogoPath != null)
+                {
+                    logoPath = Path.Combine(PathService.AppDataPath, config.LogoPath);
+                    if (!File.Exists(logoPath))
+                    {
+                        _logger.LogWarning("⚠️ Logo configurado mas ficheiro não existe: {LogoPath}", logoPath);
+                        logoPath = null;
+                    }
+                    else
+                    {
+                        _logger.LogInformation("✅ Logo da clínica carregado: {LogoPath}", logoPath);
+                    }
+                }
+            }
+            catch (Exception exConfig)
+            {
+                _logger.LogWarning(exConfig, "⚠️ Erro ao carregar configuração - PDF continuará sem logo");
+            }
+
             // ✅ USAR PathService PARA GARANTIR COMPATIBILIDADE DEBUG/RELEASE
             var pastaPaciente = PathService.GetPacienteDocumentPath(dados.NomePaciente, "");
             var pastaDeclaracoes = Path.Combine(pastaPaciente, "DeclaracoesSaude");
@@ -53,8 +85,8 @@ public class DeclaracaoSaudePdfService
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(11).FontFamily("Arial"));
 
-                    // Cabeçalho
-                    page.Header().Element(CriarCabecalho);
+                    // Cabeçalho (passa config e logoPath)
+                    page.Header().Element(c => CriarCabecalho(c, config, logoPath));
 
                     // Conteúdo Principal
                     page.Content().Element(container => CriarConteudo(container, dados));
@@ -64,7 +96,8 @@ public class DeclaracaoSaudePdfService
                     {
                         text.Span("Gerado em: ");
                         text.Span($"{DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9).Italic();
-                        text.Span(" | Nuno Correia - Terapias Naturais").FontSize(8).FontColor(Colors.Grey.Medium);
+                        var nomeClinica = config?.NomeClinica ?? "Nuno Correia - Terapias Naturais";
+                        text.Span($" | {nomeClinica}").FontSize(8).FontColor(Colors.Grey.Medium);
                     });
                 });
             })
@@ -106,7 +139,7 @@ public class DeclaracaoSaudePdfService
 
     #region === LAYOUT DO PDF ===
 
-    private void CriarCabecalho(IContainer container)
+    private void CriarCabecalho(IContainer container, ConfiguracaoClinica? config, string? logoPath)
     {
         container.Column(mainColumn =>
         {
@@ -115,7 +148,15 @@ public class DeclaracaoSaudePdfService
                 // Logo/Título à esquerda
                 row.RelativeItem().Column(column =>
                 {
-                    column.Item().Text("🌿 Nuno Correia - Terapias Naturais")
+                    // LOGO (se disponível)
+                    if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
+                    {
+                        column.Item().MaxHeight(60).Image(logoPath);
+                    }
+
+                    // Nome da Clínica
+                    var nomeClinica = config?.NomeClinica ?? "🌿 Nuno Correia - Terapias Naturais";
+                    column.Item().Text(nomeClinica)
                         .FontSize(20)
                         .Bold()
                         .FontColor(Colors.Grey.Darken3);
@@ -124,6 +165,35 @@ public class DeclaracaoSaudePdfService
                         .FontSize(10)
                         .Italic()
                         .FontColor(Colors.Grey.Darken2);
+
+                    // Morada (se disponível)
+                    if (!string.IsNullOrWhiteSpace(config?.Morada))
+                    {
+                        column.Item().Text(config.Morada)
+                            .FontSize(9)
+                            .FontColor(Colors.Grey.Medium);
+                    }
+
+                    // Telefone + Email (se disponíveis)
+                    if (!string.IsNullOrWhiteSpace(config?.Telefone) || !string.IsNullOrWhiteSpace(config?.Email))
+                    {
+                        column.Item().Row(r =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(config.Telefone))
+                            {
+                                r.AutoItem().Text($"☎ {config.Telefone}  ")
+                                    .FontSize(9)
+                                    .FontColor(Colors.Grey.Medium);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(config.Email))
+                            {
+                                r.AutoItem().Text($"✉ {config.Email}")
+                                    .FontSize(9)
+                                    .FontColor(Colors.Grey.Medium);
+                            }
+                        });
+                    }
                 });
 
                 // Data à direita

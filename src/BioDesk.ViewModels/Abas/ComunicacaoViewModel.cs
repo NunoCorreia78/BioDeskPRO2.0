@@ -549,7 +549,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             // Buscar entidade do DbContext para garantir tracking EF Core
             var comunicacaoDb = await _dbContext.Comunicacoes.FindAsync(comunicacao.Id);
-            
+
             if (comunicacaoDb == null)
             {
                 ErrorMessage = "❌ Email não encontrado na base de dados!";

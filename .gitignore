@@ -20,6 +20,10 @@ bld/
 *.userosscache
 *.sln.docstates
 
+# SQLite database files (contém dados sensíveis)
+biodesk.db
+*.db
+
 # SQLite temporary files
 *.db-shm
 *.db-wal
@@ -46,10 +50,22 @@ DebugOutput/*.log
 # Node modules
 node_modules/
 
-# Backups
+# Backups (gerados automaticamente)
+Backups/
 Backups_*/
 *.bak
 *.backup
+
+# Documentos gerados pela aplicação
+Documentos/Pacientes/
+Documentos/Prescricoes/
+Documentos/Consentimentos/
+Documentos/Templates/
+
+# Templates uploadados (não código)
+Templates/*.png
+Templates/*.jpg
+Templates/*.pdf
 
 # OS generated files
 .DS_Store

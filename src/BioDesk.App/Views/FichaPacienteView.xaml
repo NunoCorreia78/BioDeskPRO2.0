@@ -8,6 +8,7 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   d:DesignHeight="800"
   d:DesignWidth="1200"
+  Background="{StaticResource FundoPrincipal}"
   mc:Ignorable="d">
 
   <UserControl.Resources>
@@ -174,7 +175,7 @@
     </Style>
   </UserControl.Resources>
 
-  <Grid Background="{StaticResource FundoPrincipal}">
+  <Grid Panel.ZIndex="100" Background="{StaticResource FundoPrincipal}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <!--  Separadores/Abas  -->
@@ -345,9 +346,9 @@
         </Button>
 
         <Button
-          x:Name="BtnAba7"
+          x:Name="BtnAba8"
           Command="{Binding NavegarParaAbaCommand}"
-          CommandParameter="7"
+          CommandParameter="8"
           Content="🌿 Terapias"
           IsEnabled="False"
           ToolTip="Módulo em desenvolvimento futuro">
@@ -418,14 +419,14 @@
           Panel.ZIndex="20"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=6}" />
 
-        <!--  Texto para aba 7 (em desenvolvimento)  -->
+        <!--  Texto para aba 8 (em desenvolvimento)  -->
         <TextBlock
           Margin="20"
           FontSize="16"
           Foreground="{StaticResource TextoPrincipal}"
           Text="{Binding ConteudoAbaAtiva}"
           TextWrapping="Wrap"
-          Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=7}" />
+          Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=8}" />
       </Grid>
 
     </Border>

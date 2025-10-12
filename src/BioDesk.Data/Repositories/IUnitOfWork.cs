@@ -20,6 +20,8 @@ public interface IUnitOfWork : IDisposable
     IRepository<IrisImagem> IrisImagens { get; }
     IRepository<IrisMarca> IrisMarcas { get; }
     IRepository<ConfiguracaoClinica> ConfiguracaoClinica { get; }
+    ITemplateGlobalRepository TemplatesGlobais { get; }
+    IDocumentoExternoPacienteRepository DocumentosExternos { get; }
 
     /// <summary>
     /// Salva todas as alterações em uma transação atômica

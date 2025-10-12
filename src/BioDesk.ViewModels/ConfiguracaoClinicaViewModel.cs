@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Windows;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Win32;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using BioDesk.Data.Repositories;
 using BioDesk.Domain.Entities;
+using BioDesk.Services;
 using BioDesk.ViewModels.Base;
 using BioDesk.ViewModels.Validators;
 
@@ -371,7 +374,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
 
             // Ler conteúdo atual
             var json = await File.ReadAllTextAsync(appSettingsPath);
-            var settings = System.Text.Json.JsonDocument.Parse(json);
+            using var settings = System.Text.Json.JsonDocument.Parse(json);
 
             // Criar dicionário mutável para manter todas as secções existentes
             var settingsDict = new Dictionary<string, object>();
@@ -381,7 +384,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             {
                 if (property.Name != "Email") // Vamos substituir Email
                 {
-                    settingsDict[property.Name] = System.Text.Json.JsonSerializer.Deserialize<object>(property.Value.GetRawText());
+                    settingsDict[property.Name] = property.Value.Clone();
                 }
             }
 
@@ -483,6 +486,66 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
         }, "Testar conexão SMTP", _logger);
 
         IsLoading = false;
+    }
+
+    #endregion
+
+    #region === COMANDO: ADICIONAR TEMPLATE PDF ===
+
+    /// <summary>
+    /// Comando para adicionar novo template PDF para prescrições
+    /// </summary>
+    [RelayCommand]
+    private void AdicionarTemplatePdf()
+    {
+        try
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecionar Template PDF",
+                Filter = "Ficheiros PDF (*.pdf)|*.pdf",
+                Multiselect = false
+            };
+
+            var resultado = dialog.ShowDialog();
+            if (resultado is not true)
+            {
+                _logger.LogInformation("Importação de template PDF cancelada pelo utilizador.");
+                return;
+            }
+
+            // ✅ USAR PathService.TemplatesPath (funciona em qualquer PC/instalação)
+            var templatesDirectory = PathService.TemplatesPath;
+            Directory.CreateDirectory(templatesDirectory);
+
+            var ficheiroOrigem = dialog.FileName;
+            var nomeFicheiro = Path.GetFileName(ficheiroOrigem);
+            if (string.IsNullOrWhiteSpace(nomeFicheiro))
+            {
+                _logger.LogWarning("Nome de ficheiro inválido ao importar template PDF.");
+                ErrorMessage = "Não foi possível determinar o nome do ficheiro selecionado.";
+                return;
+            }
+
+            var destino = Path.Combine(templatesDirectory, nomeFicheiro);
+            var substituido = File.Exists(destino);
+
+            File.Copy(ficheiroOrigem, destino, overwrite: true);
+
+            var mensagemSucesso = substituido
+                ? $"✅ Template '{nomeFicheiro}' atualizado com sucesso!\n📂 Localização: {destino}"
+                : $"✅ Template '{nomeFicheiro}' adicionado com sucesso!\n📂 Localização: {destino}";
+
+            TesteSucessoMessage = mensagemSucesso;
+            MessageBox.Show(mensagemSucesso, "Templates PDF", MessageBoxButton.OK, MessageBoxImage.Information);
+            _logger.LogInformation("Template PDF importado para {Destino}", destino);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao adicionar template PDF");
+            ErrorMessage = $"Erro ao adicionar template: {ex.Message}";
+            MessageBox.Show($"Erro ao adicionar template: {ex.Message}", "Templates PDF", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     #endregion

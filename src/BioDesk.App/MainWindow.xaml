@@ -38,9 +38,16 @@
         </Border>
 
         <!-- Content Area -->
-        <ContentControl Grid.Row="1"
-                       x:Name="ContentArea"
-                       Margin="20"/>
+    <Border Grid.Row="1"
+        Margin="20"
+        Background="{StaticResource FundoPrincipal}"
+        CornerRadius="16"
+        SnapsToDevicePixels="True">
+        <ContentControl x:Name="ContentArea"
+                  Margin="0"
+                  Background="Transparent"
+                  ClipToBounds="True"/>
+    </Border>
 
         <!-- Toast Notifications Container -->
         <StackPanel Grid.Row="0" Grid.RowSpan="2"

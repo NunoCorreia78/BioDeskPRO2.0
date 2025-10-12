@@ -38,7 +38,11 @@
         <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
         <SolidColorBrush x:Key="BotaoPrincipal">#9CAF97</SolidColorBrush>
         <SolidColorBrush x:Key="BotaoPrincipalHover">#879B83</SolidColorBrush>
-        <SolidColorBrush x:Key="BotaoHover">#879B83</SolidColorBrush>
+    <SolidColorBrush x:Key="BotaoHover">#879B83</SolidColorBrush>
+    <SolidColorBrush x:Key="HoverBrush">#EDF2EB</SolidColorBrush>
+    <SolidColorBrush x:Key="DangerBackground">#E96B6B</SolidColorBrush>
+    <SolidColorBrush x:Key="DangerBackgroundHover">#D85A5A</SolidColorBrush>
+    <SolidColorBrush x:Key="DangerForeground">White</SolidColorBrush>
 
         <!-- Estados dos dispositivos -->
         <SolidColorBrush x:Key="StatusOnline">#2E7D32</SolidColorBrush>
@@ -75,6 +79,41 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="{StaticResource BotaoPrincipalHover}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo primário reutilizável para botões com texto branco -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource BotaoPrincipal}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BotaoHover}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#6B7F67" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#D5DDD2" />
+                                <Setter Property="Foreground" Value="#8A9487" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -232,6 +271,9 @@
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
 
+        <!-- Alias para caixas de texto simples em filtros/listas -->
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource FieldTextBoxStyle}" />
+
         <Style x:Key="FieldComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Padding" Value="12,8" />
             <Setter Property="BorderBrush" Value="{StaticResource CorBorda}" />
@@ -244,6 +286,9 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
+
+        <!-- Alias para ComboBox genérico em filtros -->
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource FieldComboBoxStyle}" />
 
         <Style x:Key="FieldDatePickerStyle" TargetType="DatePicker">
             <Setter Property="Padding" Value="12,8" />
@@ -316,6 +361,41 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="{StaticResource BotaoPrincipal}"/>
                                 <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo para ações destrutivas (apagar) -->
+        <Style x:Key="DangerButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource DangerBackground}" />
+            <Setter Property="Foreground" Value="{StaticResource DangerForeground}" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="16,10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource DangerBackgroundHover}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#F2B7B7" />
+                                <Setter Property="Foreground" Value="#885252" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
