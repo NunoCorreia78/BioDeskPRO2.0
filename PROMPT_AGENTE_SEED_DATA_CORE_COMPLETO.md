@@ -783,27 +783,248 @@ public static class ItemBancoCoreValidator
 
 ---
 
-## 🚀 COMANDO PARA INICIAR
+## � FORMATO DE ENTREGA (OBRIGATÓRIO)
 
-**Prompt para ChatGPT/Claude/Gemini**:
+### **Output Esperado**: Ficheiro ÚNICO em bloco de código markdown
+
+```markdown
+### ItemBancoCoreSeeder.cs - PARTE 1/1
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using BioDesk.Domain.Entities;
+
+namespace BioDesk.Data.SeedData;
+
+public static class ItemBancoCoreSeeder
+{
+    // ... CÓDIGO COMPLETO AQUI ...
+}
 ```
-Gera o ficheiro ItemBancoCoreSeeder.cs completo seguindo RIGOROSAMENTE
-o documento PROMPT_AGENTE_SEED_DATA_CORE_COMPLETO.md.
+```
 
-Requisitos absolutos:
-- 11 categorias completas (exceto Frequencia)
-- ~6.700 itens no total
-- Zero duplicados de GUID
-- Género correto em TODOS os órgãos reprodutores
-- JsonMetadata rico (min 3 props)
-- Zero placeholders/TODOs
-- Código compilável em C# 12 (.NET 8)
+### **⚠️ INSTRUÇÕES CRÍTICAS DE ENTREGA**:
 
-Valida automaticamente e corrige até 100% correto.
+1. **Ficheiro ÚNICO**: Não dividir em múltiplos ficheiros ou mensagens
+2. **Formato Markdown**: Usar bloco ```csharp ... ``` para facilitar copy-paste
+3. **Código Completo**: NUNCA usar "... continuar aqui" ou "restantes X itens"
+4. **Validação Inline**: Incluir método `ValidateAll()` no final do ficheiro
+5. **Sem Explicações**: Apenas o código C# puro (comentários inline são OK)
+
+### **Ordem de Prioridade (se houver timeout)**:
+
+**PRIORIDADE ALTA** (Implementar SEMPRE):
+1. ✅ Florais de Bach (38 itens) - Sistema fechado oficial
+2. ✅ Chakras (28 itens) - Sistema completo
+3. ✅ Meridianos (20 itens) - MTC tradicional
+4. ✅ Órgãos (150 itens) - **CRÍTICO: Validação de género!**
+
+**PRIORIDADE MÉDIA** (Implementar se possível):
+5. ⚡ Vitaminas (50 itens)
+6. ⚡ Minerais (80 itens)
+7. ⚡ Florais Californianos (103 itens)
+8. ⚡ Emoções (500 itens)
+
+**PRIORIDADE BAIXA** (Pode ser incremental):
+9. 🔄 Suplementos (300 itens)
+10. 🔄 Alimentos (1.000 itens)
+11. 🔄 Homeopatia (3.000 itens) - Maior categoria
+
+**⚠️ ATENÇÃO**: Se não conseguires gerar TUDO, gera pelo menos **Prioridade Alta** (236 itens) completos e compiláveis. Posso adicionar o resto depois.
+
+---
+
+## 🔍 MÉTODO DE VALIDAÇÃO AUTOMÁTICA (INCLUIR NO CÓDIGO)
+
+**Adicionar ao final de `ItemBancoCoreSeeder.cs`**:
+
+```csharp
+    /// <summary>
+    /// Valida integridade de todos os itens gerados
+    /// EXECUTAR antes de usar em produção!
+    /// </summary>
+    public static void ValidateAll()
+    {
+        var items = GetAll();
+        var errors = new List<string>();
+
+        // 1. Verificar total esperado
+        Console.WriteLine($"Total itens gerados: {items.Count}");
+
+        // 2. Verificar duplicados de GUID
+        var duplicateGuids = items
+            .GroupBy(x => x.ExternalId)
+            .Where(g => g.Count() > 1)
+            .Select(g => $"{g.Key} ({g.Count()}x)")
+            .ToList();
+
+        if (duplicateGuids.Any())
+            errors.Add($"❌ {duplicateGuids.Count} GUIDs duplicados: {string.Join(", ", duplicateGuids)}");
+        else
+            Console.WriteLine("✅ Zero GUIDs duplicados");
+
+        // 3. Verificar género em órgãos reprodutores
+        var orgaosGeneroErrado = items
+            .Where(x => x.Categoria == CategoriaCore.Orgao)
+            .Where(x =>
+                (x.Nome.Contains("Próstata") && x.GeneroAplicavel != "Masculino") ||
+                (x.Nome.Contains("Testículo") && x.GeneroAplicavel != "Masculino") ||
+                (x.Nome.Contains("Pénis") && x.GeneroAplicavel != "Masculino") ||
+                (x.Nome.Contains("Ovário") && x.GeneroAplicavel != "Feminino") ||
+                (x.Nome.Contains("Útero") && x.GeneroAplicavel != "Feminino") ||
+                (x.Nome.Contains("Mama") && x.GeneroAplicavel != "Feminino") ||
+                (x.Nome.Contains("Vagina") && x.GeneroAplicavel != "Feminino")
+            )
+            .Select(x => $"{x.Nome} (género: {x.GeneroAplicavel})")
+            .ToList();
+
+        if (orgaosGeneroErrado.Any())
+            errors.Add($"❌ {orgaosGeneroErrado.Count} órgãos com género incorreto: {string.Join(", ", orgaosGeneroErrado)}");
+        else
+            Console.WriteLine("✅ Todos os órgãos reprodutores com género correto");
+
+        // 4. Verificar JsonMetadata não-null
+        var semMetadata = items
+            .Where(x => string.IsNullOrEmpty(x.JsonMetadata))
+            .Select(x => x.Nome)
+            .ToList();
+
+        if (semMetadata.Any())
+            errors.Add($"❌ {semMetadata.Count} itens sem JsonMetadata");
+        else
+            Console.WriteLine("✅ Todos os itens têm JsonMetadata");
+
+        // 5. Verificar totais por categoria
+        var totaisPorCategoria = items
+            .GroupBy(x => x.Categoria)
+            .Select(g => new { Categoria = g.Key, Total = g.Count() })
+            .ToList();
+
+        Console.WriteLine("\n📊 Totais por Categoria:");
+        foreach (var cat in totaisPorCategoria)
+            Console.WriteLine($"   {cat.Categoria}: {cat.Total} itens");
+
+        // Totais esperados
+        var esperados = new Dictionary<CategoriaCore, int>
+        {
+            { CategoriaCore.FloraisBach, 38 },
+            { CategoriaCore.Chakra, 28 },
+            { CategoriaCore.Meridiano, 20 }
+            // Adicionar outros conforme implementado
+        };
+
+        foreach (var (categoria, totalEsperado) in esperados)
+        {
+            var totalReal = totaisPorCategoria.FirstOrDefault(x => x.Categoria == categoria)?.Total ?? 0;
+            if (totalReal != totalEsperado)
+                errors.Add($"❌ {categoria}: esperados {totalEsperado}, encontrados {totalReal}");
+        }
+
+        // 6. Resultado final
+        Console.WriteLine("\n" + new string('=', 60));
+        if (errors.Any())
+        {
+            Console.WriteLine("❌ VALIDAÇÃO FALHOU:\n");
+            errors.ForEach(e => Console.WriteLine(e));
+            throw new Exception($"Validação falhou com {errors.Count} erro(s)");
+        }
+        else
+        {
+            Console.WriteLine("✅✅✅ VALIDAÇÃO COMPLETA - CÓDIGO PRONTO PARA PRODUÇÃO! ✅✅✅");
+        }
+    }
+}
 ```
 
 ---
 
-**FIM DO PROMPT** 🎉
+## 🚀 COMANDO PARA INICIAR
 
-**Utilizador**: Aprova este prompt antes de eu enviá-lo ao agente de codificação? Alguma alteração necessária?
+**Copia e cola este prompt no ChatGPT/Claude/Gemini**:
+
+```
+🤖 TAREFA: Gerar ItemBancoCoreSeeder.cs completo para BioDeskPro2
+
+📋 ESPECIFICAÇÕES:
+- Linguagem: C# 12 (.NET 8)
+- Namespace: BioDesk.Data.SeedData
+- Entidade: ItemBancoCore (ver estrutura no documento)
+- Total: ~6.700 itens (11 categorias)
+- Ficheiro: ÚNICO (não dividir)
+
+⚠️ REGRAS CRÍTICAS:
+1. ❌ ZERO duplicados de GUID
+2. ❌ ZERO placeholders ("TODO", "...", "etc")
+3. ✅ Género CORRETO em órgãos reprodutores:
+   - Próstata/Testículos/Pénis → "Masculino"
+   - Ovários/Útero/Mama/Vagina → "Feminino"
+   - Outros órgãos → "Ambos"
+4. ✅ JsonMetadata rico (mínimo 3 propriedades)
+5. ✅ Compilável sem warnings
+
+📊 CATEGORIAS (por ordem de prioridade):
+1. Florais de Bach (38) - COMPLETO
+2. Chakras (28) - COMPLETO
+3. Meridianos (20) - COMPLETO
+4. Órgãos (150) - ATENÇÃO GÉNERO!
+5. Vitaminas (50)
+6. Minerais (80)
+7. Florais Californianos (103)
+8. Emoções (500)
+9. Suplementos (300)
+10. Alimentos (1.000)
+11. Homeopatia (3.000)
+
+📤 FORMATO DE ENTREGA:
+- Bloco markdown: ```csharp ... ```
+- Incluir método ValidateAll() no final
+- NENHUMA explicação fora do código
+- Se timeout: entregar pelo menos categorias 1-4 (236 itens)
+
+🎯 EXEMPLO de estrutura esperada:
+```csharp
+public static class ItemBancoCoreSeeder
+{
+    public static List<ItemBancoCore> GetAll() { ... }
+
+    private static List<ItemBancoCore> GetFloraisBach()
+    {
+        return new List<ItemBancoCore>
+        {
+            new() {
+                ExternalId = Guid.Parse("..."),
+                Nome = "Rock Rose",
+                Categoria = CategoriaCore.FloraisBach,
+                JsonMetadata = JsonSerializer.Serialize(new { ... }),
+                GeneroAplicavel = "Ambos",
+                // ... resto dos campos
+            },
+            // ... TODOS os 38 florais (NUNCA "restantes X itens")
+        };
+    }
+
+    // ... outros Get*() methods
+
+    public static void ValidateAll() { ... }
+}
+```
+
+🚀 COMEÇAR AGORA!
+```
+
+---
+
+## 📝 APÓS RECEBER O CÓDIGO
+
+1. **Copy-Paste direto** para `src/BioDesk.Data/SeedData/ItemBancoCoreSeeder.cs`
+2. **Build**: `dotnet build`
+3. **Validar**: Executar método `ItemBancoCoreSeeder.ValidateAll()` em teste
+4. **Integrar**: Adicionar ao `BioDeskDbContext.OnModelCreating()`
+
+---
+
+**FIM DO PROMPT OTIMIZADO** 🎉
+
+**Pronto para enviar ao agente de codificação!**
