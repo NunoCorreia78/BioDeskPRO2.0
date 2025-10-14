@@ -53,6 +53,9 @@ public class BioDeskDbContext : DbContext
     public DbSet<TemplateGlobal> TemplatesGlobais { get; set; } = null!;
     public DbSet<DocumentoExternoPaciente> DocumentosExternosPacientes { get; set; } = null!;
 
+    // === SISTEMA CORE INFORMACIONAL ===
+    public DbSet<ItemBancoCore> ItensBancoCore { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -465,6 +468,31 @@ public class BioDeskDbContext : DbContext
 
             entity.HasIndex(e => e.Sucesso)
                   .HasDatabaseName("IX_ImportacoesExcelLog_Sucesso");
+        });
+
+        // ItemBancoCore (Sistema Core Informacional)
+        modelBuilder.Entity<ItemBancoCore>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.ExternalId)
+                  .IsUnique()
+                  .HasDatabaseName("IX_ItensBancoCore_ExternalId");
+
+            entity.HasIndex(e => e.Categoria)
+                  .HasDatabaseName("IX_ItensBancoCore_Categoria");
+
+            entity.HasIndex(e => e.Nome)
+                  .HasDatabaseName("IX_ItensBancoCore_Nome");
+
+            entity.HasIndex(e => e.Subcategoria)
+                  .HasDatabaseName("IX_ItensBancoCore_Subcategoria");
+
+            entity.HasIndex(e => e.GeneroAplicavel)
+                  .HasDatabaseName("IX_ItensBancoCore_GeneroAplicavel");
+
+            entity.HasIndex(e => e.IsActive)
+                  .HasDatabaseName("IX_ItensBancoCore_IsActive");
         });
 
         // === DADOS DE SEED ===
