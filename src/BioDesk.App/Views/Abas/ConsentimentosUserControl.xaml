@@ -6,7 +6,7 @@
              xmlns:converters="clr-namespace:BioDesk.App.Converters"
              d:DesignHeight="800" d:DesignWidth="1000"
              mc:Ignorable="d"
-             Background="Transparent">
+             Background="{StaticResource FundoPrincipal}">
 
     <UserControl.Resources>
         <!-- Converters -->
@@ -291,6 +291,37 @@
                                     Click="BtnConfirmarAssinatura_Click"/>
                         </StackPanel>
                     </StackPanel>
+
+                    <!-- OBSERVAÇÕES ADICIONAIS -->
+                    <Expander Header="📝 Observações Adicionais (Opcional)"
+                              IsExpanded="False"
+                              Margin="0,15,0,10"
+                              BorderBrush="#E3E9DE"
+                              BorderThickness="1"
+                              Background="#F7F9F6"
+                              Padding="5">
+                        <Expander.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"
+                                           Foreground="#3F4A3D"/>
+                            </DataTemplate>
+                        </Expander.HeaderTemplate>
+                        <TextBox Text="{Binding InformacoesAdicionais, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Height="100"
+                                 Padding="10"
+                                 FontSize="13"
+                                 Background="White"
+                                 Foreground="#3F4A3D"
+                                 BorderBrush="#E3E9DE"
+                                 BorderThickness="1"
+                                 Margin="5"
+                                 ToolTip="Notas adicionais do profissional sobre este consentimento"/>
+                    </Expander>
 
                     <!-- Botão de Assinatura -->
                     <Button x:Name="BtnAssinar"

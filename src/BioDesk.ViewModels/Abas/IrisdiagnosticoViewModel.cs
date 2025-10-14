@@ -1832,11 +1832,11 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
                 foreach (var handler in HandlersPupila)
                 {
-                    double offsetX = (handler.X + 8) - centroX;
-                    double offsetY = (handler.Y + 8) - centroY;
+                    double offsetX = (handler.X + 11) - centroX;
+                    double offsetY = (handler.Y + 11) - centroY;
 
-                    handler.X = centroX + offsetX * multiplicador - 8;
-                    handler.Y = centroY + offsetY * multiplicador - 8;
+                    handler.X = centroX + offsetX * multiplicador - 11;
+                    handler.Y = centroY + offsetY * multiplicador - 11;
                 }
             }
 
@@ -1847,11 +1847,11 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
 
                 foreach (var handler in HandlersIris)
                 {
-                    double offsetX = (handler.X + 8) - centroX;
-                    double offsetY = (handler.Y + 8) - centroY;
+                    double offsetX = (handler.X + 11) - centroX;
+                    double offsetY = (handler.Y + 11) - centroY;
 
-                    handler.X = centroX + offsetX * multiplicador - 8;
-                    handler.Y = centroY + offsetY * multiplicador - 8;
+                    handler.X = centroX + offsetX * multiplicador - 11;
+                    handler.Y = centroY + offsetY * multiplicador - 11;
                 }
             }
         }

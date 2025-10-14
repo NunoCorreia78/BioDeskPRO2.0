@@ -21,9 +21,11 @@ public class UnitOfWork : IUnitOfWork
     private IRepository<Contacto>? _contactos;
     private IRepository<Consentimento>? _consentimentos;
     private IRepository<Comunicacao>? _comunicacoes;
-    private IRepository<HistoricoMedico>? _historicoMedico;
     private IRepository<IrisImagem>? _irisImagens;
     private IRepository<IrisMarca>? _irisMarcas;
+    private IRepository<ConfiguracaoClinica>? _configuracaoClinica;
+    private ITemplateGlobalRepository? _templatesGlobais;
+    private IDocumentoExternoPacienteRepository? _documentosExternos;
 
     public UnitOfWork(BioDeskDbContext context)
     {
@@ -75,15 +77,6 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    public IRepository<HistoricoMedico> HistoricoMedico
-    {
-        get
-        {
-            _historicoMedico ??= new Repository<HistoricoMedico>(_context);
-            return _historicoMedico;
-        }
-    }
-
     public IRepository<IrisImagem> IrisImagens
     {
         get
@@ -99,6 +92,33 @@ public class UnitOfWork : IUnitOfWork
         {
             _irisMarcas ??= new Repository<IrisMarca>(_context);
             return _irisMarcas;
+        }
+    }
+
+    public IRepository<ConfiguracaoClinica> ConfiguracaoClinica
+    {
+        get
+        {
+            _configuracaoClinica ??= new Repository<ConfiguracaoClinica>(_context);
+            return _configuracaoClinica;
+        }
+    }
+
+    public ITemplateGlobalRepository TemplatesGlobais
+    {
+        get
+        {
+            _templatesGlobais ??= new TemplateGlobalRepository(_context);
+            return _templatesGlobais;
+        }
+    }
+
+    public IDocumentoExternoPacienteRepository DocumentosExternos
+    {
+        get
+        {
+            _documentosExternos ??= new DocumentoExternoPacienteRepository(_context);
+            return _documentosExternos;
         }
     }
 

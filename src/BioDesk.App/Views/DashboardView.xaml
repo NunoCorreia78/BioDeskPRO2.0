@@ -85,13 +85,56 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <!--  Espaçamento para conteúdo principal  -->
-        <Border
-            Height="20"
+        <!--  Header com botão Configurações  -->
+        <Grid
+            Height="60"
             VerticalAlignment="Top"
-            Background="Transparent" />
+            Background="Transparent">
+            <Button
+                x:Name="BtnConfiguracoes"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="0,0,30,0"
+                Padding="16,10"
+                Background="#9CAF97"
+                BorderBrush="Transparent"
+                BorderThickness="0"
+                Click="AbrirConfiguracoes_Click"
+                Cursor="Hand"
+                ToolTip="Configurações da Clínica">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    FontSize="16"
+                                    Foreground="White"
+                                    Text="⚙️" />
+                                <TextBlock
+                                    Margin="8,0,0,0"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Foreground="White"
+                                    Text="Configurações" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#879B83" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#6B7F67" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
 
-        <ScrollViewer Margin="0,20,0,0" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Margin="0,80,0,0" VerticalScrollBarVisibility="Auto">
             <Grid Margin="30">
                 <StackPanel>
                     <!--  Ações Rápidas Cards Melhorados  -->
@@ -241,13 +284,7 @@
                                 Visibility="{Binding IsLoadingStats, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
                         </StackPanel>
 
-                        <!--  Botão Configurações  -->
-                        <Button
-                            Grid.Column="2"
-                            Click="BtnConfiguracoes_Click"
-                            Content="⚙️ Configurações"
-                            Style="{StaticResource ActionButtonStyle}"
-                            ToolTip="Configurar email e outras opções do sistema" />
+                        <!--  REMOVIDO: Botão duplicado - já existe no topo  -->
                     </Grid>
 
                     <!--  LAYOUT DEFINITIVO: 4x2 (8 Cards)  -->
@@ -455,7 +492,7 @@
                                     Margin="0,0,0,8"
                                     HorizontalAlignment="Center"
                                     FontSize="28"
-                                    Text="�" />
+                                    Text="📅" />
                                 <TextBlock
                                     Margin="0,0,0,4"
                                     HorizontalAlignment="Center"

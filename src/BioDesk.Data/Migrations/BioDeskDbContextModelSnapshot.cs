@@ -220,8 +220,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ComunicacaoId")
-                        .HasDatabaseName("IX_AnexosComunicacoes_ComunicacaoId");
+                    b.HasIndex("ComunicacaoId");
 
                     b.ToTable("AnexosComunicacoes");
                 });
@@ -332,19 +331,55 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataEnvio")
-                        .HasDatabaseName("IX_Comunicacoes_DataEnvio");
-
-                    b.HasIndex("PacienteId")
-                        .HasDatabaseName("IX_Comunicacoes_PacienteId");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("IX_Comunicacoes_Status");
-
-                    b.HasIndex("IsEnviado", "ProximaTentativa")
-                        .HasDatabaseName("IX_Comunicacoes_FilaRetry");
+                    b.HasIndex("PacienteId");
 
                     b.ToTable("Comunicacoes");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.ConfiguracaoClinica", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DataAtualizacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LogoPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Morada")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NIPC")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NomeClinica")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Telefone")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ConfiguracaoClinica");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DataAtualizacao = new DateTime(2025, 10, 13, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(3369),
+                            NomeClinica = "Minha Clínica"
+                        });
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Consentimento", b =>
@@ -787,6 +822,119 @@ namespace BioDesk.Data.Migrations
                     b.ToTable("DeclaracoesSaude");
                 });
 
+            modelBuilder.Entity("BioDesk.Domain.Entities.DocumentoExternoPaciente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CaminhoArquivo")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataDocumento")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataUpload")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NomeArquivo")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("TamanhoBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TipoMime")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Categoria")
+                        .HasDatabaseName("IX_DocumentosExternos_Categoria");
+
+                    b.HasIndex("DataDocumento")
+                        .HasDatabaseName("IX_DocumentosExternos_DataDocumento");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_DocumentosExternos_IsDeleted");
+
+                    b.HasIndex("PacienteId")
+                        .HasDatabaseName("IX_DocumentosExternos_PacienteId");
+
+                    b.ToTable("DocumentosExternosPacientes");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.EventoHardware", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CodigoErro")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DetalhesJson")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Mensagem")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SessaoTerapiaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Severidade")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TipoEvento")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoTerapiaId")
+                        .HasDatabaseName("IX_EventosHardware_SessaoTerapiaId");
+
+                    b.HasIndex("Severidade")
+                        .HasDatabaseName("IX_EventosHardware_Severidade");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_EventosHardware_Timestamp");
+
+                    b.HasIndex("TipoEvento")
+                        .HasDatabaseName("IX_EventosHardware_TipoEvento");
+
+                    b.ToTable("EventosHardware");
+                });
+
             modelBuilder.Entity("BioDesk.Domain.Entities.HistoriaFamiliar", b =>
                 {
                     b.Property<int>("Id")
@@ -820,124 +968,6 @@ namespace BioDesk.Data.Migrations
                     b.ToTable("HistoriaFamiliar");
                 });
 
-            modelBuilder.Entity("BioDesk.Domain.Entities.HistoricoMedico", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AlergiasAlimentares")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AlergiasAmbientais")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AlergiasMedicamentosas")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CirurgiasAnteriores")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("CompreendImportancia")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ComprometeMudancas")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ConfirmaVeracidade")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal?>("ConsumoAguaDiario")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ConsumoAlcool")
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("DataAtualizacao")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DetalheAlcool")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DetalheExercicio")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DetalheTabagismo")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DoencasCronicas")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DoencasHereditarias")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ExercicioFisico")
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("HistoriaFamiliar")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal?>("HorasSono")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Hospitalizacoes")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IntoleranciasAlimentares")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("MedicacaoAtual")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("MedicamentosNaturais")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObservacoesAdicionais")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ObservacoesFamiliares")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("OutrasDoencas")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PacienteId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("QualidadeSono")
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RestricaoesAlimentares")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SuplementacaoAtual")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Suplementos")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Tabagismo")
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TipoDieta")
-                        .HasMaxLength(30)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PacienteId")
-                        .HasDatabaseName("IX_HistoricosMedicos_PacienteId");
-
-                    b.ToTable("HistoricosMedicos");
-                });
-
             modelBuilder.Entity("BioDesk.Domain.Entities.Hospitalizacao", b =>
                 {
                     b.Property<int>("Id")
@@ -967,6 +997,65 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("DeclaracaoSaudeId");
 
                     b.ToTable("Hospitalizacao");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.ImportacaoExcelLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CaminhoCompleto")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DetalhesJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("DuracaoSegundos")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("ImportadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LinhasErros")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LinhasOk")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LinhasWarnings")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("MensagemErro")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NomeFicheiro")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Sucesso")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalLinhas")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UtilizadorId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ImportadoEm")
+                        .HasDatabaseName("IX_ImportacoesExcelLog_ImportadoEm");
+
+                    b.HasIndex("Sucesso")
+                        .HasDatabaseName("IX_ImportacoesExcelLog_Sucesso");
+
+                    b.ToTable("ImportacoesExcelLog");
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.IntoleranciaAlimentar", b =>
@@ -1136,11 +1225,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DataCaptura")
-                        .HasDatabaseName("IX_IrisImagens_DataCaptura");
-
-                    b.HasIndex("PacienteId")
-                        .HasDatabaseName("IX_IrisImagens_PacienteId");
+                    b.HasIndex("PacienteId");
 
                     b.ToTable("IrisImagens");
                 });
@@ -1176,10 +1261,54 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IrisImagemId")
-                        .HasDatabaseName("IX_IrisMarcas_IrisImagemId");
+                    b.HasIndex("IrisImagemId");
 
                     b.ToTable("IrisMarcas");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.LeituraBioenergetica", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Canal")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("FrequenciaDominante")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Gsr")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("MetricasAdicionaisJson")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Pico")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("PotenciaEspectral")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("Rms")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("SessaoTerapiaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessaoTerapiaId")
+                        .HasDatabaseName("IX_LeiturasBioenergeticas_SessaoTerapiaId");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_LeiturasBioenergeticas_Timestamp");
+
+                    b.ToTable("LeiturasBioenergeticas");
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.MedicamentoAtual", b =>
@@ -1225,7 +1354,7 @@ namespace BioDesk.Data.Migrations
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DataNascimento")
+                    b.Property<DateTime?>("DataNascimento")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DataUltimaAtualizacao")
@@ -1244,6 +1373,9 @@ namespace BioDesk.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("LastActiveTab")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("NIF")
                         .HasMaxLength(9)
@@ -1281,6 +1413,10 @@ namespace BioDesk.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TerapiaAtual")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DataNascimento")
@@ -1299,11 +1435,12 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 1,
-                            DataCriacao = new DateTime(2025, 9, 2, 21, 11, 43, 475, DateTimeKind.Utc).AddTicks(5589),
+                            DataCriacao = new DateTime(2025, 9, 13, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2912),
                             DataNascimento = new DateTime(1980, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "Casado",
                             EstadoRegisto = "Incompleto",
                             Genero = "Masculino",
+                            LastActiveTab = 1,
                             Nacionalidade = "Portuguesa",
                             NomeCompleto = "João Silva Santos",
                             NomePreferido = "João",
@@ -1313,11 +1450,12 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 2,
-                            DataCriacao = new DateTime(2025, 9, 17, 21, 11, 43, 475, DateTimeKind.Utc).AddTicks(5599),
+                            DataCriacao = new DateTime(2025, 9, 28, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2923),
                             DataNascimento = new DateTime(1975, 11, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "Solteira",
                             EstadoRegisto = "Em Progresso",
                             Genero = "Feminino",
+                            LastActiveTab = 1,
                             Nacionalidade = "Portuguesa",
                             NomeCompleto = "Maria Fernanda Costa",
                             NomePreferido = "Maria",
@@ -1328,11 +1466,12 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 3,
-                            DataCriacao = new DateTime(2025, 9, 25, 21, 11, 43, 475, DateTimeKind.Utc).AddTicks(5603),
+                            DataCriacao = new DateTime(2025, 10, 6, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2926),
                             DataNascimento = new DateTime(1990, 3, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "União de Facto",
                             EstadoRegisto = "Completo",
                             Genero = "Masculino",
+                            LastActiveTab = 1,
                             NIF = "123456789",
                             Nacionalidade = "Portuguesa",
                             NomeCompleto = "Carlos António Pereira",
@@ -1340,6 +1479,126 @@ namespace BioDesk.Data.Migrations
                             Profissao = "Designer Gráfico",
                             ProgressoAbas = "{\"Aba1\":true,\"Aba2\":true,\"Aba3\":true,\"Aba4\":true,\"Aba5\":true,\"Aba6\":false}"
                         });
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.PlanoTerapia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SessaoId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CriadoEm")
+                        .HasDatabaseName("IX_PlanosTerapia_CriadoEm");
+
+                    b.HasIndex("Estado")
+                        .HasDatabaseName("IX_PlanosTerapia_Estado");
+
+                    b.HasIndex("SessaoId")
+                        .HasDatabaseName("IX_PlanosTerapia_SessaoId");
+
+                    b.ToTable("PlanosTerapia");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.ProtocoloTerapeutico", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("AmplitudeV")
+                        .HasColumnType("REAL");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Canal")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Categoria")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Contraindicacoes")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DuracaoMinPorFrequencia")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FormaOnda")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FrequenciasJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("LimiteCorrenteMa")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Modulacao")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notas")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Categoria")
+                        .HasDatabaseName("IX_ProtocolosTerapeuticos_Categoria");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ProtocolosTerapeuticos_ExternalId");
+
+                    b.HasIndex("Nome")
+                        .HasDatabaseName("IX_ProtocolosTerapeuticos_Nome");
+
+                    b.ToTable("ProtocolosTerapeuticos");
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Sessao", b =>
@@ -1423,8 +1682,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Tensão muscular paravertebral L4-L5, trigger points bilateral",
                             Avaliacao = "Lombalgia mecânica aguda",
                             Contexto = "Após esforço físico no ginásio",
-                            CriadoEm = new DateTime(2025, 9, 2, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(5983),
-                            DataHora = new DateTime(2025, 9, 2, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(5971),
+                            CriadoEm = new DateTime(2025, 9, 13, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3243),
+                            DataHora = new DateTime(2025, 9, 13, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3232),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Dor lombar aguda",
@@ -1439,8 +1698,8 @@ namespace BioDesk.Data.Migrations
                             Id = 2,
                             Achados = "Melhoria 70%, tensão residual L5",
                             Avaliacao = "Evolução favorável",
-                            CriadoEm = new DateTime(2025, 9, 9, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(5992),
-                            DataHora = new DateTime(2025, 9, 9, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(5988),
+                            CriadoEm = new DateTime(2025, 9, 20, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3251),
+                            DataHora = new DateTime(2025, 9, 20, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3248),
                             DuracaoMinutos = 45,
                             IsDeleted = false,
                             Motivo = "Reavaliação lombalgia",
@@ -1455,8 +1714,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "FC: 85 bpm, tensão cervical bilateral",
                             Avaliacao = "Stress ocupacional com somatização",
                             Contexto = "Período de trabalho intenso com deadlines apertados",
-                            CriadoEm = new DateTime(2025, 9, 22, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(6000),
-                            DataHora = new DateTime(2025, 9, 22, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(5996),
+                            CriadoEm = new DateTime(2025, 10, 3, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3257),
+                            DataHora = new DateTime(2025, 10, 3, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3254),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Consulta de rotina + stress elevado",
@@ -1471,8 +1730,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Trigger points trapézio superior bilateral, C5-C6 com restrição de mobilidade",
                             Avaliacao = "Cefaleia tensional de origem cervical",
                             Contexto = "Cefaleias tensionais há 6 meses, agravamento recente",
-                            CriadoEm = new DateTime(2025, 9, 17, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(6008),
-                            DataHora = new DateTime(2025, 9, 17, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(6004),
+                            CriadoEm = new DateTime(2025, 9, 28, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3263),
+                            DataHora = new DateTime(2025, 9, 28, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3260),
                             DuracaoMinutos = 90,
                             IsDeleted = false,
                             Motivo = "Avaliação inicial - cefaleias recorrentes",
@@ -1488,8 +1747,8 @@ namespace BioDesk.Data.Migrations
                             Id = 5,
                             Achados = "Redução 60% frequência cefaleias, mobilidade cervical normalizada",
                             Avaliacao = "Excelente evolução",
-                            CriadoEm = new DateTime(2025, 10, 1, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(6015),
-                            DataHora = new DateTime(2025, 10, 1, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(6012),
+                            CriadoEm = new DateTime(2025, 10, 12, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3269),
+                            DataHora = new DateTime(2025, 10, 12, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3267),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Reavaliação cefaleias + análise iridológica",
@@ -1504,8 +1763,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Edema leve joelho direito, mobilidade ombro esquerdo reduzida 20%, padrão de fadiga adrenal",
                             Avaliacao = "Síndrome inflamatório multifatorial + possível sobrecarga adrenal",
                             Contexto = "Dores articulares múltiplas (joelhos, ombros) + fadiga persistente há 3 meses",
-                            CriadoEm = new DateTime(2025, 9, 27, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(6022),
-                            DataHora = new DateTime(2025, 9, 27, 22, 11, 43, 475, DateTimeKind.Local).AddTicks(6019),
+                            CriadoEm = new DateTime(2025, 10, 8, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3275),
+                            DataHora = new DateTime(2025, 10, 8, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3272),
                             DuracaoMinutos = 120,
                             IsDeleted = false,
                             Motivo = "Consulta integrada - dor articular + fadiga crónica",
@@ -1516,6 +1775,182 @@ namespace BioDesk.Data.Migrations
                             PressaoArterial = "128/84",
                             Temperatura = 36.4m
                         });
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SessaoTerapia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DuracaoTotalMinutos")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("FimEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HardwareUsado")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("ImprovementMedio")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("InicioEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PlanoTerapiaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RngSeed")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TipoRng")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TotalItensAplicados")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TipoRng")
+                        .HasDatabaseName("IX_SessoesTerapia_TipoRng");
+
+                    b.HasIndex("PlanoTerapiaId", "InicioEm")
+                        .HasDatabaseName("IX_SessoesTerapia_PlanoId_Inicio");
+
+                    b.ToTable("SessoesTerapia");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.TemplateGlobal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CaminhoArquivo")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataAdicao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DataAtualizacao")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("DisponivelEmail")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Categoria")
+                        .HasDatabaseName("IX_TemplatesGlobais_Categoria");
+
+                    b.HasIndex("DisponivelEmail")
+                        .HasDatabaseName("IX_TemplatesGlobais_DisponivelEmail");
+
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_TemplatesGlobais_IsDeleted");
+
+                    b.HasIndex("Nome")
+                        .HasDatabaseName("IX_TemplatesGlobais_Nome");
+
+                    b.HasIndex("Tipo")
+                        .HasDatabaseName("IX_TemplatesGlobais_Tipo");
+
+                    b.ToTable("TemplatesGlobais");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.Terapia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("AlvoMelhoria")
+                        .HasColumnType("REAL");
+
+                    b.Property<bool>("Aplicado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("AplicadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DuracaoMinutos")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("ImprovementPercent")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("NotasAplicacao")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlanoTerapiaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProtocoloTerapeuticoId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("ValuePercent")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Ordem")
+                        .HasDatabaseName("IX_Terapias_Ordem");
+
+                    b.HasIndex("PlanoTerapiaId")
+                        .HasDatabaseName("IX_Terapias_PlanoTerapiaId");
+
+                    b.HasIndex("ProtocoloTerapeuticoId")
+                        .HasDatabaseName("IX_Terapias_ProtocoloTerapeuticoId");
+
+                    b.ToTable("Terapias");
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.AbordagemSessao", b =>
@@ -1589,7 +2024,7 @@ namespace BioDesk.Data.Migrations
                     b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
                         .WithMany()
                         .HasForeignKey("PacienteId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Paciente");
@@ -1639,6 +2074,28 @@ namespace BioDesk.Data.Migrations
                     b.Navigation("Paciente");
                 });
 
+            modelBuilder.Entity("BioDesk.Domain.Entities.DocumentoExternoPaciente", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.EventoHardware", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.SessaoTerapia", "SessaoTerapia")
+                        .WithMany("EventosHardware")
+                        .HasForeignKey("SessaoTerapiaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SessaoTerapia");
+                });
+
             modelBuilder.Entity("BioDesk.Domain.Entities.HistoriaFamiliar", b =>
                 {
                     b.HasOne("BioDesk.Domain.Entities.DeclaracaoSaude", "DeclaracaoSaude")
@@ -1648,17 +2105,6 @@ namespace BioDesk.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("DeclaracaoSaude");
-                });
-
-            modelBuilder.Entity("BioDesk.Domain.Entities.HistoricoMedico", b =>
-                {
-                    b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
-                        .WithMany("HistoricoMedico")
-                        .HasForeignKey("PacienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Paciente");
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Hospitalizacao", b =>
@@ -1699,7 +2145,7 @@ namespace BioDesk.Data.Migrations
                     b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
                         .WithMany()
                         .HasForeignKey("PacienteId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Paciente");
@@ -1716,6 +2162,17 @@ namespace BioDesk.Data.Migrations
                     b.Navigation("IrisImagem");
                 });
 
+            modelBuilder.Entity("BioDesk.Domain.Entities.LeituraBioenergetica", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.SessaoTerapia", "SessaoTerapia")
+                        .WithMany("Leituras")
+                        .HasForeignKey("SessaoTerapiaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SessaoTerapia");
+                });
+
             modelBuilder.Entity("BioDesk.Domain.Entities.MedicamentoAtual", b =>
                 {
                     b.HasOne("BioDesk.Domain.Entities.DeclaracaoSaude", "DeclaracaoSaude")
@@ -1727,6 +2184,17 @@ namespace BioDesk.Data.Migrations
                     b.Navigation("DeclaracaoSaude");
                 });
 
+            modelBuilder.Entity("BioDesk.Domain.Entities.PlanoTerapia", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.Sessao", "Sessao")
+                        .WithMany()
+                        .HasForeignKey("SessaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sessao");
+                });
+
             modelBuilder.Entity("BioDesk.Domain.Entities.Sessao", b =>
                 {
                     b.HasOne("BioDesk.Domain.Entities.Paciente", "Paciente")
@@ -1736,6 +2204,36 @@ namespace BioDesk.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Paciente");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SessaoTerapia", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.PlanoTerapia", "PlanoTerapia")
+                        .WithMany("SessoesTerapia")
+                        .HasForeignKey("PlanoTerapiaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlanoTerapia");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.Terapia", b =>
+                {
+                    b.HasOne("BioDesk.Domain.Entities.PlanoTerapia", "PlanoTerapia")
+                        .WithMany("Terapias")
+                        .HasForeignKey("PlanoTerapiaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BioDesk.Domain.Entities.ProtocoloTerapeutico", "ProtocoloTerapeutico")
+                        .WithMany("Terapias")
+                        .HasForeignKey("ProtocoloTerapeuticoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlanoTerapia");
+
+                    b.Navigation("ProtocoloTerapeutico");
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Comunicacao", b =>
@@ -1777,14 +2275,31 @@ namespace BioDesk.Data.Migrations
 
                     b.Navigation("DeclaracaoSaude");
 
-                    b.Navigation("HistoricoMedico");
-
                     b.Navigation("IrisAnalises");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.PlanoTerapia", b =>
+                {
+                    b.Navigation("SessoesTerapia");
+
+                    b.Navigation("Terapias");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.ProtocoloTerapeutico", b =>
+                {
+                    b.Navigation("Terapias");
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Sessao", b =>
                 {
                     b.Navigation("Abordagens");
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.SessaoTerapia", b =>
+                {
+                    b.Navigation("EventosHardware");
+
+                    b.Navigation("Leituras");
                 });
 #pragma warning restore 612, 618
         }

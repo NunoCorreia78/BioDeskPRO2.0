@@ -67,6 +67,12 @@ public class EmailService : IEmailService
     {
         _logger.LogInformation("📧 Tentando enviar email IMEDIATO para {To}: {Subject}", message.To, message.Subject);
 
+        // 🔍 DEBUG: Verificar configuração carregada
+        var sender = _configuration["Email:Sender"];
+        var password = _configuration["Email:Password"];
+        _logger.LogWarning("🔍 DEBUG - Email:Sender configurado: {Sender}", string.IsNullOrEmpty(sender) ? "❌ VAZIO" : "✅ " + sender);
+        _logger.LogWarning("🔍 DEBUG - Email:Password configurado: {Password}", string.IsNullOrEmpty(password) ? "❌ VAZIO" : "✅ (oculto)");
+
         // ⚠️ Verificar conexão
         if (!TemConexao)
         {
@@ -82,6 +88,7 @@ public class EmailService : IEmailService
         // ⚡ Tentar enviar IMEDIATAMENTE
         try
         {
+            _logger.LogWarning("🔌 TENTANDO SMTP com Host={Host}, Port={Port}, Username={Username}", SmtpHost, SmtpPort, SmtpUsername);
             await EnviarViaSMTPAsync(message);
             _logger.LogInformation("✅ Email enviado IMEDIATAMENTE para {To}", message.To);
 
@@ -95,6 +102,7 @@ public class EmailService : IEmailService
         {
             // ❌ CRÍTICO: NÃO SILENCIAR - Lançar exceção para ViewModel saber que falhou
             _logger.LogError(ex, "❌ ERRO ao enviar email para {To}: {Message}", message.To, ex.Message);
+            _logger.LogError("❌ Stack Trace: {StackTrace}", ex.StackTrace);
 
             // Retornar falha COM mensagem clara
             return new EmailResult

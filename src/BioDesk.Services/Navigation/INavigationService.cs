@@ -52,16 +52,16 @@ public class NavigationService : INavigationService
     public void NavigateTo(string viewName)
     {
         _logger.LogInformation("🚀 NavigateTo('{ViewName}') chamado", viewName);
-        
+
         if (!_views.ContainsKey(viewName))
         {
-            _logger.LogError("❌ View '{ViewName}' não está registrada. Views disponíveis: {AvailableViews}", 
+            _logger.LogError("❌ View '{ViewName}' não está registrada. Views disponíveis: {AvailableViews}",
                 viewName, string.Join(", ", _views.Keys));
             throw new ArgumentException($"View '{viewName}' não está registada.");
         }
 
         _logger.LogInformation("✅ View '{ViewName}' encontrada, disparando NavigationRequested...", viewName);
-        
+
         try
         {
             NavigationRequested?.Invoke(this, viewName);
@@ -69,8 +69,13 @@ public class NavigationService : INavigationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "💥 ERRO ao disparar NavigationRequested para '{ViewName}': {Message}", viewName, ex.Message);
-            throw;
+            _logger.LogError(ex, "💥 ERRO ao disparar NavigationRequested para '{ViewName}': {Message}\n" +
+                "StackTrace: {StackTrace}\n" +
+                "InnerException: {InnerMessage}",
+                viewName, ex.Message, ex.StackTrace, ex.InnerException?.Message ?? "N/A");
+
+            // Re-throw com mensagem mais descritiva
+            throw new InvalidOperationException($"Erro ao navegar para '{viewName}': {ex.Message}", ex);
         }
     }
 

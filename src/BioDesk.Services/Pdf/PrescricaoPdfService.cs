@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using BioDesk.Data.Repositories;
+using BioDesk.Domain.Entities;
 
 namespace BioDesk.Services.Pdf;
 
@@ -16,9 +18,13 @@ namespace BioDesk.Services.Pdf;
 public class PrescricaoPdfService
 {
     private readonly ILogger<PrescricaoPdfService> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public PrescricaoPdfService(ILogger<PrescricaoPdfService> logger)
+    public PrescricaoPdfService(
+        IUnitOfWork unitOfWork,
+        ILogger<PrescricaoPdfService> logger)
     {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Configurar licença QuestPDF (Community License)
@@ -34,11 +40,34 @@ public class PrescricaoPdfService
 
         try
         {
-            // ✅ ESTRUTURA DE PASTAS DOCUMENTAIS: BaseDirectory\Pacientes\[Nome]\Prescricoes\
-            // Subir da pasta bin/Debug/net8.0-windows até raiz do projeto
-            var binDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            var baseDirectory = Path.GetFullPath(Path.Combine(binDirectory, "..", "..", "..", "..", ".."));
-            var pastaPaciente = Path.Combine(baseDirectory, "Pacientes", dados.NomePaciente);
+            // 🏥 CARREGAR CONFIGURAÇÃO DA CLÍNICA (logo + dados)
+            ConfiguracaoClinica? config = null;
+            string? logoPath = null;
+
+            try
+            {
+                config = _unitOfWork.ConfiguracaoClinica.GetByIdAsync(1).Result;
+                if (config?.LogoPath != null)
+                {
+                    logoPath = Path.Combine(PathService.AppDataPath, config.LogoPath);
+                    if (!File.Exists(logoPath))
+                    {
+                        _logger.LogWarning("⚠️ Logo configurado mas ficheiro não existe: {LogoPath}", logoPath);
+                        logoPath = null;
+                    }
+                    else
+                    {
+                        _logger.LogInformation("✅ Logo da clínica carregado: {LogoPath}", logoPath);
+                    }
+                }
+            }
+            catch (Exception exConfig)
+            {
+                _logger.LogWarning(exConfig, "⚠️ Erro ao carregar configuração - PDF continuará sem logo");
+            }
+
+            // ✅ USAR PathService PARA GARANTIR COMPATIBILIDADE DEBUG/RELEASE
+            var pastaPaciente = PathService.GetPacienteDocumentPath(dados.NomePaciente, "");
             var pastaPrescricoes = Path.Combine(pastaPaciente, "Prescricoes");
             Directory.CreateDirectory(pastaPrescricoes);
 
@@ -57,8 +86,8 @@ public class PrescricaoPdfService
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(x => x.FontSize(11).FontFamily("Arial"));
 
-                    // Cabeçalho
-                    page.Header().Element(CriarCabecalho);
+                    // Cabeçalho (passa config e logoPath)
+                    page.Header().Element(c => CriarCabecalho(c, config, logoPath));
 
                     // Conteúdo Principal
                     page.Content().Element(container => CriarConteudo(container, dados));
@@ -110,7 +139,7 @@ public class PrescricaoPdfService
 
     #region === LAYOUT DO PDF ===
 
-    private void CriarCabecalho(IContainer container)
+    private void CriarCabecalho(IContainer container, ConfiguracaoClinica? config, string? logoPath)
     {
         container.Column(col =>
         {
@@ -120,7 +149,15 @@ public class PrescricaoPdfService
                 // Logo/Título à esquerda
                 row.RelativeItem().Column(column =>
                 {
-                    column.Item().Text("🌿 Nuno Correia - Terapias Naturais")
+                    // LOGO (se disponível)
+                    if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
+                    {
+                        column.Item().MaxHeight(60).Image(logoPath);
+                    }
+
+                    // Nome da Clínica
+                    var nomeClinica = config?.NomeClinica ?? "🌿 Nuno Correia - Terapias Naturais";
+                    column.Item().Text(nomeClinica)
                         .FontSize(20)
                         .Bold()
                         .FontColor(Colors.Grey.Darken3);
@@ -129,6 +166,35 @@ public class PrescricaoPdfService
                         .FontSize(10)
                         .Italic()
                         .FontColor(Colors.Grey.Darken2);
+
+                    // Morada (se disponível)
+                    if (!string.IsNullOrWhiteSpace(config?.Morada))
+                    {
+                        column.Item().Text(config.Morada)
+                            .FontSize(9)
+                            .FontColor(Colors.Grey.Medium);
+                    }
+
+                    // Telefone + Email (se disponíveis)
+                    if (!string.IsNullOrWhiteSpace(config?.Telefone) || !string.IsNullOrWhiteSpace(config?.Email))
+                    {
+                        column.Item().Row(r =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(config.Telefone))
+                            {
+                                r.AutoItem().Text($"☎ {config.Telefone}  ")
+                                    .FontSize(9)
+                                    .FontColor(Colors.Grey.Medium);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(config.Email))
+                            {
+                                r.AutoItem().Text($"✉ {config.Email}")
+                                    .FontSize(9)
+                                    .FontColor(Colors.Grey.Medium);
+                            }
+                        });
+                    }
                 });
 
                 // Data à direita
@@ -137,6 +203,10 @@ public class PrescricaoPdfService
                     column.Item().Text($"Data: {DateTime.Now:dd/MM/yyyy}")
                         .FontSize(10)
                         .FontColor(Colors.Grey.Darken3);
+
+                    column.Item().Text($"Hora: {DateTime.Now:HH:mm}")
+                        .FontSize(9)
+                        .FontColor(Colors.Grey.Medium);
                 });
             });
 
@@ -152,7 +222,7 @@ public class PrescricaoPdfService
             column.Spacing(15);
 
             // === TÍTULO DO DOCUMENTO ===
-            column.Item().PaddingTop(20).AlignCenter().Text("PRESCRIÇÃO MÉDICA")
+            column.Item().PaddingTop(20).AlignCenter().Text("PRESCRIÇÃO")
                 .FontSize(18)
                 .Bold()
                 .FontColor(Colors.Grey.Darken3);
@@ -178,10 +248,10 @@ public class PrescricaoPdfService
                 });
             });
 
-            // === DIAGNÓSTICO/OBSERVAÇÕES ===
+            // === OBSERVAÇÕES/INDICAÇÕES (campo manual - NÃO vem da ficha) ===
             if (!string.IsNullOrEmpty(dados.Diagnostico))
             {
-                column.Item().PaddingTop(10).Text("📋 DIAGNÓSTICO/OBSERVAÇÕES").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+                column.Item().PaddingTop(10).Text("📋 OBSERVAÇÕES/INDICAÇÕES").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
                 column.Item().PaddingTop(5).Text(dados.Diagnostico)
                     .FontSize(10)
                     .LineHeight(1.5f);
@@ -231,15 +301,6 @@ public class PrescricaoPdfService
                 });
             }
 
-            // === INSTRUÇÕES GERAIS ===
-            if (!string.IsNullOrEmpty(dados.InstrucoesGerais))
-            {
-                column.Item().PaddingTop(15).Text("📝 INSTRUÇÕES GERAIS").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-                column.Item().PaddingTop(5).Text(dados.InstrucoesGerais)
-                    .FontSize(10)
-                    .LineHeight(1.5f);
-            }
-
             // === ASSINATURA DO TERAPEUTA ===
             column.Item().PaddingTop(30).Row(row =>
             {
@@ -284,13 +345,11 @@ public class PrescricaoPdfService
                 });
             });
 
-            // === NOTA LEGAL ===
-            column.Item().PaddingTop(20).Background(Colors.Yellow.Lighten3).Padding(10).Text(
-                "⚠️ Esta prescrição tem validade de 30 dias. Mantenha este documento em local seguro. " +
-                "Em caso de dúvidas ou reações adversas, contacte imediatamente o profissional responsável.")
-                .FontSize(8)
-                .Italic()
-                .FontColor(Colors.Orange.Darken3);
+            // === NOTA LEGAL (sem barra amarela, texto legal simples) ===
+            column.Item().PaddingTop(20).Padding(10).Text(
+                "Este documento é pessoal e intransponível.")
+                .FontSize(9)
+                .FontColor(Colors.Grey.Darken2);
         });
     }
 
@@ -299,15 +358,14 @@ public class PrescricaoPdfService
 
 /// <summary>
 /// Dados necessários para gerar PDF de prescrição
+/// ⚠️ Diagnostico = campo manual (NÃO vem da ficha do paciente)
 /// </summary>
 public class DadosPrescricao
 {
     public string NomePaciente { get; set; } = string.Empty;
     public DateTime DataPrescricao { get; set; } = DateTime.Now;
-    public string Diagnostico { get; set; } = string.Empty;
+    public string Diagnostico { get; set; } = string.Empty; // ✅ Campo manual de observações
     public List<ItemPrescricao> Itens { get; set; } = new();
-    public string InstrucoesGerais { get; set; } = string.Empty;
-    public string DuracaoTratamento { get; set; } = string.Empty;
 }
 
 /// <summary>

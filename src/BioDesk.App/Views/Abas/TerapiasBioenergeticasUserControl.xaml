@@ -1,0 +1,747 @@
+<UserControl
+  x:Class="BioDesk.App.Views.Abas.TerapiasBioenergeticasUserControl"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:vm="clr-namespace:BioDesk.ViewModels.UserControls;assembly=BioDesk.ViewModels"
+  xmlns:converters="clr-namespace:BioDesk.App.Converters"
+  xmlns:system="clr-namespace:System;assembly=mscorlib"
+  d:DataContext="{d:DesignInstance Type=vm:TerapiasBioenergeticasUserControlViewModel}"
+  d:DesignHeight="700"
+  d:DesignWidth="1200"
+  Background="Transparent"
+  mc:Ignorable="d">
+
+  <UserControl.Resources>
+    <!--  Converters  -->
+    <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+
+    <!--  Estilo para Cards de Protocolo  -->
+    <Style x:Key="ProtocoloCardStyle" TargetType="Border">
+      <Setter Property="Background" Value="{StaticResource CartaoBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BordaBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="16" />
+      <Setter Property="Margin" Value="0,0,0,12" />
+      <Setter Property="Effect">
+        <Setter.Value>
+          <DropShadowEffect
+            BlurRadius="8"
+            Opacity="0.1"
+            ShadowDepth="2"
+            Color="Black" />
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="BorderBrush" Value="{StaticResource BotaoPrimarioBrush}" />
+          <Setter Property="Effect">
+            <Setter.Value>
+              <DropShadowEffect
+                BlurRadius="12"
+                Opacity="0.15"
+                ShadowDepth="3"
+                Color="Black" />
+            </Setter.Value>
+          </Setter>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <Grid Margin="20">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <!--  Row 0: Cabeçalho  -->
+        <RowDefinition Height="Auto" />
+        <!--  Row 1: Lista Protocolos Scanned  -->
+        <RowDefinition Height="Auto" />
+        <!--  Row 2: Fila de Execução  -->
+        <RowDefinition Height="Auto" />
+        <!--  Row 3: Lista Original (compatibilidade)  -->
+      </Grid.RowDefinitions>
+
+      <!--  === CABEÇALHO ===  -->
+      <Border
+        Grid.Row="0"
+        Padding="20"
+        Background="{StaticResource CartaoBrush}"
+        BorderBrush="{StaticResource BordaBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0">
+            <TextBlock
+              FontSize="20"
+              FontWeight="SemiBold"
+              Foreground="{StaticResource TextoPrincipal}"
+              Text="🌿 Terapias Bioenergéticas — CoRe 5.0" />
+            <TextBlock
+              Margin="0,4,0,0"
+              FontSize="13"
+              Foreground="{StaticResource TextoSecundario}"
+              Text="Value % Scanning + Fila de Execução + Monitorização em Tempo Real" />
+          </StackPanel>
+
+          <Button
+            Grid.Column="1"
+            Margin="12,0,0,0"
+            Command="{Binding ImportarExcelCommand}"
+            Content="📥 Importar Excel"
+            Style="{StaticResource PrimaryButtonStyle}"
+            ToolTip="Importar protocolos de ficheiro Excel" />
+        </Grid>
+      </Border>
+
+      <!--  ═══════════════════════════════════════════════════════════  -->
+      <!--  === SECÇÃO 1: VALUE % SCANNING (CoRe 5.0 Algorithm) ===  -->
+      <!--  ═══════════════════════════════════════════════════════════  -->
+      <Border
+        Grid.Row="1"
+        Margin="0,12,0,0"
+        Padding="20"
+        Background="{StaticResource CartaoBrush}"
+        BorderBrush="{StaticResource BordaBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <!--  Título Secção  -->
+          <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock
+              FontSize="16"
+              FontWeight="SemiBold"
+              Foreground="{StaticResource TextoPrincipal}"
+              Text="🔍 Value % Scanning" />
+            <TextBlock
+              Margin="0,4,0,0"
+              FontSize="12"
+              Foreground="{StaticResource TextoSecundario}"
+              Text="Algoritmo CoRe 5.0: 10 amostras RNG por protocolo → média normalizada 0-100%" />
+          </StackPanel>
+
+          <!--  Botão Scan Values  -->
+          <Button
+            Grid.Row="1"
+            Height="40"
+            Margin="0,0,0,12"
+            HorizontalAlignment="Left"
+            Command="{Binding ScanValuesCommand}"
+            IsEnabled="{Binding IsScanning, Converter={StaticResource InverseBoolConverter}}"
+            Style="{StaticResource PrimaryButtonStyle}">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock
+                VerticalAlignment="Center"
+                FontSize="14"
+                Text="🔍 Scan Values" />
+              <ProgressBar
+                Width="20"
+                Height="20"
+                Margin="8,0,0,0"
+                IsIndeterminate="True"
+                Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </StackPanel>
+          </Button>
+
+          <!--  DataGrid Protocolos Scanned  -->
+          <DataGrid
+            Grid.Row="2"
+            Height="300"
+            Margin="0,0,0,12"
+            AutoGenerateColumns="False"
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            IsReadOnly="False"
+            ItemsSource="{Binding ProtocolosScanned}"
+            SelectionMode="Extended">
+            <DataGrid.Columns>
+              <!--  CheckBox Seleção  -->
+              <DataGridCheckBoxColumn
+                Width="50"
+                Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                Header="✓" />
+
+              <!--  Nome Protocolo  -->
+              <DataGridTextColumn
+                Width="*"
+                Binding="{Binding Nome}"
+                Header="Nome do Protocolo"
+                IsReadOnly="True" />
+
+              <!--  Value %  -->
+              <DataGridTextColumn
+                Width="100"
+                Binding="{Binding ValuePercent, StringFormat='{}{0:N2}%'}"
+                Header="Value %"
+                IsReadOnly="True">
+                <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="Foreground" Value="#6B9F5F" />
+                    <Setter Property="HorizontalAlignment" Value="Right" />
+                  </Style>
+                </DataGridTextColumn.ElementStyle>
+              </DataGridTextColumn>
+
+              <!--  Categoria  -->
+              <DataGridTextColumn
+                Width="150"
+                Binding="{Binding Categoria}"
+                Header="Categoria"
+                IsReadOnly="True" />
+
+              <!--  Nº Frequências  -->
+              <DataGridTextColumn
+                Width="100"
+                Binding="{Binding NumeroFrequencias}"
+                Header="Nº Freqs"
+                IsReadOnly="True">
+                <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
+                  </Style>
+                </DataGridTextColumn.ElementStyle>
+              </DataGridTextColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+
+          <!--  Botões Seleção Rápida  -->
+          <StackPanel
+            Grid.Row="3"
+            Margin="0,0,0,8"
+            Orientation="Horizontal">
+            <!--  Slider Filtro Value%  -->
+            <TextBlock
+              VerticalAlignment="Center"
+              FontSize="12"
+              Foreground="{StaticResource TextoSecundario}"
+              Text="Filtro Value%  ≥" />
+            <Slider
+              Width="120"
+              Margin="8,0"
+              VerticalAlignment="Center"
+              IsSnapToTickEnabled="True"
+              Maximum="100"
+              Minimum="0"
+              TickFrequency="5"
+              Value="{Binding FiltroValueMinimo, Mode=TwoWay}" />
+            <TextBlock
+              Width="35"
+              VerticalAlignment="Center"
+              FontSize="12"
+              FontWeight="Bold"
+              Foreground="{StaticResource TextoPrincipal}"
+              Text="{Binding FiltroValueMinimo, StringFormat='{}{0:N0}%'}" />
+
+            <!--  Botão Selecionar por Value%  -->
+            <Button
+              Height="28"
+              Margin="12,0,0,0"
+              Padding="12,4"
+              Command="{Binding SelecionarPorValueCommand}"
+              Content="✓ Selecionar"
+              FontSize="11"
+              Style="{StaticResource SecondaryButtonStyle}"
+              ToolTip="Selecionar todos com Value% maior ou igual ao filtro" />
+
+            <!--  Botões Top N  -->
+            <Button
+              Height="28"
+              Margin="8,0,0,0"
+              Padding="10,4"
+              Command="{Binding SelecionarTopCommand}"
+              Content="Top 5"
+              FontSize="11"
+              Style="{StaticResource SecondaryButtonStyle}"
+              ToolTip="Selecionar Top 5 protocolos">
+              <Button.CommandParameter>
+                <system:Int32>5</system:Int32>
+              </Button.CommandParameter>
+            </Button>
+
+            <Button
+              Height="28"
+              Margin="4,0,0,0"
+              Padding="10,4"
+              Command="{Binding SelecionarTopCommand}"
+              Content="Top 10"
+              FontSize="11"
+              Style="{StaticResource SecondaryButtonStyle}"
+              ToolTip="Selecionar Top 10 protocolos">
+              <Button.CommandParameter>
+                <system:Int32>10</system:Int32>
+              </Button.CommandParameter>
+            </Button>
+
+            <Button
+              Height="28"
+              Margin="4,0,0,0"
+              Padding="10,4"
+              Command="{Binding SelecionarTopCommand}"
+              Content="Top 20"
+              FontSize="11"
+              Style="{StaticResource SecondaryButtonStyle}"
+              ToolTip="Selecionar Top 20 protocolos">
+              <Button.CommandParameter>
+                <system:Int32>20</system:Int32>
+              </Button.CommandParameter>
+            </Button>
+
+            <!--  Botão Desselecionar Todos  -->
+            <Button
+              Height="28"
+              Margin="12,0,0,0"
+              Padding="10,4"
+              Command="{Binding DesselecionarTodosCommand}"
+              Content="✗ Limpar"
+              FontSize="11"
+              Style="{StaticResource SecondaryButtonStyle}"
+              ToolTip="Desselecionar todos" />
+          </StackPanel>
+
+          <!--  Botão Adicionar Protocolos  -->
+          <Button
+            Grid.Row="4"
+            Height="36"
+            HorizontalAlignment="Right"
+            Command="{Binding AddToQueueCommand}"
+            Content="➕ Adicionar à Fila"
+            FontSize="13"
+            FontWeight="SemiBold"
+            Style="{StaticResource PrimaryButtonStyle}"
+            ToolTip="Adicionar protocolos selecionados à fila de execução" />
+        </Grid>
+      </Border>
+
+      <!--  ═══════════════════════════════════════════════════════════  -->
+      <!--  === SECÇÃO 2: FILA DE EXECUÇÃO ===  -->
+      <!--  ═══════════════════════════════════════════════════════════  -->
+      <Border
+        Grid.Row="2"
+        Margin="0,12,0,0"
+        Padding="20"
+        Background="{StaticResource CartaoBrush}"
+        BorderBrush="{StaticResource BordaBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <!--  Título Secção + Configuração Alvo  -->
+          <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+              <TextBlock
+                FontSize="16"
+                FontWeight="SemiBold"
+                Foreground="{StaticResource TextoPrincipal}"
+                Text="⚡ Fila de Execução" />
+              <TextBlock
+                Margin="0,4,0,0"
+                FontSize="12"
+                Foreground="{StaticResource TextoSecundario}"
+                Text="Aplicação sequencial com auto-stop configurável" />
+            </StackPanel>
+
+            <!--  CONFIGURAÇÃO ALVO AUTO-STOP (movido para cá)  -->
+            <StackPanel
+              Grid.Column="1"
+              VerticalAlignment="Center"
+              Orientation="Horizontal">
+              <TextBlock
+                VerticalAlignment="Center"
+                FontSize="12"
+                FontWeight="Medium"
+                Foreground="{StaticResource TextoSecundario}"
+                Text="🎯 Alvo:" />
+              <Slider
+                Width="120"
+                Margin="8,0"
+                VerticalAlignment="Center"
+                IsSnapToTickEnabled="True"
+                Maximum="100"
+                Minimum="80"
+                TickFrequency="5"
+                ToolTip="Alvo de Improvement% para auto-stop&#x0a;80% = rápido | 95% = standard CoRe | 100% = máximo"
+                Value="{Binding AlvoMelhoriaGlobal, Mode=TwoWay}" />
+              <TextBlock
+                Width="45"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="Bold"
+                Foreground="#4A7C59"
+                Text="{Binding AlvoMelhoriaGlobal, StringFormat='{}{0:N0}%'}" />
+            </StackPanel>
+          </Grid>
+
+          <!--  DataGrid Fila  -->
+          <DataGrid
+            Grid.Row="1"
+            Height="250"
+            Margin="0,0,0,12"
+            AutoGenerateColumns="False"
+            CanUserAddRows="False"
+            CanUserDeleteRows="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding FilaTerapias}"
+            SelectionMode="Single">
+            <DataGrid.Columns>
+              <!--  Ordem  -->
+              <DataGridTextColumn
+                Width="60"
+                Binding="{Binding Ordem}"
+                Header="#"
+                IsReadOnly="True">
+                <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                  </Style>
+                </DataGridTextColumn.ElementStyle>
+              </DataGridTextColumn>
+
+              <!--  Nome  -->
+              <DataGridTextColumn
+                Width="*"
+                Binding="{Binding Nome}"
+                Header="Nome do Protocolo"
+                IsReadOnly="True" />
+
+              <!--  Value %  -->
+              <DataGridTextColumn
+                Width="90"
+                Binding="{Binding ValuePercent, StringFormat='{}{0:N2}%'}"
+                Header="Value %"
+                IsReadOnly="True">
+                <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Right" />
+                    <Setter Property="Foreground" Value="#6B9F5F" />
+                  </Style>
+                </DataGridTextColumn.ElementStyle>
+              </DataGridTextColumn>
+
+              <!--  Improvement % com ProgressBar  -->
+              <DataGridTemplateColumn Width="140" Header="Improvement %">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Grid>
+                      <!--  ProgressBar Visual  -->
+                      <ProgressBar
+                        Height="20"
+                        Background="#E3E9DE"
+                        BorderBrush="{StaticResource BordaBrush}"
+                        BorderThickness="1"
+                        Foreground="#6B9F5F"
+                        Maximum="100"
+                        Minimum="0"
+                        Value="{Binding ImprovementPercent}" />
+
+                      <!--  Texto sobreposto  -->
+                      <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="11"
+                        FontWeight="Bold"
+                        Foreground="#3F4A3D"
+                        Text="{Binding ImprovementPercent, StringFormat='{}{0:N1}%'}" />
+                    </Grid>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+
+              <!--  Alvo Melhoria  -->
+              <DataGridTextColumn
+                Width="80"
+                Binding="{Binding AlvoMelhoria, StringFormat='{}{0:N0}%'}"
+                Header="Alvo"
+                IsReadOnly="True">
+                <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
+                  </Style>
+                </DataGridTextColumn.ElementStyle>
+              </DataGridTextColumn>
+
+              <!--  Estado  -->
+              <DataGridTextColumn
+                Width="120"
+                Binding="{Binding Estado}"
+                Header="Estado"
+                IsReadOnly="True">
+                <DataGridTextColumn.ElementStyle>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="FontWeight" Value="Medium" />
+                    <Setter Property="Foreground" Value="{Binding EstadoCor}" />
+                  </Style>
+                </DataGridTextColumn.ElementStyle>
+              </DataGridTextColumn>
+
+              <!--  Botão Remover  -->
+              <DataGridTemplateColumn Width="80" Header="Ações">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button
+                      Padding="8,4"
+                      Command="{Binding DataContext.RemoveFromQueueCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      CommandParameter="{Binding}"
+                      Content="🗑️"
+                      IsEnabled="{Binding IsRemovable}"
+                      Style="{StaticResource SecondaryButtonStyle}"
+                      ToolTip="Remover da fila (apenas Aguardando)" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+
+          <!--  Botões Controlo Sessão  -->
+          <StackPanel
+            Grid.Row="2"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+              Height="40"
+              Margin="0,0,12,0"
+              Padding="20,0"
+              Command="{Binding IniciarSessaoCommand}"
+              Content="▶️ Aplicar Terapias"
+              Style="{StaticResource PrimaryButtonStyle}"
+              ToolTip="Iniciar sessão de terapias (baseline + aplicação sequencial)" />
+
+            <Button
+              Height="40"
+              Padding="20,0"
+              Command="{Binding PararSessaoCommand}"
+              Content="⏹️ Parar"
+              Style="{StaticResource SecondaryButtonStyle}"
+              ToolTip="Parar sessão em execução" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!--  ✅ MONITORIZAÇÃO REMOVIDA: Agora está integrada na tabela (coluna Improvement% com ProgressBar)  -->
+
+      <!--  ═══════════════════════════════════════════════════════════  -->
+      <!--  === SECÇÃO 3: LISTA ORIGINAL (MANTER COMPATIBILIDADE) ===  -->
+      <!--  ═══════════════════════════════════════════════════════════  -->
+      <Border
+        Grid.Row="3"
+        Margin="0,12,0,0"
+        Padding="16"
+        Background="{StaticResource CartaoBrush}"
+        BorderBrush="{StaticResource BordaBrush}"
+        BorderThickness="1"
+        CornerRadius="8">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+
+          <!--  Título + Barra de Pesquisa  -->
+          <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock
+              FontSize="16"
+              FontWeight="SemiBold"
+              Foreground="{StaticResource TextoPrincipal}"
+              Text="📋 Todos os Protocolos (Aplicação Manual)" />
+            <TextBlock
+              Margin="0,4,0,0"
+              FontSize="12"
+              Foreground="{StaticResource TextoSecundario}"
+              Text="Pesquisar e aplicar protocolos individualmente (modo legado)" />
+          </StackPanel>
+
+          <!--  Barra de Pesquisa  -->
+          <Border
+            Grid.Row="1"
+            Margin="0,0,0,12"
+            Padding="12"
+            Background="White"
+            BorderBrush="{StaticResource BordaBrush}"
+            BorderThickness="1"
+            CornerRadius="4">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <!--  TextBox Pesquisa  -->
+              <TextBox
+                Grid.Column="0"
+                Height="32"
+                Padding="8,0"
+                VerticalContentAlignment="Center"
+                BorderThickness="0"
+                FontSize="13"
+                Text="{Binding TextoPesquisa, UpdateSourceTrigger=PropertyChanged}" />
+
+              <!--  Placeholder  -->
+              <TextBlock
+                Grid.Column="0"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center"
+                FontSize="13"
+                Foreground="{StaticResource TextoSecundario}"
+                IsHitTestVisible="False"
+                Text="🔍 Pesquisar protocolos por nome ou categoria...">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding TextoPesquisa}" Value="">
+                        <Setter Property="Visibility" Value="Visible" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+
+              <!--  Botão Limpar  -->
+              <Button
+                Grid.Column="1"
+                Margin="8,0,0,0"
+                Command="{Binding LimparFiltrosCommand}"
+                Content="🗑️ Limpar"
+                IsEnabled="{Binding TemFiltrosAtivos}"
+                Style="{StaticResource SecondaryButtonStyle}"
+                ToolTip="Limpar filtros de pesquisa" />
+            </Grid>
+          </Border>
+
+          <!--  ScrollViewer com Lista de Protocolos  -->
+          <ScrollViewer
+            Grid.Row="2"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+              <!--  Mensagem quando vazio  -->
+              <TextBlock
+                Margin="0,40"
+                HorizontalAlignment="Center"
+                FontSize="16"
+                Foreground="#5A6558"
+                Text="📋 Nenhum protocolo encontrado">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding ProtocolosFiltrados.Count}" Value="0">
+                        <Setter Property="Visibility" Value="Visible" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+
+              <!--  Lista de Protocolos (ItemsControl original mantido)  -->
+              <ItemsControl ItemsSource="{Binding ProtocolosFiltrados}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Style="{StaticResource ProtocoloCardStyle}">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--  Informação do Protocolo  -->
+                        <StackPanel Grid.Column="0">
+                          <TextBlock
+                            FontSize="15"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextoPrincipal}"
+                            Text="{Binding Nome}"
+                            TextTrimming="CharacterEllipsis" />
+
+                          <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                            <Border
+                              Padding="8,4"
+                              Background="{StaticResource BotaoPrimarioBrush}"
+                              CornerRadius="4">
+                              <TextBlock
+                                FontSize="11"
+                                FontWeight="Medium"
+                                Foreground="White"
+                                Text="{Binding Categoria}" />
+                            </Border>
+
+                            <TextBlock
+                              Margin="12,0,0,0"
+                              VerticalAlignment="Center"
+                              FontSize="12"
+                              Foreground="{StaticResource TextoSecundario}">
+                              <Run Text="🎵" />
+                              <Run Text="{Binding NumeroFrequencias, StringFormat='{}{0} frequências'}" />
+                            </TextBlock>
+
+                            <TextBlock
+                              Margin="12,0,0,0"
+                              VerticalAlignment="Center"
+                              FontSize="12"
+                              Foreground="{StaticResource TextoSecundario}"
+                              Text="{Binding AtualizadoEm, StringFormat='📅 {0:dd/MM/yyyy}'}" />
+                          </StackPanel>
+                        </StackPanel>
+
+                        <!--  Botões de Ação  -->
+                        <StackPanel
+                          Grid.Column="1"
+                          VerticalAlignment="Center"
+                          Orientation="Horizontal">
+                          <Button
+                            Margin="8,0"
+                            Command="{Binding DataContext.VisualizarProtocoloCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}"
+                            Content="👁️ Ver"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            ToolTip="Visualizar frequências" />
+
+                          <Button
+                            Command="{Binding DataContext.AplicarProtocoloCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}"
+                            Content="⚡ Aplicar"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            ToolTip="Aplicar protocolo ao paciente" />
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

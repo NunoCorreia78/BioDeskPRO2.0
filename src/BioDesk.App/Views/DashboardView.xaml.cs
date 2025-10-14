@@ -31,7 +31,7 @@ public partial class DashboardView : UserControl
         _navigationService = navigationService;
     }
 
-    private void BtnConfiguracoes_Click(object sender, RoutedEventArgs e)
+    private void AbrirConfiguracoes_Click(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -45,17 +45,17 @@ public partial class DashboardView : UserControl
                 return;
             }
 
-            // Criar a janela de configurações
-            var configView = app.ServiceProvider.GetRequiredService<ConfiguracoesView>();
-            configView.Owner = Window.GetWindow(this);
+            // Criar a janela de configurações da clínica
+            var configWindow = app.ServiceProvider.GetRequiredService<Views.Dialogs.ConfiguracoesWindow>();
+            configWindow.Owner = Window.GetWindow(this);
 
             // Mostrar como diálogo modal
-            var result = configView.ShowDialog();
+            var result = configWindow.ShowDialog();
 
             if (result == true)
             {
-                _logger?.LogInformation("✅ Configurações guardadas com sucesso");
-                MessageBox.Show("Configurações guardadas com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                _logger?.LogInformation("✅ Configurações da clínica guardadas com sucesso");
+                MessageBox.Show("Configurações da clínica guardadas com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         catch (Exception ex)

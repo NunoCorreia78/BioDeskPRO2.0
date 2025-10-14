@@ -47,6 +47,16 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
     }
 
     /// <summary>
+    /// 🔥 LIVE SEARCH: Chamado automaticamente quando TextoPesquisa muda
+    /// Filtra a lista em tempo real sem precisar Enter
+    /// </summary>
+    partial void OnTextoPesquisaChanged(string value)
+    {
+        // Executar pesquisa automaticamente (debounce handled by Task.Delay)
+        _ = PesquisarAsync();
+    }
+
+    /// <summary>
     /// Carregar todos os pacientes ao abrir a view
     /// </summary>
     public async Task OnNavigatedToAsync()
@@ -103,8 +113,8 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
             IsLoading = false;
         }, "Erro ao carregar pacientes");
     }    /// <summary>
-    /// Abrir ficha do paciente selecionado
-    /// </summary>
+         /// Abrir ficha do paciente selecionado
+         /// </summary>
     [RelayCommand]
     private void AbrirFichaPaciente(Paciente? paciente)
     {
@@ -155,6 +165,74 @@ public partial class ListaPacientesViewModel : NavigationViewModelBase
     {
         TextoPesquisa = string.Empty;
         await CarregarTodosPacientesAsync();
+    }
+
+    /// <summary>
+    /// Eliminar paciente da base de dados (com confirmação obrigatória)
+    /// </summary>
+    [RelayCommand]
+    private async Task EliminarPaciente(Paciente? paciente)
+    {
+        if (paciente == null)
+        {
+            _logger.LogWarning("⚠️ Tentativa de eliminar paciente nulo");
+            return;
+        }
+
+        // Diálogo de confirmação OBRIGATÓRIO
+        var result = System.Windows.MessageBox.Show(
+            $"Tem a certeza que deseja eliminar o paciente:\n\n" +
+            $"👤 {paciente.NomeCompleto}\n" +
+            $"📋 Processo: {paciente.NumeroProcesso}\n\n" +
+            $"⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n" +
+            $"Todos os dados associados (consultas, emails, documentos) serão perdidos.",
+            "⚠️ Confirmar Eliminação",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning,
+            System.Windows.MessageBoxResult.No);
+
+        if (result == System.Windows.MessageBoxResult.Yes)
+        {
+            try
+            {
+                IsLoading = true;
+                _logger.LogWarning("🗑️ Eliminando paciente {Id}: {Nome}", paciente.Id, paciente.NomeCompleto);
+
+                // Eliminar da BD via repository
+                _unitOfWork.Pacientes.Remove(paciente);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Remover da ObservableCollection
+                Pacientes.Remove(paciente);
+                TotalPacientes = Pacientes.Count;
+
+                _logger.LogInformation("✅ Paciente {Nome} eliminado com sucesso", paciente.NomeCompleto);
+
+                System.Windows.MessageBox.Show(
+                    $"Paciente '{paciente.NomeCompleto}' eliminado com sucesso.",
+                    "✅ Eliminação Concluída",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Erro ao eliminar paciente {Id}", paciente.Id);
+
+                System.Windows.MessageBox.Show(
+                    $"Erro ao eliminar paciente:\n\n{ex.Message}",
+                    "❌ Erro de Eliminação",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+        else
+        {
+            _logger.LogInformation("ℹ️ Eliminação de paciente cancelada pelo utilizador");
+        }
     }
 }
 

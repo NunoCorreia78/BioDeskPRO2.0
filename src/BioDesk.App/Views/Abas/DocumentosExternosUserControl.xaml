@@ -1,0 +1,299 @@
+<UserControl
+  x:Class="BioDesk.App.Views.Abas.DocumentosExternosUserControl"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converters="clr-namespace:BioDesk.App.Converters"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:viewmodels="clr-namespace:BioDesk.ViewModels.Documentos;assembly=BioDesk.ViewModels"
+  d:DataContext="{d:DesignInstance Type=viewmodels:DocumentosExternosViewModel,
+                                   IsDesignTimeCreatable=False}"
+  d:DesignHeight="650"
+  d:DesignWidth="1100"
+  Background="{StaticResource FundoPrincipal}"
+  mc:Ignorable="d">
+
+  <UserControl.Resources>
+    <converters:BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    <converters:NullToVisibilityConverter x:Key="NullToVisibility" />
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!--  === CABEÇALHO ===  -->
+    <Border
+      Grid.Row="0"
+      Margin="0,0,0,20"
+      Padding="20"
+      Background="{StaticResource CartaoBrush}"
+      BorderBrush="{StaticResource BordaBrush}"
+      BorderThickness="1"
+      CornerRadius="8">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0">
+          <TextBlock
+            FontSize="20"
+            FontWeight="SemiBold"
+            Foreground="{StaticResource TextoPrincipal}"
+            Text="📁 Documentos Externos" />
+          <TextBlock
+            Margin="0,4,0,0"
+            FontSize="13"
+            Foreground="{StaticResource TextoSecundario}"
+            Text="Anexos, relatórios, análises e documentação médica do paciente"
+            TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!--  Botão Upload  -->
+        <Button
+          Grid.Column="1"
+          VerticalAlignment="Center"
+          Command="{Binding AdicionarDocumentoCommand}"
+          Content="📤 Upload"
+          Style="{StaticResource PrimaryButtonStyle}"
+          ToolTip="Fazer upload de novo documento" />
+      </Grid>
+    </Border>
+
+    <!--  === FILTROS ===  -->
+    <Border
+      Grid.Row="1"
+      Margin="0,0,0,16"
+      Padding="16"
+      Background="{StaticResource CartaoBrush}"
+      BorderBrush="{StaticResource BordaBrush}"
+      BorderThickness="1"
+      CornerRadius="8">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="16" />
+          <ColumnDefinition Width="200" />
+        </Grid.ColumnDefinitions>
+
+        <!--  Pesquisa por nome  -->
+        <StackPanel Grid.Column="0">
+          <TextBlock
+            Margin="0,0,0,4"
+            FontSize="12"
+            FontWeight="SemiBold"
+            Foreground="{StaticResource TextoSecundario}"
+            Text="Pesquisar:" />
+          <TextBox
+            Padding="10,8"
+            FontSize="14"
+            Style="{StaticResource InputTextBoxStyle}"
+            Text="{Binding FiltroNome, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+
+        <!--  Filtro por categoria  -->
+        <StackPanel Grid.Column="2">
+          <TextBlock
+            Margin="0,0,0,4"
+            FontSize="12"
+            FontWeight="SemiBold"
+            Foreground="{StaticResource TextoSecundario}"
+            Text="Categoria:" />
+          <ComboBox
+            Padding="10,8"
+            FontSize="14"
+            SelectedValue="{Binding FiltroCategoria, UpdateSourceTrigger=PropertyChanged}"
+            Style="{StaticResource ComboBoxStyle}">
+            <ComboBoxItem Content="Todas" IsSelected="True" />
+            <ComboBoxItem Content="Análises Clínicas" />
+            <ComboBoxItem Content="Exames de Imagem" />
+            <ComboBoxItem Content="Relatórios Médicos" />
+            <ComboBoxItem Content="Receitas" />
+            <ComboBoxItem Content="Atestados" />
+            <ComboBoxItem Content="Consentimentos Externos" />
+            <ComboBoxItem Content="Outro" />
+          </ComboBox>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!--  === DATAGRID DE DOCUMENTOS ===  -->
+    <Border
+      Grid.Row="2"
+      Margin="0"
+      Background="{StaticResource CartaoBrush}"
+      BorderBrush="{StaticResource BordaBrush}"
+      BorderThickness="1"
+      CornerRadius="8">
+      <Grid>
+        <!--  Loading State  -->
+        <Border
+          Padding="40"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          Background="{StaticResource CartaoBrush}"
+          CornerRadius="8"
+          Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+          <StackPanel HorizontalAlignment="Center">
+            <TextBlock
+              FontSize="16"
+              Foreground="{StaticResource TextoSecundario}"
+              Text="⏳ A carregar documentos..." />
+          </StackPanel>
+        </Border>
+
+        <!--  DataGrid  -->
+        <DataGrid
+          Margin="1"
+          AutoGenerateColumns="False"
+          BorderThickness="0"
+          CanUserAddRows="False"
+          CanUserDeleteRows="False"
+          CanUserReorderColumns="False"
+          CanUserResizeRows="False"
+          GridLinesVisibility="Horizontal"
+          HeadersVisibility="Column"
+          IsReadOnly="True"
+          ItemsSource="{Binding DocumentosFiltrados}"
+          RowHeight="48"
+          SelectionMode="Single"
+          Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}">
+
+          <DataGrid.Columns>
+            <!--  Nome do Arquivo  -->
+            <DataGridTextColumn
+              Width="2*"
+              Binding="{Binding NomeArquivo}"
+              Header="📄 Nome do Arquivo">
+              <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                  <Setter Property="FontSize" Value="14" />
+                  <Setter Property="FontWeight" Value="SemiBold" />
+                  <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
+                  <Setter Property="VerticalAlignment" Value="Center" />
+                  <Setter Property="Margin" Value="8,0" />
+                  <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                </Style>
+              </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+
+            <!--  Categoria  -->
+            <DataGridTextColumn
+              Width="*"
+              Binding="{Binding Categoria}"
+              Header="🗂️ Categoria">
+              <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                  <Setter Property="FontSize" Value="13" />
+                  <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
+                  <Setter Property="VerticalAlignment" Value="Center" />
+                  <Setter Property="Margin" Value="8,0" />
+                </Style>
+              </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+
+            <!--  Data do Documento  -->
+            <DataGridTextColumn
+              Width="120"
+              Binding="{Binding DataDocumento, StringFormat=dd/MM/yyyy}"
+              Header="📅 Data">
+              <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                  <Setter Property="FontSize" Value="13" />
+                  <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
+                  <Setter Property="VerticalAlignment" Value="Center" />
+                  <Setter Property="Margin" Value="8,0" />
+                </Style>
+              </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+
+            <!--  Tamanho  -->
+            <DataGridTextColumn
+              Width="100"
+              Binding="{Binding TamanhoFormatado}"
+              Header="💾 Tamanho">
+              <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                  <Setter Property="FontSize" Value="13" />
+                  <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
+                  <Setter Property="VerticalAlignment" Value="Center" />
+                  <Setter Property="Margin" Value="8,0" />
+                  <Setter Property="HorizontalAlignment" Value="Right" />
+                </Style>
+              </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+
+            <!--  Ações  -->
+            <DataGridTemplateColumn Width="180" Header="⚙️ Ações">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <!--  Botão Abrir  -->
+                    <Button
+                      Margin="4,0"
+                      Padding="12,6"
+                      Command="{Binding DataContext.AbrirDocumentoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                      CommandParameter="{Binding}"
+                      Content="👁️ Abrir"
+                      FontSize="12"
+                      Style="{StaticResource SecondaryButtonStyle}"
+                      ToolTip="Abrir documento no visualizador padrão" />
+
+                    <!--  Botão Apagar  -->
+                    <Button
+                      Margin="4,0"
+                      Padding="12,6"
+                      Command="{Binding DataContext.RemoverDocumentoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                      CommandParameter="{Binding}"
+                      Content="🗑️ Apagar"
+                      FontSize="12"
+                      Style="{StaticResource DangerButtonStyle}"
+                      ToolTip="Eliminar documento permanentemente" />
+                  </StackPanel>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+          </DataGrid.Columns>
+
+          <DataGrid.RowStyle>
+            <Style TargetType="DataGridRow">
+              <Setter Property="Background" Value="Transparent" />
+              <Setter Property="BorderThickness" Value="0" />
+              <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </DataGrid.RowStyle>
+        </DataGrid>
+      </Grid>
+    </Border>
+
+    <!--  === RODAPÉ COM MENSAGEM DE ERRO ===  -->
+    <Border
+      Grid.Row="3"
+      Margin="0,12,0,0"
+      Padding="12"
+      Background="#FFEEF0"
+      BorderBrush="#FFCCCE"
+      BorderThickness="1"
+      CornerRadius="6"
+      Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibility}}">
+      <TextBlock
+        FontSize="13"
+        Foreground="#DC3545"
+        Text="{Binding ErrorMessage}"
+        TextWrapping="Wrap" />
+    </Border>
+  </Grid>
+</UserControl>

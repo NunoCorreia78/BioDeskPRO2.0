@@ -1,0 +1,28 @@
+💥 DISPATCHER EXCEPTION (UI Thread)
+
+Exception Type: ArgumentException
+Message: Must create DependencySource on same Thread as the DependencyObject.
+
+Stack Trace:
+   at System.Windows.DependencyObject.ValidateSources(DependencyObject d, DependencySource[] newSources, Expression expr)
+   at System.Windows.Expression.ChangeSources(DependencyObject d, DependencyProperty dp, DependencySource[] newSources)
+   at System.Windows.Data.BindingExpressionBase.ChangeSources(WeakDependencySource[] newSources)
+   at MS.Internal.Data.ClrBindingWorker.NewValueAvailable(Boolean dependencySourcesChanged, Boolean initialValue, Boolean isASubPropertyChange)
+   at MS.Internal.Data.PropertyPathWorker.UpdateSourceValueState(Int32 k, ICollectionView collectionView, Object newValue, Boolean isASubPropertyChange)
+   at MS.Internal.Data.ClrBindingWorker.AttachDataItem()
+   at System.Windows.Data.BindingExpression.Activate(Object item)
+   at System.Windows.Data.BindingExpression.AttachToContext(AttachAttempt attempt)
+   at System.Windows.Data.BindingExpression.MS.Internal.Data.IDataBindEngineClient.AttachToContext(Boolean lastChance)
+   at MS.Internal.Data.DataBindEngine.Task.Run(Boolean lastChance)
+   at MS.Internal.Data.DataBindEngine.Run(Object arg)
+   at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)
+   at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)
+
+Inner Exception:
+None
+
+Inner Stack:
+None
+
+Source: WindowsBase
+Target Site: ValidateSources

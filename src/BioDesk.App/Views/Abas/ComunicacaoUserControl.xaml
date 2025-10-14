@@ -10,7 +10,7 @@
     d:DataContext="{d:DesignInstance Type=vm:ComunicacaoViewModel}"
     d:DesignHeight="700"
     d:DesignWidth="1200"
-    Background="Transparent"
+    Background="{StaticResource FundoPrincipal}"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -22,9 +22,9 @@
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />  
+            <RowDefinition Height="Auto" />
             <!--  Header  -->
-            <RowDefinition Height="*" />    
+            <RowDefinition Height="*" />
             <!--  Conteúdo principal  -->
         </Grid.RowDefinitions>
 
@@ -105,9 +105,9 @@
         <!--  Conteúdo principal: 2 Colunas  -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="450" />  
+                <ColumnDefinition Width="450" />
                 <!--  Coluna Esquerda: Documentos + Histórico  -->
-                <ColumnDefinition Width="*" />    
+                <ColumnDefinition Width="*" />
                 <!--  Coluna Direita: Formulário Email  -->
             </Grid.ColumnDefinitions>
 
@@ -120,11 +120,11 @@
                 VerticalScrollBarVisibility="Auto">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />  
+                        <RowDefinition Height="Auto" />
                         <!--  Card Documentos  -->
-                        <RowDefinition Height="12" />    
+                        <RowDefinition Height="12" />
                         <!--  Espaçamento  -->
-                        <RowDefinition Height="Auto" />  
+                        <RowDefinition Height="Auto" />
                         <!--  ⭐ Histórico com altura automática  -->
                     </Grid.RowDefinitions>
 

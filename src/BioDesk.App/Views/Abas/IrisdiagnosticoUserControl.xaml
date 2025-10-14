@@ -6,7 +6,7 @@
              xmlns:converters="clr-namespace:BioDesk.App.Converters"
              mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1400"
-             Background="Transparent">
+             Background="{StaticResource FundoPrincipal}">
 
     <UserControl.Resources>
         <converters:PathToImageSourceConverter x:Key="PathToImageConverter"/>
@@ -419,10 +419,10 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Ellipse Width="16" Height="16"
+                                        <Ellipse Width="22" Height="22"
                                                  Fill="#5B7C99"
                                                  Stroke="White"
-                                                 StrokeThickness="2"
+                                                 StrokeThickness="3"
                                                  Cursor="Hand"
                                                  IsHitTestVisible="True"
                                                  MouseLeftButtonDown="Handler_MouseDown"
@@ -446,8 +446,8 @@
                                                         </DataTrigger>
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Setter Property="Opacity" Value="1"/>
-                                                            <Setter Property="Width" Value="20"/>
-                                                            <Setter Property="Height" Value="20"/>
+                                                            <Setter Property="Width" Value="26"/>
+                                                            <Setter Property="Height" Value="26"/>
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -466,10 +466,10 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Ellipse Width="16" Height="16"
+                                        <Ellipse Width="22" Height="22"
                                                  Fill="#6B8E63"
                                                  Stroke="White"
-                                                 StrokeThickness="2"
+                                                 StrokeThickness="3"
                                                  Cursor="Hand"
                                                  IsHitTestVisible="True"
                                                  MouseLeftButtonDown="Handler_MouseDown"
@@ -493,8 +493,8 @@
                                                         </DataTrigger>
                                                         <Trigger Property="IsMouseOver" Value="True">
                                                             <Setter Property="Opacity" Value="1"/>
-                                                            <Setter Property="Width" Value="20"/>
-                                                            <Setter Property="Height" Value="20"/>
+                                                            <Setter Property="Width" Value="26"/>
+                                                            <Setter Property="Height" Value="26"/>
                                                         </Trigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -629,6 +629,129 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </Canvas>
+
+                        <!-- LAYER 5: Marcas de Íris (Círculos Coloridos com ContextMenu) -->
+                        <ItemsControl ItemsSource="{Binding MarcasImagem}"
+                                      Panel.ZIndex="4">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas Width="1600" Height="1600"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Ellipse Width="24" Height="24"
+                                             Fill="{Binding Cor}"
+                                             Stroke="White"
+                                             StrokeThickness="2"
+                                             Cursor="Hand"
+                                             ToolTip="{Binding Observacoes}">
+                                        <!-- Posicionamento no canvas -->
+                                        <Canvas.Left>
+                                            <Binding Path="X">
+                                                <Binding.Converter>
+                                                    <converters:CenterOffsetConverter/>
+                                                </Binding.Converter>
+                                                <Binding.ConverterParameter>-12</Binding.ConverterParameter>
+                                            </Binding>
+                                        </Canvas.Left>
+                                        <Canvas.Top>
+                                            <Binding Path="Y">
+                                                <Binding.Converter>
+                                                    <converters:CenterOffsetConverter/>
+                                                </Binding.Converter>
+                                                <Binding.ConverterParameter>-12</Binding.ConverterParameter>
+                                            </Binding>
+                                        </Canvas.Top>
+
+                                        <!-- Menu Contextual -->
+                                        <Ellipse.ContextMenu>
+                                            <ContextMenu Background="#F7F9F6" BorderBrush="#E3E9DE" Padding="4">
+                                                <!-- Editar Observações -->
+                                                <MenuItem Header="📝 Editar Observações"
+                                                          Click="EditarObservacoes_Click">
+                                                    <MenuItem.Style>
+                                                        <Style TargetType="MenuItem">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="Foreground" Value="#3F4A3D"/>
+                                                            <Setter Property="FontSize" Value="13"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#E3E9DE"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </MenuItem.Style>
+                                                </MenuItem>
+
+                                                <Separator Background="#E3E9DE" Margin="2,4"/>
+
+                                                <!-- Submenu Mudar Cor -->
+                                                <MenuItem Header="🎨 Mudar Cor">
+                                                    <MenuItem.Style>
+                                                        <Style TargetType="MenuItem">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="Foreground" Value="#3F4A3D"/>
+                                                            <Setter Property="FontSize" Value="13"/>
+                                                        </Style>
+                                                    </MenuItem.Style>
+                                                    <MenuItem Header="🔴 Vermelho Terroso"
+                                                              Tag="#C85959"
+                                                              Click="MudarCor_Click"/>
+                                                    <MenuItem Header="🟢 Verde Musgo"
+                                                              Tag="#6B8E63"
+                                                              Click="MudarCor_Click"/>
+                                                    <MenuItem Header="🔵 Azul Petróleo"
+                                                              Tag="#5B7C99"
+                                                              Click="MudarCor_Click"/>
+                                                    <MenuItem Header="🟡 Amarelo Mostarda"
+                                                              Tag="#D4A849"
+                                                              Click="MudarCor_Click"/>
+                                                </MenuItem>
+
+                                                <Separator Background="#E3E9DE" Margin="2,4"/>
+
+                                                <!-- Remover Marca -->
+                                                <MenuItem Header="🗑️ Remover"
+                                                          Command="{Binding DataContext.RemoverMarcaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                          CommandParameter="{Binding}">
+                                                    <MenuItem.Style>
+                                                        <Style TargetType="MenuItem">
+                                                            <Setter Property="Background" Value="Transparent"/>
+                                                            <Setter Property="Foreground" Value="#C85959"/>
+                                                            <Setter Property="FontSize" Value="13"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#FFEAEA"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </MenuItem.Style>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </Ellipse.ContextMenu>
+
+                                        <!-- Efeito Hover -->
+                                        <Ellipse.Style>
+                                            <Style TargetType="Ellipse">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="StrokeThickness" Value="3"/>
+                                                        <Setter Property="Effect">
+                                                            <Setter.Value>
+                                                                <DropShadowEffect Color="Black" Opacity="0.4" BlurRadius="8" ShadowDepth="2"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Ellipse.Style>
+                                    </Ellipse>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
                     </Canvas>
                 </Viewbox>
             </Grid>

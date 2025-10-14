@@ -71,6 +71,12 @@ public partial class ConsentimentosViewModel : ObservableValidator
         _logger.LogInformation("👤 Nome do paciente atualizado nos Consentimentos: {Nome}", nome);
     }
 
+    /// <summary>
+    /// Observações adicionais/notas livres do profissional sobre o consentimento
+    /// </summary>
+    [ObservableProperty]
+    private string _informacoesAdicionais = string.Empty;
+
     public ObservableCollection<ConsentimentoInformado> ConsentimentosExistentes { get; }
 
     [ObservableProperty]

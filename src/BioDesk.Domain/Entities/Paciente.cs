@@ -66,6 +66,19 @@ public class Paciente
     /// </summary>
     public string? ProgressoAbas { get; set; }
 
+    /// <summary>
+    /// Última aba ativa (1-8) para restaurar ao reabrir ficha do paciente
+    /// </summary>
+    public int LastActiveTab { get; set; } = 1;
+
+    // === INFORMAÇÃO CLÍNICA ATUAL ===
+    /// <summary>
+    /// Medicação, suplementação e terapia atual do paciente
+    /// Campo editável na aba Consultas para referência rápida
+    /// </summary>
+    [StringLength(2000)]
+    public string? TerapiaAtual { get; set; }
+
     // === PROPRIEDADES CALCULADAS ===
     /// <summary>
     /// Idade calculada automaticamente (null se DataNascimento não preenchida)
@@ -77,7 +90,6 @@ public class Paciente
     // === NAVEGAÇÃO PARA OUTRAS ENTIDADES ===
     public virtual Contacto? Contacto { get; set; }
     public virtual DeclaracaoSaude? DeclaracaoSaude { get; set; } // ⭐ Aba 2 - Declaração de Saúde
-    public virtual ICollection<HistoricoMedico> HistoricoMedico { get; set; } = [];
     public virtual ICollection<Consulta> Consultas { get; set; } = [];
     public virtual ICollection<Consentimento> Consentimentos { get; set; } = [];
     public virtual ICollection<IrisAnalise> IrisAnalises { get; set; } = [];

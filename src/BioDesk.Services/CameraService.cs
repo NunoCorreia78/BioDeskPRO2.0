@@ -72,7 +72,7 @@ public class CameraInfo
 /// Implementação do serviço de câmara usando DirectShow (Windows)
 /// NOTA: Esta é uma implementação simplificada. Para produção, usar AForge.NET ou Emgu.CV
 /// </summary>
-public class CameraService : ICameraService, IDisposable
+public sealed class CameraService : ICameraService, IDisposable
 {
     private bool _isPreviewRunning;
     private CameraInfo? _activeCamera;
@@ -220,10 +220,23 @@ public class CameraService : ICameraService, IDisposable
 
     public void Dispose()
     {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
         if (_disposed) return;
 
-        _previewTimer?.Dispose();
-        _lastCapturedFrame?.Dispose();
+        if (disposing)
+        {
+            _previewTimer?.Stop();
+            _previewTimer?.Dispose();
+            _lastCapturedFrame?.Dispose();
+            _lastCapturedFrame = null;
+            _activeCamera = null;
+        }
+
         _disposed = true;
     }
 }

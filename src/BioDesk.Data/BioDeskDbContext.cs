@@ -11,257 +11,474 @@ namespace BioDesk.Data;
 /// </summary>
 public class BioDeskDbContext : DbContext
 {
-  public BioDeskDbContext(DbContextOptions<BioDeskDbContext> options) : base(options)
-  {
-  }
-
-  // === ENTIDADES PRINCIPAIS ===
-  public DbSet<Paciente> Pacientes { get; set; } = null!;
-  public DbSet<Contacto> Contactos { get; set; } = null!;
-  public DbSet<HistoricoMedico> HistoricosMedicos { get; set; } = null!;
-  public DbSet<Consulta> Consultas { get; set; } = null!;
-  public DbSet<Consentimento> Consentimentos { get; set; } = null!;
-  public DbSet<IrisAnalise> IrisAnalises { get; set; } = null!;
-
-  // === DECLARAÇÃO DE SAÚDE (ABA 2) ===
-  public DbSet<DeclaracaoSaude> DeclaracoesSaude { get; set; } = null!;
-
-  // === SESSÕES CLÍNICAS (ABA 4) ===
-  public DbSet<Sessao> Sessoes { get; set; } = null!;
-  public DbSet<AbordagemSessao> AbordagensSessoes { get; set; } = null!;
-
-  // === COMUNICAÇÃO E SEGUIMENTO (ABA 5) ===
-  public DbSet<Comunicacao> Comunicacoes { get; set; } = null!;
-  public DbSet<AnexoComunicacao> AnexosComunicacoes { get; set; } = null!;
-
-  // === IRISDIAGNÓSTICO (ABA 6) ===
-  public DbSet<IrisImagem> IrisImagens { get; set; } = null!;
-  public DbSet<IrisMarca> IrisMarcas { get; set; } = null!;
-
-  protected override void OnModelCreating(ModelBuilder modelBuilder)
-  {
-    base.OnModelCreating(modelBuilder);
-
-    // === CONFIGURAÇÃO PACIENTE ===
-    modelBuilder.Entity<Paciente>(entity =>
+    public BioDeskDbContext(DbContextOptions<BioDeskDbContext> options) : base(options)
     {
-      entity.HasKey(e => e.Id);
-      entity.HasIndex(e => e.NumeroProcesso)
-                .IsUnique()
-                .HasDatabaseName("IX_Pacientes_NumeroProcesso");
+    }
 
-      entity.HasIndex(e => e.NomeCompleto)
-                .HasDatabaseName("IX_Pacientes_NomeCompleto");
+    // === ENTIDADES PRINCIPAIS ===
+    public DbSet<Paciente> Pacientes { get; set; } = null!;
+    public DbSet<Contacto> Contactos { get; set; } = null!;
+    public DbSet<Consulta> Consultas { get; set; } = null!;
+    public DbSet<Consentimento> Consentimentos { get; set; } = null!;
+    public DbSet<IrisAnalise> IrisAnalises { get; set; } = null!;
 
-      entity.HasIndex(e => e.DataNascimento)
-                .HasDatabaseName("IX_Pacientes_DataNascimento");
+    // === CONFIGURAÇÃO GLOBAL ===
+    public DbSet<ConfiguracaoClinica> ConfiguracaoClinica { get; set; } = null!;
 
-      // Relacionamento 1:1 com Contacto
-      entity.HasOne(p => p.Contacto)
-                .WithOne(c => c.Paciente)
-                .HasForeignKey<Contacto>(c => c.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
+    // === DECLARAÇÃO DE SAÚDE (ABA 2) ===
+    public DbSet<DeclaracaoSaude> DeclaracoesSaude { get; set; } = null!;
 
-      // Relacionamentos 1:N
-      entity.HasMany(p => p.HistoricoMedico)
-                .WithOne(h => h.Paciente)
-                .HasForeignKey(h => h.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
+    // === SESSÕES CLÍNICAS (ABA 4) ===
+    public DbSet<Sessao> Sessoes { get; set; } = null!;
+    public DbSet<AbordagemSessao> AbordagensSessoes { get; set; } = null!;
 
-      entity.HasMany(p => p.Consultas)
-                .WithOne(c => c.Paciente)
-                .HasForeignKey(c => c.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
+    // === COMUNICAÇÃO E SEGUIMENTO (ABA 5) ===
+    public DbSet<Comunicacao> Comunicacoes { get; set; } = null!;
+    public DbSet<AnexoComunicacao> AnexosComunicacoes { get; set; } = null!;
 
-      entity.HasMany(p => p.Consentimentos)
-                .WithOne(c => c.Paciente)
-                .HasForeignKey(c => c.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
+    // === IRISDIAGNÓSTICO (ABA 6) ===
+    public DbSet<IrisImagem> IrisImagens { get; set; } = null!;
+    public DbSet<IrisMarca> IrisMarcas { get; set; } = null!;
 
-      entity.HasMany(p => p.IrisAnalises)
-                .WithOne(i => i.Paciente)
-                .HasForeignKey(i => i.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
+    // === TERAPIAS BIOENERGÉTICAS (ABA 8) ===
+    public DbSet<ProtocoloTerapeutico> ProtocolosTerapeuticos { get; set; } = null!;
+    public DbSet<PlanoTerapia> PlanosTerapia { get; set; } = null!;
+    public DbSet<Terapia> Terapias { get; set; } = null!;
+    public DbSet<SessaoTerapia> SessoesTerapia { get; set; } = null!;
+    public DbSet<LeituraBioenergetica> LeiturasBioenergeticas { get; set; } = null!;
+    public DbSet<EventoHardware> EventosHardware { get; set; } = null!;
+    public DbSet<ImportacaoExcelLog> ImportacoesExcelLog { get; set; } = null!;
 
-      // Relacionamento 1:1 com DeclaracaoSaude
-      entity.HasOne(p => p.DeclaracaoSaude)
-                .WithOne(d => d.Paciente)
-                .HasForeignKey<DeclaracaoSaude>(d => d.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
-    });
+    // === TEMPLATES GLOBAIS E DOCUMENTOS EXTERNOS ===
+    public DbSet<TemplateGlobal> TemplatesGlobais { get; set; } = null!;
+    public DbSet<DocumentoExternoPaciente> DocumentosExternosPacientes { get; set; } = null!;
 
-    // === CONFIGURAÇÃO CONTACTO ===
-    modelBuilder.Entity<Contacto>(entity =>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      entity.HasKey(e => e.Id);
+        base.OnModelCreating(modelBuilder);
 
-      entity.HasIndex(e => e.PacienteId)
-                .IsUnique()
-                .HasDatabaseName("IX_Contactos_PacienteId");
+        // === CONFIGURAÇÃO PACIENTE ===
+        modelBuilder.Entity<Paciente>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.NumeroProcesso)
+                  .IsUnique()
+                  .HasDatabaseName("IX_Pacientes_NumeroProcesso");
 
-      entity.HasIndex(e => e.EmailPrincipal)
-                .HasDatabaseName("IX_Contactos_EmailPrincipal");
-    });
+            entity.HasIndex(e => e.NomeCompleto)
+                  .HasDatabaseName("IX_Pacientes_NomeCompleto");
 
-    // === CONFIGURAÇÃO HISTÓRICO MÉDICO ===
-    modelBuilder.Entity<HistoricoMedico>(entity =>
+            entity.HasIndex(e => e.DataNascimento)
+                  .HasDatabaseName("IX_Pacientes_DataNascimento");
+
+            // Relacionamento 1:1 com Contacto
+            entity.HasOne(p => p.Contacto)
+                  .WithOne(c => c.Paciente)
+                  .HasForeignKey<Contacto>(c => c.PacienteId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamentos 1:N
+            entity.HasMany(p => p.Consultas)
+                  .WithOne(c => c.Paciente)
+                  .HasForeignKey(c => c.PacienteId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(p => p.Consentimentos)
+                  .WithOne(c => c.Paciente)
+                  .HasForeignKey(c => c.PacienteId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(p => p.IrisAnalises)
+                  .WithOne(i => i.Paciente)
+                  .HasForeignKey(i => i.PacienteId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento 1:1 com DeclaracaoSaude
+            entity.HasOne(p => p.DeclaracaoSaude)
+                  .WithOne(d => d.Paciente)
+                  .HasForeignKey<DeclaracaoSaude>(d => d.PacienteId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // === CONFIGURAÇÃO CONTACTO ===
+        modelBuilder.Entity<Contacto>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.PacienteId)
+                  .IsUnique()
+                  .HasDatabaseName("IX_Contactos_PacienteId");
+
+            entity.HasIndex(e => e.EmailPrincipal)
+                  .HasDatabaseName("IX_Contactos_EmailPrincipal");
+        });
+
+        // === CONFIGURAÇÃO CONSULTA ===
+        modelBuilder.Entity<Consulta>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.PacienteId)
+                  .HasDatabaseName("IX_Consultas_PacienteId");
+
+            entity.HasIndex(e => e.DataHoraConsulta)
+                  .HasDatabaseName("IX_Consultas_DataHoraConsulta");
+
+            entity.HasIndex(e => e.TipoConsulta)
+                  .HasDatabaseName("IX_Consultas_TipoConsulta");
+
+            entity.HasIndex(e => e.Estado)
+                  .HasDatabaseName("IX_Consultas_Estado");
+        });
+
+        // === CONFIGURAÇÃO CONSENTIMENTO ===
+        modelBuilder.Entity<Consentimento>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.PacienteId)
+                  .HasDatabaseName("IX_Consentimentos_PacienteId");
+
+            entity.HasIndex(e => e.TipoTratamento)
+                  .HasDatabaseName("IX_Consentimentos_TipoTratamento");
+
+            entity.HasIndex(e => e.Estado)
+                  .HasDatabaseName("IX_Consentimentos_Estado");
+
+            entity.HasIndex(e => e.DataExpiracao)
+                  .HasDatabaseName("IX_Consentimentos_DataExpiracao");
+        });
+
+        // === CONFIGURAÇÃO ÍRIS ANÁLISE ===
+        modelBuilder.Entity<IrisAnalise>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.PacienteId)
+                  .HasDatabaseName("IX_IrisAnalises_PacienteId");
+
+            entity.HasIndex(e => e.DataHoraAnalise)
+                  .HasDatabaseName("IX_IrisAnalises_DataHoraAnalise");
+        });
+
+        // === CONFIGURAÇÃO DECLARAÇÃO DE SAÚDE (ABA 2) ===
+        modelBuilder.Entity<DeclaracaoSaude>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.PacienteId)
+                  .IsUnique()
+                  .HasDatabaseName("IX_DeclaracoesSaude_PacienteId");
+
+            entity.Property(e => e.EspecificacaoOutrasDoencas)
+                  .HasMaxLength(1000);
+
+            entity.Property(e => e.SuplementosAlimentares)
+                  .HasMaxLength(1000);
+
+            entity.Property(e => e.MedicamentosNaturais)
+                  .HasMaxLength(1000);
+        });
+
+        // === CONFIGURAÇÃO SESSÃO (ABA 4 - REGISTO DE CONSULTAS) ===
+        modelBuilder.Entity<Sessao>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Índices para performance
+            entity.HasIndex(e => e.PacienteId)
+                  .HasDatabaseName("IX_Sessoes_PacienteId");
+
+            entity.HasIndex(e => e.DataHora)
+                  .HasDatabaseName("IX_Sessoes_DataHora");
+
+            entity.HasIndex(e => e.IsDeleted)
+                  .HasDatabaseName("IX_Sessoes_IsDeleted");
+
+            // Relacionamento com Paciente
+            entity.HasOne(s => s.Paciente)
+                  .WithMany()
+                  .HasForeignKey(s => s.PacienteId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento com Abordagens (Many-to-Many)
+            entity.HasMany(s => s.Abordagens)
+                  .WithOne(a => a.Sessao)
+                  .HasForeignKey(a => a.SessaoId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Configurações de campos
+            entity.Property(s => s.Motivo)
+                  .IsRequired()
+                  .HasMaxLength(500);
+
+            entity.Property(s => s.Contexto)
+                  .HasMaxLength(1000);
+
+            entity.Property(s => s.Achados)
+                  .HasMaxLength(2000);
+
+            entity.Property(s => s.PressaoArterial)
+                  .HasMaxLength(20);
+
+            entity.Property(s => s.Peso)
+                  .HasPrecision(5, 2); // Ex: 150.50 kg
+
+            entity.Property(s => s.Temperatura)
+                  .HasPrecision(4, 2); // Ex: 36.50 °C
+
+            entity.Property(s => s.OutrasMedicoes)
+                  .HasMaxLength(1000);
+
+            entity.Property(s => s.Avaliacao)
+                  .HasMaxLength(2000);
+
+            entity.Property(s => s.Plano)
+                  .HasMaxLength(3000);
+        });
+
+        // === CONFIGURAÇÃO ABORDAGEM SESSÃO (Many-to-Many) ===
+        modelBuilder.Entity<AbordagemSessao>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Índice composto para garantir unicidade (Sessão + TipoAbordagem)
+            entity.HasIndex(e => new { e.SessaoId, e.TipoAbordagem })
+                  .IsUnique()
+                  .HasDatabaseName("IX_AbordagensSessoes_SessaoId_TipoAbordagem");
+
+            entity.Property(e => e.Observacoes)
+                  .HasMaxLength(1000);
+        });
+
+        // === CONFIGURAÇÃO GLOBAL DA CLÍNICA ===
+        modelBuilder.Entity<ConfiguracaoClinica>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Garantir que existe apenas UMA configuração (Id = 1)
+            entity.Property(e => e.Id)
+                    .ValueGeneratedNever(); // Id não é auto-incremento
+
+            entity.Property(e => e.NomeClinica)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+            entity.Property(e => e.Morada)
+                    .HasMaxLength(500);
+
+            entity.Property(e => e.Telefone)
+                    .HasMaxLength(50);
+
+            entity.Property(e => e.Email)
+                    .HasMaxLength(100);
+
+            entity.Property(e => e.NIPC)
+                    .HasMaxLength(20);
+
+            entity.Property(e => e.LogoPath)
+                    .HasMaxLength(500);
+
+            entity.Property(e => e.DataAtualizacao)
+                    .IsRequired();
+        });
+
+        // === CONFIGURAÇÃO TEMPLATES GLOBAIS ===
+        modelBuilder.Entity<TemplateGlobal>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.Nome)
+                  .HasDatabaseName("IX_TemplatesGlobais_Nome");
+
+            entity.HasIndex(e => e.Tipo)
+                  .HasDatabaseName("IX_TemplatesGlobais_Tipo");
+
+            entity.HasIndex(e => e.Categoria)
+                  .HasDatabaseName("IX_TemplatesGlobais_Categoria");
+
+            entity.HasIndex(e => e.DisponivelEmail)
+                  .HasDatabaseName("IX_TemplatesGlobais_DisponivelEmail");
+
+            entity.HasIndex(e => e.IsDeleted)
+                  .HasDatabaseName("IX_TemplatesGlobais_IsDeleted");
+        });
+
+        // === CONFIGURAÇÃO DOCUMENTOS EXTERNOS PACIENTE ===
+        modelBuilder.Entity<DocumentoExternoPaciente>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.PacienteId)
+                  .HasDatabaseName("IX_DocumentosExternos_PacienteId");
+
+            entity.HasIndex(e => e.DataDocumento)
+                  .HasDatabaseName("IX_DocumentosExternos_DataDocumento");
+
+            entity.HasIndex(e => e.Categoria)
+                  .HasDatabaseName("IX_DocumentosExternos_Categoria");
+
+            entity.HasIndex(e => e.IsDeleted)
+                  .HasDatabaseName("IX_DocumentosExternos_IsDeleted");
+
+            // Relacionamento com Paciente
+            entity.HasOne(d => d.Paciente)
+                  .WithMany()
+                  .HasForeignKey(d => d.PacienteId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // === CONFIGURAÇÃO TERAPIAS BIOENERGÉTICAS ===
+
+        // PlanoTerapia
+        modelBuilder.Entity<PlanoTerapia>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.SessaoId)
+                  .HasDatabaseName("IX_PlanosTerapia_SessaoId");
+
+            entity.HasIndex(e => e.Estado)
+                  .HasDatabaseName("IX_PlanosTerapia_Estado");
+
+            entity.HasIndex(e => e.CriadoEm)
+                  .HasDatabaseName("IX_PlanosTerapia_CriadoEm");
+
+            // Relacionamento com Sessao
+            entity.HasOne(p => p.Sessao)
+                  .WithMany()
+                  .HasForeignKey(p => p.SessaoId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Terapia
+        modelBuilder.Entity<Terapia>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.PlanoTerapiaId)
+                  .HasDatabaseName("IX_Terapias_PlanoTerapiaId");
+
+            entity.HasIndex(e => e.Ordem)
+                  .HasDatabaseName("IX_Terapias_Ordem");
+
+            entity.HasIndex(e => e.ProtocoloTerapeuticoId)
+                  .HasDatabaseName("IX_Terapias_ProtocoloTerapeuticoId");
+
+            // Relacionamento com PlanoTerapia
+            entity.HasOne(t => t.PlanoTerapia)
+                  .WithMany(p => p.Terapias)
+                  .HasForeignKey(t => t.PlanoTerapiaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Relacionamento com ProtocoloTerapeutico
+            entity.HasOne(t => t.ProtocoloTerapeutico)
+                  .WithMany(p => p.Terapias)
+                  .HasForeignKey(t => t.ProtocoloTerapeuticoId)
+                  .OnDelete(DeleteBehavior.Restrict); // Não deletar protocolo se usado em plano
+        });
+
+        // SessaoTerapia
+        modelBuilder.Entity<SessaoTerapia>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Índice composto para ordenação
+            entity.HasIndex(e => new { e.PlanoTerapiaId, e.InicioEm })
+                  .HasDatabaseName("IX_SessoesTerapia_PlanoId_Inicio");
+
+            entity.HasIndex(e => e.TipoRng)
+                  .HasDatabaseName("IX_SessoesTerapia_TipoRng");
+
+            // Relacionamento com PlanoTerapia
+            entity.HasOne(s => s.PlanoTerapia)
+                  .WithMany(p => p.SessoesTerapia)
+                  .HasForeignKey(s => s.PlanoTerapiaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // LeituraBioenergetica
+        modelBuilder.Entity<LeituraBioenergetica>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.SessaoTerapiaId)
+                  .HasDatabaseName("IX_LeiturasBioenergeticas_SessaoTerapiaId");
+
+            entity.HasIndex(e => e.Timestamp)
+                  .HasDatabaseName("IX_LeiturasBioenergeticas_Timestamp");
+
+            // Relacionamento com SessaoTerapia
+            entity.HasOne(l => l.SessaoTerapia)
+                  .WithMany(s => s.Leituras)
+                  .HasForeignKey(l => l.SessaoTerapiaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // EventoHardware
+        modelBuilder.Entity<EventoHardware>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.SessaoTerapiaId)
+                  .HasDatabaseName("IX_EventosHardware_SessaoTerapiaId");
+
+            entity.HasIndex(e => e.Timestamp)
+                  .HasDatabaseName("IX_EventosHardware_Timestamp");
+
+            entity.HasIndex(e => e.TipoEvento)
+                  .HasDatabaseName("IX_EventosHardware_TipoEvento");
+
+            entity.HasIndex(e => e.Severidade)
+                  .HasDatabaseName("IX_EventosHardware_Severidade");
+
+            // Relacionamento com SessaoTerapia
+            entity.HasOne(e => e.SessaoTerapia)
+                  .WithMany(s => s.EventosHardware)
+                  .HasForeignKey(e => e.SessaoTerapiaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ProtocoloTerapeutico (já existe, adicionar índices)
+        modelBuilder.Entity<ProtocoloTerapeutico>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.Nome)
+                  .HasDatabaseName("IX_ProtocolosTerapeuticos_Nome");
+
+            entity.HasIndex(e => e.Categoria)
+                  .HasDatabaseName("IX_ProtocolosTerapeuticos_Categoria");
+
+            entity.HasIndex(e => e.ExternalId)
+                  .IsUnique()
+                  .HasDatabaseName("IX_ProtocolosTerapeuticos_ExternalId");
+        });
+
+        // ImportacaoExcelLog
+        modelBuilder.Entity<ImportacaoExcelLog>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.ImportadoEm)
+                  .HasDatabaseName("IX_ImportacoesExcelLog_ImportadoEm");
+
+            entity.HasIndex(e => e.Sucesso)
+                  .HasDatabaseName("IX_ImportacoesExcelLog_Sucesso");
+        });
+
+        // === DADOS DE SEED ===
+        SeedData(modelBuilder);
+    }
+
+    /// <summary>
+    /// Dados de seed para desenvolvimento e testes
+    /// </summary>
+    private static void SeedData(ModelBuilder modelBuilder)
     {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                .HasDatabaseName("IX_HistoricosMedicos_PacienteId");
-    });
-
-    // === CONFIGURAÇÃO CONSULTA ===
-    modelBuilder.Entity<Consulta>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                .HasDatabaseName("IX_Consultas_PacienteId");
-
-      entity.HasIndex(e => e.DataHoraConsulta)
-                .HasDatabaseName("IX_Consultas_DataHoraConsulta");
-
-      entity.HasIndex(e => e.TipoConsulta)
-                .HasDatabaseName("IX_Consultas_TipoConsulta");
-
-      entity.HasIndex(e => e.Estado)
-                .HasDatabaseName("IX_Consultas_Estado");
-    });
-
-    // === CONFIGURAÇÃO CONSENTIMENTO ===
-    modelBuilder.Entity<Consentimento>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                .HasDatabaseName("IX_Consentimentos_PacienteId");
-
-      entity.HasIndex(e => e.TipoTratamento)
-                .HasDatabaseName("IX_Consentimentos_TipoTratamento");
-
-      entity.HasIndex(e => e.Estado)
-                .HasDatabaseName("IX_Consentimentos_Estado");
-
-      entity.HasIndex(e => e.DataExpiracao)
-                .HasDatabaseName("IX_Consentimentos_DataExpiracao");
-    });
-
-    // === CONFIGURAÇÃO ÍRIS ANÁLISE ===
-    modelBuilder.Entity<IrisAnalise>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                .HasDatabaseName("IX_IrisAnalises_PacienteId");
-
-      entity.HasIndex(e => e.DataHoraAnalise)
-                .HasDatabaseName("IX_IrisAnalises_DataHoraAnalise");
-    });
-
-    // === CONFIGURAÇÃO DECLARAÇÃO DE SAÚDE (ABA 2) ===
-    modelBuilder.Entity<DeclaracaoSaude>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                .IsUnique()
-                .HasDatabaseName("IX_DeclaracoesSaude_PacienteId");
-
-      entity.Property(e => e.EspecificacaoOutrasDoencas)
-                .HasMaxLength(1000);
-
-      entity.Property(e => e.SuplementosAlimentares)
-                .HasMaxLength(1000);
-
-      entity.Property(e => e.MedicamentosNaturais)
-                .HasMaxLength(1000);
-    });
-
-    // === CONFIGURAÇÃO SESSÃO (ABA 4 - REGISTO DE CONSULTAS) ===
-    modelBuilder.Entity<Sessao>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      // Índices para performance
-      entity.HasIndex(e => e.PacienteId)
-                .HasDatabaseName("IX_Sessoes_PacienteId");
-
-      entity.HasIndex(e => e.DataHora)
-                .HasDatabaseName("IX_Sessoes_DataHora");
-
-      entity.HasIndex(e => e.IsDeleted)
-                .HasDatabaseName("IX_Sessoes_IsDeleted");
-
-      // Relacionamento com Paciente
-      entity.HasOne(s => s.Paciente)
-                .WithMany()
-                .HasForeignKey(s => s.PacienteId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-      // Relacionamento com Abordagens (Many-to-Many)
-      entity.HasMany(s => s.Abordagens)
-                .WithOne(a => a.Sessao)
-                .HasForeignKey(a => a.SessaoId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-      // Configurações de campos
-      entity.Property(s => s.Motivo)
-                .IsRequired()
-                .HasMaxLength(500);
-
-      entity.Property(s => s.Contexto)
-                .HasMaxLength(1000);
-
-      entity.Property(s => s.Achados)
-                .HasMaxLength(2000);
-
-      entity.Property(s => s.PressaoArterial)
-                .HasMaxLength(20);
-
-      entity.Property(s => s.Peso)
-                .HasPrecision(5, 2); // Ex: 150.50 kg
-
-      entity.Property(s => s.Temperatura)
-                .HasPrecision(4, 2); // Ex: 36.50 °C
-
-      entity.Property(s => s.OutrasMedicoes)
-                .HasMaxLength(1000);
-
-      entity.Property(s => s.Avaliacao)
-                .HasMaxLength(2000);
-
-      entity.Property(s => s.Plano)
-                .HasMaxLength(3000);
-    });
-
-    // === CONFIGURAÇÃO ABORDAGEM SESSÃO (Many-to-Many) ===
-    modelBuilder.Entity<AbordagemSessao>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      // Índice composto para garantir unicidade (Sessão + TipoAbordagem)
-      entity.HasIndex(e => new { e.SessaoId, e.TipoAbordagem })
-                .IsUnique()
-                .HasDatabaseName("IX_AbordagensSessoes_SessaoId_TipoAbordagem");
-
-      entity.Property(e => e.Observacoes)
-                .HasMaxLength(1000);
-    });
-
-    // === DADOS DE SEED ===
-    SeedData(modelBuilder);
-  }
-
-  /// <summary>
-  /// Dados de seed para desenvolvimento e testes
-  /// </summary>
-  private static void SeedData(ModelBuilder modelBuilder)
-  {
-    // SEED: 3 Pacientes base para desenvolvimento
-    var pacientes = new[]
-    {
+        // SEED: 3 Pacientes base para desenvolvimento
+        var pacientes = new[]
+        {
             new Paciente
             {
                 Id = 1,
@@ -308,11 +525,11 @@ public class BioDeskDbContext : DbContext
             }
         };
 
-    modelBuilder.Entity<Paciente>().HasData(pacientes);
+        modelBuilder.Entity<Paciente>().HasData(pacientes);
 
-    // SEED: Contactos para os pacientes
-    var contactos = new[]
-    {
+        // SEED: Contactos para os pacientes
+        var contactos = new[]
+        {
             new Contacto
             {
                 Id = 1,
@@ -354,11 +571,11 @@ public class BioDeskDbContext : DbContext
             }
         };
 
-    modelBuilder.Entity<Contacto>().HasData(contactos);
+        modelBuilder.Entity<Contacto>().HasData(contactos);
 
-    // SEED: Sessões de exemplo (Aba 4: Registo de Consultas)
-    var sessoes = new[]
-    {
+        // SEED: Sessões de exemplo (Aba 4: Registo de Consultas)
+        var sessoes = new[]
+        {
             // Sessões para João Santos (ID=1)
             new Sessao
             {
@@ -408,7 +625,7 @@ public class BioDeskDbContext : DbContext
                 CriadoEm = DateTime.Now.AddDays(-10),
                 IsDeleted = false
             },
-            
+
             // Sessões para Maria Costa (ID=2)
             new Sessao
             {
@@ -443,7 +660,7 @@ public class BioDeskDbContext : DbContext
                 CriadoEm = DateTime.Now.AddDays(-1),
                 IsDeleted = false
             },
-            
+
             // Sessão para Carlos Pereira (ID=3) - Multi-abordagem
             new Sessao
             {
@@ -465,105 +682,49 @@ public class BioDeskDbContext : DbContext
             }
         };
 
-    modelBuilder.Entity<Sessao>().HasData(sessoes);
+        modelBuilder.Entity<Sessao>().HasData(sessoes);
 
-    // SEED: Abordagens terapêuticas aplicadas nas sessões
-    var abordagensSessoes = new[]
-    {
+        // SEED: Abordagens terapêuticas aplicadas nas sessões
+        var abordagensSessoes = new[]
+        {
             // Sessão 1 (João) - Osteopatia
             new AbordagemSessao { Id = 1, SessaoId = 1, TipoAbordagem = TipoAbordagem.Osteopatia },
-            
+
             // Sessão 2 (João) - Osteopatia
             new AbordagemSessao { Id = 2, SessaoId = 2, TipoAbordagem = TipoAbordagem.Osteopatia },
-            
+
             // Sessão 3 (João) - Naturopatia + Medicina Bioenergética
             new AbordagemSessao { Id = 3, SessaoId = 3, TipoAbordagem = TipoAbordagem.Naturopatia, Observacoes = "Suplementação adaptogénica" },
             new AbordagemSessao { Id = 4, SessaoId = 3, TipoAbordagem = TipoAbordagem.MedicinaBioenergetica, Observacoes = "Equilíbrio energético" },
-            
+
             // Sessão 4 (Maria) - Osteopatia
             new AbordagemSessao { Id = 5, SessaoId = 4, TipoAbordagem = TipoAbordagem.Osteopatia },
-            
+
             // Sessão 5 (Maria) - Osteopatia + Iridologia
             new AbordagemSessao { Id = 6, SessaoId = 5, TipoAbordagem = TipoAbordagem.Osteopatia },
             new AbordagemSessao { Id = 7, SessaoId = 5, TipoAbordagem = TipoAbordagem.Iridologia, Observacoes = "Análise constitucional" },
-            
+
             // Sessão 6 (Carlos) - Multi-abordagem (Osteopatia + Mesoterapia + Naturopatia)
             new AbordagemSessao { Id = 8, SessaoId = 6, TipoAbordagem = TipoAbordagem.Osteopatia, Observacoes = "Técnicas articulares joelhos e ombro" },
             new AbordagemSessao { Id = 9, SessaoId = 6, TipoAbordagem = TipoAbordagem.Mesoterapia, Observacoes = "Infiltrações anti-inflamatórias" },
             new AbordagemSessao { Id = 10, SessaoId = 6, TipoAbordagem = TipoAbordagem.Naturopatia, Observacoes = "Protocolo anti-inflamatório oral" }
         };
 
-    modelBuilder.Entity<AbordagemSessao>().HasData(abordagensSessoes);
+        modelBuilder.Entity<AbordagemSessao>().HasData(abordagensSessoes);
 
-    // === CONFIGURAÇÃO COMUNICAÇÃO (ABA 5) ===
-    modelBuilder.Entity<Comunicacao>(entity =>
-    {
-      entity.HasKey(e => e.Id);
+        // SEED: Configuração Global da Clínica (Id fixo = 1)
+        var configuracaoClinica = new ConfiguracaoClinica
+        {
+            Id = 1,
+            NomeClinica = "Minha Clínica",
+            Morada = null,
+            Telefone = null,
+            Email = null,
+            NIPC = null,
+            LogoPath = null,
+            DataAtualizacao = DateTime.UtcNow
+        };
 
-      // Índices para performance
-      entity.HasIndex(e => e.PacienteId)
-                  .HasDatabaseName("IX_Comunicacoes_PacienteId");
-
-      entity.HasIndex(e => e.DataEnvio)
-                  .HasDatabaseName("IX_Comunicacoes_DataEnvio");
-
-      entity.HasIndex(e => new { e.IsEnviado, e.ProximaTentativa })
-                  .HasDatabaseName("IX_Comunicacoes_FilaRetry");
-
-      entity.HasIndex(e => e.Status)
-                  .HasDatabaseName("IX_Comunicacoes_Status");
-
-      // Relacionamento com Paciente
-      entity.HasOne(c => c.Paciente)
-                  .WithMany()
-                  .HasForeignKey(c => c.PacienteId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-      // Relacionamento com Anexos
-      entity.HasMany(c => c.Anexos)
-                  .WithOne(a => a.Comunicacao)
-                  .HasForeignKey(a => a.ComunicacaoId)
-                  .OnDelete(DeleteBehavior.Cascade);
-    });
-
-    modelBuilder.Entity<AnexoComunicacao>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.ComunicacaoId)
-                  .HasDatabaseName("IX_AnexosComunicacoes_ComunicacaoId");
-    });
-
-    // === CONFIGURAÇÃO IRISDIAGNÓSTICO ===
-    modelBuilder.Entity<IrisImagem>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.PacienteId)
-                  .HasDatabaseName("IX_IrisImagens_PacienteId");
-
-      entity.HasIndex(e => e.DataCaptura)
-                  .HasDatabaseName("IX_IrisImagens_DataCaptura");
-
-      // Relacionamento com Paciente
-      entity.HasOne(i => i.Paciente)
-                  .WithMany()
-                  .HasForeignKey(i => i.PacienteId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-      // Relacionamento com Marcas
-      entity.HasMany(i => i.Marcas)
-                  .WithOne(m => m.IrisImagem)
-                  .HasForeignKey(m => m.IrisImagemId)
-                  .OnDelete(DeleteBehavior.Cascade);
-    });
-
-    modelBuilder.Entity<IrisMarca>(entity =>
-    {
-      entity.HasKey(e => e.Id);
-
-      entity.HasIndex(e => e.IrisImagemId)
-                  .HasDatabaseName("IX_IrisMarcas_IrisImagemId");
-    });
-  }
+        modelBuilder.Entity<ConfiguracaoClinica>().HasData(configuracaoClinica);
+    }
 }

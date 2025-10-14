@@ -13,7 +13,7 @@ namespace BioDesk.Services;
 /// <summary>
 /// Serviço de câmara com captura REAL usando AForge.NET DirectShow
 /// </summary>
-public class RealCameraService : ICameraService, IDisposable
+public sealed class RealCameraService : ICameraService, IDisposable
 {
     private bool _isPreviewRunning;
     private CameraInfo? _activeCamera;
@@ -247,19 +247,57 @@ public class RealCameraService : ICameraService, IDisposable
 
     public void Dispose()
     {
-        if (_disposed) return;
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-        // ✅ CORRETO: SignalToStop() é síncrono, evita .Wait() deadlock
-        if (_videoSource != null && _videoSource.IsRunning)
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
         {
-            _videoSource.SignalToStop();
-            _videoSource.NewFrame -= OnNewFrameReceived;
-            _videoSource = null;
+            return;
         }
 
-        _lastCapturedFrame?.Dispose();
-        _isPreviewRunning = false;
-        _activeCamera = null;
+        if (disposing)
+        {
+            _isPreviewRunning = false;
+
+            if (_videoSource != null)
+            {
+                try
+                {
+                    if (_videoSource.IsRunning)
+                    {
+                        _videoSource.SignalToStop();
+
+                        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                        while (_videoSource.IsRunning && stopwatch.ElapsedMilliseconds < 2000)
+                        {
+                            System.Threading.Thread.Sleep(50);
+                        }
+
+                        if (_videoSource.IsRunning)
+                        {
+                            _videoSource.Stop();
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignorar erros de paragem durante dispose
+                }
+                finally
+                {
+                    _videoSource.NewFrame -= OnNewFrameReceived;
+                    _videoSource = null;
+                }
+            }
+
+            _lastCapturedFrame?.Dispose();
+            _lastCapturedFrame = null;
+            _activeCamera = null;
+        }
+
         _disposed = true;
     }
 }

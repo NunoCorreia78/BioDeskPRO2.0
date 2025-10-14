@@ -26,8 +26,8 @@ public class TemplateService : ITemplateService
         _logger = logger;
         _pacienteRepository = pacienteRepository;
 
-        // Pasta Templates/ na raiz do projeto
-        _templatesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "Templates");
+        // Usar PathService para obter caminho dos templates (funciona em Debug e Release)
+        _templatesPath = PathService.TemplatesPath;
         _logger.LogInformation("TemplateService inicializado. Pasta templates: {Path}", _templatesPath);
     }
 

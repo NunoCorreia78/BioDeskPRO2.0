@@ -31,6 +31,49 @@ public partial class IrisdiagnosticoUserControl : UserControl
         {
             _dragDebugService = app.ServiceProvider.GetService<IDragDebugService>();
         }
+
+        // ✅ CRÍTICO: Libertar mouse capture quando UserControl fica invisível
+        // Resolve bug onde manipulação da íris bloqueia cliques em outras abas
+        this.IsVisibleChanged += IrisdiagnosticoUserControl_IsVisibleChanged;
+    }
+
+    /// <summary>
+    /// ✅ CORREÇÃO CRÍTICA: Reset completo quando UserControl fica invisível
+    /// Previne que Canvas capturado bloqueie cliques em outras abas
+    /// </summary>
+    private void IrisdiagnosticoUserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        // Quando fica invisível, libertar TODOS os captures
+        if (this.Visibility != Visibility.Visible)
+        {
+            // Reset estado de drag do mapa
+            if (_isDraggingMapa)
+            {
+                _isDraggingMapa = false;
+                if (MapaOverlayCanvas != null)
+                {
+                    MapaOverlayCanvas.Cursor = Cursors.Arrow;
+                    MapaOverlayCanvas.ReleaseMouseCapture();
+                }
+            }
+
+            // Reset estado de desenho
+            if (_isDrawing)
+            {
+                _isDrawing = false;
+                if (DesenhoCanvas != null)
+                {
+                    DesenhoCanvas.ReleaseMouseCapture();
+                }
+            }
+
+            // ✅ Libertar capture de QUALQUER elemento que possa estar capturado
+            // Força WPF a limpar o estado global de mouse capture
+            if (Mouse.Captured != null)
+            {
+                Mouse.Capture(null);
+            }
+        }
     }
 
     /// <summary>
@@ -203,8 +246,8 @@ public partial class IrisdiagnosticoUserControl : UserControl
         // Atualizar posição do handler
         if (_currentHandler is IrisdiagnosticoViewModel.CalibrationHandler handler)
         {
-            handler.X = position.X - 8; // -8 para centralizar ellipse 16x16
-            handler.Y = position.Y - 8;
+            handler.X = position.X - 11; // -11 para centralizar ellipse 22x22
+            handler.Y = position.Y - 11;
 
 #if DEBUG
             System.Diagnostics.Debug.WriteLine($"📍 POSITION UPDATE: X={handler.X:F2}, Y={handler.Y:F2}");
@@ -352,7 +395,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
             metrics,
             BuildContext(viewModel, modo));
 
-        MapaOverlayCanvas.CaptureMouse();
+        MapaOverlayCanvas?.CaptureMouse();
         e.Handled = true;
     }
 
@@ -456,7 +499,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
             MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
         }
 
-        MapaOverlayCanvas.ReleaseMouseCapture();
+        MapaOverlayCanvas?.ReleaseMouseCapture();
         e.Handled = true;
     }
 
@@ -508,7 +551,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
                 MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
             }
 
-            MapaOverlayCanvas.ReleaseMouseCapture();
+            MapaOverlayCanvas?.ReleaseMouseCapture();
         }
     }
 

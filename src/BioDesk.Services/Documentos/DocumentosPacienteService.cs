@@ -29,10 +29,8 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
     {
         _logger = logger;
 
-        // ✅ CORREÇÃO CRÍTICA: Subir da pasta bin/Debug/net8.0-windows até raiz do projeto
-        // bin\Debug\net8.0-windows → bin\Debug → bin → BioDesk.App → src → RAIZ
-        var binDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        _baseDirectory = Path.GetFullPath(Path.Combine(binDirectory, "..", "..", "..", "..", ".."));
+        // ✅ Usar PathService para obter caminho correto (Debug/Release)
+        _baseDirectory = PathService.AppDataPath;
     }
 
     public async Task<List<DocumentoPaciente>> ObterDocumentosDoPacienteAsync(int pacienteId, string nomePaciente)
@@ -56,8 +54,8 @@ public sealed class DocumentosPacienteService : IDocumentosPacienteService
 
         try
         {
-            // ✅ Buscar APENAS na pasta específica do paciente (BaseDirectory\Pacientes\[Nome]\)
-            var pastaPacienteRaiz = Path.Combine(_baseDirectory, "Pacientes");
+            // ✅ Usar PathService para obter pasta de Pacientes (Debug/Release)
+            var pastaPacienteRaiz = Path.Combine(PathService.DocumentosPath, "Pacientes");
             logLines.Add($"PastaPacienteRaiz: {pastaPacienteRaiz}");
             logLines.Add($"Pasta existe? {Directory.Exists(pastaPacienteRaiz)}");
 
