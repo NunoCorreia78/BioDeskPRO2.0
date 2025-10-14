@@ -53,4 +53,9 @@ public interface IProtocoloRepository
     /// Conta total de protocolos ativos
     /// </summary>
     Task<int> CountActiveAsync();
+
+    /// <summary>
+    /// Regista log de importação Excel
+    /// </summary>
+    Task AddImportLogAsync(string nomeArquivo, int totalLinhas, int sucessos, int erros, string? mensagemErro = null);
 }

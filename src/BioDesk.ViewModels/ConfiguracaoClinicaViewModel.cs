@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
@@ -12,6 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 using BioDesk.Data.Repositories;
 using BioDesk.Domain.Entities;
 using BioDesk.Services;
+using BioDesk.Services.Backup;
 using BioDesk.ViewModels.Base;
 using BioDesk.ViewModels.Validators;
 
@@ -27,6 +29,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     private readonly ILogger<ConfiguracaoClinicaViewModel> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
+    private readonly IBackupService? _backupService;
     private ConfiguracaoClinica? _configuracaoOriginal; // Para guardar logo antigo
 
     #region === PROPRIEDADES - DADOS DA CLÍNICA ===
@@ -81,6 +84,15 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     [ObservableProperty]
     private string? _errorMessage;
 
+    [ObservableProperty]
+    private ObservableCollection<BackupMetadata> _backupsDisponiveis = new();
+
+    [ObservableProperty]
+    private string _ultimoBackupInfo = string.Empty;
+
+    [ObservableProperty]
+    private bool _temBackups = false;
+
     #endregion
 
     #region === EVENTOS ===
@@ -95,16 +107,21 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     public ConfiguracaoClinicaViewModel(
         IUnitOfWork unitOfWork,
         IConfiguration configuration,
-        ILogger<ConfiguracaoClinicaViewModel> logger)
+        ILogger<ConfiguracaoClinicaViewModel> logger,
+        IBackupService backupService)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _backupService = backupService ?? throw new ArgumentNullException(nameof(backupService));
 
         _logger.LogInformation("📋 ConfiguracaoClinicaViewModel inicializado");
 
         // Carregar configuração existente
         _ = CarregarConfiguracaoAsync();
+
+        // Carregar lista de backups disponíveis
+        _ = AtualizarListaBackupsAsync();
     }
 
     #region === COMANDOS ===
@@ -545,6 +562,152 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             _logger.LogError(ex, "Erro ao adicionar template PDF");
             ErrorMessage = $"Erro ao adicionar template: {ex.Message}";
             MessageBox.Show($"Erro ao adicionar template: {ex.Message}", "Templates PDF", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    #endregion
+
+    #region === COMANDOS: BACKUP & RESTORE ===
+
+    [RelayCommand]
+    private async Task CriarBackupAsync()
+    {
+        if (_backupService == null)
+        {
+            MessageBox.Show("⚠️ Serviço de backup não disponível.", "Backup", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            IsLoading = true;
+            var resultado = await _backupService.CreateBackupAsync(incluirDocumentos: true, incluirTemplates: true);
+
+            if (resultado.Sucesso)
+            {
+                TesteSucessoMessage = $"✅ Backup criado! {resultado.TamanhoFormatado}";
+                MessageBox.Show(
+                    $"✅ Backup criado com sucesso!\n\n📂 {Path.GetFileName(resultado.CaminhoZip)}\n💾 {resultado.TamanhoFormatado}\n📦 {resultado.NumeroFicheiros} ficheiros",
+                    "Backup", MessageBoxButton.OK, MessageBoxImage.Information);
+                await AtualizarListaBackupsAsync();
+            }
+            else
+            {
+                ErrorMessage = $"❌ Erro: {resultado.Erro}";
+                MessageBox.Show($"❌ Erro ao criar backup:\n\n{resultado.Erro}", "Backup", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao criar backup");
+            ErrorMessage = $"❌ Erro: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RestaurarBackupAsync()
+    {
+        if (_backupService == null) return;
+
+        var confirmacao = MessageBox.Show(
+            "⚠️ ATENÇÃO!\n\nRestaurar um backup irá SUBSTITUIR todos os dados atuais.\nUm backup de segurança será criado antes.\n\nContinuar?",
+            "Restaurar Backup", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+
+        if (confirmacao != MessageBoxResult.Yes) return;
+
+        try
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Selecionar Backup",
+                Filter = "Ficheiros ZIP (*.zip)|*.zip",
+                InitialDirectory = PathService.BackupsPath
+            };
+
+            if (dialog.ShowDialog() != true) return;
+
+            IsLoading = true;
+            var resultado = await _backupService.RestoreBackupAsync(dialog.FileName, validarIntegridade: true);
+
+            if (resultado.Sucesso)
+            {
+                var mensagem = $"✅ Backup restaurado com sucesso!\n\n" +
+                               $"📂 Ficheiros restaurados: {resultado.FicheirosRestaurados}\n" +
+                               $"⏱️ Duração: {resultado.Duracao.TotalSeconds:N1}s\n\n" +
+                               $"⚠️ IMPORTANTE:\n" +
+                               $"A aplicação PRECISA ser reiniciada agora!\n\n" +
+                               $"Clique OK para fechar a aplicação.";
+
+                MessageBox.Show(mensagem, "Backup Restaurado", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                // Fechar aplicação após restore
+                System.Windows.Application.Current.Shutdown();
+            }
+            else
+            {
+                MessageBox.Show($"❌ Erro ao restaurar backup:\n\n{resultado.Erro}",
+                    "Restaurar Backup", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao restaurar backup");
+            MessageBox.Show($"❌ Erro: {ex.Message}", "Restaurar Backup", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private void AbrirPastaBackups()
+    {
+        try
+        {
+            var pasta = PathService.BackupsPath;
+            if (!Directory.Exists(pasta)) Directory.CreateDirectory(pasta);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = pasta,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao abrir pasta de backups");
+            MessageBox.Show($"Erro: {ex.Message}", "Backups", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task AtualizarListaBackupsAsync()
+    {
+        if (_backupService == null) return;
+
+        try
+        {
+            var backups = await _backupService.ListBackupsAsync();
+            BackupsDisponiveis.Clear();
+            foreach (var backup in backups) BackupsDisponiveis.Add(backup);
+            TemBackups = BackupsDisponiveis.Count > 0;
+            if (TemBackups)
+            {
+                var ultimo = BackupsDisponiveis.First();
+                UltimoBackupInfo = $"Último: {ultimo.DataFormatada} ({ultimo.TamanhoFormatado})";
+            }
+            else
+            {
+                UltimoBackupInfo = "Nenhum backup disponível";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao listar backups");
         }
     }
 

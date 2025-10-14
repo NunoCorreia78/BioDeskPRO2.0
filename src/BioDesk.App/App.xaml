@@ -14,6 +14,8 @@
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:GreaterThanConverter x:Key="GreaterThanConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverterCollapsed"
                                                   NullValue="Collapsed" NotNullValue="Visible"/>
@@ -37,6 +39,7 @@
         <SolidColorBrush x:Key="TextoPrincipal">#3F4A3D</SolidColorBrush>
         <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
         <SolidColorBrush x:Key="BotaoPrincipal">#9CAF97</SolidColorBrush>
+        <SolidColorBrush x:Key="BotaoPrimarioBrush">#9CAF97</SolidColorBrush>
         <SolidColorBrush x:Key="BotaoPrincipalHover">#879B83</SolidColorBrush>
     <SolidColorBrush x:Key="BotaoHover">#879B83</SolidColorBrush>
     <SolidColorBrush x:Key="HoverBrush">#EDF2EB</SolidColorBrush>

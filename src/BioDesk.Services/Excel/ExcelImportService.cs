@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using BioDesk.Data.Repositories;
@@ -38,12 +39,12 @@ public class ExcelImportService : IExcelImportService
                 if (!File.Exists(filePath)) return (false, "Não encontrado");
                 var ext = Path.GetExtension(filePath).ToLowerInvariant();
                 if (ext != ".xls" && ext != ".xlsx") return (false, "Formato inválido");
-                
+
                 using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
                 using var reader = ExcelReaderFactory.CreateReader(stream);
                 var dataset = reader.AsDataSet();
                 var table = dataset.Tables[0];
-                
+
                 return table.Rows.Count >= 2 ? (true, string.Empty) : (false, "Vazio");
             }
             catch (Exception ex) { return (false, ex.Message); }
@@ -57,7 +58,7 @@ public class ExcelImportService : IExcelImportService
             var previews = new List<PreviewLine>();
             var erros = new List<string>();
             var warnings = new List<string>();
-            
+
             try
             {
                 var (isValid, errorMessage) = ValidateFileAsync(filePath).Result;
@@ -71,7 +72,7 @@ public class ExcelImportService : IExcelImportService
                 using var reader = ExcelReaderFactory.CreateReader(stream);
                 var dataset = reader.AsDataSet();
                 var table = dataset.Tables[0];
-                
+
                 int totalLinhas = table.Rows.Count;
                 int linhasValidas = 0, linhasWarnings = 0, linhasErros = 0;
 
@@ -84,7 +85,7 @@ public class ExcelImportService : IExcelImportService
                     var nomePt = MedicalTermsTranslator.TranslateToPortuguese(diseaseEn);
                     var freqs = ExtractFrequenciesFromRow(row);
                     linhasValidas++;
-                    
+
                     previews.Add(new PreviewLine
                     {
                         NumeroLinha = i + 1,
@@ -111,14 +112,14 @@ public class ExcelImportService : IExcelImportService
         var stopwatch = Stopwatch.StartNew();
         var erros = new List<string>();
         var warnings = new List<string>();
-        
+
         try
         {
             using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
             using var reader = ExcelReaderFactory.CreateReader(stream);
             var dataset = reader.AsDataSet();
             var table = dataset.Tables[0];
-            
+
             int totalLinhas = table.Rows.Count - 1;
             int linhasOk = 0, linhasWarnings = 0, linhasErros = 0;
 
@@ -132,9 +133,13 @@ public class ExcelImportService : IExcelImportService
                 var freqs = ExtractFrequenciesFromRow(row);
                 if (freqs.Count == 0) continue;
 
+                // Gerar hash estável para ExternalId (idempotência)
+                var frequenciasStr = string.Join(";", freqs.OrderBy(f => f).Select(f => f.ToString("F2", CultureInfo.InvariantCulture)));
+                var externalId = GerarHashEstavel(nomePt, "Geral", frequenciasStr);
+
                 var protocolo = new ProtocoloTerapeutico
                 {
-                    ExternalId = Guid.NewGuid().ToString(),
+                    ExternalId = externalId,
                     Nome = nomePt,
                     Categoria = "Geral",
                     CriadoEm = DateTime.UtcNow,
@@ -144,16 +149,44 @@ public class ExcelImportService : IExcelImportService
                 protocolo.SetFrequencias(freqs.ToArray());
                 await _protocoloRepository.UpsertAsync(protocolo);
                 linhasOk++;
-                
-                if (linhasOk % 100 == 0) _logger.LogInformation("{Ok}/{Total}", linhasOk, totalLinhas);
             }
 
             stopwatch.Stop();
+
+            // Registar log de importação (sucesso)
+            var fileName = Path.GetFileName(filePath);
+            await _protocoloRepository.AddImportLogAsync(
+                nomeArquivo: fileName,
+                totalLinhas: totalLinhas,
+                sucessos: linhasOk,
+                erros: linhasErros,
+                mensagemErro: null
+            );
+
             return new ExcelImportResult { Sucesso = true, TotalLinhas = totalLinhas, LinhasOk = linhasOk, LinhasWarnings = linhasWarnings, LinhasErros = linhasErros, DuracaoSegundos = stopwatch.Elapsed.TotalSeconds, Erros = erros, Warnings = warnings };
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
+
+            // Registar log de importação (erro)
+            try
+            {
+                var fileName = Path.GetFileName(filePath);
+                await _protocoloRepository.AddImportLogAsync(
+                    nomeArquivo: fileName,
+                    totalLinhas: 0,
+                    sucessos: 0,
+                    erros: 1,
+                    mensagemErro: ex.Message
+                );
+            }
+            catch (Exception logEx)
+            {
+                // Log failure silencioso - não queremos mascarar o erro original
+                System.Diagnostics.Debug.WriteLine($"Erro ao registar log: {logEx.Message}");
+            }
+
             return new ExcelImportResult { Sucesso = false, MensagemErro = ex.Message, DuracaoSegundos = stopwatch.Elapsed.TotalSeconds, Erros = erros, Warnings = warnings };
         }
     }
@@ -170,5 +203,22 @@ public class ExcelImportService : IExcelImportService
                 freqs.Add(freq);
         }
         return freqs;
+    }
+
+    /// <summary>
+    /// Gera hash estável (SHA256) para ExternalId baseado em nome+categoria+frequências
+    /// Garante idempotência: mesmos dados = mesmo GUID
+    /// </summary>
+    private string GerarHashEstavel(string nome, string categoria, string frequenciasStr)
+    {
+        var input = $"{nome.ToLowerInvariant()}|{categoria.ToLowerInvariant()}|{frequenciasStr}";
+        using var sha256 = SHA256.Create();
+        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+        // Converter primeiros 16 bytes para GUID
+        var guidBytes = hashBytes.Take(16).ToArray();
+        var guid = new Guid(guidBytes);
+
+        return guid.ToString();
     }
 }

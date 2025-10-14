@@ -17,6 +17,8 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
     private IntPtr _deviceHandle = IntPtr.Zero;
     private bool _disposed = false;
     private readonly object _lockObject = new object();
+    private bool _sdkAvailable = false;
+    private string _initializationError = string.Empty;
 
     #region P/Invoke Declarations
 
@@ -84,7 +86,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
     // === CONSTANTES ===
     private const uint IDKIND_INDEX = 0;
     private const uint DEVICETYPE_GENERATOR = 0x00000002;
-    
+
     // Signal Types (LibTiePie SDK)
     private const uint ST_SINE = 0x00000001;
     private const uint ST_TRIANGLE = 0x00000002;
@@ -96,24 +98,27 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
     public RealTiePieHardwareService(ILogger<RealTiePieHardwareService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
+
         try
         {
             _logger.LogInformation("🔌 RealTiePieHardwareService: Inicializando LibTiePie SDK...");
             LibInit();
-            
+
             var version = LibGetVersion();
             _logger.LogInformation("✅ LibTiePie SDK v{Version} inicializado com sucesso", version);
+            _sdkAvailable = true;
         }
         catch (DllNotFoundException ex)
         {
-            _logger.LogError(ex, "❌ libtiepie.dll NÃO ENCONTRADO! Instale o LibTiePie SDK.");
-            throw new InvalidOperationException("LibTiePie SDK não encontrado. Instale o driver TiePie.", ex);
+            _initializationError = "libtiepie.dll não encontrado. Instale o LibTiePie SDK.";
+            _logger.LogWarning(ex, "⚠️ {Error}", _initializationError);
+            // NÃO lançar exceção - permitir que o serviço funcione em modo "SDK indisponível"
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao inicializar LibTiePie SDK");
-            throw;
+            _initializationError = $"Erro ao inicializar LibTiePie SDK: {ex.Message}";
+            _logger.LogWarning(ex, "⚠️ {Error}", _initializationError);
+            // NÃO lançar exceção - permitir que o serviço funcione em modo "SDK indisponível"
         }
     }
 
@@ -123,13 +128,24 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
         {
             lock (_lockObject)
             {
+                // Verificar se SDK está disponível
+                if (!_sdkAvailable)
+                {
+                    _logger.LogWarning("⚠️ LibTiePie SDK indisponível: {Error}", _initializationError);
+                    return new HardwareStatus
+                    {
+                        IsConnected = false,
+                        ErrorMessage = _initializationError
+                    };
+                }
+
                 try
                 {
                     _logger.LogInformation("📡 GetStatus: Detectando dispositivos TiePie...");
-                    
+
                     LstUpdate();
                     var deviceCount = LstGetCount();
-                    
+
                     if (deviceCount == 0)
                     {
                         _logger.LogWarning("⚠️ Nenhum dispositivo TiePie detectado via USB");
@@ -142,7 +158,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
 
                     // Abrir primeiro dispositivo
                     _deviceHandle = LstOpenDevice(IDKIND_INDEX, 0, DEVICETYPE_GENERATOR);
-                    
+
                     if (_deviceHandle == IntPtr.Zero)
                     {
                         _logger.LogError("❌ Falha ao abrir dispositivo TiePie (handle nulo)");
@@ -155,13 +171,13 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
 
                     // Obter informações do dispositivo
                     var serialNumber = LstDevGetSerialNumber(IDKIND_INDEX, 0);
-                    
+
                     var nameBuffer = Marshal.AllocHGlobal(256);
                     LstDevGetNameShort(IDKIND_INDEX, 0, nameBuffer, 256);
                     var deviceName = Marshal.PtrToStringAnsi(nameBuffer) ?? "TiePie Handyscope HS5";
                     Marshal.FreeHGlobal(nameBuffer);
 
-                    _logger.LogInformation("✅ Dispositivo conectado: {DeviceName} (S/N: {SerialNumber})", 
+                    _logger.LogInformation("✅ Dispositivo conectado: {DeviceName} (S/N: {SerialNumber})",
                         deviceName, serialNumber);
 
                     return new HardwareStatus
@@ -191,6 +207,12 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
     {
         if (config == null)
             throw new ArgumentNullException(nameof(config));
+
+        if (!_sdkAvailable)
+        {
+            _logger.LogWarning("⚠️ LibTiePie SDK indisponível. Não é possível enviar sinal.");
+            return false;
+        }
 
         if (!config.IsValid())
         {
@@ -224,7 +246,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
                         SignalWaveform.Sawtooth => ST_SAWTOOTH,
                         _ => ST_SINE
                     };
-                    
+
                     if (!GenSetSignalType(_deviceHandle, signalType))
                     {
                         _logger.LogError("❌ Falha ao configurar forma de onda");
@@ -283,6 +305,12 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
 
     public async Task StopAllChannelsAsync()
     {
+        if (!_sdkAvailable)
+        {
+            _logger.LogWarning("⚠️ LibTiePie SDK indisponível. Não é possível parar canais.");
+            return;
+        }
+
         await Task.Run(() =>
         {
             lock (_lockObject)
@@ -290,7 +318,7 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
                 try
                 {
                     _logger.LogInformation("🛑 Parando todos os canais...");
-                    
+
                     if (_deviceHandle != IntPtr.Zero)
                     {
                         GenStop(_deviceHandle);
@@ -313,6 +341,12 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
         SignalWaveform waveform = SignalWaveform.Sine,
         double durationPerFreqSeconds = 60.0)
     {
+        if (!_sdkAvailable)
+        {
+            _logger.LogWarning("⚠️ LibTiePie SDK indisponível. Não é possível enviar frequências.");
+            return false;
+        }
+
         if (frequencies == null || frequencies.Length == 0)
             throw new ArgumentException("Array de frequências vazio", nameof(frequencies));
 
@@ -347,6 +381,12 @@ public class RealTiePieHardwareService : ITiePieHardwareService, IDisposable
 
     public async Task<bool> TestHardwareAsync()
     {
+        if (!_sdkAvailable)
+        {
+            _logger.LogWarning("⚠️ LibTiePie SDK indisponível. Teste de hardware não pode ser executado.");
+            return false;
+        }
+
         _logger.LogInformation("🧪 Teste de hardware: 1 kHz, 1V, Sine, 2s");
 
         var testConfig = new SignalConfiguration

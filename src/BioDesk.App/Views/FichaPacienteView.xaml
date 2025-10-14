@@ -350,8 +350,7 @@
           Command="{Binding NavegarParaAbaCommand}"
           CommandParameter="8"
           Content="🌿 Terapias"
-          IsEnabled="True"
-          ToolTip="Terapias Bioenergéticas (RNG + TiePie HS5)">
+          ToolTip="Gestão de protocolos terapêuticos bioenergéticos">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
@@ -419,12 +418,8 @@
           Panel.ZIndex="20"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=6}" />
 
-        <!--  UserControl para Aba 8: Terapias Bioenergéticas (RNG + TiePie HS5)  -->
-        <abas:TerapiasUserControl
-          x:Name="TerapiasUserControl"
-          Panel.ZIndex="15"
-          Background="Transparent"
-          Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=8}" />
+        <!--  UserControl para Aba 8: Terapias Bioenergéticas (adicionado via código)  -->
+        <Grid x:Name="TerapiasBioenergeticasContainer" Panel.ZIndex="18" />
       </Grid>
 
     </Border>

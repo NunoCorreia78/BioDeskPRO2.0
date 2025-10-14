@@ -168,6 +168,99 @@ public sealed class ExcelImportServiceTests : IDisposable
         _output.WriteLine($"✅ Spot-check 'Abdominal' → '{abdomen.Nome}' ({freqs.Length} freq)");
     }
 
+    /// <summary>
+    /// 🎯 TESTE CRÍTICO DE IDEMPOTÊNCIA
+    /// Verifica que reimportar o mesmo ficheiro NÃO cria duplicados
+    /// </summary>
+    [Fact]
+    public async Task ImportAsync_Idempotente_NaoCriaDuplicados()
+    {
+        // Arrange
+        var excelPath = @"C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Templates\Terapias\FrequencyList.xls";
+
+        if (!File.Exists(excelPath))
+        {
+            _output.WriteLine($"⚠️ SKIP: Ficheiro não encontrado: {excelPath}");
+            return;
+        }
+
+        _output.WriteLine("");
+        _output.WriteLine(new string('=', 80));
+        _output.WriteLine("🎯 TESTE DE IDEMPOTÊNCIA - Reimportação sem Duplicados");
+        _output.WriteLine(new string('=', 80));
+
+        // Act - PRIMEIRA IMPORTAÇÃO
+        _output.WriteLine("");
+        _output.WriteLine("📥 [1/2] Primeira importação...");
+        var result1 = await _service.ImportAsync(excelPath);
+        var count1 = await _context.ProtocolosTerapeuticos.CountAsync();
+
+        _output.WriteLine($"✅ Importação 1 completa:");
+        _output.WriteLine($"   - Linhas processadas: {result1.TotalLinhas}");
+        _output.WriteLine($"   - Linhas OK: {result1.LinhasOk}");
+        _output.WriteLine($"   - Registos na BD: {count1}");
+
+        // Act - SEGUNDA IMPORTAÇÃO (MESMO FICHEIRO)
+        _output.WriteLine("");
+        _output.WriteLine("📥 [2/2] Segunda importação (MESMO ficheiro)...");
+        var result2 = await _service.ImportAsync(excelPath);
+        var count2 = await _context.ProtocolosTerapeuticos.CountAsync();
+
+        _output.WriteLine($"✅ Importação 2 completa:");
+        _output.WriteLine($"   - Linhas processadas: {result2.TotalLinhas}");
+        _output.WriteLine($"   - Linhas OK: {result2.LinhasOk}");
+        _output.WriteLine($"   - Registos na BD: {count2}");
+
+        // Assert - NÚMERO DE REGISTOS DEVE MANTER-SE IGUAL
+        _output.WriteLine("");
+        _output.WriteLine(new string('=', 80));
+        if (count1 == count2)
+        {
+            _output.WriteLine($"✅ IDEMPOTÊNCIA FUNCIONA! Manteve-se em {count2} registos (sem duplicados)");
+        }
+        else
+        {
+            _output.WriteLine($"❌ FALHA DE IDEMPOTÊNCIA! {count1} → {count2} (duplicou {count2 - count1} registos)");
+        }
+        _output.WriteLine(new string('=', 80));
+
+        Assert.Equal(count1, count2); // ⚡ TESTE CRÍTICO: Número de registos deve manter-se igual
+        Assert.Equal(result1.LinhasOk, result2.LinhasOk); // Ambas devem processar mesmo número de linhas
+        Assert.Equal(result1.TotalLinhas, result2.TotalLinhas); // Total de linhas deve ser igual
+
+        // Verificar ExternalIds únicos (não deve haver duplicados)
+        var externalIds = await _context.ProtocolosTerapeuticos
+            .Select(p => p.ExternalId)
+            .ToListAsync();
+
+        var uniqueIds = externalIds.Distinct().Count();
+        _output.WriteLine("");
+        _output.WriteLine($"✅ Verificação ExternalId:");
+        _output.WriteLine($"   - Total registos: {externalIds.Count}");
+        _output.WriteLine($"   - IDs únicos: {uniqueIds}");
+        _output.WriteLine($"   - Duplicados: {externalIds.Count - uniqueIds}");
+
+        Assert.Equal(externalIds.Count, uniqueIds); // Todos os ExternalIds devem ser únicos
+
+        // Verificar logs de importação (deve ter 2 entradas)
+        var logs = await _context.ImportacoesExcelLog.ToListAsync();
+        _output.WriteLine("");
+        _output.WriteLine($"✅ Verificação ImportacoesExcelLog:");
+        _output.WriteLine($"   - Total entradas: {logs.Count}");
+
+        Assert.Equal(2, logs.Count); // Deve ter registado ambas as importações
+
+        foreach (var log in logs)
+        {
+            _output.WriteLine($"   - {log.ImportadoEm:HH:mm:ss}: {log.NomeFicheiro} → {log.LinhasOk} linhas (Sucesso: {log.Sucesso})");
+            Assert.True(log.Sucesso);
+            Assert.Equal(0, log.LinhasErros);
+        }
+
+        _output.WriteLine("");
+        _output.WriteLine("🎉 TESTE DE IDEMPOTÊNCIA PASSOU COM SUCESSO!");
+    }
+
     [Fact]
     public async Task ValidateFileAsync_FicheiroNaoExiste_RetornaFalse()
     {

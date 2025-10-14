@@ -123,4 +123,24 @@ public class ProtocoloRepository : IProtocoloRepository
         return await _context.ProtocolosTerapeuticos
             .CountAsync(p => p.Ativo);
     }
+
+    public async Task AddImportLogAsync(string nomeArquivo, int totalLinhas, int sucessos, int erros, string? mensagemErro = null)
+    {
+        var log = new ImportacaoExcelLog
+        {
+            NomeFicheiro = nomeArquivo,
+            CaminhoCompleto = nomeArquivo, // Simplificado por agora
+            ImportadoEm = DateTime.UtcNow,
+            TotalLinhas = totalLinhas,
+            LinhasOk = sucessos,
+            LinhasWarnings = 0,
+            LinhasErros = erros,
+            DuracaoSegundos = 0, // Calculado no ExcelImportService se necessário
+            Sucesso = erros == 0,
+            MensagemErro = mensagemErro
+        };
+
+        _context.ImportacoesExcelLog.Add(log);
+        await _context.SaveChangesAsync();
+    }
 }

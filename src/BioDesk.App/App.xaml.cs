@@ -74,8 +74,17 @@ Inner Stack:
 
 Is Terminating: {e.IsTerminating}";
 
-        // Log para ficheiro
-        System.IO.File.WriteAllText(@"C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\UNHANDLED_EXCEPTION.txt", errorMessage);
+        // Log para ficheiro (SEMPRE escreve, mesmo que a app crashe)
+        try
+        {
+            var logPath = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "BioDeskPro2",
+                "CRASH_LOG.txt");
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logPath)!);
+            System.IO.File.WriteAllText(logPath, errorMessage);
+        }
+        catch { /* Ignorar se falhar */ }
 
         // Mostrar ao utilizador
         MessageBox.Show(errorMessage, "🚨 UNHANDLED EXCEPTION", MessageBoxButton.OK, MessageBoxImage.Stop);
@@ -101,8 +110,17 @@ Inner Stack:
 Source: {e.Exception.Source}
 Target Site: {e.Exception.TargetSite?.Name ?? "Unknown"}";
 
-        // Log para ficheiro
-        System.IO.File.WriteAllText(@"C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\DISPATCHER_EXCEPTION.txt", errorMessage);
+        // Log para ficheiro (SEMPRE escreve, mesmo que a app crashe)
+        try
+        {
+            var logPath = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "BioDeskPro2",
+                "CRASH_LOG_DISPATCHER.txt");
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logPath)!);
+            System.IO.File.WriteAllText(logPath, errorMessage);
+        }
+        catch { /* Ignorar se falhar */ }
 
         // Mostrar ao utilizador
         MessageBox.Show(errorMessage, "🚨 UI THREAD CRASH", MessageBoxButton.OK, MessageBoxImage.Stop);
@@ -125,8 +143,17 @@ Stack Trace:
 Inner Exceptions:
 {string.Join("\n", e.Exception.InnerExceptions.Select(ex => $"- {ex.Message}"))}";
 
-        // Log para ficheiro
-        System.IO.File.WriteAllText(@"C:\Users\Nuno Correia\OneDrive\Documentos\BioDeskPro2\TASK_EXCEPTION.txt", errorMessage);
+        // Log para ficheiro (SEMPRE escreve, mesmo que a app crashe)
+        try
+        {
+            var logPath = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "BioDeskPro2",
+                "CRASH_LOG_TASK.txt");
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logPath)!);
+            System.IO.File.WriteAllText(logPath, errorMessage);
+        }
+        catch { /* Ignorar se falhar */ }
 
         // ✅ CRITICAL: Marcar como observado
         e.SetObserved();
@@ -212,6 +239,49 @@ Inner Exceptions:
                 var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
                 await dbContext.Database.MigrateAsync();
                 Console.WriteLine("✅ Migrations aplicadas com sucesso!");
+
+                // 🔥 SEED: Importar protocolos do FrequencyList.xls se BD estiver vazia
+                var protocoloRepo = scope.ServiceProvider.GetRequiredService<IProtocoloRepository>();
+                var totalProtocolos = await protocoloRepo.CountActiveAsync();
+
+                if (totalProtocolos == 0)
+                {
+                    Console.WriteLine("� BD vazia! Importando FrequencyList.xls...");
+                    var excelService = scope.ServiceProvider.GetRequiredService<BioDesk.Services.Excel.IExcelImportService>();
+                    var excelPath = System.IO.Path.Combine(Services.PathService.TemplatesPath, "Terapias", "FrequencyList.xls");
+
+                    if (System.IO.File.Exists(excelPath))
+                    {
+                        try
+                        {
+                            var resultado = await excelService.ImportAsync(excelPath);
+                            if (resultado.Sucesso)
+                            {
+                                Console.WriteLine($"✅ Importados {resultado.LinhasOk} protocolos do Excel!");
+                                System.Windows.MessageBox.Show($"✅ Base de dados inicializada!\n\n{resultado.LinhasOk} protocolos terapêuticos importados do FrequencyList.xls", "Primeira Execução", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"❌ ERRO ao importar: {resultado.MensagemErro}");
+                                System.Windows.MessageBox.Show($"❌ Erro ao importar Excel:\n{resultado.MensagemErro}\n\nA aplicação continuará com BD vazia.", "Erro de Importação", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                            }
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Console.WriteLine($"❌ EXCEÇÃO ao importar: {ex.Message}");
+                            System.Windows.MessageBox.Show($"❌ Exceção ao importar Excel:\n{ex.Message}\n\nA aplicação continuará com BD vazia.", "Erro Crítico", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⚠️ FrequencyList.xls não encontrado em: {excelPath}");
+                        System.Windows.MessageBox.Show($"⚠️ Ficheiro não encontrado:\n{excelPath}\n\nPor favor, coloque o FrequencyList.xls na pasta Templates/Terapias/", "Ficheiro Não Encontrado", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"✅ BD já tem {totalProtocolos} protocolos");
+                }
             }
 
             Console.WriteLine("🚀 Iniciando host...");
@@ -246,6 +316,38 @@ Inner Exceptions:
     {
         if (_host != null)
         {
+            // 💾 BACKUP AUTOMÁTICO ao fechar aplicação
+            try
+            {
+                Console.WriteLine("💾 Criando backup automático...");
+                var backupService = _host.Services.GetService<BioDesk.Services.Backup.IBackupService>();
+                if (backupService != null)
+                {
+                    var result = Task.Run(async () => await backupService.CreateBackupAsync(
+                        incluirDocumentos: false, // Backup rápido apenas BD
+                        incluirTemplates: false)).GetAwaiter().GetResult();
+
+                    if (result.Sucesso)
+                    {
+                        Console.WriteLine($"✅ Backup criado: {result.CaminhoZip} ({result.TamanhoFormatado})");
+
+                        // Limpar backups antigos (manter últimos 10)
+                        var removed = Task.Run(async () => await backupService.CleanOldBackupsAsync(10))
+                            .GetAwaiter().GetResult();
+                        if (removed > 0)
+                            Console.WriteLine($"🗑️ {removed} backups antigos removidos");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⚠️ Backup falhou: {result.Erro}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ Erro no backup automático: {ex.Message}");
+            }
+
             // ✅ CORRETO: Task.Run evita deadlock com SynchronizationContext
             Task.Run(async () => await _host.StopAsync()).GetAwaiter().GetResult();
             _host.Dispose();
@@ -314,6 +416,10 @@ Inner Exceptions:
         // === EXCEL IMPORT SERVICE (EPPlus - Terapias Bioenergéticas) ===
         services.AddScoped<BioDesk.Services.Excel.IExcelImportService, BioDesk.Services.Excel.ExcelImportService>();
 
+        // === BACKUP SERVICE (Sistema de Backup/Restore Automático) 🔥 CRÍTICO ===
+        services.AddSingleton<BioDesk.Services.Backup.IBackupService, BioDesk.Services.Backup.BackupService>();
+        Console.WriteLine("💾 Backup Service: REGISTRADO (Backup automático + Restore)");
+
         // === HTTP CLIENT FACTORY (para Random.org atmospheric RNG) ===
         services.AddHttpClient("RandomOrg", client =>
         {
@@ -324,12 +430,51 @@ Inner Exceptions:
         // === RNG SERVICE (True Random Number Generator - Terapias Bioenergéticas) ===
         services.AddSingleton<BioDesk.Services.Rng.IRngService, BioDesk.Services.Rng.RngService>();
 
+        // === VALUE SCANNING SERVICE (CoRe 5.0 Algorithm - Value % Scanning) ===
+        services.AddSingleton<BioDesk.Services.Terapias.IValueScanningService, BioDesk.Services.Terapias.ValueScanningService>();
+        Console.WriteLine("🔍 Value Scanning Service: REGISTRADO (CoRe 5.0 Algorithm)");
+
         // === TIEPIE HARDWARE SERVICE (Handyscope HS5 - Gerador de Sinais) ===
-        // 🔴 MODO REAL: Hardware físico conectado via USB (LibTiePie SDK)
-        services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.RealTiePieHardwareService>();
-        
-        // ⚡ MODO DUMMY: Para testes sem hardware (descomentar linha abaixo e comentar linha acima)
-        // services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.DummyTiePieHardwareService>();
+        // � TOGGLE: Ler configuração appsettings.json para decidir Dummy vs Real
+        var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+        var useDummyTiePie = configuration.GetValue<bool>("Hardware:UseDummyTiePie", defaultValue: false);
+
+        if (useDummyTiePie)
+        {
+            // ⚡ MODO DUMMY: Para testes sem hardware
+            services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.DummyTiePieHardwareService>();
+            Console.WriteLine("🎭 TiePie Hardware: DUMMY mode (appsettings.json: UseDummyTiePie=true)");
+        }
+        else
+        {
+            // 🔴 MODO REAL: Hardware físico conectado via USB (LibTiePie SDK)
+            // Com tratamento de erro - NÃO crash se SDK/hardware não disponível
+            services.AddSingleton<BioDesk.Services.Hardware.ITiePieHardwareService, BioDesk.Services.Hardware.RealTiePieHardwareService>();
+            Console.WriteLine("⚡ TiePie Hardware: REAL mode (appsettings.json: UseDummyTiePie=false ou não definido)");
+        }
+
+        // === MEDIÇÃO SERVICE (Biofeedback INPUT - Oscilloscope) ===
+        // 🔄 TOGGLE: Ler configuração appsettings.json para decidir Dummy vs Real
+        var useDummyMedicao = configuration.GetValue<bool>("Hardware:UseDummyMedicao", defaultValue: false);
+
+        if (useDummyMedicao)
+        {
+            // ⚡ MODO DUMMY: Simulação para testes sem hardware
+            services.AddSingleton<BioDesk.Services.Medicao.IMedicaoService, BioDesk.Services.Medicao.DummyMedicaoService>();
+            Console.WriteLine("🎭 Medição Hardware: DUMMY mode (appsettings.json: UseDummyMedicao=true)");
+        }
+        else
+        {
+            // 🔴 MODO REAL: TiePie Oscilloscope INPUT (LibTiePie SDK)
+            // Com tratamento de erro - NÃO crash se SDK/hardware não disponível
+            services.AddSingleton<BioDesk.Services.Medicao.IMedicaoService, BioDesk.Services.Medicao.RealMedicaoService>();
+            Console.WriteLine("⚡ Medição Hardware: REAL mode (appsettings.json: UseDummyMedicao=false ou não definido)");
+        }
+
+        // === FLUENTVALIDATION VALIDATORS (Regras de Negócio) 🔒 ===
+        services.AddScoped<FluentValidation.IValidator<BioDesk.Domain.Entities.ProtocoloTerapeutico>, BioDesk.Domain.Validators.ProtocoloTerapeuticoValidator>();
+        services.AddScoped<FluentValidation.IValidator<BioDesk.Domain.DTOs.TerapiaFilaItem>, BioDesk.Domain.Validators.TerapiaFilaItemValidator>();
+        Console.WriteLine("🔒 FluentValidation: REGISTRADO (ProtocoloTerapeutico + TerapiaFilaItem)");
 
         // === VIEWMODELS ===
         services.AddTransient<DashboardViewModel>();
@@ -346,6 +491,9 @@ Inner Exceptions:
         services.AddTransient<ComunicacaoViewModel>(); // ✅ ABA 6: Comunicação
         services.AddTransient<TerapiasBioenergeticasUserControlViewModel>(); // ✅ ABA 8: Terapias (RNG + TiePie)
         services.AddTransient<SelecionarTemplatesViewModel>(); // ⭐ NOVO: Pop-up de templates PDF
+
+        // UserControls (precisam de DI para construtores parametrizados)
+        services.AddTransient<Views.Abas.TerapiasBioenergeticasUserControl>(); // ✅ ABA 8: Terapias
 
         // Views - SISTEMA LIMPO
         services.AddSingleton<MainWindow>();

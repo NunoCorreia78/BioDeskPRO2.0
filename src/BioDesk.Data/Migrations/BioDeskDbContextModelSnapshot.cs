@@ -377,7 +377,7 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 1,
-                            DataAtualizacao = new DateTime(2025, 10, 12, 19, 39, 50, 268, DateTimeKind.Utc).AddTicks(6151),
+                            DataAtualizacao = new DateTime(2025, 10, 13, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(3369),
                             NomeClinica = "Minha Clínica"
                         });
                 });
@@ -920,11 +920,17 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SessaoTerapiaId");
+                    b.HasIndex("SessaoTerapiaId")
+                        .HasDatabaseName("IX_EventosHardware_SessaoTerapiaId");
 
-                    b.HasIndex("Timestamp");
+                    b.HasIndex("Severidade")
+                        .HasDatabaseName("IX_EventosHardware_Severidade");
 
-                    b.HasIndex("TipoEvento");
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_EventosHardware_Timestamp");
+
+                    b.HasIndex("TipoEvento")
+                        .HasDatabaseName("IX_EventosHardware_TipoEvento");
 
                     b.ToTable("EventosHardware");
                 });
@@ -1043,9 +1049,11 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ImportadoEm");
+                    b.HasIndex("ImportadoEm")
+                        .HasDatabaseName("IX_ImportacoesExcelLog_ImportadoEm");
 
-                    b.HasIndex("Sucesso");
+                    b.HasIndex("Sucesso")
+                        .HasDatabaseName("IX_ImportacoesExcelLog_Sucesso");
 
                     b.ToTable("ImportacoesExcelLog");
                 });
@@ -1294,9 +1302,11 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SessaoTerapiaId");
+                    b.HasIndex("SessaoTerapiaId")
+                        .HasDatabaseName("IX_LeiturasBioenergeticas_SessaoTerapiaId");
 
-                    b.HasIndex("Timestamp");
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("IX_LeiturasBioenergeticas_Timestamp");
 
                     b.ToTable("LeiturasBioenergeticas");
                 });
@@ -1425,7 +1435,7 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 1,
-                            DataCriacao = new DateTime(2025, 9, 12, 19, 39, 50, 267, DateTimeKind.Utc).AddTicks(6455),
+                            DataCriacao = new DateTime(2025, 9, 13, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2912),
                             DataNascimento = new DateTime(1980, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "Casado",
                             EstadoRegisto = "Incompleto",
@@ -1440,7 +1450,7 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 2,
-                            DataCriacao = new DateTime(2025, 9, 27, 19, 39, 50, 267, DateTimeKind.Utc).AddTicks(6470),
+                            DataCriacao = new DateTime(2025, 9, 28, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2923),
                             DataNascimento = new DateTime(1975, 11, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "Solteira",
                             EstadoRegisto = "Em Progresso",
@@ -1456,7 +1466,7 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 3,
-                            DataCriacao = new DateTime(2025, 10, 5, 19, 39, 50, 267, DateTimeKind.Utc).AddTicks(6473),
+                            DataCriacao = new DateTime(2025, 10, 6, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2926),
                             DataNascimento = new DateTime(1990, 3, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "União de Facto",
                             EstadoRegisto = "Completo",
@@ -1499,7 +1509,14 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SessaoId");
+                    b.HasIndex("CriadoEm")
+                        .HasDatabaseName("IX_PlanosTerapia_CriadoEm");
+
+                    b.HasIndex("Estado")
+                        .HasDatabaseName("IX_PlanosTerapia_Estado");
+
+                    b.HasIndex("SessaoId")
+                        .HasDatabaseName("IX_PlanosTerapia_SessaoId");
 
                     b.ToTable("PlanosTerapia");
                 });
@@ -1571,14 +1588,15 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Ativo");
-
-                    b.HasIndex("Categoria");
+                    b.HasIndex("Categoria")
+                        .HasDatabaseName("IX_ProtocolosTerapeuticos_Categoria");
 
                     b.HasIndex("ExternalId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_ProtocolosTerapeuticos_ExternalId");
 
-                    b.HasIndex("Nome");
+                    b.HasIndex("Nome")
+                        .HasDatabaseName("IX_ProtocolosTerapeuticos_Nome");
 
                     b.ToTable("ProtocolosTerapeuticos");
                 });
@@ -1664,8 +1682,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Tensão muscular paravertebral L4-L5, trigger points bilateral",
                             Avaliacao = "Lombalgia mecânica aguda",
                             Contexto = "Após esforço físico no ginásio",
-                            CriadoEm = new DateTime(2025, 9, 12, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6790),
-                            DataHora = new DateTime(2025, 9, 12, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6778),
+                            CriadoEm = new DateTime(2025, 9, 13, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3243),
+                            DataHora = new DateTime(2025, 9, 13, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3232),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Dor lombar aguda",
@@ -1680,8 +1698,8 @@ namespace BioDesk.Data.Migrations
                             Id = 2,
                             Achados = "Melhoria 70%, tensão residual L5",
                             Avaliacao = "Evolução favorável",
-                            CriadoEm = new DateTime(2025, 9, 19, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6797),
-                            DataHora = new DateTime(2025, 9, 19, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6794),
+                            CriadoEm = new DateTime(2025, 9, 20, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3251),
+                            DataHora = new DateTime(2025, 9, 20, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3248),
                             DuracaoMinutos = 45,
                             IsDeleted = false,
                             Motivo = "Reavaliação lombalgia",
@@ -1696,8 +1714,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "FC: 85 bpm, tensão cervical bilateral",
                             Avaliacao = "Stress ocupacional com somatização",
                             Contexto = "Período de trabalho intenso com deadlines apertados",
-                            CriadoEm = new DateTime(2025, 10, 2, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6804),
-                            DataHora = new DateTime(2025, 10, 2, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6801),
+                            CriadoEm = new DateTime(2025, 10, 3, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3257),
+                            DataHora = new DateTime(2025, 10, 3, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3254),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Consulta de rotina + stress elevado",
@@ -1712,8 +1730,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Trigger points trapézio superior bilateral, C5-C6 com restrição de mobilidade",
                             Avaliacao = "Cefaleia tensional de origem cervical",
                             Contexto = "Cefaleias tensionais há 6 meses, agravamento recente",
-                            CriadoEm = new DateTime(2025, 9, 27, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6874),
-                            DataHora = new DateTime(2025, 9, 27, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6822),
+                            CriadoEm = new DateTime(2025, 9, 28, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3263),
+                            DataHora = new DateTime(2025, 9, 28, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3260),
                             DuracaoMinutos = 90,
                             IsDeleted = false,
                             Motivo = "Avaliação inicial - cefaleias recorrentes",
@@ -1729,8 +1747,8 @@ namespace BioDesk.Data.Migrations
                             Id = 5,
                             Achados = "Redução 60% frequência cefaleias, mobilidade cervical normalizada",
                             Avaliacao = "Excelente evolução",
-                            CriadoEm = new DateTime(2025, 10, 11, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6881),
-                            DataHora = new DateTime(2025, 10, 11, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6878),
+                            CriadoEm = new DateTime(2025, 10, 12, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3269),
+                            DataHora = new DateTime(2025, 10, 12, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3267),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Reavaliação cefaleias + análise iridológica",
@@ -1745,8 +1763,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Edema leve joelho direito, mobilidade ombro esquerdo reduzida 20%, padrão de fadiga adrenal",
                             Avaliacao = "Síndrome inflamatório multifatorial + possível sobrecarga adrenal",
                             Contexto = "Dores articulares múltiplas (joelhos, ombros) + fadiga persistente há 3 meses",
-                            CriadoEm = new DateTime(2025, 10, 7, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6887),
-                            DataHora = new DateTime(2025, 10, 7, 20, 39, 50, 267, DateTimeKind.Local).AddTicks(6884),
+                            CriadoEm = new DateTime(2025, 10, 8, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3275),
+                            DataHora = new DateTime(2025, 10, 8, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3272),
                             DuracaoMinutos = 120,
                             IsDeleted = false,
                             Motivo = "Consulta integrada - dor articular + fadiga crónica",
@@ -1810,11 +1828,11 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Estado");
+                    b.HasIndex("TipoRng")
+                        .HasDatabaseName("IX_SessoesTerapia_TipoRng");
 
-                    b.HasIndex("InicioEm");
-
-                    b.HasIndex("PlanoTerapiaId");
+                    b.HasIndex("PlanoTerapiaId", "InicioEm")
+                        .HasDatabaseName("IX_SessoesTerapia_PlanoId_Inicio");
 
                     b.ToTable("SessoesTerapia");
                 });
@@ -1923,11 +1941,14 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Ordem");
+                    b.HasIndex("Ordem")
+                        .HasDatabaseName("IX_Terapias_Ordem");
 
-                    b.HasIndex("PlanoTerapiaId");
+                    b.HasIndex("PlanoTerapiaId")
+                        .HasDatabaseName("IX_Terapias_PlanoTerapiaId");
 
-                    b.HasIndex("ProtocoloTerapeuticoId");
+                    b.HasIndex("ProtocoloTerapeuticoId")
+                        .HasDatabaseName("IX_Terapias_ProtocoloTerapeuticoId");
 
                     b.ToTable("Terapias");
                 });

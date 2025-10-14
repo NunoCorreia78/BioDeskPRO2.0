@@ -402,6 +402,140 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+
+            <!--  TAB 4: BACKUPS  -->
+            <TabItem Header="💾 Backups">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <TextBlock
+                            Margin="0,0,0,20"
+                            FontSize="18"
+                            FontWeight="SemiBold"
+                            Foreground="{StaticResource TextoPrincipal}"
+                            Text="💾 Gestão de Backups" />
+
+                        <!--  Criar Backup  -->
+                        <Border
+                            Margin="0,0,0,15"
+                            Padding="15"
+                            Background="White"
+                            BorderBrush="#E3E9DE"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock
+                                    Margin="0,0,0,10"
+                                    FontSize="15"
+                                    FontWeight="SemiBold"
+                                    Text="📦 Criar Backup" />
+                                <TextBlock
+                                    Margin="0,0,0,15"
+                                    FontSize="12"
+                                    Foreground="#666"
+                                    Text="Cria um backup completo da base de dados em formato ZIP"
+                                    TextWrapping="Wrap" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button
+                                        Padding="12,8"
+                                        Command="{Binding CriarBackupCommand}"
+                                        Content="💾 Criar Backup Agora"
+                                        Style="{StaticResource PrimaryButtonStyle}" />
+                                    <Button
+                                        Margin="10,0,0,0"
+                                        Padding="12,8"
+                                        Command="{Binding AbrirPastaBackupsCommand}"
+                                        Content="📂 Abrir Pasta"
+                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!--  Restaurar Backup  -->
+                        <Border
+                            Margin="0,0,0,15"
+                            Padding="15"
+                            Background="#FFF3E0"
+                            BorderBrush="#FFB300"
+                            BorderThickness="2"
+                            CornerRadius="8">
+                            <StackPanel>
+                                <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                                    <TextBlock
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Foreground="#F57C00"
+                                        Text="⚠️ " />
+                                    <TextBlock
+                                        FontSize="15"
+                                        FontWeight="SemiBold"
+                                        Foreground="#E65100"
+                                        Text="Restaurar Backup" />
+                                </StackPanel>
+                                <TextBlock
+                                    Margin="0,0,0,15"
+                                    FontSize="12"
+                                    Foreground="#BF360C"
+                                    Text="ATENÇÃO: Restaurar irá SUBSTITUIR todos os dados atuais!"
+                                    TextWrapping="Wrap" />
+                                <Button
+                                    Padding="12,8"
+                                    Command="{Binding RestaurarBackupCommand}"
+                                    Content="📥 Restaurar Backup..."
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!--  Lista de Backups  -->
+                        <Border
+                            Padding="15"
+                            Background="White"
+                            BorderBrush="#E3E9DE"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                            <StackPanel>
+                                <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                                    <TextBlock
+                                        FontSize="15"
+                                        FontWeight="SemiBold"
+                                        Text="📋 Backups Disponíveis" />
+                                    <Button
+                                        Margin="10,0,0,0"
+                                        Padding="6,4"
+                                        Command="{Binding AtualizarListaBackupsCommand}"
+                                        Content="🔄"
+                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                </StackPanel>
+                                <DataGrid
+                                    Height="180"
+                                    AutoGenerateColumns="False"
+                                    CanUserAddRows="False"
+                                    IsReadOnly="True"
+                                    ItemsSource="{Binding BackupsDisponiveis}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn
+                                            Width="*"
+                                            Binding="{Binding NomeFicheiro}"
+                                            Header="Nome" />
+                                        <DataGridTextColumn
+                                            Width="140"
+                                            Binding="{Binding DataFormatada}"
+                                            Header="Data" />
+                                        <DataGridTextColumn
+                                            Width="80"
+                                            Binding="{Binding TamanhoFormatado}"
+                                            Header="Tamanho" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <TextBlock
+                                    Margin="0,10,0,0"
+                                    FontSize="11"
+                                    Foreground="#666"
+                                    Text="💡 Os backups são criados automaticamente ao fechar a aplicação" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
 
         <!--  Botões de ação  -->

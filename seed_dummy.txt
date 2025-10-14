@@ -1,0 +1,31 @@
+                // 🔥 SEED: Criar 50 protocolos dummy para testes
+                var protocoloRepo = scope.ServiceProvider.GetRequiredService<IProtocoloRepository>();
+                var totalProtocolos = await protocoloRepo.CountActiveAsync();
+                
+                if (totalProtocolos == 0)
+                {
+                    Console.WriteLine("📋 BD vazia! Criando 50 protocolos dummy...");
+                    
+                    var protocolosDummy = new System.Collections.Generic.List<BioDesk.Domain.Entities.ProtocoloTerapeutico>();
+                    var categorias = new[] { "Sistema Imunológico", "Sistema Digestivo", "Sistema Nervoso", "Sistema Cardiovascular", "Sistema Respiratório" };
+                    
+                    for (int i = 1; i <= 50; i++)
+                    {
+                        var protocolo = new BioDesk.Domain.Entities.ProtocoloTerapeutico
+                        {
+                            Nome = $"Protocolo Teste {i}",
+                            Descricao = $"Protocolo de teste #{i} para validação do sistema",
+                            Categoria = categorias[i % categorias.Length],
+                            FrequenciaPrincipal = 100.0 + (i * 10),
+                            Ativo = true
+                        };
+                        protocolosDummy.Add(protocolo);
+                    }
+                    
+                    await protocoloRepo.BulkInsertAsync(protocolosDummy);
+                    Console.WriteLine($"✅ Criados {protocolosDummy.Count} protocolos dummy!");
+                }
+                else
+                {
+                    Console.WriteLine($"✅ BD já tem {totalProtocolos} protocolos");
+                }
