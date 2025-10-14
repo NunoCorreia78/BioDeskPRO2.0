@@ -245,6 +245,9 @@ public class MeuServico : IDisposable
 5. **NUNCA** alterar código funcional sem razão explícita ("Se funciona, não mexe")
 6. **NUNCA** usar hardcoded paths - sempre `PathService`
 7. **NUNCA** colocar múltiplos UserControls sem `Panel.ZIndex`
+8. **🔴 NUNCA NUNCA NUNCA ALTERAR PathService.cs** - Causa perda de dados (ver REGRAS_CRITICAS_BD.md)
+9. **🔴 NUNCA ALTERAR DatabasePath** - BD fica inacessível
+10. **🔴 NUNCA ALTERAR App.xaml.cs linha DbContext** - Cria BD nova vazia
 
 ### SEMPRE Fazer
 1. **SEMPRE** verificar build antes e depois: `dotnet clean && dotnet build`
@@ -255,6 +258,8 @@ public class MeuServico : IDisposable
 6. **SEMPRE** testar navegação entre TODAS as abas após mudanças XAML
 7. **SEMPRE** usar `PathService` para caminhos de ficheiros
 8. **SEMPRE** definir `d:DataContext` em UserControls para IntelliSense
+9. **🔴 SEMPRE fazer backup manual antes de alterações críticas** (ver REGRAS_CRITICAS_BD.md)
+10. **🔴 SEMPRE verificar tamanho da BD após alterações** (deve manter >700KB se tinha dados)
 
 ### Checklist Pré-Commit
 ```bash
