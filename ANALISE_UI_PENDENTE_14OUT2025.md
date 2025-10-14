@@ -67,7 +67,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="Observações:" FontWeight="Bold" Grid.Row="0"/>
-        
+
         <TextBox x:Name="txtObservacoes"
                  Grid.Row="1" Margin="0,10,0,10"
                  AcceptsReturn="True"
@@ -98,7 +98,7 @@ private async Task EditarObservacoesMarcaAsync(IrisMarca marca)
     {
         marca.Observacoes = dialog.Observacoes;
         marca.DataAtualizacao = DateTime.Now;
-        
+
         await _pacienteService.AtualizarIrisMarcaAsync(marca);
         _logger.LogInformation("✏️ Observações atualizadas: {Nome}", marca.Nome);
     }

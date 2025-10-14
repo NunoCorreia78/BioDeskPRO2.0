@@ -787,7 +787,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         if (marca == null) return;
 
         _logger.LogInformation("📝 Solicitando edição de observações da marca ID {Id}", marca.Id);
-        
+
         // Disparar evento para a View tratar (MVVM pattern)
         SolicitarEdicaoObservacoes?.Invoke(this, marca);
     }

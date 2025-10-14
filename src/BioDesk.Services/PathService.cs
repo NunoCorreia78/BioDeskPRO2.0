@@ -13,9 +13,10 @@ public static class PathService
 {
     /// <summary>
     /// Detecta se está em modo debug (VS Code/Visual Studio)
+    /// CORRIGIDO: AppContext.BaseDirectory contém "BioDeskPro2" em debug
     /// </summary>
     private static readonly bool IsDebugMode = Debugger.IsAttached ||
-        Directory.GetCurrentDirectory().Contains("BioDeskPro2");
+        AppContext.BaseDirectory.Contains("BioDeskPro2", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Pasta raiz de dados da aplicação

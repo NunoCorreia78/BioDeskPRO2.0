@@ -258,7 +258,7 @@ Inner Exceptions:
                             if (resultado.Sucesso)
                             {
                                 Console.WriteLine($"✅ Importados {resultado.LinhasOk} protocolos do Excel!");
-                                System.Windows.MessageBox.Show($"✅ Base de dados inicializada!\n\n{resultado.LinhasOk} protocolos terapêuticos importados do FrequencyList.xls", "Primeira Execução", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                                // ✅ SILENCIOSO: Apenas log, sem popup (evitar interromper arranque)
                             }
                             else
                             {
