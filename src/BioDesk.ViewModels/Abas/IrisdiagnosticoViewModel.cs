@@ -773,25 +773,40 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
     /// <summary>
     /// Edita observações de uma marca existente (FASE 3)
     /// </summary>
+    /// <summary>
+    /// Evento para solicitar abertura de dialog de edição de observações
+    /// </summary>
+    public event EventHandler<IrisMarca>? SolicitarEdicaoObservacoes;
+
+    /// <summary>
+    /// Editar observações de uma marca - Dispara evento para a View abrir o dialog
+    /// </summary>
     [RelayCommand]
-    private async Task EditarObservacoesMarcaAsync(IrisMarca marca)
+    private void EditarObservacoesMarca(IrisMarca marca)
     {
         if (marca == null) return;
 
+        _logger.LogInformation("📝 Solicitando edição de observações da marca ID {Id}", marca.Id);
+        
+        // Disparar evento para a View tratar (MVVM pattern)
+        SolicitarEdicaoObservacoes?.Invoke(this, marca);
+    }
+
+    /// <summary>
+    /// Atualizar observações de uma marca (chamado pela View após dialog)
+    /// </summary>
+    public async Task AtualizarObservacoesMarcaAsync(IrisMarca marca)
+    {
         try
         {
-            // TODO: Integração do dialog deve ser feita na camada View (IrisdiagnosticoUserControl)
-            // ViewModels não devem referenciar Views/Dialogs (violação MVVM)
-            // Por agora, apenas log para confirmar que comando executa
-            _logger.LogInformation("📝 Editar observações da marca ID {Id}", marca.Id);
-
             // Salvar na BD
             await _unitOfWork.SaveChangesAsync();
+            _logger.LogInformation("✅ Observações da marca ID {Id} atualizadas", marca.Id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao editar observações da marca");
-            ErrorMessage = $"Erro ao editar observações: {ex.Message}";
+            _logger.LogError(ex, "❌ Erro ao atualizar observações da marca");
+            ErrorMessage = $"Erro ao atualizar observações: {ex.Message}";
         }
     }
 

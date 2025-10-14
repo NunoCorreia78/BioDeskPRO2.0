@@ -163,7 +163,9 @@ public partial class IrisdiagnosticoUserControl : UserControl
 
         // Atualizar observações
         marca.Observacoes = dialog.Observacoes;
-        await viewModel.EditarObservacoesMarcaCommand.ExecuteAsync(marca);
+        
+        // Salvar na BD via ViewModel
+        await viewModel.AtualizarObservacoesMarcaAsync(marca);
     }
 
     /// <summary>
