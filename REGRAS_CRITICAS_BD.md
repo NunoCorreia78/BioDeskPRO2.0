@@ -1,6 +1,6 @@
 # 🚨 REGRAS CRÍTICAS - BASE DE DADOS
 
-**Data:** 14 de Outubro de 2025 22:30  
+**Data:** 14 de Outubro de 2025 22:30
 **Motivo:** Perda de dados por alteração incorreta do PathService
 
 ---
@@ -64,7 +64,7 @@ C:\ProgramData\BioDeskPro2\biodesk.db
 
 2. ✅ **Verificar tamanho da BD:**
    ```powershell
-   Get-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db" | 
+   Get-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db" |
        Select-Object @{Name='Size(KB)';Expression={[math]::Round($_.Length/1KB,2)}}
    ```
 
@@ -109,8 +109,8 @@ Antes de qualquer commit de código:
 2. ✅ **Usar Restore da App** imediatamente
 3. ✅ **Procurar backup mais recente:**
    ```powershell
-   Get-ChildItem "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Backups" | 
-       Sort-Object LastWriteTime -Descending | 
+   Get-ChildItem "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Backups" |
+       Sort-Object LastWriteTime -Descending |
        Select-Object -First 5 Name, LastWriteTime
    ```
 4. ✅ **Extrair backup e copiar BD:**
