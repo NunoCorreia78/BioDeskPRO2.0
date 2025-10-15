@@ -10,7 +10,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="10">
-            <GroupBox Header="Configuracao do scan" Margin="0,0,0,10">
+            <GroupBox Header="⚙️ Configuração do Scan RNG" Margin="0,0,0,10">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -30,7 +30,8 @@
                         Height="28"
                         ItemsSource="{Binding SeedSources}"
                         SelectedItem="{Binding SelectedSeedSource, Mode=TwoWay}"
-                        Margin="0,0,0,10" />
+                        Margin="0,0,0,10"
+                        ToolTip="Como identificar o paciente informacionalmente&#x0a;&#x0a;🔹 Nome+DataNasc (recomendado): Usa dados do paciente&#x0a;🔹 Âncora Custom: Texto personalizado (UUID, frase)&#x0a;🔹 FotoHash: Hash de foto do cliente&#x0a;🔹 UUID Sessão: Identificador único desta sessão" />
 
                     <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Gerador RNG:" />
                     <ComboBox
@@ -39,39 +40,46 @@
                         Height="28"
                         ItemsSource="{Binding RngEngines}"
                         SelectedItem="{Binding SelectedRngEngine, Mode=TwoWay}"
-                        Margin="0,0,0,10" />
+                        Margin="0,0,0,10"
+                        ToolTip="Algoritmo gerador de números aleatórios&#x0a;&#x0a;🔹 XorShift128+ (padrão): Rápido e eficiente&#x0a;🔹 PCG64: Melhor qualidade estatística&#x0a;🔹 HardwareNoiseMix: Usa ruído de hardware (mais lento)" />
 
-                    <Label Grid.Row="2" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Salt da sessao:" />
+                    <Label Grid.Row="2" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Salt da sessão:" />
                     <DockPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,10">
                         <TextBox
                             MinWidth="220"
-                            Text="{Binding SessionSalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            Text="{Binding SessionSalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            ToolTip="Variabilidade única para esta sessão&#x0a;Regenerado automaticamente ao iniciar&#x0a;Garante que scans diferentes do mesmo paciente não são idênticos" />
                         <Button
                             Margin="8,0,0,0"
-                            Content="Regenerar"
-                            Command="{Binding RegenerateSaltCommand}" />
+                            Content="🔄 Regenerar"
+                            Command="{Binding RegenerateSaltCommand}"
+                            ToolTip="Gerar novo salt aleatório&#x0a;Use ao iniciar nova avaliação do mesmo paciente" />
                     </DockPanel>
 
-                    <Label Grid.Row="3" Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center" Content="Iteracoes:" />
+                    <Label Grid.Row="3" Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center" Content="Iterações:" />
                     <TextBox
                         Grid.Row="3"
                         Grid.Column="1"
                         Width="120"
-                        Text="{Binding Iterations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding Iterations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Número de amostras RNG por item do Banco Core&#x0a;&#x0a;⚙️ 50,000 (padrão): Uso normal, ~10 segundos&#x0a;⚙️ 100,000: Maior precisão, ~20 segundos&#x0a;⚙️ 10,000: Teste rápido, menos confiável" />
                 </Grid>
             </GroupBox>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
-                <Button Width="140" Margin="0,0,10,0" Content="Executar scan" Command="{Binding RunScanCommand}" />
+                <Button Width="140" Margin="0,0,10,0" Content="🔍 Executar Scan" Command="{Binding RunScanCommand}"
+                        ToolTip="Inicia scanning RNG dos 156 itens do Banco Core&#x0a;Duração: ~10 segundos (50,000 iterações)&#x0a;Resultado: Tabela com scores de ressonância 0-100%" />
                 <Button
                     Width="180"
                     Margin="0,0,10,0"
-                    Content="Adicionar a lista ativa"
-                    Command="{Binding AddSelectedToActiveListCommand}" />
-                <Button Width="140" Content="Guardar sessao" Command="{Binding SaveSessionCommand}" />
+                    Content="➕ Adicionar à Lista Ativa"
+                    Command="{Binding AddSelectedToActiveListCommand}"
+                    ToolTip="Move itens selecionados na tabela para Lista Ativa&#x0a;Use Ctrl+Click ou Shift+Click para selecionar múltiplos&#x0a;Depois aplique no sub-separador Biofeedback" />
+                <Button Width="140" Content="💾 Guardar Sessão" Command="{Binding SaveSessionCommand}"
+                        ToolTip="Persistir resultados do scan na base de dados&#x0a;🚧 Em desenvolvimento" />
             </StackPanel>
 
-            <GroupBox Header="Resultados">
+            <GroupBox Header="📊 Resultados do Scan (ordenados por Score decrescente)">
                 <DataGrid
                     Margin="10"
                     AutoGenerateColumns="False"
