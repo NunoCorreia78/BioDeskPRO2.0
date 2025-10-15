@@ -45,7 +45,7 @@ public partial class ProtocoloComValue : ObservableObject
     /// <summary>
     /// Categoria do protocolo (conveniência para binding)
     /// </summary>
-    public string Categoria => Protocolo.Categoria;
+    public string Categoria => Protocolo.Categoria!;
 
     /// <summary>
     /// ID do protocolo (conveniência para binding)

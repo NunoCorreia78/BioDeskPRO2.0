@@ -1,0 +1,29 @@
+<UserControl
+    x:Class="BioDesk.App.Views.Terapia.TerapiaCoreView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:BioDesk.App.Views.Terapia"
+    xmlns:vm="clr-namespace:BioDesk.ViewModels.UserControls.Terapia;assembly=BioDesk.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vm:TerapiaCoreViewModel}"
+    mc:Ignorable="d">
+
+    <TabControl Margin="10">
+        <TabItem Header="Avaliacao">
+            <views:AvaliacaoView DataContext="{Binding Avaliacao}" />
+        </TabItem>
+        <TabItem Header="Programas">
+            <views:ProgramasView DataContext="{Binding Programas}" />
+        </TabItem>
+        <TabItem Header="Ressonantes">
+            <views:RessonantesView DataContext="{Binding Ressonantes}" />
+        </TabItem>
+        <TabItem Header="Biofeedback">
+            <views:BiofeedbackView DataContext="{Binding Biofeedback}" />
+        </TabItem>
+        <TabItem Header="Historico">
+            <views:HistoricoView DataContext="{Binding Historico}" />
+        </TabItem>
+    </TabControl>
+</UserControl>

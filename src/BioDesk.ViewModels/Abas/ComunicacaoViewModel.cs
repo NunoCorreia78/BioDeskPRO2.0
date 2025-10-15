@@ -16,6 +16,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BioDesk.ViewModels.Abas;
 
@@ -27,7 +28,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
 {
     private readonly ILogger<ComunicacaoViewModel> _logger;
     private readonly IEmailService _emailService;
-    private readonly BioDeskDbContext _dbContext;
+    private readonly IServiceScopeFactory _scopeFactory; // ⭐ CORREÇÃO: Usa scope factory para DbContext isolado
     private readonly IDocumentoService _documentoService;
     private readonly IDocumentosPacienteService _documentosPacienteService;
     private readonly ITemplatesPdfService _templatesPdfService;
@@ -144,20 +145,26 @@ public partial class ComunicacaoViewModel : ViewModelBase
     public ComunicacaoViewModel(
         ILogger<ComunicacaoViewModel> logger,
         IEmailService emailService,
-        BioDeskDbContext dbContext,
+        IServiceScopeFactory scopeFactory, // ⭐ CORREÇÃO: Scope factory para DbContext isolado
         IDocumentoService documentoService,
         IDocumentosPacienteService documentosPacienteService,
         ITemplatesPdfService templatesPdfService)
     {
         _logger = logger;
         _emailService = emailService;
-        _dbContext = dbContext;
+        _scopeFactory = scopeFactory;
         _documentoService = documentoService;
         _documentosPacienteService = documentosPacienteService;
         _templatesPdfService = templatesPdfService;
 
         _logger.LogInformation("ComunicacaoViewModel inicializado");
+    }
 
+    /// <summary>
+    /// ⭐ CORREÇÃO: Task de background para verificar conexão
+    /// </summary>
+    private void IniciarMonitorConexao()
+    {
         // ⭐ CORREÇÃO: Verificar conexão E recarregar histórico a cada 30 segundos
         Task.Run(async () =>
         {
@@ -363,6 +370,10 @@ Naturopatia - Osteopatia - Medicina Bioenergética
             // ⭐ NOVO: Verificar se deve agendar o envio para data futura
             if (AgendarEnvio && DataEnvioAgendado > DateTime.Now)
             {
+                // ⭐ CORREÇÃO: Usar scope isolado para DbContext
+                using var scope = _scopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
+
                 // AGENDAR para envio futuro (não enviar imediatamente)
                 var comunicacaoAgendada = new Comunicacao
                 {
@@ -381,10 +392,10 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                     UltimoErro = null
                 };
 
-                await _dbContext.Comunicacoes.AddAsync(comunicacaoAgendada);
+                await dbContext.Comunicacoes.AddAsync(comunicacaoAgendada);
 
                 // ⭐ CRÍTICO: Salvar primeiro para obter ID
-                await _dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
 
                 // Gravar anexos na BD (agora com ID correto)
                 foreach (var caminhoFicheiro in Anexos)
@@ -397,13 +408,13 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                         TamanhoBytes = new System.IO.FileInfo(caminhoFicheiro).Length,
                         DataCriacao = DateTime.Now
                     };
-                    await _dbContext.Set<AnexoComunicacao>().AddAsync(anexo);
+                    await dbContext.Set<AnexoComunicacao>().AddAsync(anexo);
                 }
 
                 // Salvar anexos
                 if (Anexos.Any())
                 {
-                    await _dbContext.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync();
                 }
 
                 var tempoDiferenca = DataEnvioAgendado - DateTime.Now;
@@ -444,6 +455,10 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             var resultado = await _emailService.EnviarAsync(emailMessage);
 
+            // ⭐ CORREÇÃO: Usar scope isolado para DbContext
+            using var scope2 = _scopeFactory.CreateScope();
+            var dbContext2 = scope2.ServiceProvider.GetRequiredService<BioDeskDbContext>();
+
             // Criar comunicação na DB com STATUS CORRETO desde o início
             var comunicacao = new Comunicacao
             {
@@ -462,10 +477,10 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 UltimoErro = resultado.Sucesso ? null : resultado.Mensagem
             };
 
-            await _dbContext.Comunicacoes.AddAsync(comunicacao);
+            await dbContext2.Comunicacoes.AddAsync(comunicacao);
 
             // ⭐ CRÍTICO: Salvar primeiro para obter ID da comunicação
-            await _dbContext.SaveChangesAsync();
+            await dbContext2.SaveChangesAsync();
 
             // Gravar anexos na BD (agora com ID correto)
             foreach (var caminhoFicheiro in Anexos)
@@ -478,13 +493,13 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                     TamanhoBytes = new System.IO.FileInfo(caminhoFicheiro).Length,
                     DataCriacao = DateTime.Now
                 };
-                await _dbContext.Set<AnexoComunicacao>().AddAsync(anexo);
+                await dbContext2.Set<AnexoComunicacao>().AddAsync(anexo);
             }
 
             // Salvar anexos
             if (Anexos.Any())
             {
-                await _dbContext.SaveChangesAsync();
+                await dbContext2.SaveChangesAsync();
             }
 
             // Mensagem de feedback conforme resultado
@@ -547,8 +562,12 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             IsLoading = true;
 
+            // ⭐ CORREÇÃO: Usar scope isolado para DbContext
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
+
             // Buscar entidade do DbContext para garantir tracking EF Core
-            var comunicacaoDb = await _dbContext.Comunicacoes.FindAsync(comunicacao.Id);
+            var comunicacaoDb = await dbContext.Comunicacoes.FindAsync(comunicacao.Id);
 
             if (comunicacaoDb == null)
             {
@@ -560,7 +579,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             comunicacaoDb.Status = StatusComunicacao.Falhado;
             comunicacaoDb.UltimoErro = "Cancelado pelo utilizador";
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
 
             SuccessMessage = "✅ Email cancelado com sucesso!";
             _logger.LogInformation("✅ Email ID {Id} cancelado pelo utilizador", comunicacao.Id);
@@ -794,10 +813,11 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         try
         {
-            // ⭐ CORREÇÃO CRÍTICA: Limpar COMPLETAMENTE o ChangeTracker do EF Core
-            _dbContext.ChangeTracker.Clear();
+            // ⭐ CORREÇÃO CRÍTICA: Usar scope isolado para evitar threading issues
+            using var scope = _scopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
 
-            var historico = await _dbContext.Comunicacoes
+            var historico = await dbContext.Comunicacoes
                 .AsNoTracking() // ⭐ Garantir dados frescos da BD (não cache)
                 .Where(c => c.PacienteId == PacienteAtual.Id && !c.IsDeleted)
                 .OrderByDescending(c => c.DataCriacao)
@@ -827,7 +847,12 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     {
         if (PacienteAtual == null) return;
 
-        var todas = await _dbContext.Comunicacoes
+        // ⭐ CORREÇÃO: Usar scope isolado
+        using var scope = _scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
+
+        var todas = await dbContext.Comunicacoes
+            .AsNoTracking()
             .Where(c => c.PacienteId == PacienteAtual.Id && !c.IsDeleted)
             .ToListAsync();
 
@@ -842,7 +867,9 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         UltimaComunicacao = todas.OrderByDescending(c => c.DataEnvio).FirstOrDefault()?.DataEnvio;
 
-        ProximoFollowUp = await _dbContext.Comunicacoes
+        // ⭐ CORREÇÃO: Scope já está ativo (mesmo método), reutilizar dbContext
+        ProximoFollowUp = await dbContext.Comunicacoes
+            .AsNoTracking()
             .Where(c => c.PacienteId == PacienteAtual.Id && c.DataFollowUp.HasValue && !c.FollowUpEnviado)
             .OrderBy(c => c.DataFollowUp)
             .Select(c => c.DataFollowUp)

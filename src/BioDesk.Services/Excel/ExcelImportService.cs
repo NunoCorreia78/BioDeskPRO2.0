@@ -36,9 +36,9 @@ public class ExcelImportService : IExcelImportService
         {
             try
             {
-                if (!File.Exists(filePath)) return (false, "Não encontrado");
+                if (!File.Exists(filePath)) return (false, "Ficheiro não encontrado");
                 var ext = Path.GetExtension(filePath).ToLowerInvariant();
-                if (ext != ".xls" && ext != ".xlsx") return (false, "Formato inválido");
+                if (ext != ".xls" && ext != ".xlsx") return (false, "Extensão inválida. Apenas .xls e .xlsx são suportados");
 
                 using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
                 using var reader = ExcelReaderFactory.CreateReader(stream);

@@ -21,12 +21,12 @@
     <converters:TabStyleConverter x:Key="TabStyleConverter" />
     <converters:StringParameterToVisibilityConverter x:Key="StringParameterToVisibilityConverter" />
 
-    <!--  DataTemplate para Aba 1: Dados Biográficos  -->
+    <!--  DataTemplate para Aba 1: Dados Biogr├íficos  -->
     <DataTemplate x:Key="DadosBiograficosTemplate">
       <abas:DadosBiograficosUserControl />
     </DataTemplate>
 
-    <!--  DataTemplate para conteúdo de texto simples (outras abas)  -->
+    <!--  DataTemplate para conte├║do de texto simples (outras abas)  -->
     <DataTemplate x:Key="ConteudoTextoTemplate">
       <TextBlock
         Margin="20"
@@ -36,7 +36,7 @@
         TextWrapping="Wrap" />
     </DataTemplate>
 
-    <!--  Style para separadores INATIVOS - CARTÕES FLUTUANTES MODERNOS  -->
+    <!--  Style para separadores INATIVOS - CART├òES FLUTUANTES MODERNOS  -->
     <Style x:Key="TabButtonStyle" TargetType="Button">
       <Setter Property="Background">
         <Setter.Value>
@@ -93,7 +93,7 @@
       </Setter>
     </Style>
 
-    <!--  Style para separador ATIVO - CARTÃO PREMIUM DESTAQUE  -->
+    <!--  Style para separador ATIVO - CART├âO PREMIUM DESTAQUE  -->
     <Style
       x:Key="TabButtonActiveStyle"
       BasedOn="{StaticResource TabButtonStyle}"
@@ -122,7 +122,7 @@
       </Setter>
     </Style>
 
-    <!--  Style para botões de navegação no rodapé - DESIGN MODERNO  -->
+    <!--  Style para bot├Áes de navega├º├úo no rodap├® - DESIGN MODERNO  -->
     <Style x:Key="NavigationButtonStyle" TargetType="Button">
       <Setter Property="Background" Value="{StaticResource BotaoPrincipal}" />
       <Setter Property="Foreground" Value="White" />
@@ -165,7 +165,7 @@
       </Setter>
     </Style>
 
-    <!--  Style para botão secundário (Guardar Rascunho)  -->
+    <!--  Style para bot├úo secund├írio (Guardar Rascunho)  -->
     <Style
       x:Key="SecondaryButtonStyle"
       BasedOn="{StaticResource NavigationButtonStyle}"
@@ -180,12 +180,12 @@
       <RowDefinition Height="Auto" />
       <!--  Separadores/Abas  -->
       <RowDefinition Height="*" />
-      <!--  Conteúdo da Aba  -->
+      <!--  Conte├║do da Aba  -->
       <RowDefinition Height="Auto" />
-      <!--  Rodapé de Navegação  -->
+      <!--  Rodap├® de Navega├º├úo  -->
     </Grid.RowDefinitions>
 
-    <!--  === SEPARADORES/ABAS - DESIGN CARTÕES FLUTUANTES PREMIUM ===  -->
+    <!--  === SEPARADORES/ABAS - DESIGN CART├òES FLUTUANTES PREMIUM ===  -->
     <Border Grid.Row="0" Padding="24,16,24,8">
       <Border.Background>
         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -193,13 +193,13 @@
           <GradientStop Offset="1" Color="#EDF2EB" />
         </LinearGradientBrush>
       </Border.Background>
-      <!--  WrapPanel permite quebra automática sem scrollbar  -->
+      <!--  WrapPanel permite quebra autom├ítica sem scrollbar  -->
       <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal">
         <Button
           x:Name="BtnAba1"
           Command="{Binding NavegarParaAbaCommand}"
           CommandParameter="1"
-          Content="👤 Dados">
+          Content="📋 Dados">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
@@ -224,7 +224,7 @@
           x:Name="BtnAba2"
           Command="{Binding NavegarParaAbaCommand}"
           CommandParameter="2"
-          Content="📋 Saúde">
+          Content="🏥 Saúde">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
@@ -249,7 +249,7 @@
           x:Name="BtnAba3"
           Command="{Binding NavegarParaAbaCommand}"
           CommandParameter="3"
-          Content="📜 Consents">
+          Content="📄 Consentimentos">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
@@ -274,7 +274,7 @@
           x:Name="BtnAba4"
           Command="{Binding NavegarParaAbaCommand}"
           CommandParameter="4"
-          Content="📋 Consultas">
+          Content="🏥 Consultas">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
@@ -346,15 +346,15 @@
         </Button>
 
         <Button
-          x:Name="BtnAba8"
+          x:Name="BtnAba7"
           Command="{Binding NavegarParaAbaCommand}"
-          CommandParameter="8"
+          CommandParameter="7"
           Content="🌿 Terapias"
           ToolTip="Gestão de protocolos terapêuticos bioenergéticos">
           <Button.Style>
             <Style BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
               <Style.Triggers>
-                <DataTrigger Binding="{Binding AbaAtiva}" Value="8">
+                <DataTrigger Binding="{Binding AbaAtiva}" Value="7">
                   <Setter Property="Background">
                     <Setter.Value>
                       <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -373,21 +373,21 @@
       </WrapPanel>
     </Border>
 
-    <!--  === CONTEÚDO DA ABA ATIVA ===  -->
+    <!--  === CONTE├ÜDO DA ABA ATIVA ===  -->
     <Border
       Grid.Row="1"
       Padding="0"
       Background="{StaticResource FundoPrincipal}">
 
-      <!--  Conteúdo dinâmico baseado na aba ativa  -->
+      <!--  Conte├║do din├ómico baseado na aba ativa  -->
       <Grid>
-        <!--  UserControl para Aba 1: Dados Biográficos  -->
+        <!--  UserControl para Aba 1: Dados Biogr├íficos  -->
         <abas:DadosBiograficosUserControl
           x:Name="DadosBiograficosUserControl"
           Panel.ZIndex="100"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=1}" />
 
-        <!--  UserControl para Aba 2: Declaração de Saúde  -->
+        <!--  UserControl para Aba 2: Declara├º├úo de Sa├║de  -->
         <abas:DeclaracaoSaudeUserControl
           x:Name="DeclaracaoSaudeUserControl"
           Panel.ZIndex="50"
@@ -399,13 +399,13 @@
           Panel.ZIndex="25"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=3}" />
 
-        <!--  UserControl para Aba 4: Registo de Consultas/Sessões  -->
+        <!--  UserControl para Aba 4: Registo de Consultas/Sess├Áes  -->
         <abas:RegistoConsultasUserControl
           x:Name="RegistoConsultasUserControl"
           Panel.ZIndex="26"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=4}" />
 
-        <!--  UserControl para Aba 5: Irisdiagnóstico  -->
+        <!--  UserControl para Aba 5: Irisdiagn├│stico  -->
         <abas:IrisdiagnosticoUserControl
           x:Name="IrisdiagnosticoUserControl"
           Panel.ZIndex="22"
@@ -418,13 +418,17 @@
           Panel.ZIndex="20"
           Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=6}" />
 
-        <!--  UserControl para Aba 8: Terapias Bioenergéticas (adicionado via código)  -->
-        <Grid x:Name="TerapiasBioenergeticasContainer" Panel.ZIndex="18" />
+        <!--  UserControl para Aba 7: Terapias  -->
+        <abas:TerapiasUserControl
+          x:Name="TerapiasUserControl"
+          Panel.ZIndex="18"
+          Background="Transparent"
+          Visibility="{Binding AbaAtiva, Converter={StaticResource StringParameterToVisibilityConverter}, ConverterParameter=7}" />
       </Grid>
 
     </Border>
 
-    <!--  === RODAPÉ DE NAVEGAÇÃO ===  -->
+    <!--  === RODAP├ë DE NAVEGA├ç├âO ===  -->
     <Border
       Grid.Row="2"
       Padding="20,12"
@@ -438,7 +442,7 @@
           <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!--  Botões Esquerda  -->
+        <!--  Bot├Áes Esquerda  -->
         <StackPanel
           Grid.Column="0"
           HorizontalAlignment="Left"
@@ -451,11 +455,11 @@
             ToolTip="Voltar ao Dashboard (protege alterações não guardadas)" />
           <Button
             Command="{Binding AbaAnteriorCommand}"
-            Content="⬅️ Anterior"
+            Content="◀️ Anterior"
             Style="{StaticResource SecondaryButtonStyle}" />
         </StackPanel>
 
-        <!--  Botões Centro - SISTEMA DE GRAVAÇÃO MANUAL  -->
+        <!--  Bot├Áes Centro - SISTEMA DE GRAVA├ç├âO MANUAL  -->
         <StackPanel
           Grid.Column="1"
           HorizontalAlignment="Center"
@@ -473,14 +477,14 @@
             Text="{Binding StatusSave, FallbackValue='Pronto'}" />
         </StackPanel>
 
-        <!--  Botões Direita  -->
+        <!--  Bot├Áes Direita  -->
         <StackPanel
           Grid.Column="2"
           HorizontalAlignment="Right"
           Orientation="Horizontal">
           <Button
             Command="{Binding ProximaAbaCommand}"
-            Content="Seguinte ➡️"
+            Content="Seguinte ▶️"
             IsEnabled="{Binding PodeAvancarAba}"
             Style="{StaticResource NavigationButtonStyle}" />
         </StackPanel>

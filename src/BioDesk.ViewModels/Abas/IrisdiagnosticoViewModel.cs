@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using BioDesk.Data.Repositories;
@@ -22,12 +23,13 @@ namespace BioDesk.ViewModels.Abas;
 /// ViewModel MINIMALISTA para Irisdiagnóstico (Tab 5)
 /// Responsabilidade: Gerir lista de imagens de íris do paciente atual
 /// </summary>
-public partial class IrisdiagnosticoViewModel : ObservableObject
+public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<IrisdiagnosticoViewModel> _logger;
     private readonly IIridologyService _iridologyService;
     private readonly IDragDebugService _dragDebugService;
+    private readonly SemaphoreSlim _carregarImagensSemaphore = new(1, 1); // ✅ CORREÇÃO CONCORRÊNCIA: 1 operação por vez
 
     [ObservableProperty]
     private Paciente? _pacienteAtual;
@@ -346,6 +348,9 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
             return;
         }
 
+        // ✅ CORREÇÃO CONCORRÊNCIA: Aguardar semaphore antes de acessar DbContext
+        await _carregarImagensSemaphore.WaitAsync();
+
         try
         {
             _logger.LogInformation("🔍 Carregando imagens para Paciente ID={Id}, Nome={Nome}", PacienteAtual.Id, PacienteAtual.NomeCompleto);
@@ -381,6 +386,11 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         {
             _logger.LogError(ex, "❌ Erro ao carregar imagens de íris");
             ErrorMessage = "Erro ao carregar imagens.";
+        }
+        finally
+        {
+            // ✅ SEMPRE libertar o semaphore, mesmo com erro
+            _carregarImagensSemaphore.Release();
         }
     }
 
@@ -2199,6 +2209,24 @@ public partial class IrisdiagnosticoViewModel : ObservableObject
         {
             _logger.LogInformation("🔧 Modo calibração DESATIVADO");
         }
+    }
+
+    // ✅ DISPOSE PATTERN: Liberar SemaphoreSlim (CA1001 compliant)
+    private bool _disposed = false;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed && disposing)
+        {
+            _carregarImagensSemaphore?.Dispose();
+        }
+        _disposed = true;
     }
 }
 

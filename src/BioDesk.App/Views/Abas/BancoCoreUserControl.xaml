@@ -1,0 +1,386 @@
+<UserControl
+  x:Class="BioDesk.App.Views.Abas.BancoCoreUserControl"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:vm="clr-namespace:BioDesk.ViewModels.FichaPaciente;assembly=BioDesk.ViewModels"
+  d:DataContext="{d:DesignInstance Type=vm:TerapiasBioenergeticasViewModel}"
+  d:DesignHeight="700"
+  d:DesignWidth="1000"
+  mc:Ignorable="d">
+
+  <UserControl.Resources>
+    <!--  Cores do tema  -->
+    <SolidColorBrush x:Key="FundoPrincipal">#FCFDFB</SolidColorBrush>
+    <SolidColorBrush x:Key="Cartao">#F7F9F6</SolidColorBrush>
+    <SolidColorBrush x:Key="Borda">#E3E9DE</SolidColorBrush>
+    <SolidColorBrush x:Key="TextoPrincipal">#3F4A3D</SolidColorBrush>
+    <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
+    <SolidColorBrush x:Key="BotaoPrimario">#9CAF97</SolidColorBrush>
+    <SolidColorBrush x:Key="BotaoPrimarioHover">#879B83</SolidColorBrush>
+  </UserControl.Resources>
+
+  <Grid Background="{StaticResource FundoPrincipal}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <!--  Cabeçalho + Barra de pesquisa + Filtros  -->
+      <RowDefinition Height="*" />
+      <!--  Lista de itens disponíveis  -->
+      <RowDefinition Height="200" />
+      <!--  Itens selecionados  -->
+    </Grid.RowDefinitions>
+
+    <!--  === CABEÇALHO + PESQUISA + FILTROS ===  -->
+    <Border
+      Grid.Row="0"
+      Margin="20,20,20,10"
+      Padding="20"
+      Background="{StaticResource Cartao}"
+      BorderBrush="{StaticResource Borda}"
+      BorderThickness="1"
+      CornerRadius="8">
+      <StackPanel>
+        <!--  Título  -->
+        <TextBlock
+          FontSize="20"
+          FontWeight="SemiBold"
+          Foreground="{StaticResource TextoPrincipal}"
+          Text="🔬 Banco Core Informacional (156 itens)" />
+
+        <TextBlock
+          Margin="0,5,0,15"
+          FontSize="13"
+          Foreground="{StaticResource TextoSecundario}"
+          Text="Sistema inspirado no Inergetix CoRe 5.0 - Análise de ressonância bioenergética"
+          TextWrapping="Wrap" />
+
+        <!--  Barra de Pesquisa  -->
+        <Grid Margin="0,0,0,12">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <TextBox
+            Grid.Column="0"
+            Padding="10,8"
+            VerticalContentAlignment="Center"
+            Background="White"
+            BorderBrush="{StaticResource Borda}"
+            BorderThickness="1"
+            FontSize="14"
+            Text="{Binding PesquisarTexto, UpdateSourceTrigger=PropertyChanged}">
+            <TextBox.Style>
+              <Style TargetType="TextBox">
+                <Style.Triggers>
+                  <Trigger Property="Text" Value="">
+                    <Setter Property="Background">
+                      <Setter.Value>
+                        <VisualBrush
+                          AlignmentX="Left"
+                          AlignmentY="Center"
+                          Stretch="None">
+                          <VisualBrush.Visual>
+                            <TextBlock
+                              Margin="10,0,0,0"
+                              FontSize="14"
+                              Foreground="#999"
+                              Text="🔍 Pesquisar por nome ou descrição..." />
+                          </VisualBrush.Visual>
+                        </VisualBrush>
+                      </Setter.Value>
+                    </Setter>
+                  </Trigger>
+                </Style.Triggers>
+              </Style>
+            </TextBox.Style>
+          </TextBox>
+
+          <Button
+            Grid.Column="1"
+            Margin="8,0,0,0"
+            Padding="15,8"
+            Background="{StaticResource BotaoPrimario}"
+            BorderThickness="0"
+            Command="{Binding PesquisarCommand}"
+            Content="Pesquisar"
+            FontWeight="SemiBold"
+            Foreground="White">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Style.Triggers>
+                  <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource BotaoPrimarioHover}" />
+                  </Trigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+
+          <Button
+            Grid.Column="2"
+            Margin="8,0,0,0"
+            Padding="15,8"
+            Background="White"
+            BorderBrush="{StaticResource Borda}"
+            BorderThickness="1"
+            Command="{Binding ValidarIntegridadeCommand}"
+            Content="✓ Validar"
+            FontSize="13"
+            Foreground="{StaticResource TextoPrincipal}"
+            ToolTip="Validar integridade: 156 itens = 38 Bach + 28 Chakras + 20 Meridianos + 70 Órgãos" />
+        </Grid>
+
+        <!--  Filtros por Categoria  -->
+        <WrapPanel Margin="0,8,0,0">
+          <Button
+            Margin="0,0,8,8"
+            Padding="12,6"
+            Background="White"
+            BorderBrush="{StaticResource Borda}"
+            BorderThickness="1"
+            Click="FiltrarTodos_Click"
+            Content="📦 Todos (156)"
+            FontSize="13" />
+
+          <Button
+            Margin="0,0,8,8"
+            Padding="12,6"
+            Background="White"
+            BorderBrush="{StaticResource Borda}"
+            BorderThickness="1"
+            Click="FiltrarCategoria_Click"
+            Content="🌸 Bach Florais (38)"
+            FontSize="13"
+            Tag="3"
+            ToolTip="Sistema Florais de Bach - 38 essências" />
+
+          <Button
+            Margin="0,0,8,8"
+            Padding="12,6"
+            Background="White"
+            BorderBrush="{StaticResource Borda}"
+            BorderThickness="1"
+            Click="FiltrarCategoria_Click"
+            Content="🔮 Chakras (28)"
+            FontSize="13"
+            Tag="7"
+            ToolTip="7 principais + 21 secundários" />
+
+          <Button
+            Margin="0,0,8,8"
+            Padding="12,6"
+            Background="White"
+            BorderBrush="{StaticResource Borda}"
+            BorderThickness="1"
+            Click="FiltrarCategoria_Click"
+            Content="⚡ Meridianos (20)"
+            FontSize="13"
+            Tag="8"
+            ToolTip="12 principais + 8 extraordinários - MTC" />
+
+          <Button
+            Margin="0,0,8,8"
+            Padding="12,6"
+            Background="White"
+            BorderBrush="{StaticResource Borda}"
+            BorderThickness="1"
+            Click="FiltrarCategoria_Click"
+            Content="🫀 Órgãos (70)"
+            FontSize="13"
+            Tag="6"
+            ToolTip="Sistemas anatómicos e órgãos" />
+        </WrapPanel>
+
+        <!--  Mensagem de Status  -->
+        <TextBlock
+          Margin="0,10,0,0"
+          FontSize="13"
+          FontStyle="Italic"
+          Foreground="{StaticResource TextoSecundario}"
+          Text="{Binding MensagemStatus}"
+          TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+
+    <!--  === LISTA DE ITENS DISPONÍVEIS ===  -->
+    <Border
+      Grid.Row="1"
+      Margin="20,10,20,10"
+      Padding="15"
+      Background="{StaticResource Cartao}"
+      BorderBrush="{StaticResource Borda}"
+      BorderThickness="1"
+      CornerRadius="8">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+          Grid.Row="0"
+          Margin="0,0,0,10"
+          FontSize="15"
+          FontWeight="SemiBold"
+          Foreground="{StaticResource TextoPrincipal}"
+          Text="📋 Itens Disponíveis" />
+
+        <ListBox
+          Grid.Row="1"
+          Background="White"
+          BorderBrush="{StaticResource Borda}"
+          BorderThickness="1"
+          ItemsSource="{Binding ItensDisponiveis}"
+          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+          SelectedItem="{Binding ItemSelecionado}">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border
+                Margin="0,2"
+                Padding="10,8"
+                Background="Transparent"
+                BorderBrush="{StaticResource Borda}"
+                BorderThickness="0,0,0,1">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <StackPanel Grid.Column="0">
+                    <TextBlock
+                      FontSize="14"
+                      FontWeight="SemiBold"
+                      Foreground="{StaticResource TextoPrincipal}"
+                      Text="{Binding Nome}" />
+                    <TextBlock
+                      Margin="0,4,0,0"
+                      FontSize="12"
+                      Foreground="{StaticResource TextoSecundario}"
+                      Text="{Binding DescricaoBreve}"
+                      TextWrapping="Wrap" />
+                    <TextBlock
+                      Margin="0,4,0,0"
+                      FontSize="11"
+                      FontStyle="Italic"
+                      Foreground="#888">
+                      <Run Text="Categoria: " />
+                      <Run FontWeight="SemiBold" Text="{Binding Categoria}" />
+                      <Run Text=" | Subcategoria: " />
+                      <Run Text="{Binding Subcategoria}" />
+                    </TextBlock>
+                  </StackPanel>
+
+                  <Button
+                    Grid.Column="1"
+                    Padding="12,6"
+                    VerticalAlignment="Center"
+                    Background="{StaticResource BotaoPrimario}"
+                    BorderThickness="0"
+                    Command="{Binding DataContext.AdicionarItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                    CommandParameter="{Binding}"
+                    Content="+ Adicionar"
+                    FontSize="12"
+                    Foreground="White" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+
+    <!--  === ITENS SELECIONADOS ===  -->
+    <Border
+      Grid.Row="2"
+      Margin="20,10,20,20"
+      Padding="15"
+      Background="{StaticResource Cartao}"
+      BorderBrush="{StaticResource Borda}"
+      BorderThickness="1"
+      CornerRadius="8">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+          <TextBlock
+            HorizontalAlignment="Left"
+            FontSize="15"
+            FontWeight="SemiBold"
+            Foreground="{StaticResource TextoPrincipal}">
+            <Run Text="✅ Selecionados (" />
+            <Run Text="{Binding ItensSelecionados.Count, Mode=OneWay}" />
+            <Run Text=")" />
+          </TextBlock>
+
+          <Button
+            HorizontalAlignment="Right"
+            Padding="10,5"
+            Background="#E57373"
+            BorderThickness="0"
+            Command="{Binding LimparSelecaoCommand}"
+            Content="🗑️ Limpar Todos"
+            FontSize="12"
+            Foreground="White" />
+        </Grid>
+
+        <ListBox
+          Grid.Row="1"
+          Background="White"
+          BorderBrush="{StaticResource Borda}"
+          BorderThickness="1"
+          ItemsSource="{Binding ItensSelecionados}"
+          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border
+                Margin="0,2"
+                Padding="8,6"
+                Background="#F0F4EF"
+                BorderBrush="{StaticResource Borda}"
+                BorderThickness="0,0,0,1">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <StackPanel Grid.Column="0">
+                    <TextBlock
+                      FontSize="13"
+                      FontWeight="SemiBold"
+                      Foreground="{StaticResource TextoPrincipal}"
+                      Text="{Binding Nome}" />
+                    <TextBlock
+                      Margin="0,2,0,0"
+                      FontSize="11"
+                      Foreground="{StaticResource TextoSecundario}"
+                      Text="{Binding Subcategoria}" />
+                  </StackPanel>
+
+                  <Button
+                    Grid.Column="1"
+                    Padding="8,4"
+                    VerticalAlignment="Center"
+                    Background="#E57373"
+                    BorderThickness="0"
+                    Command="{Binding DataContext.RemoverItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                    CommandParameter="{Binding}"
+                    Content="✕"
+                    FontSize="11"
+                    Foreground="White" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

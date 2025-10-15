@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using BioDesk.Domain.Entities;
 
@@ -52,6 +53,9 @@ public class BioDeskDbContext : DbContext
     // === TEMPLATES GLOBAIS E DOCUMENTOS EXTERNOS ===
     public DbSet<TemplateGlobal> TemplatesGlobais { get; set; } = null!;
     public DbSet<DocumentoExternoPaciente> DocumentosExternosPacientes { get; set; } = null!;
+
+    // === SISTEMA CORE INFORMACIONAL (INERGETIX-INSPIRED) ===
+    public DbSet<ItemBancoCore> ItensBancoCore { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -467,6 +471,37 @@ public class BioDeskDbContext : DbContext
                   .HasDatabaseName("IX_ImportacoesExcelLog_Sucesso");
         });
 
+        // === CONFIGURAÇÃO ITEM BANCO CORE (Sistema Informacional) ===
+        modelBuilder.Entity<ItemBancoCore>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Índice único para ExternalId (GUID)
+            entity.HasIndex(e => e.ExternalId)
+                  .IsUnique()
+                  .HasDatabaseName("IX_ItensBancoCore_ExternalId");
+
+            // Índices para queries de ressonância
+            entity.HasIndex(e => e.Categoria)
+                  .HasDatabaseName("IX_ItensBancoCore_Categoria");
+
+            entity.HasIndex(e => e.Nome)
+                  .HasDatabaseName("IX_ItensBancoCore_Nome");
+
+            entity.HasIndex(e => e.Subcategoria)
+                  .HasDatabaseName("IX_ItensBancoCore_Subcategoria");
+
+            entity.HasIndex(e => e.GeneroAplicavel)
+                  .HasDatabaseName("IX_ItensBancoCore_GeneroAplicavel");
+
+            entity.HasIndex(e => e.IsActive)
+                  .HasDatabaseName("IX_ItensBancoCore_IsActive");
+
+            // Índice composto para filtros comuns
+            entity.HasIndex(e => new { e.Categoria, e.IsActive, e.GeneroAplicavel })
+                  .HasDatabaseName("IX_ItensBancoCore_Categoria_Active_Genero");
+        });
+
         // === DADOS DE SEED ===
         SeedData(modelBuilder);
     }
@@ -726,5 +761,27 @@ public class BioDeskDbContext : DbContext
         };
 
         modelBuilder.Entity<ConfiguracaoClinica>().HasData(configuracaoClinica);
+    }
+
+    /// <summary>
+    /// Seed inicial dos 156 itens do Banco Core (Inergetix-inspired)
+    /// Este método deve ser chamado APÓS Database.Migrate() no App.xaml.cs
+    /// </summary>
+    public void EnsureItensBancoCoreSeeded()
+    {
+        // Verificar se já existem itens
+        if (ItensBancoCore.Any())
+        {
+            Console.WriteLine("ℹ️ ItensBancoCore já contém dados. Seed ignorado.");
+            return;
+        }
+
+        Console.WriteLine("🌱 A semear 156 itens do Banco Core...");
+
+        var itens = BioDesk.Data.SeedData.ItemBancoCoreSeeder.GetAll();
+        ItensBancoCore.AddRange(itens);
+        SaveChanges();
+
+        Console.WriteLine($"✅ {itens.Count} itens inseridos com sucesso!");
     }
 }

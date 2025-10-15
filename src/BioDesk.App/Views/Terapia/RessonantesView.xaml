@@ -1,0 +1,81 @@
+<UserControl
+    x:Class="BioDesk.App.Views.Terapia.RessonantesView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:BioDesk.ViewModels.UserControls.Terapia;assembly=BioDesk.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vm:RessonantesViewModel}"
+    mc:Ignorable="d">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="Configuracao do sweep" Margin="0,0,0,10">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="120" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Inicio (Hz):" />
+                <TextBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Text="{Binding StartHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="0" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Fim (Hz):" />
+                <TextBox
+                    Grid.Row="0"
+                    Grid.Column="4"
+                    Text="{Binding StopHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Passo (Hz):" />
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Text="{Binding StepHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Label Grid.Row="1" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Dwell (ms):" />
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="4"
+                    Text="{Binding DwellMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Orientation="Horizontal">
+                    <Button Width="140" Margin="0,0,10,0" Content="Executar sweep" Command="{Binding RunSweepCommand}" />
+                    <Button Width="180" Content="Adicionar selecionado" Command="{Binding AddSelectedToActiveListCommand}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Header="Resultados do sweep">
+            <DataGrid
+                Margin="10"
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                HeadersVisibility="Column"
+                IsReadOnly="True"
+                ItemsSource="{Binding SweepResults}"
+                SelectedItem="{Binding SelectedPoint, Mode=TwoWay}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="*" Binding="{Binding Hz, StringFormat='{}{0:N2} Hz'}" Header="Hz" />
+                    <DataGridTextColumn Width="120" Binding="{Binding Score, StringFormat='{}{0:N2}%'}" Header="Score" />
+                    <DataGridTextColumn Width="*" Binding="{Binding Notes}" Header="Notas" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+    </Grid>
+</UserControl>

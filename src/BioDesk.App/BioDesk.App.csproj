@@ -22,6 +22,7 @@
     <ProjectReference Include="..\BioDesk.ViewModels\BioDesk.ViewModels.csproj" />
     <ProjectReference Include="..\BioDesk.Services\BioDesk.Services.csproj" />
     <ProjectReference Include="..\BioDesk.Data\BioDesk.Data.csproj" />
+    <ProjectReference Include="..\BioDesk.Core\BioDesk.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

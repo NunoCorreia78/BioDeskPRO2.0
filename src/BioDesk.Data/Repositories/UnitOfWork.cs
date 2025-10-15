@@ -122,8 +122,30 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
+    /// <summary>
+    /// Grava mudanças no contexto com retry logic para SQLite locked
+    /// ✅ CORREÇÃO: 3 tentativas com exponential backoff para evitar "database is locked"
+    /// </summary>
     public async Task<int> SaveChangesAsync()
     {
+        const int maxRetries = 3;
+        int delay = 50; // ms inicial
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 5 && attempt < maxRetries) // Error 5 = SQLITE_BUSY
+            {
+                // ✅ Database locked: aguardar antes de retry
+                await Task.Delay(delay);
+                delay *= 2; // Exponential backoff: 50ms → 100ms → 200ms
+            }
+        }
+
+        // ✅ Última tentativa sem catch (propaga exceção se falhar)
         return await _context.SaveChangesAsync();
     }
 

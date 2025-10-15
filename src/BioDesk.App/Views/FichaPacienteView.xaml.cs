@@ -19,21 +19,11 @@ public partial class FichaPacienteView : UserControl
     private DeclaracaoSaudeViewModel? _declaracaoSaudeViewModel;
     private ConsentimentosViewModel? _consentimentosViewModel;
     private IrisdiagnosticoViewModel? _irisdiagnosticoViewModel;
-    private Abas.TerapiasBioenergeticasUserControl? _terapiasBioenergeticasUserControl;
 
     public FichaPacienteView()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
-
-        // ✅ Adicionar UserControl de Terapias via DI (construtor parametrizado)
-        var app = (App)Application.Current;
-        _terapiasBioenergeticasUserControl = app.ServiceProvider?.GetRequiredService<Abas.TerapiasBioenergeticasUserControl>();
-        if (_terapiasBioenergeticasUserControl != null && TerapiasBioenergeticasContainer != null)
-        {
-            _terapiasBioenergeticasUserControl.Visibility = Visibility.Collapsed;
-            TerapiasBioenergeticasContainer.Children.Add(_terapiasBioenergeticasUserControl);
-        }
     }
 
     private async void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -209,8 +199,8 @@ public partial class FichaPacienteView : UserControl
             IrisdiagnosticoUserControl.Visibility = Visibility.Collapsed;
         if (ComunicacaoUserControl != null)
             ComunicacaoUserControl.Visibility = Visibility.Collapsed;
-        if (_terapiasBioenergeticasUserControl != null)
-            _terapiasBioenergeticasUserControl.Visibility = Visibility.Collapsed;
+        if (TerapiasUserControl != null)
+            TerapiasUserControl.Visibility = Visibility.Collapsed;
 
         // Mostrar o correto
         switch (abaAtiva)
@@ -248,10 +238,10 @@ public partial class FichaPacienteView : UserControl
                     System.Diagnostics.Debug.WriteLine("✅ CODE-BEHIND: Comunicacao VISÍVEL");
                 }
                 break;
-            case 8:
-                if (_terapiasBioenergeticasUserControl != null)
+            case 7:
+                if (TerapiasUserControl != null)
                 {
-                    _terapiasBioenergeticasUserControl.Visibility = Visibility.Visible;
+                    TerapiasUserControl.Visibility = Visibility.Visible;
                     System.Diagnostics.Debug.WriteLine("✅ CODE-BEHIND: Terapias VISÍVEL");
                 }
                 break;

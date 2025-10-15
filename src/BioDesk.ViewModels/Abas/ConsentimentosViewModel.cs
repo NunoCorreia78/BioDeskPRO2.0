@@ -20,11 +20,11 @@ namespace BioDesk.ViewModels.Abas;
 public partial class ConsentimentosViewModel : ObservableValidator
 {
     private readonly ILogger<ConsentimentosViewModel> _logger;
-    private readonly Services.Pdf.ConsentimentoPdfService _pdfService;
+    private readonly global::BioDesk.Services.Pdf.ConsentimentoPdfService _pdfService;
 
     public ConsentimentosViewModel(
         ILogger<ConsentimentosViewModel> logger,
-        Services.Pdf.ConsentimentoPdfService pdfService)
+        global::BioDesk.Services.Pdf.ConsentimentoPdfService pdfService)
     {
         _logger = logger;
         _pdfService = pdfService;
@@ -538,7 +538,7 @@ public partial class ConsentimentosViewModel : ObservableValidator
             _logger.LogInformation("✅ DescricaoTratamento válida: {Length} caracteres", DescricaoTratamento.Length);
 
             // Criar dados do consentimento
-            var dados = new Services.Pdf.DadosConsentimento
+            var dados = new global::BioDesk.Services.Pdf.DadosConsentimento
             {
                 NomePaciente = NomePaciente,
                 TipoTratamento = TipoTratamentoSelecionado,

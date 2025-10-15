@@ -1,0 +1,314 @@
+<UserControl x:Class="BioDesk.App.Views.ItensCoreUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="1000"
+             d:DataContext="{d:DesignInstance Type=vm:ItensCoreViewModel}"
+             Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <!-- Estilo para Cards de Itens -->
+        <Style x:Key="ItemCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.1"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Template para Item do ListBox -->
+        <DataTemplate x:Key="ItemTemplate">
+            <Border Style="{StaticResource ItemCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <!-- Nome do Item -->
+                        <TextBlock Text="{Binding Nome}"
+                                   FontWeight="SemiBold"
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextoPrincipal}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,4"/>
+
+                        <!-- Categoria e Subcategoria -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="{Binding Categoria}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource BotaoPrimario}"
+                                       FontWeight="Medium"/>
+                            <TextBlock Text=" • "
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextoSecundario}"
+                                       Visibility="{Binding Subcategoria, Converter={StaticResource NullToVisibilityConverter}}"/>
+                            <TextBlock Text="{Binding Subcategoria}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TextoSecundario}"
+                                       Visibility="{Binding Subcategoria, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        </StackPanel>
+
+                        <!-- Descrição Breve -->
+                        <TextBlock Text="{Binding DescricaoBreve}"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextoSecundario}"
+                                   TextWrapping="Wrap"
+                                   MaxHeight="40"
+                                   TextTrimming="CharacterEllipsis"
+                                   Visibility="{Binding DescricaoBreve, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    </StackPanel>
+
+                    <!-- Badge de Género -->
+                    <Border Grid.Column="1"
+                            Background="{StaticResource FundoPrincipal}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="8,4"
+                            VerticalAlignment="Top"
+                            Margin="8,0,0,0"
+                            Visibility="{Binding GeneroAplicavel, Converter={StaticResource NullToVisibilityConverter}}">
+                        <TextBlock Text="{Binding GeneroAplicavel}"
+                                   FontSize="10"
+                                   Foreground="{StaticResource TextoSecundario}"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource FundoPrincipal}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Cabeçalho -->
+            <RowDefinition Height="Auto"/> <!-- Filtros -->
+            <RowDefinition Height="*"/>    <!-- Lista -->
+            <RowDefinition Height="Auto"/> <!-- Detalhes -->
+            <RowDefinition Height="Auto"/> <!-- Estatísticas -->
+        </Grid.RowDefinitions>
+
+        <!-- =========================== CABEÇALHO =========================== -->
+        <Border Grid.Row="0"
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="🧬 Banco Core Informacional"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextoPrincipal}"/>
+                    <TextBlock Text="Sistema inspirado no Inergetix CoRe 5.0 para análise de ressonância"
+                               FontSize="12"
+                               Foreground="{StaticResource TextoSecundario}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="🔄 Recarregar"
+                        Command="{Binding CarregarItensCommand}"
+                        Style="{StaticResource BotaoPrimarioStyle}"
+                        Padding="16,8"
+                        VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- =========================== FILTROS =========================== -->
+        <Border Grid.Row="1"
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Linha 1: Pesquisa + Categoria + Género -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Pesquisa de Texto -->
+                    <TextBox Grid.Column="0"
+                             Text="{Binding TextoPesquisa, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource TextBoxPadraoStyle}"
+                             Margin="0,0,12,0">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding AplicarFiltrosCommand}"/>
+                        </TextBox.InputBindings>
+                        <TextBox.Tag>
+                            <TextBlock Text="🔍 Pesquisar por nome, descrição ou subcategoria..."
+                                       Foreground="{StaticResource TextoSecundario}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0,0,0"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource AncestorType=TextBox}}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </TextBox.Tag>
+                    </TextBox>
+
+                    <!-- Filtro de Categoria -->
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding CategoriasDisponiveis}"
+                              SelectedItem="{Binding CategoriaFiltro}"
+                              Style="{StaticResource ComboBoxPadraoStyle}"
+                              Margin="0,0,12,0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}📁 {0}">
+                                            <Binding/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- Filtro de Género -->
+                    <ComboBox Grid.Column="2"
+                              ItemsSource="{Binding GenerosDisponiveis}"
+                              SelectedItem="{Binding GeneroFiltro}"
+                              Style="{StaticResource ComboBoxPadraoStyle}"
+                              Margin="0,0,12,0"/>
+
+                    <!-- Botão Limpar Filtros -->
+                    <Button Grid.Column="3"
+                            Content="❌ Limpar"
+                            Command="{Binding LimparFiltrosCommand}"
+                            Style="{StaticResource BotaoSecundarioStyle}"
+                            Padding="12,8"/>
+                </Grid>
+
+                <!-- Linha 2: Checkbox Apenas Ativos -->
+                <CheckBox Grid.Row="1"
+                          Content="Mostrar apenas itens ativos"
+                          IsChecked="{Binding ApenasAtivos}"
+                          Foreground="{StaticResource TextoSecundario}"
+                          FontSize="12"
+                          Margin="0,12,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- =========================== LISTA DE ITENS =========================== -->
+        <Border Grid.Row="2"
+                Background="{StaticResource FundoPrincipal}"
+                Padding="20">
+            <ListBox ItemsSource="{Binding ItensFiltrados}"
+                     SelectedItem="{Binding ItemSelecionado}"
+                     ItemTemplate="{StaticResource ItemTemplate}"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+        </Border>
+
+        <!-- =========================== DETALHES DO ITEM SELECIONADO =========================== -->
+        <Border Grid.Row="3"
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="20"
+                Visibility="{Binding ItemSelecionado, Converter={StaticResource NullToVisibilityConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Detalhes do Item Selecionado"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextoPrincipal}"
+                               Margin="0,0,0,8"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Nome:" FontWeight="SemiBold" Margin="0,0,12,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ItemSelecionado.Nome}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Fonte:" FontWeight="SemiBold" Margin="0,0,12,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ItemSelecionado.FonteOrigem}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="ExternalId:" FontWeight="SemiBold" Margin="0,0,12,0"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ItemSelecionado.ExternalId}" FontFamily="Consolas" FontSize="10"/>
+                    </Grid>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="📋 Copiar Detalhes"
+                        Command="{Binding ExportarDetalhesCommand}"
+                        Style="{StaticResource BotaoSecundarioStyle}"
+                        Padding="12,8"
+                        VerticalAlignment="Top"/>
+            </Grid>
+        </Border>
+
+        <!-- =========================== ESTATÍSTICAS =========================== -->
+        <Border Grid.Row="4"
+                Background="{StaticResource CardBackground}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="20">
+            <TextBlock Text="{Binding Estatisticas}"
+                       FontSize="11"
+                       Foreground="{StaticResource TextoSecundario}"
+                       TextWrapping="Wrap"/>
+        </Border>
+    </Grid>
+</UserControl>

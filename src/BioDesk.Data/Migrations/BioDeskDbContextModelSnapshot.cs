@@ -39,7 +39,7 @@ namespace BioDesk.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_AbordagensSessoes_SessaoId_TipoAbordagem");
 
-                    b.ToTable("AbordagensSessoes");
+                    b.ToTable("AbordagensSessoes", (string)null);
 
                     b.HasData(
                         new
@@ -132,7 +132,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("AlergiaAlimentar");
+                    b.ToTable("AlergiaAlimentar", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.AlergiaAmbiental", b =>
@@ -157,7 +157,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("AlergiaAmbiental");
+                    b.ToTable("AlergiaAmbiental", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.AlergiaMedicamentosa", b =>
@@ -186,7 +186,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("AlergiaMedicamentosa");
+                    b.ToTable("AlergiaMedicamentosa", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.AnexoComunicacao", b =>
@@ -222,7 +222,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("ComunicacaoId");
 
-                    b.ToTable("AnexosComunicacoes");
+                    b.ToTable("AnexosComunicacoes", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Cirurgia", b =>
@@ -254,7 +254,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("Cirurgia");
+                    b.ToTable("Cirurgia", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Comunicacao", b =>
@@ -333,7 +333,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("PacienteId");
 
-                    b.ToTable("Comunicacoes");
+                    b.ToTable("Comunicacoes", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.ConfiguracaoClinica", b =>
@@ -371,13 +371,13 @@ namespace BioDesk.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConfiguracaoClinica");
+                    b.ToTable("ConfiguracaoClinica", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            DataAtualizacao = new DateTime(2025, 10, 13, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(3369),
+                            DataAtualizacao = new DateTime(2025, 10, 15, 10, 26, 11, 752, DateTimeKind.Utc).AddTicks(6825),
                             NomeClinica = "Minha Clínica"
                         });
                 });
@@ -490,7 +490,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("TipoTratamento")
                         .HasDatabaseName("IX_Consentimentos_TipoTratamento");
 
-                    b.ToTable("Consentimentos");
+                    b.ToTable("Consentimentos", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Consulta", b =>
@@ -610,7 +610,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("TipoConsulta")
                         .HasDatabaseName("IX_Consultas_TipoConsulta");
 
-                    b.ToTable("Consultas");
+                    b.ToTable("Consultas", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Contacto", b =>
@@ -671,7 +671,7 @@ namespace BioDesk.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Contactos_PacienteId");
 
-                    b.ToTable("Contactos");
+                    b.ToTable("Contactos", (string)null);
 
                     b.HasData(
                         new
@@ -819,7 +819,7 @@ namespace BioDesk.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_DeclaracoesSaude_PacienteId");
 
-                    b.ToTable("DeclaracoesSaude");
+                    b.ToTable("DeclaracoesSaude", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.DocumentoExternoPaciente", b =>
@@ -880,7 +880,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("PacienteId")
                         .HasDatabaseName("IX_DocumentosExternos_PacienteId");
 
-                    b.ToTable("DocumentosExternosPacientes");
+                    b.ToTable("DocumentosExternosPacientes", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.EventoHardware", b =>
@@ -932,7 +932,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("TipoEvento")
                         .HasDatabaseName("IX_EventosHardware_TipoEvento");
 
-                    b.ToTable("EventosHardware");
+                    b.ToTable("EventosHardware", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.HistoriaFamiliar", b =>
@@ -965,7 +965,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("HistoriaFamiliar");
+                    b.ToTable("HistoriaFamiliar", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Hospitalizacao", b =>
@@ -996,7 +996,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("Hospitalizacao");
+                    b.ToTable("Hospitalizacao", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.ImportacaoExcelLog", b =>
@@ -1055,7 +1055,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("Sucesso")
                         .HasDatabaseName("IX_ImportacoesExcelLog_Sucesso");
 
-                    b.ToTable("ImportacoesExcelLog");
+                    b.ToTable("ImportacoesExcelLog", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.IntoleranciaAlimentar", b =>
@@ -1080,7 +1080,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("IntoleranciaAlimentar");
+                    b.ToTable("IntoleranciaAlimentar", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.IrisAnalise", b =>
@@ -1197,7 +1197,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("PacienteId")
                         .HasDatabaseName("IX_IrisAnalises_PacienteId");
 
-                    b.ToTable("IrisAnalises");
+                    b.ToTable("IrisAnalises", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.IrisImagem", b =>
@@ -1227,7 +1227,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("PacienteId");
 
-                    b.ToTable("IrisImagens");
+                    b.ToTable("IrisImagens", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.IrisMarca", b =>
@@ -1263,7 +1263,76 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("IrisImagemId");
 
-                    b.ToTable("IrisMarcas");
+                    b.ToTable("IrisMarcas", (string)null);
+                });
+
+            modelBuilder.Entity("BioDesk.Domain.Entities.ItemBancoCore", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Categoria")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DescricaoBreve")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ExternalId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FonteOrigem")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GeneroAplicavel")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("JsonMetadata")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Subcategoria")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Categoria")
+                        .HasDatabaseName("IX_ItensBancoCore_Categoria");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ItensBancoCore_ExternalId");
+
+                    b.HasIndex("GeneroAplicavel")
+                        .HasDatabaseName("IX_ItensBancoCore_GeneroAplicavel");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_ItensBancoCore_IsActive");
+
+                    b.HasIndex("Nome")
+                        .HasDatabaseName("IX_ItensBancoCore_Nome");
+
+                    b.HasIndex("Subcategoria")
+                        .HasDatabaseName("IX_ItensBancoCore_Subcategoria");
+
+                    b.HasIndex("Categoria", "IsActive", "GeneroAplicavel")
+                        .HasDatabaseName("IX_ItensBancoCore_Categoria_Active_Genero");
+
+                    b.ToTable("ItensBancoCore", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.LeituraBioenergetica", b =>
@@ -1308,7 +1377,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("Timestamp")
                         .HasDatabaseName("IX_LeiturasBioenergeticas_Timestamp");
 
-                    b.ToTable("LeiturasBioenergeticas");
+                    b.ToTable("LeiturasBioenergeticas", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.MedicamentoAtual", b =>
@@ -1342,7 +1411,7 @@ namespace BioDesk.Data.Migrations
 
                     b.HasIndex("DeclaracaoSaudeId");
 
-                    b.ToTable("MedicamentoAtual");
+                    b.ToTable("MedicamentoAtual", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Paciente", b =>
@@ -1429,13 +1498,13 @@ namespace BioDesk.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Pacientes_NumeroProcesso");
 
-                    b.ToTable("Pacientes");
+                    b.ToTable("Pacientes", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            DataCriacao = new DateTime(2025, 9, 13, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2912),
+                            DataCriacao = new DateTime(2025, 9, 15, 10, 26, 11, 752, DateTimeKind.Utc).AddTicks(6037),
                             DataNascimento = new DateTime(1980, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "Casado",
                             EstadoRegisto = "Incompleto",
@@ -1450,7 +1519,7 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 2,
-                            DataCriacao = new DateTime(2025, 9, 28, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2923),
+                            DataCriacao = new DateTime(2025, 9, 30, 10, 26, 11, 752, DateTimeKind.Utc).AddTicks(6049),
                             DataNascimento = new DateTime(1975, 11, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "Solteira",
                             EstadoRegisto = "Em Progresso",
@@ -1466,7 +1535,7 @@ namespace BioDesk.Data.Migrations
                         new
                         {
                             Id = 3,
-                            DataCriacao = new DateTime(2025, 10, 6, 13, 39, 37, 581, DateTimeKind.Utc).AddTicks(2926),
+                            DataCriacao = new DateTime(2025, 10, 8, 10, 26, 11, 752, DateTimeKind.Utc).AddTicks(6055),
                             DataNascimento = new DateTime(1990, 3, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EstadoCivil = "União de Facto",
                             EstadoRegisto = "Completo",
@@ -1518,7 +1587,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("SessaoId")
                         .HasDatabaseName("IX_PlanosTerapia_SessaoId");
 
-                    b.ToTable("PlanosTerapia");
+                    b.ToTable("PlanosTerapia", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.ProtocoloTerapeutico", b =>
@@ -1598,7 +1667,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("Nome")
                         .HasDatabaseName("IX_ProtocolosTerapeuticos_Nome");
 
-                    b.ToTable("ProtocolosTerapeuticos");
+                    b.ToTable("ProtocolosTerapeuticos", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Sessao", b =>
@@ -1673,7 +1742,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("PacienteId")
                         .HasDatabaseName("IX_Sessoes_PacienteId");
 
-                    b.ToTable("Sessoes");
+                    b.ToTable("Sessoes", (string)null);
 
                     b.HasData(
                         new
@@ -1682,8 +1751,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Tensão muscular paravertebral L4-L5, trigger points bilateral",
                             Avaliacao = "Lombalgia mecânica aguda",
                             Contexto = "Após esforço físico no ginásio",
-                            CriadoEm = new DateTime(2025, 9, 13, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3243),
-                            DataHora = new DateTime(2025, 9, 13, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3232),
+                            CriadoEm = new DateTime(2025, 9, 15, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6579),
+                            DataHora = new DateTime(2025, 9, 15, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6562),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Dor lombar aguda",
@@ -1698,8 +1767,8 @@ namespace BioDesk.Data.Migrations
                             Id = 2,
                             Achados = "Melhoria 70%, tensão residual L5",
                             Avaliacao = "Evolução favorável",
-                            CriadoEm = new DateTime(2025, 9, 20, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3251),
-                            DataHora = new DateTime(2025, 9, 20, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3248),
+                            CriadoEm = new DateTime(2025, 9, 22, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6590),
+                            DataHora = new DateTime(2025, 9, 22, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6586),
                             DuracaoMinutos = 45,
                             IsDeleted = false,
                             Motivo = "Reavaliação lombalgia",
@@ -1714,8 +1783,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "FC: 85 bpm, tensão cervical bilateral",
                             Avaliacao = "Stress ocupacional com somatização",
                             Contexto = "Período de trabalho intenso com deadlines apertados",
-                            CriadoEm = new DateTime(2025, 10, 3, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3257),
-                            DataHora = new DateTime(2025, 10, 3, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3254),
+                            CriadoEm = new DateTime(2025, 10, 5, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6600),
+                            DataHora = new DateTime(2025, 10, 5, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6596),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Consulta de rotina + stress elevado",
@@ -1730,8 +1799,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Trigger points trapézio superior bilateral, C5-C6 com restrição de mobilidade",
                             Avaliacao = "Cefaleia tensional de origem cervical",
                             Contexto = "Cefaleias tensionais há 6 meses, agravamento recente",
-                            CriadoEm = new DateTime(2025, 9, 28, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3263),
-                            DataHora = new DateTime(2025, 9, 28, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3260),
+                            CriadoEm = new DateTime(2025, 9, 30, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6660),
+                            DataHora = new DateTime(2025, 9, 30, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6616),
                             DuracaoMinutos = 90,
                             IsDeleted = false,
                             Motivo = "Avaliação inicial - cefaleias recorrentes",
@@ -1747,8 +1816,8 @@ namespace BioDesk.Data.Migrations
                             Id = 5,
                             Achados = "Redução 60% frequência cefaleias, mobilidade cervical normalizada",
                             Avaliacao = "Excelente evolução",
-                            CriadoEm = new DateTime(2025, 10, 12, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3269),
-                            DataHora = new DateTime(2025, 10, 12, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3267),
+                            CriadoEm = new DateTime(2025, 10, 14, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6670),
+                            DataHora = new DateTime(2025, 10, 14, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6667),
                             DuracaoMinutos = 60,
                             IsDeleted = false,
                             Motivo = "Reavaliação cefaleias + análise iridológica",
@@ -1763,8 +1832,8 @@ namespace BioDesk.Data.Migrations
                             Achados = "Edema leve joelho direito, mobilidade ombro esquerdo reduzida 20%, padrão de fadiga adrenal",
                             Avaliacao = "Síndrome inflamatório multifatorial + possível sobrecarga adrenal",
                             Contexto = "Dores articulares múltiplas (joelhos, ombros) + fadiga persistente há 3 meses",
-                            CriadoEm = new DateTime(2025, 10, 8, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3275),
-                            DataHora = new DateTime(2025, 10, 8, 14, 39, 37, 581, DateTimeKind.Local).AddTicks(3272),
+                            CriadoEm = new DateTime(2025, 10, 10, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6680),
+                            DataHora = new DateTime(2025, 10, 10, 11, 26, 11, 752, DateTimeKind.Local).AddTicks(6676),
                             DuracaoMinutos = 120,
                             IsDeleted = false,
                             Motivo = "Consulta integrada - dor articular + fadiga crónica",
@@ -1834,7 +1903,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("PlanoTerapiaId", "InicioEm")
                         .HasDatabaseName("IX_SessoesTerapia_PlanoId_Inicio");
 
-                    b.ToTable("SessoesTerapia");
+                    b.ToTable("SessoesTerapia", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.TemplateGlobal", b =>
@@ -1896,7 +1965,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("Tipo")
                         .HasDatabaseName("IX_TemplatesGlobais_Tipo");
 
-                    b.ToTable("TemplatesGlobais");
+                    b.ToTable("TemplatesGlobais", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.Terapia", b =>
@@ -1950,7 +2019,7 @@ namespace BioDesk.Data.Migrations
                     b.HasIndex("ProtocoloTerapeuticoId")
                         .HasDatabaseName("IX_Terapias_ProtocoloTerapeuticoId");
 
-                    b.ToTable("Terapias");
+                    b.ToTable("Terapias", (string)null);
                 });
 
             modelBuilder.Entity("BioDesk.Domain.Entities.AbordagemSessao", b =>

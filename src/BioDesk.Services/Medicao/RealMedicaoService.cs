@@ -327,11 +327,31 @@ public sealed class RealMedicaoService : IMedicaoService, IDisposable
         };
     }
 
+    /// <summary>
+    /// Finalizer (destructor) para garantir limpeza de recursos não-managed
+    /// ✅ CA2216: Tipos descartáveis devem declarar finalizador
+    /// </summary>
+    ~RealMedicaoService()
+    {
+        Dispose(disposing: false);
+    }
+
     public void Dispose()
     {
-        _capturaContinuaCts?.Cancel();
-        _capturaContinuaCts?.Dispose();
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 
+    private void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // Limpar recursos managed
+            _capturaContinuaCts?.Cancel();
+            _capturaContinuaCts?.Dispose();
+        }
+
+        // Limpar recursos não-managed (sempre executado)
         if (_deviceHandle != IntPtr.Zero && _deviceHandle.ToInt64() != LIBTIEPIE_HANDLE_INVALID)
         {
             try
@@ -355,8 +375,6 @@ public sealed class RealMedicaoService : IMedicaoService, IDisposable
             _logger.LogInformation("LibTiePie SDK finalizado");
         }
         catch { /* Ignorar erros no LibExit */ }
-
-        GC.SuppressFinalize(this);
     }
 
     #region P/Invoke LibTiePie - Oscilloscope Functions
