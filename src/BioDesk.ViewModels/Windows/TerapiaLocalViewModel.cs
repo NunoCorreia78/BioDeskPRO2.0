@@ -1,6 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using BioDesk.Data.Repositories;
+using BioDesk.Domain.Entities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -12,6 +17,8 @@ namespace BioDesk.ViewModels.Windows;
 /// </summary>
 public partial class TerapiaLocalViewModel : ObservableObject
 {
+    private readonly ISessionHistoricoRepository? _sessionRepository;
+    
     [ObservableProperty] private double _voltagemV = 5.0; // Default 5V
     
     [ObservableProperty] private double _correnteMaxMa = 50.0;
@@ -40,8 +47,15 @@ public partial class TerapiaLocalViewModel : ObservableObject
         ? TimeSpan.FromSeconds(Frequencias.Sum(f => f.DuracaoSegundos)).ToString(@"mm\:ss")
         : "00:00";
     
+    public TerapiaLocalViewModel() { }
+    
+    public TerapiaLocalViewModel(ISessionHistoricoRepository sessionRepository)
+    {
+        _sessionRepository = sessionRepository;
+    }
+    
     [RelayCommand]
-    private void Iniciar()
+    private async Task IniciarAsync()
     {
         EmExecucao = true;
         Pausado = false;
@@ -49,6 +63,36 @@ public partial class TerapiaLocalViewModel : ObservableObject
         // TODO: Integrar com ITiePieHardwareService
         // - Configurar voltagem (VoltagemV)
         // - Iterar por Frequencias (foreach step)
+        
+        // 📊 Persistir em SessionHistorico
+        if (_sessionRepository != null && Frequencias.Any())
+        {
+            try
+            {
+                var frequenciasJson = Frequencias.Select(f => new 
+                { 
+                    Hz = f.Hz, 
+                    DutyPercent = f.DutyPercent, 
+                    DuracaoSegundos = f.DuracaoSegundos 
+                }).ToList();
+                
+                var session = new SessionHistorico
+                {
+                    DataHoraInicio = DateTime.Now,
+                    TipoTerapia = TipoTerapia.Local,
+                    FrequenciasHzJson = JsonSerializer.Serialize(frequenciasJson),
+                    DuracaoMinutos = (int)(Frequencias.Sum(f => f.DuracaoSegundos) / 60.0),
+                    VoltagemV = VoltagemV,
+                    CorrenteMa = CorrenteMaxMa
+                };
+                
+                await _sessionRepository.AddAsync(session);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erro ao persistir SessionHistorico: {ex.Message}");
+            }
+        }
         // - Emitir cada Hz com Duty e Duração especificados
         // - Atualizar ProgressoPercent, HzAtual, TempoDecorrido
         // - Persistir em SessionHistorico (TipoTerapia.Local)

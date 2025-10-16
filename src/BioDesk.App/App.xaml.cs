@@ -573,6 +573,12 @@ Inner Exceptions:
         services.AddTransient<HistoricoViewModel>();
         services.AddTransient<TerapiaCoreViewModel>();
         services.AddTransient<SelecionarTemplatesViewModel>();
+        
+        // ViewModels para Windows (modals e histórico)
+        services.AddTransient<BioDesk.ViewModels.Windows.HistoricoViewModel>();
+        services.AddTransient<BioDesk.ViewModels.Windows.TerapiaRemotaViewModel>();
+        services.AddTransient<BioDesk.ViewModels.Windows.TerapiaLocalViewModel>();
+        services.AddTransient<BioDesk.ViewModels.Windows.BiofeedbackSessionViewModel>();
 
         // UserControls (precisam de DI para construtores parametrizados)
         services.AddTransient<Views.Abas.TerapiasBioenergeticasUserControl>(); // Ô£à ABA 8: Terapias

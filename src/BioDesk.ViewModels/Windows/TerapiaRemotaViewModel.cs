@@ -1,4 +1,9 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Threading.Tasks;
+using BioDesk.Data.Repositories;
+using BioDesk.Domain.Entities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -10,6 +15,8 @@ namespace BioDesk.ViewModels.Windows;
 /// </summary>
 public partial class TerapiaRemotaViewModel : ObservableObject
 {
+    private readonly ISessionHistoricoRepository? _sessionRepository;
+    
     [ObservableProperty] private int _duracaoDias = 14; // Default 14 dias
     
     [ObservableProperty] private string _anchor = "Nome+DataNasc";
@@ -43,8 +50,15 @@ public partial class TerapiaRemotaViewModel : ObservableObject
     /// </summary>
     public ObservableCollection<string> ProtocolosSelecionados { get; } = new();
     
+    public TerapiaRemotaViewModel() { }
+    
+    public TerapiaRemotaViewModel(ISessionHistoricoRepository sessionRepository)
+    {
+        _sessionRepository = sessionRepository;
+    }
+    
     [RelayCommand]
-    private void IniciarTransmissao()
+    private async Task IniciarTransmissaoAsync()
     {
         EmTransmissao = true;
         
@@ -52,7 +66,30 @@ public partial class TerapiaRemotaViewModel : ObservableObject
         // - Criar seed com anchor (Nome+DataNasc ou custom)
         // - Configurar ScanConfig com protocolos selecionados
         // - Iniciar transmissão em background (duração: DuracaoDias)
-        // - Persistir em SessionHistorico (TipoTerapia.Remota)
+        
+        // 📊 Persistir em SessionHistorico
+        if (_sessionRepository != null)
+        {
+            try
+            {
+                var protocolos = new System.Collections.Generic.List<string>(ProtocolosSelecionados);
+                
+                var session = new SessionHistorico
+                {
+                    DataHoraInicio = DateTime.Now,
+                    TipoTerapia = TipoTerapia.Remota,
+                    ProtocolosJson = JsonSerializer.Serialize(protocolos),
+                    DuracaoMinutos = DuracaoDias * 24 * 60, // Converter dias para minutos
+                    Notas = $"Anchor: {Anchor}, Hash: {HashAlgoritmo}, Modulação: {Modulacao}, Ciclos: {Ciclos}"
+                };
+                
+                await _sessionRepository.AddAsync(session);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erro ao persistir SessionHistorico: {ex.Message}");
+            }
+        }
     }
     
     [RelayCommand]

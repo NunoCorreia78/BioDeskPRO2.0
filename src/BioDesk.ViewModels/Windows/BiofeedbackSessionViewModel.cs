@@ -1,3 +1,5 @@
+using BioDesk.Data.Repositories;
+using BioDesk.Domain.Entities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -13,6 +15,8 @@ namespace BioDesk.ViewModels.Windows;
 /// </summary>
 public partial class BiofeedbackSessionViewModel : ObservableObject
 {
+    private readonly ISessionHistoricoRepository? _sessionRepository;
+    
     // ══════════════════════════════════════════════════════════════
     // PROPRIEDADES - Controlo de Sessão
     // ══════════════════════════════════════════════════════════════
@@ -111,6 +115,17 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
     /// Mostra ao user o que foi detetado e emitido em cada ciclo.
     /// </summary>
     public ObservableCollection<CycleHistoryItem> History { get; } = new();
+    
+    // ══════════════════════════════════════════════════════════════
+    // CONSTRUTORES
+    // ══════════════════════════════════════════════════════════════
+    
+    public BiofeedbackSessionViewModel() { }
+    
+    public BiofeedbackSessionViewModel(ISessionHistoricoRepository sessionRepository)
+    {
+        _sessionRepository = sessionRepository;
+    }
 
     // ══════════════════════════════════════════════════════════════
     // COMANDOS
@@ -129,6 +144,27 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
         ProgressoPercent = 0.0;
         CurrentHz = "A detetar...";
         History.Clear();
+        
+        // 📊 Persistir em SessionHistorico
+        if (_sessionRepository != null)
+        {
+            try
+            {
+                var session = new SessionHistorico
+                {
+                    DataHoraInicio = DateTime.Now,
+                    TipoTerapia = TipoTerapia.Biofeedback,
+                    VoltagemV = VoltagemV,
+                    Notas = $"Ciclos máx: {MaxCycles?.ToString() ?? "∞"}, Intervalo: {ScanIntervalSeconds}s, Auto-ajuste: {(AutoAdjustVoltage ? "Sim" : "Não")}"
+                };
+                
+                await _sessionRepository.AddAsync(session);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Erro ao persistir SessionHistorico: {ex.Message}");
+            }
+        }
 
         // TODO: Integrar com IResonanceEngine para loop:
         // 1. Auto-scan → deteta Hz ressonantes
