@@ -20,12 +20,16 @@ public partial class AvaliacaoViewModel : ObservableObject
     [ObservableProperty] private string _selectedSeedSource = "Nome+DataNasc";
     [ObservableProperty] private string _selectedRngEngine = "XorShift128+";
     [ObservableProperty] private int _iterations = 50000;
+    [ObservableProperty] private string _selectedCategoryFilter = "Todas";
 
     public ObservableCollection<string> SeedSources { get; } =
         new(["Nome+DataNasc", "Âncora Custom", "FotoHash", "UUID Sessão"]);
 
     public ObservableCollection<string> RngEngines { get; } =
         new(["XorShift128+", "PCG64", "HardwareNoiseMix"]);
+
+    public ObservableCollection<string> CategoryFilters { get; } =
+        new(["Todas", "Chakra", "Meridiano", "Órgão", "Florais", "Vitamina", "Patógeno", "Emocional"]);
 
     public ObservableCollection<ScanResultItem> Results { get; } = new();
 
@@ -42,12 +46,40 @@ public partial class AvaliacaoViewModel : ObservableObject
     private async Task RunScanAsync()
     {
         var cfg = DemoConfigs.BuildScanConfig(SelectedSeedSource, SessionSalt, SelectedRngEngine, Iterations);
+        
+        // Aplicar filtro de categoria se não for "Todas"
+        if (SelectedCategoryFilter != "Todas")
+        {
+            cfg = cfg with 
+            { 
+                Filter = new ItemFilter(
+                    IncludeCategories: new[] { SelectedCategoryFilter },
+                    ExcludeCategories: Array.Empty<string>())
+            };
+        }
+        
         var list = await _engine.RunScanAsync(cfg, CancellationToken.None);
 
         Results.Clear();
-        foreach (var item in list)
+        
+        // Debug: Se não houver resultados, mostrar mensagem
+        if (list.Count == 0)
         {
-            Results.Add(item);
+            Results.Add(new ScanResultItem(
+                ItemId: 0,
+                Code: "DEBUG",
+                Name: $"Nenhum resultado encontrado para categoria: {SelectedCategoryFilter}",
+                Category: "Info",
+                ScorePercent: 0,
+                ZScore: 0,
+                QValue: 0));
+        }
+        else
+        {
+            foreach (var item in list)
+            {
+                Results.Add(item);
+            }
         }
     }
 

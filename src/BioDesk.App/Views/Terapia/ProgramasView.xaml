@@ -21,24 +21,25 @@
 
         <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,0,0,10">
             <TextBox
-                Width="260"
-                Margin="0,0,10,0"
-                Text="{Binding ExcelPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                ToolTip="Caminho do ficheiro Excel" />
-            <Button Width="110" Margin="0,0,10,0" Content="Importar Excel" Command="{Binding ImportExcelCommand}" />
-            <TextBox
-                Width="200"
+                Width="400"
                 Margin="0,0,10,0"
                 Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                ToolTip="Texto de pesquisa" />
-            <Button Width="110" Content="Atualizar" Command="{Binding RefreshProgramsCommand}" />
+                ToolTip="Pesquisar protocolos (filtragem automática)" />
+            <TextBlock VerticalAlignment="Center" Foreground="Gray" Text="Use Ctrl+Clique ou Shift+Clique para selecionar múltiplos" />
         </StackPanel>
 
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Programas">
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Programas (1.272 disponíveis)">
             <ListBox
                 Margin="10"
+                SelectionMode="Extended"
                 ItemsSource="{Binding Programs}"
-                SelectedItem="{Binding SelectedProgram, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                SelectedItem="{Binding SelectedProgram, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <EventSetter Event="Selected" Handler="ListBoxItem_Selected" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
         </GroupBox>
 
         <GroupBox Grid.Row="1" Grid.Column="2" Header="Passos do programa">

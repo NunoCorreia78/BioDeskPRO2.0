@@ -21,6 +21,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <Label Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Fonte da semente:" />
@@ -41,8 +42,18 @@
                         SelectedItem="{Binding SelectedRngEngine, Mode=TwoWay}"
                         Margin="0,0,0,10" />
 
-                    <Label Grid.Row="2" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Salt da sessao:" />
-                    <DockPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,10">
+                    <Label Grid.Row="2" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Filtrar categoria:" />
+                    <ComboBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Height="28"
+                        ItemsSource="{Binding CategoryFilters}"
+                        SelectedItem="{Binding SelectedCategoryFilter, Mode=TwoWay}"
+                        Margin="0,0,0,10"
+                        ToolTip="Filtrar resultados por categoria específica" />
+
+                    <Label Grid.Row="3" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Salt da sessao:" />
+                    <DockPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,10">
                         <TextBox
                             MinWidth="220"
                             Text="{Binding SessionSalt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -52,9 +63,9 @@
                             Command="{Binding RegenerateSaltCommand}" />
                     </DockPanel>
 
-                    <Label Grid.Row="3" Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center" Content="Iteracoes:" />
+                    <Label Grid.Row="4" Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center" Content="Iteracoes:" />
                     <TextBox
-                        Grid.Row="3"
+                        Grid.Row="4"
                         Grid.Column="1"
                         Width="120"
                         Text="{Binding Iterations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

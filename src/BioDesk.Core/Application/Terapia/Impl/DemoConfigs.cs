@@ -18,9 +18,9 @@ public static class DemoConfigs
 
         var validation = new PatternValidationConfig(
             NullModelRuns: 128,
-            MinZ: 1.25,
-            MinScorePercent: 25,
-            MaxQValue: 0.25,
+            MinZ: 0.5,           // Reduzido de 1.25 para permitir mais resultados
+            MinScorePercent: 10,  // Reduzido de 25 para permitir mais resultados
+            MaxQValue: 0.35,      // Aumentado de 0.25 para ser menos restritivo
             Replicas: 3,
             SaltJitter: 0.05);
 

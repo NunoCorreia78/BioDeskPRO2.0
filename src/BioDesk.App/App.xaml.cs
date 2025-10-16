@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
@@ -396,22 +397,50 @@ Inner Exceptions:
         services.AddSingleton<ICoreCatalogProvider, CoreCatalogProvider>();
         services.AddSingleton<IResonanceEngine, ResonanceEngine>();
         services.AddSingleton<IResonantFrequencyFinder, ResonantFrequencyFinder>();
-        
+
         // 📊 ExcelImportService (para importar FrequencyList.xls)
         services.AddSingleton<IExcelImportService, ExcelImportService>();
-        
+
         // 📚 ProgramLibrary com delegate wrapper para evitar dependência circular
         services.AddSingleton<IProgramLibrary>(sp =>
         {
             var excelService = sp.GetRequiredService<IExcelImportService>();
+
+            // Delegate 1: Importação Excel
             Func<string, Task<ExcelImportResultCore>> importFunc = async (path) =>
             {
                 var result = await excelService.ImportAsync(path);
                 return new ExcelImportResultCore(result.Sucesso, result.LinhasOk, result.MensagemErro);
             };
-            return new ProgramLibraryExcel(importFunc);
+
+            // Delegate 2: Pesquisa BD (usa IServiceScopeFactory para DbContext scoped)
+            var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+            Func<string?, Task<List<ProtocoloSimples>>> searchFunc = async (searchTerm) =>
+            {
+                using var scope = scopeFactory.CreateScope();
+                var repo = scope.ServiceProvider.GetRequiredService<BioDesk.Data.Repositories.IProtocoloRepository>();
+
+                List<BioDesk.Domain.Entities.ProtocoloTerapeutico> protocolos;
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    protocolos = await repo.GetAllActiveAsync();
+                }
+                else
+                {
+                    protocolos = await repo.SearchByNameAsync(searchTerm);
+                }
+
+                // Converter para DTO simples (sem dependência de Domain)
+                return protocolos.Select(p => new ProtocoloSimples(
+                    p.Nome,
+                    p.Categoria,
+                    p.FrequenciasJson ?? string.Empty
+                )).ToList();
+            };
+
+            return new ProgramLibraryExcel(importFunc, searchFunc);
         });
-        
+
         services.AddSingleton<IImprovementModel, LogisticImprovementModel>();
         services.AddSingleton<IEmissionDevice, NullInformationalEmitter>();
         services.AddSingleton<IBiofeedbackRunner, BiofeedbackRunner>();
