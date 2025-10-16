@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BioDesk.Core.Application.Terapia;
 using BioDesk.Core.Domain.Terapia;
-using BioDesk.ViewModels.Services.Terapia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 

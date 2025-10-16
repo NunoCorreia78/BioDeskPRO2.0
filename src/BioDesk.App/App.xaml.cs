@@ -26,7 +26,6 @@ using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
 using BioDesk.ViewModels.UserControls;
 using BioDesk.ViewModels.UserControls.Terapia;
-using BioDesk.ViewModels.Services.Terapia;
 using BioDesk.Core.Application.Terapia;
 using BioDesk.Core.Application.Terapia.Impl;
 using BioDesk.Services.Core.Infrastructure;
@@ -391,7 +390,6 @@ Inner Exceptions:
         services.AddScoped<BioDesk.Data.Repositories.IProtocoloRepository, BioDesk.Data.Repositories.ProtocoloRepository>();
         services.AddScoped<BioDesk.Data.Repositories.IItemBancoCoreRepository, BioDesk.Data.Repositories.ItemBancoCoreRepository>();
 
-        services.AddSingleton<IActiveListService, ActiveListService>();
         services.AddSingleton<ISeedProvider, SeedProvider>();
         services.AddSingleton<IPatternValidator, PatternValidator>();
         services.AddSingleton<ICoreCatalogProvider, CoreCatalogProvider>();
