@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using BioDesk.Core.Application.Terapia;
 using BioDesk.Data.Repositories;
 using BioDesk.Domain.Entities;
 using BioDesk.Services.Translation;

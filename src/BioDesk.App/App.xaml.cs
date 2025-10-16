@@ -17,6 +17,7 @@ using BioDesk.Data.Repositories;
 using BioDesk.Services;
 using BioDesk.Services.Navigation;
 using BioDesk.Services.Email;
+using BioDesk.Services.Excel;
 using BioDesk.Services.Cache;
 using BioDesk.Services.AutoSave;
 using BioDesk.Services.Documentos;
@@ -395,7 +396,22 @@ Inner Exceptions:
         services.AddSingleton<ICoreCatalogProvider, CoreCatalogProvider>();
         services.AddSingleton<IResonanceEngine, ResonanceEngine>();
         services.AddSingleton<IResonantFrequencyFinder, ResonantFrequencyFinder>();
-        services.AddSingleton<IProgramLibrary, ProgramLibraryExcel>();
+        
+        // 📊 ExcelImportService (para importar FrequencyList.xls)
+        services.AddSingleton<IExcelImportService, ExcelImportService>();
+        
+        // 📚 ProgramLibrary com delegate wrapper para evitar dependência circular
+        services.AddSingleton<IProgramLibrary>(sp =>
+        {
+            var excelService = sp.GetRequiredService<IExcelImportService>();
+            Func<string, Task<ExcelImportResultCore>> importFunc = async (path) =>
+            {
+                var result = await excelService.ImportAsync(path);
+                return new ExcelImportResultCore(result.Sucesso, result.LinhasOk, result.MensagemErro);
+            };
+            return new ProgramLibraryExcel(importFunc);
+        });
+        
         services.AddSingleton<IImprovementModel, LogisticImprovementModel>();
         services.AddSingleton<IEmissionDevice, NullInformationalEmitter>();
         services.AddSingleton<IBiofeedbackRunner, BiofeedbackRunner>();
