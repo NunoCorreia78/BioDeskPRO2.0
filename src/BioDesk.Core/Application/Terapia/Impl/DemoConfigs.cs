@@ -12,8 +12,9 @@ public static class DemoConfigs
         var anchor = $"{seedSource}:{rngEngine}";
         var seed = SeedProvider.BuildSeed(new SeedInputs(anchor, sessionSalt));
 
+        // NUNCA passar filtro default - sempre null (ViewModels controlam filtros)
         var filter = new ItemFilter(
-            IncludeCategories: new[] { "Florais", "Órgão", "Meridiano", "Chakra", "Vitamina" },
+            IncludeCategories: Array.Empty<string>(),
             ExcludeCategories: Array.Empty<string>());
 
         var validation = new PatternValidationConfig(

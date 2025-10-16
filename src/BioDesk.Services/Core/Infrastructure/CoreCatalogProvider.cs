@@ -20,10 +20,11 @@ public sealed class CoreCatalogProvider : ICoreCatalogProvider
 
     public async Task<IReadOnlyList<CoreCatalogItem>> GetCatalogAsync(ItemFilter filter, CancellationToken ct)
     {
-        var items = await _repository.GetAllAsync();
+        // TODO: Obter género do paciente ativo do contexto (por enquanto null = todos)
+        var items = await _repository.GetAllWithGenderFilterAsync(generoPaciente: null);
 
-        // Normaliza categorias removendo acentos para comparação robusta
-        string Normalize(string s) => s.Trim()
+        // Normaliza strings removendo acentos para comparação robusta (Órgão → Orgao)
+        static string Normalize(string s) => s.Trim()
             .Replace("ã", "a").Replace("á", "a").Replace("à", "a")
             .Replace("é", "e").Replace("ê", "e")
             .Replace("í", "i").Replace("ó", "o").Replace("õ", "o")
@@ -40,7 +41,7 @@ public sealed class CoreCatalogProvider : ICoreCatalogProvider
                 return false;
             }
 
-            return include is null || include.Contains(normalized);
+            return include is null || include.Count == 0 || include.Contains(normalized);
         }
 
         var filtered = items

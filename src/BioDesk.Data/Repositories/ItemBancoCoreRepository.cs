@@ -71,4 +71,24 @@ public class ItemBancoCoreRepository : IItemBancoCoreRepository
             .Select(g => new { Categoria = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Categoria, x => x.Count);
     }
+
+    public async Task<List<ItemBancoCore>> GetAllWithGenderFilterAsync(string? generoPaciente)
+    {
+        var query = _context.ItensBancoCore.Where(i => i.IsActive);
+
+        // Filtro género: null retorna todos, caso contrário filtra
+        if (!string.IsNullOrWhiteSpace(generoPaciente))
+        {
+            query = query.Where(i =>
+                i.GeneroAplicavel == null ||
+                i.GeneroAplicavel == "Ambos" ||
+                i.GeneroAplicavel == generoPaciente);
+        }
+
+        return await query
+            .OrderBy(i => i.Categoria)
+            .ThenBy(i => i.Nome)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
