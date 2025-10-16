@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BioDesk.Core.Application.Terapia;
@@ -7,14 +9,26 @@ using BioDesk.Core.Application.Terapia.Impl;
 using BioDesk.Core.Domain.Terapia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using BioDesk.ViewModels.Services.Terapia;
 
 namespace BioDesk.ViewModels.UserControls.Terapia;
+
+/// <summary>
+/// EventArgs para solicitação de terapia remota.
+/// Contém lista de protocolos selecionados pelo user na avaliação.
+/// </summary>
+public class TerapiaRemotaRequestedEventArgs : EventArgs
+{
+    public List<string> ProtocolosSelecionados { get; }
+
+    public TerapiaRemotaRequestedEventArgs(List<string> protocolos)
+    {
+        ProtocolosSelecionados = protocolos;
+    }
+}
 
 public partial class AvaliacaoViewModel : ObservableObject
 {
     private readonly IResonanceEngine _engine;
-    private readonly IActiveListService _activeList;
 
     [ObservableProperty] private string _sessionSalt = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
     [ObservableProperty] private string _selectedSeedSource = "Nome+DataNasc";
@@ -33,10 +47,9 @@ public partial class AvaliacaoViewModel : ObservableObject
 
     public ObservableCollection<ScanResultItem> Results { get; } = new();
 
-    public AvaliacaoViewModel(IResonanceEngine engine, IActiveListService activeList)
+    public AvaliacaoViewModel(IResonanceEngine engine)
     {
         _engine = engine;
-        _activeList = activeList;
     }
 
     [RelayCommand]
@@ -83,13 +96,33 @@ public partial class AvaliacaoViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Evento disparado quando user pede para iniciar terapia remota.
+    /// View (XAML.cs) escuta este evento e abre TerapiaRemotaWindow.
+    /// </summary>
+    public event EventHandler<TerapiaRemotaRequestedEventArgs>? TerapiaRemotaRequested;
+
+    /// <summary>
+    /// Prepara dados e solicita abertura de modal de Terapia Remota.
+    /// User requirement: Terapia remota = 14 dias default, seeds/RNG, sem emissão Hz.
+    /// </summary>
     [RelayCommand]
-    private void AddSelectedToActiveList()
+    private void IniciarTerapiaRemota()
     {
-        foreach (var item in Results)
+        // Extrair nomes dos itens selecionados
+        var protocolosSelecionados = Results
+            .Where(r => r.Category != "Info") // Excluir mensagens debug
+            .Select(r => r.Name)
+            .ToList();
+
+        if (protocolosSelecionados.Count == 0)
         {
-            _activeList.AddOrUpdate(item);
+            // TODO: Mostrar mensagem ao user "Nenhum item selecionado"
+            return;
         }
+
+        // Disparar evento para View abrir modal
+        TerapiaRemotaRequested?.Invoke(this, new TerapiaRemotaRequestedEventArgs(protocolosSelecionados));
     }
 
     [RelayCommand]

@@ -77,8 +77,12 @@
                 <Button
                     Width="180"
                     Margin="0,0,10,0"
-                    Content="Adicionar a lista ativa"
-                    Command="{Binding AddSelectedToActiveListCommand}" />
+                    Content="Iniciar Terapia Remota"
+                    Command="{Binding IniciarTerapiaRemotaCommand}"
+                    Background="#9CAF97"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    ToolTip="Abre modal para terapia remota/informacional (14 dias default)" />
                 <Button Width="140" Content="Guardar sessao" Command="{Binding SaveSessionCommand}" />
             </StackPanel>
 
