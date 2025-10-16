@@ -22,6 +22,7 @@ public class BioDeskDbContext : DbContext
     public DbSet<Consulta> Consultas { get; set; } = null!;
     public DbSet<Consentimento> Consentimentos { get; set; } = null!;
     public DbSet<IrisAnalise> IrisAnalises { get; set; } = null!;
+    public DbSet<SessionHistorico> SessionHistoricos { get; set; } = null!;
 
     // === CONFIGURAÇÃO GLOBAL ===
     public DbSet<ConfiguracaoClinica> ConfiguracaoClinica { get; set; } = null!;

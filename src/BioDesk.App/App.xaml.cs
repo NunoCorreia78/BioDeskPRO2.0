@@ -387,6 +387,7 @@ Inner Exceptions:
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPacienteRepository, PacienteRepository>();
         services.AddScoped<ISessaoRepository, SessaoRepository>();
+        services.AddScoped<ISessionHistoricoRepository, SessionHistoricoRepository>();
         services.AddScoped<BioDesk.Data.Repositories.IProtocoloRepository, BioDesk.Data.Repositories.ProtocoloRepository>();
         services.AddScoped<BioDesk.Data.Repositories.IItemBancoCoreRepository, BioDesk.Data.Repositories.ItemBancoCoreRepository>();
 
