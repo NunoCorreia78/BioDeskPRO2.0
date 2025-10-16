@@ -29,7 +29,7 @@ public partial class AvaliacaoViewModel : ObservableObject
         new(["XorShift128+", "PCG64", "HardwareNoiseMix"]);
 
     public ObservableCollection<string> CategoryFilters { get; } =
-        new(["Todas", "Chakra", "Meridiano", "Órgão", "Florais", "Vitamina", "Patógeno", "Emocional"]);
+        new(["Todas", "Chakra", "Meridiano", "Orgao", "FloraisBach", "FloraisCalifornianos", "Vitamina", "Mineral", "Emocao", "Frequencia", "Homeopatia", "Suplemento", "Alimento"]);
 
     public ObservableCollection<ScanResultItem> Results { get; } = new();
 

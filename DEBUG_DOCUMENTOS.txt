@@ -1,4 +1,4 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-16 10:32:12 ===
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-16 11:03:11 ===
 PacienteId: 4
 NomePaciente: Nuno Filipe Correia
 NomeNormalizado: nunofilipecorreia
@@ -25,13 +25,15 @@ Buscando pastas que contenham: 'nunofilipecorreia' OU 'nuno_filipe_correia'
 Pastas encontradas para o paciente: 1
 
 📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Nuno Filipe Correia
-  Subpastas: 2
+  Subpastas: 3
     - Consentimentos
+    - DeclaracoesSaude
     - Prescricoes
-  PDFs encontrados: 4
+  PDFs encontrados: 5
     ✅ Consentimentos\Consentimento_🌿 Naturopatia - Consulta Geral_Nuno Filipe Correia_20251016_102451.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251016_105325.pdf
     ✅ Prescricoes\Prescricao_20251008_173501.pdf
     ✅ Prescricoes\Prescricao_20251009_112634.pdf
     ✅ Prescricoes\Prescricao_20251009_122522.pdf
 
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 4
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 5
