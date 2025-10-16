@@ -18,7 +18,7 @@
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
 
-        <GroupBox Grid.Column="0" Header="Lista ativa">
+        <GroupBox Grid.Column="0" Header="📋 Lista Ativa (Itens para aplicar)">
             <DataGrid
                 Margin="10"
                 AutoGenerateColumns="False"
@@ -26,7 +26,8 @@
                 CanUserDeleteRows="False"
                 HeadersVisibility="Column"
                 IsReadOnly="True"
-                ItemsSource="{Binding ActiveList}">
+                ItemsSource="{Binding ActiveList}"
+                ToolTip="Itens adicionados de:&#x0a;✅ Avaliação (scan Banco Core)&#x0a;✅ Programas (protocolos Excel)&#x0a;✅ Ressonantes (sweep frequências)">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="Nome" />
                     <DataGridTextColumn Width="140" Binding="{Binding Category}" Header="Categoria" />
@@ -40,7 +41,7 @@
         </GroupBox>
 
         <StackPanel Grid.Column="1" Margin="10,0,0,0">
-            <GroupBox Header="Configuracao geral" Margin="0,0,0,10">
+            <GroupBox Header="⚙️ Configuração Geral" Margin="0,0,0,10">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -56,14 +57,16 @@
                         Grid.Row="0"
                         Grid.Column="1"
                         ItemsSource="{Binding Modes}"
-                        SelectedItem="{Binding SelectedMode, Mode=TwoWay}" />
+                        SelectedItem="{Binding SelectedMode, Mode=TwoWay}"
+                        ToolTip="🔸 Local (Energia): Emissão física via equipamento (cliente presente)&#x0a;🔸 Remoto (Informação): Transmissão informacional (cliente pode estar ausente)" />
 
                     <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center" Content="Estado:" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Status}" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Status}" 
+                               ToolTip="Status atual da sessão:&#x0a;🟢 Pronto | 🟡 A emitir... | 🔴 Pausado | ✅ Concluído | ⛔ Emergência!" />
                 </Grid>
             </GroupBox>
 
-            <GroupBox Header="Emissao local" Margin="0,0,0,10" Visibility="{Binding IsLocalMode, Converter={StaticResource BoolToVisibility}}">
+            <GroupBox Header="⚡ Emissão Local (Energia Física)" Margin="0,0,0,10" Visibility="{Binding IsLocalMode, Converter={StaticResource BoolToVisibility}}">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -83,41 +86,47 @@
                         Grid.Row="0"
                         Grid.Column="1"
                         ItemsSource="{Binding Waveforms}"
-                        SelectedItem="{Binding SelectedWaveform, Mode=TwoWay}" />
+                        SelectedItem="{Binding SelectedWaveform, Mode=TwoWay}"
+                        ToolTip="🔹 Sine: Suave, melhor tolerância&#x0a;🔹 Square: Energética, penetração profunda&#x0a;🔹 Pulse: Curta duração, efeito pulsado" />
 
-                    <Label Grid.Row="0" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Frequencia (Hz):" />
+                    <Label Grid.Row="0" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Frequência (Hz):" />
                     <TextBox
                         Grid.Row="0"
                         Grid.Column="4"
-                        Text="{Binding FrequencyHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding FrequencyHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Frequência base (sobrescrita pelos itens da Lista Ativa)&#x0a;Range: 0.1 Hz - 20000 Hz&#x0a;Exemplo: 728 Hz (Rife standard)" />
 
                     <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Duty (%):" />
                     <TextBox
                         Grid.Row="1"
                         Grid.Column="1"
-                        Text="{Binding Duty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding Duty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Percentagem do ciclo em que onda está ON&#x0a;Range: 1% - 100%&#x0a;Exemplo: 50% = metade ON, metade OFF" />
 
                     <Label Grid.Row="1" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Vpp (V):" />
                     <TextBox
                         Grid.Row="1"
                         Grid.Column="4"
-                        Text="{Binding Vpp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding Vpp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Tensão pico-a-pico da onda&#x0a;Range: 0.1 V - 12 V&#x0a;⚠️ Valores altos podem ser desconfortáveis" />
 
                     <Label Grid.Row="2" Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center" Content="Limite corrente (mA):" />
                     <TextBox
                         Grid.Row="2"
                         Grid.Column="1"
-                        Text="{Binding CurrentLimitmA, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding CurrentLimitmA, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Limite de segurança de corrente&#x0a;Range: 0.1 mA - 5 mA&#x0a;Sistema para automaticamente se ultrapassar" />
 
                     <Label Grid.Row="2" Grid.Column="3" Margin="0,0,10,0" VerticalAlignment="Center" Content="Compliance (V):" />
                     <TextBox
                         Grid.Row="2"
                         Grid.Column="4"
-                        Text="{Binding ComplianceV, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding ComplianceV, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Tensão máxima de compliance do circuito&#x0a;Range: 5 V - 50 V" />
                 </Grid>
             </GroupBox>
 
-            <GroupBox Header="Emissao remota" Margin="0,0,0,10" Visibility="{Binding IsRemoteMode, Converter={StaticResource BoolToVisibility}}">
+            <GroupBox Header="🌐 Emissão Remota (Informação Quântica)" Margin="0,0,0,10" Visibility="{Binding IsRemoteMode, Converter={StaticResource BoolToVisibility}}">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -133,73 +142,86 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Ancora:" />
+                    <Label Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Âncora:" />
                     <TextBox
                         Grid.Row="0"
                         Grid.Column="1"
-                        Text="{Binding Anchor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding Anchor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="📌 Identificador informacional do cliente&#x0a;Exemplos:&#x0a;  • João Silva 1980-05-15&#x0a;  • Hash de foto&#x0a;  • UUID pessoal&#x0a;  • Frase significativa" />
 
                     <Label Grid.Row="0" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Hash:" />
                     <ComboBox
                         Grid.Row="0"
                         Grid.Column="4"
                         ItemsSource="{Binding HashAlgos}"
-                        SelectedItem="{Binding SelectedHashAlgo, Mode=TwoWay}" />
+                        SelectedItem="{Binding SelectedHashAlgo, Mode=TwoWay}"
+                        ToolTip="Algoritmo de hash para codificar âncora&#x0a;🔹 SHA256: Standard (recomendado)&#x0a;🔹 BLAKE3: Mais moderno e rápido" />
 
-                    <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Modulacao:" />
+                    <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Modulação:" />
                     <ComboBox
                         Grid.Row="1"
                         Grid.Column="1"
                         ItemsSource="{Binding Modulations}"
-                        SelectedItem="{Binding SelectedModulation, Mode=TwoWay}" />
+                        SelectedItem="{Binding SelectedModulation, Mode=TwoWay}"
+                        ToolTip="Tipo de modulação informacional&#x0a;🔹 AM-Ruído: Amplitude + ruído quântico&#x0a;🔹 FM-Ruído: Frequência + ruído quântico&#x0a;🔹 PSK: Phase-shift keying" />
 
                     <Label Grid.Row="1" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Ciclos:" />
                     <TextBox
                         Grid.Row="1"
                         Grid.Column="4"
-                        Text="{Binding Cycles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding Cycles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Número de vezes que lista completa é aplicada&#x0a;Range: 1 - 10&#x0a;Recomendado: 3 ciclos" />
 
                     <Label Grid.Row="2" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Tempo item (s):" />
                     <TextBox
                         Grid.Row="2"
                         Grid.Column="1"
-                        Text="{Binding PerItemSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding PerItemSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Duração de aplicação de cada item&#x0a;Range: 5 s - 300 s&#x0a;Standard: 20 segundos" />
 
                     <Label Grid.Row="2" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="On (ms):" />
                     <TextBox
                         Grid.Row="2"
                         Grid.Column="4"
-                        Text="{Binding OnMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding OnMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Duração do pulso ON na modulação&#x0a;Exemplo: 800 ms" />
 
                     <Label Grid.Row="3" Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Center" Content="Off (ms):" />
                     <TextBox
                         Grid.Row="3"
                         Grid.Column="1"
-                        Text="{Binding OffMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding OffMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="Duração do intervalo OFF entre pulsos&#x0a;Exemplo: 200 ms" />
 
                     <CheckBox
                         Grid.Row="3"
                         Grid.Column="3"
                         Content="Verificar drift"
-                        IsChecked="{Binding NullDriftCheck, Mode=TwoWay}" />
+                        IsChecked="{Binding NullDriftCheck, Mode=TwoWay}"
+                        ToolTip="✅ Ativar verificação de drift do RNG&#x0a;Detecta se ressonância está a degradar&#x0a;(cliente desconectou, âncora incorreta)" />
                 </Grid>
             </GroupBox>
 
-            <GroupBox Header="Execucao">
+            <GroupBox Header="▶️ Execução da Sessão">
                 <StackPanel Margin="10">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Width="100" Margin="0,0,10,0" Content="Iniciar" Command="{Binding StartCommand}" />
-                        <Button Width="90" Margin="0,0,10,0" Content="Pausar" Command="{Binding PauseCommand}" />
-                        <Button Width="90" Margin="0,0,10,0" Content="Parar" Command="{Binding StopCommand}" />
-                        <Button Width="110" Content="Emergencia" Command="{Binding EStopCommand}" />
+                        <Button Width="100" Margin="0,0,10,0" Content="▶️ Iniciar" Command="{Binding StartCommand}"
+                                ToolTip="Inicia aplicação sequencial de todos os itens da Lista Ativa&#x0a;Duração: Nº itens × Tempo/item × Ciclos&#x0a;Pré-requisito: Lista não-vazia" />
+                        <Button Width="90" Margin="0,0,10,0" Content="⏸️ Pausar" Command="{Binding PauseCommand}"
+                                ToolTip="Pausa emissão (pode retomar depois)&#x0a;🚧 Em desenvolvimento" />
+                        <Button Width="90" Margin="0,0,10,0" Content="⏹️ Parar" Command="{Binding StopCommand}"
+                                ToolTip="Para emissão completamente&#x0a;🚧 Em desenvolvimento" />
+                        <Button Width="110" Content="🛑 Emergência" Command="{Binding EStopCommand}"
+                                ToolTip="⛔ STOP IMEDIATO de toda emissão&#x0a;Use se cliente sentir desconforto ou reação adversa" />
                     </StackPanel>
-                    <TextBlock Margin="0,0,0,6" Text="Telemetria:" />
+                    <TextBlock Margin="0,0,0,6" Text="📊 Telemetria em Tempo Real:" />
                     <TextBox
                         Height="80"
                         IsReadOnly="True"
                         Text="{Binding Telemetry}"
                         TextWrapping="Wrap"
-                        VerticalScrollBarVisibility="Auto" />
+                        VerticalScrollBarVisibility="Auto"
+                        ToolTip="Log da sessão com timestamps:&#x0a;• Início/fim de sessão&#x0a;• Itens aplicados&#x0a;• Improvement % parcial&#x0a;• Eventos de erro" />
                 </StackPanel>
             </GroupBox>
         </StackPanel>

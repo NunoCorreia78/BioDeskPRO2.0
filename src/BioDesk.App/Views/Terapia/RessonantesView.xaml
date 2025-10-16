@@ -14,7 +14,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <GroupBox Header="Configuracao do sweep" Margin="0,0,0,10">
+        <GroupBox Header="🎵 Configuração do Sweep de Frequências" Margin="0,0,0,10">
             <Grid Margin="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -29,38 +29,44 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Inicio (Hz):" />
+                <Label Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Início (Hz):" />
                 <TextBox
                     Grid.Row="0"
                     Grid.Column="1"
-                    Text="{Binding StartHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding StartHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="Frequência inicial da varredura&#x0a;Exemplo: 10 Hz (ondas cerebrais baixas)" />
 
                 <Label Grid.Row="0" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Fim (Hz):" />
                 <TextBox
                     Grid.Row="0"
                     Grid.Column="4"
-                    Text="{Binding StopHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding StopHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="Frequência final da varredura&#x0a;Exemplo: 2000 Hz (cobre maioria terapias)" />
 
                 <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Passo (Hz):" />
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="1"
-                    Text="{Binding StepHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding StepHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="Incremento entre frequências testadas&#x0a;&#x0a;🔹 0.1 Hz: Muito detalhado (lento)&#x0a;🔹 1 Hz: Standard (recomendado)&#x0a;🔹 10 Hz: Rápido (pode perder ressonâncias)" />
 
                 <Label Grid.Row="1" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Dwell (ms):" />
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="4"
-                    Text="{Binding DwellMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    Text="{Binding DwellMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="Tempo de permanência em cada frequência&#x0a;&#x0a;⏱️ 150 ms (padrão): Balanço velocidade/precisão&#x0a;⏱️ 50 ms: Sweep rápido&#x0a;⏱️ 500 ms: Medições mais precisas" />
 
                 <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Orientation="Horizontal">
-                    <Button Width="140" Margin="0,0,10,0" Content="Executar sweep" Command="{Binding RunSweepCommand}" />
-                    <Button Width="180" Content="Adicionar selecionado" Command="{Binding AddSelectedToActiveListCommand}" />
+                    <Button Width="140" Margin="0,0,10,0" Content="🚀 Executar Sweep" Command="{Binding RunSweepCommand}"
+                            ToolTip="Inicia varredura automática de frequências&#x0a;Duração: (Fim - Início) / Passo × Dwell&#x0a;Exemplo: (2000-10)/1 × 150ms = ~5 minutos" />
+                    <Button Width="180" Content="➕ Adicionar Selecionado" Command="{Binding AddSelectedToActiveListCommand}"
+                            ToolTip="Adiciona frequência selecionada à Lista Ativa&#x0a;Selecione linha com maior Score na tabela" />
                 </StackPanel>
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Row="1" Header="Resultados do sweep">
+        <GroupBox Grid.Row="1" Header="📈 Resultados do Sweep (frequências ressonantes)">
             <DataGrid
                 Margin="10"
                 AutoGenerateColumns="False"

@@ -24,31 +24,35 @@
                 Width="260"
                 Margin="0,0,10,0"
                 Text="{Binding ExcelPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                ToolTip="Caminho do ficheiro Excel" />
-            <Button Width="110" Margin="0,0,10,0" Content="Importar Excel" Command="{Binding ImportExcelCommand}" />
+                ToolTip="📥 COLE AQUI o caminho completo do ficheiro Excel com frequências&#x0a;Exemplo: C:\ProgramData\BioDeskPro2\Templates\Frequencias\MeuProtocolo.xlsx&#x0a;&#x0a;Formato esperado: Colunas Nome_Programa, Hz, Duty, Segundos, Notas" />
+            <Button Width="110" Margin="0,0,10,0" Content="Importar Excel" Command="{Binding ImportExcelCommand}" 
+                    ToolTip="Importar protocolos de frequências do ficheiro Excel&#x0a;Lê primeira folha e guarda na base de dados" />
             <TextBox
                 Width="200"
                 Margin="0,0,10,0"
                 Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                ToolTip="Texto de pesquisa" />
-            <Button Width="110" Content="Atualizar" Command="{Binding RefreshProgramsCommand}" />
+                ToolTip="🔍 Pesquisar protocolos por nome&#x0a;Filtro case-insensitive" />
+            <Button Width="110" Content="Atualizar" Command="{Binding RefreshProgramsCommand}" 
+                    ToolTip="Recarregar lista de protocolos da base de dados" />
         </StackPanel>
 
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Programas">
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="📋 Programas Importados">
             <ListBox
                 Margin="10"
                 ItemsSource="{Binding Programs}"
-                SelectedItem="{Binding SelectedProgram, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                SelectedItem="{Binding SelectedProgram, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                ToolTip="Lista de protocolos importados do Excel&#x0a;Clique para ver passos à direita" />
         </GroupBox>
 
-        <GroupBox Grid.Row="1" Grid.Column="2" Header="Passos do programa">
+        <GroupBox Grid.Row="1" Grid.Column="2" Header="⚡ Passos do Programa Selecionado">
             <DockPanel Margin="10">
                 <Button
                     DockPanel.Dock="Top"
                     Margin="0,0,0,10"
                     HorizontalAlignment="Left"
-                    Content="Adicionar a lista ativa"
-                    Command="{Binding AddProgramToActiveListCommand}" />
+                    Content="➕ Adicionar à Lista Ativa"
+                    Command="{Binding AddProgramToActiveListCommand}"
+                    ToolTip="Adiciona TODOS os passos deste programa à Lista Ativa&#x0a;Depois aplique no sub-separador Biofeedback" />
                 <DataGrid
                     AutoGenerateColumns="False"
                     CanUserAddRows="False"
