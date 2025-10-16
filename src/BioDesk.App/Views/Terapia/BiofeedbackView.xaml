@@ -13,12 +13,47 @@
     </UserControl.Resources>
 
     <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
 
-        <GroupBox Grid.Column="0" Header="Lista ativa">
+        <!-- Botão Iniciar Sessão (novo, autónoma) -->
+        <Border 
+            Grid.Row="0" 
+            Grid.Column="0" 
+            Grid.ColumnSpan="2" 
+            Background="#E8F5E9" 
+            BorderBrush="#9CAF97" 
+            BorderThickness="2" 
+            CornerRadius="8" 
+            Padding="15" 
+            Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button 
+                    Width="200" 
+                    Height="45"
+                    Background="#9CAF97"
+                    Foreground="White"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Content="🔄 Iniciar Sessão Biofeedback" 
+                    Command="{Binding IniciarSessaoCommand}"
+                    ToolTip="Abre modal autónoma para loop scan→emissão (120s interval, auto-voltagem opcional)" />
+                <TextBlock 
+                    Margin="20,0,0,0" 
+                    VerticalAlignment="Center" 
+                    FontSize="13" 
+                    Foreground="#5A6558"
+                    Text="Sessão autónoma: scan ressonantes → emissão → repetir (até parar manualmente)" />
+            </StackPanel>
+        </Border>
+
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Lista ativa">
             <DataGrid
                 Margin="10"
                 AutoGenerateColumns="False"
@@ -39,7 +74,7 @@
             </DataGrid>
         </GroupBox>
 
-        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
             <GroupBox Header="Configuracao geral" Margin="0,0,0,10">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>

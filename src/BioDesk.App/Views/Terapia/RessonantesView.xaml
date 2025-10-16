@@ -55,7 +55,15 @@
 
                 <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Orientation="Horizontal">
                     <Button Width="140" Margin="0,0,10,0" Content="Executar sweep" Command="{Binding RunSweepCommand}" />
-                    <Button Width="180" Content="Adicionar selecionado" Command="{Binding AddSelectedToActiveListCommand}" />
+                    <Button 
+                        Width="180" 
+                        Height="35"
+                        Background="#9CAF97"
+                        Foreground="White"
+                        FontWeight="SemiBold"
+                        Content="Iniciar Terapia Local" 
+                        Command="{Binding IniciarTerapiaLocalCommand}"
+                        ToolTip="Abre modal para terapia local com Hz ressonantes (Duty=50%, Duração=3min)" />
                 </StackPanel>
             </Grid>
         </GroupBox>

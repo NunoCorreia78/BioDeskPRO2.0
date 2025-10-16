@@ -1,9 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BioDesk.Core.Application.Terapia;
 using BioDesk.Core.Domain.Terapia;
-using BioDesk.ViewModels.Services.Terapia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -12,7 +14,6 @@ namespace BioDesk.ViewModels.UserControls.Terapia;
 public partial class RessonantesViewModel : ObservableObject
 {
     private readonly IResonantFrequencyFinder _finder;
-    private readonly IActiveListService _activeList;
 
     [ObservableProperty] private double _startHz = 10;
     [ObservableProperty] private double _stopHz = 2000;
@@ -21,11 +22,17 @@ public partial class RessonantesViewModel : ObservableObject
     [ObservableProperty] private SweepPointVM? _selectedPoint;
 
     public ObservableCollection<SweepPointVM> SweepResults { get; } = new();
+    public ObservableCollection<SweepPointVM> SelectedPoints { get; } = new(); // Seleção múltipla
 
-    public RessonantesViewModel(IResonantFrequencyFinder finder, IActiveListService activeList)
+    /// <summary>
+    /// Evento disparado quando user pede para iniciar terapia local com Hz ressonantes.
+    /// View (XAML.cs) escuta este evento e abre TerapiaLocalWindow.
+    /// </summary>
+    public event EventHandler<TerapiaLocalRequestedEventArgs>? TerapiaLocalRequested;
+
+    public RessonantesViewModel(IResonantFrequencyFinder finder)
     {
         _finder = finder;
-        _activeList = activeList;
     }
 
     [RelayCommand]
@@ -40,26 +47,35 @@ public partial class RessonantesViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Prepara dados e solicita abertura de modal de Terapia Local com Hz ressonantes.
+    /// User requirement: Usa Hz detectados no scan (não da BD), voltagem controlável 0-12V.
+    /// </summary>
     [RelayCommand]
-    private void AddSelectedToActiveList()
+    private void IniciarTerapiaLocal()
     {
-        if (SelectedPoint is null)
+        // Usar pontos selecionados (multi-seleção) ou ponto único
+        var pontosParaUsar = SelectedPoints.Count > 0
+            ? SelectedPoints.ToList()
+            : (SelectedPoint != null ? new List<SweepPointVM> { SelectedPoint } : new List<SweepPointVM>());
+
+        if (pontosParaUsar.Count == 0)
         {
+            // TODO: Mostrar mensagem "Nenhuma frequência ressonante selecionada"
             return;
         }
 
-        var item = new ScanResultItem(
-            ItemId: (int)SelectedPoint.Hz,
-            Code: $"SWEEP::{SelectedPoint.Hz:F2}",
-            Name: $"Sweep {SelectedPoint.Hz:F2} Hz",
-            Category: "Sweep",
-            ScorePercent: SelectedPoint.Score,
-            ZScore: 0,
-            QValue: 0,
-            ImprovementPercent: 0,
-            Rank: 0);
+        // Converter Hz ressonantes para FrequenciaInfo
+        // Nota: Hz do scan ressonante não têm duty/duração pré-definidos,
+        // usar defaults: Duty 50%, Duração 180s (3 min)
+        var frequencias = pontosParaUsar.Select(p => new FrequenciaInfo(
+            Hz: p.Hz,
+            DutyPercent: 50, // Default duty cycle
+            DuracaoSegundos: 180 // Default 3 minutos por Hz
+        )).ToList();
 
-        _activeList.AddOrUpdate(item);
+        // Disparar evento para View abrir modal
+        TerapiaLocalRequested?.Invoke(this, new TerapiaLocalRequestedEventArgs(frequencias));
     }
 }
 

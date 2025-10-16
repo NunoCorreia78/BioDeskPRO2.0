@@ -12,12 +12,18 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace BioDesk.ViewModels.UserControls.Terapia;
 
+/// <summary>
+/// EventArgs para solicitação de sessão de biofeedback.
+/// Modal é autónomo (não precisa dados pré-carregados).
+/// </summary>
+public class BiofeedbackSessaoRequestedEventArgs : EventArgs { }
+
 public partial class BiofeedbackViewModel : ObservableObject
 {
     private readonly IBiofeedbackRunner _runner;
-    private readonly IActiveListService _activeList;
 
-    public ObservableCollection<ScanResultItem> ActiveList => _activeList.ActiveItems;
+    // Removido: ActiveList (conceito obsoleto)
+    // public ObservableCollection<ScanResultItem> ActiveList => _activeList.ActiveItems;
 
     public IReadOnlyList<string> Modes { get; } = new[] { "Local (Energia)", "Remoto (Informação)" };
     [ObservableProperty] private string _selectedMode = "Local (Energia)";
@@ -48,10 +54,15 @@ public partial class BiofeedbackViewModel : ObservableObject
     public bool IsLocalMode => SelectedMode.StartsWith("Local", StringComparison.OrdinalIgnoreCase);
     public bool IsRemoteMode => !IsLocalMode;
 
-    public BiofeedbackViewModel(IBiofeedbackRunner runner, IActiveListService activeList)
+    /// <summary>
+    /// Evento disparado quando user pede para iniciar sessão de biofeedback.
+    /// View (XAML.cs) escuta este evento e abre BiofeedbackSessionWindow.
+    /// </summary>
+    public event EventHandler<BiofeedbackSessaoRequestedEventArgs>? BiofeedbackSessaoRequested;
+
+    public BiofeedbackViewModel(IBiofeedbackRunner runner)
     {
         _runner = runner;
-        _activeList = activeList;
     }
 
     partial void OnSelectedModeChanged(string value)
@@ -60,6 +71,22 @@ public partial class BiofeedbackViewModel : ObservableObject
         OnPropertyChanged(nameof(IsRemoteMode));
     }
 
+    /// <summary>
+    /// Inicia sessão de biofeedback (abre modal autónomo).
+    /// User requirement: Loop 100% independente (scan → emit → re-scan → repeat).
+    /// </summary>
+    [RelayCommand]
+    private void IniciarSessao()
+    {
+        // Disparar evento para View abrir modal
+        // Modal é autónomo: não precisa dados (faz scan interno)
+        BiofeedbackSessaoRequested?.Invoke(this, new BiofeedbackSessaoRequestedEventArgs());
+    }
+
+    // NOTA: StartAsync, Pause, Stop, EStop são comandos legados (manter por compatibilidade)
+    // Nova arquitetura usa modal BiofeedbackSessionWindow com loop autónomo
+
+    /* LEGADO - Comentado (dependia de ActiveList obsoleto)
     [RelayCommand]
     private async Task StartAsync()
     {
@@ -106,4 +133,5 @@ public partial class BiofeedbackViewModel : ObservableObject
     [RelayCommand] private void Pause() => Status = "Pausado (stub)";
     [RelayCommand] private void Stop() => Status = "Parado (stub)";
     [RelayCommand] private void EStop() => Status = "Emergência!";
+    */
 }
