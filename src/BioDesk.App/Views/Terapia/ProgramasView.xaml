@@ -48,8 +48,14 @@
                     DockPanel.Dock="Top"
                     Margin="0,0,0,10"
                     HorizontalAlignment="Left"
-                    Content="Adicionar a lista ativa"
-                    Command="{Binding AddProgramToActiveListCommand}" />
+                    Width="180"
+                    Height="35"
+                    Content="Iniciar Terapia Local"
+                    Command="{Binding IniciarTerapiaLocalCommand}"
+                    Background="#9CAF97"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    ToolTip="Abre modal para terapia local com emissão Hz direta e controlo voltagem 0-12V" />
                 <DataGrid
                     AutoGenerateColumns="False"
                     CanUserAddRows="False"

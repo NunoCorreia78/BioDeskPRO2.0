@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -5,16 +6,33 @@ using System.Threading;
 using System.Threading.Tasks;
 using BioDesk.Core.Application.Terapia;
 using BioDesk.Core.Domain.Terapia;
-using BioDesk.ViewModels.Services.Terapia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace BioDesk.ViewModels.UserControls.Terapia;
 
+/// <summary>
+/// EventArgs para solicitação de terapia local.
+/// Contém lista de frequências (Hz) extraídas dos protocolos selecionados.
+/// </summary>
+public class TerapiaLocalRequestedEventArgs : EventArgs
+{
+    public List<FrequenciaInfo> Frequencias { get; }
+
+    public TerapiaLocalRequestedEventArgs(List<FrequenciaInfo> frequencias)
+    {
+        Frequencias = frequencias;
+    }
+}
+
+/// <summary>
+/// Informação de uma frequência para terapia local.
+/// </summary>
+public record FrequenciaInfo(double Hz, int DutyPercent, int DuracaoSegundos);
+
 public partial class ProgramasViewModel : ObservableObject
 {
     private readonly IProgramLibrary _library;
-    private readonly IActiveListService _activeList;
 
     [ObservableProperty] private string _search = string.Empty;
     [ObservableProperty] private string? _selectedProgram;
@@ -23,10 +41,15 @@ public partial class ProgramasViewModel : ObservableObject
     public ObservableCollection<string> SelectedPrograms { get; } = new(); // Seleção múltipla
     public ObservableCollection<ProgramStepVM> SelectedProgramSteps { get; } = new();
 
-    public ProgramasViewModel(IProgramLibrary library, IActiveListService activeList)
+    /// <summary>
+    /// Evento disparado quando user pede para iniciar terapia local.
+    /// View (XAML.cs) escuta este evento e abre TerapiaLocalWindow.
+    /// </summary>
+    public event EventHandler<TerapiaLocalRequestedEventArgs>? TerapiaLocalRequested;
+
+    public ProgramasViewModel(IProgramLibrary library)
     {
         _library = library;
-        _activeList = activeList;
 
         // Auto-load ao instanciar
         _ = LoadAllProgramsAsync();
@@ -78,8 +101,12 @@ public partial class ProgramasViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Prepara dados e solicita abertura de modal de Terapia Local.
+    /// User requirement: Terapia local = Hz direto, voltagem controlável 0-12V.
+    /// </summary>
     [RelayCommand]
-    private async Task AddProgramToActiveListAsync()
+    private async Task IniciarTerapiaLocalAsync()
     {
         // Processar múltiplos protocolos selecionados
         var programsToAdd = SelectedPrograms.Count > 0
@@ -88,32 +115,34 @@ public partial class ProgramasViewModel : ObservableObject
 
         if (programsToAdd.Count == 0)
         {
+            // TODO: Mostrar mensagem ao user "Nenhum protocolo selecionado"
             return;
         }
 
+        // Buscar Hz reais da BD para todos os protocolos
+        var todasFrequencias = new List<FrequenciaInfo>();
         foreach (var program in programsToAdd)
         {
             if (string.IsNullOrWhiteSpace(program)) continue;
 
             var steps = await _library.GetProgramAsync(program!, CancellationToken.None);
-            var index = 1;
             foreach (var step in steps)
             {
-                var item = new ScanResultItem(
-                    ItemId: index,
-                    Code: $"{program}::{index}",
-                    Name: $"{program.Replace("PROTO::", "")} - {step.Hz:N1} Hz",
-                    Category: "Programa",
-                    ScorePercent: 100,
-                    ZScore: 0,
-                    QValue: 0,
-                    ImprovementPercent: 0,
-                    Rank: index);
-
-                _activeList.AddOrUpdate(item);
-                index++;
+                todasFrequencias.Add(new FrequenciaInfo(
+                    Hz: step.Hz,
+                    DutyPercent: (int)step.Duty,
+                    DuracaoSegundos: step.Seconds));
             }
         }
+
+        if (todasFrequencias.Count == 0)
+        {
+            // TODO: Mostrar mensagem "Nenhuma frequência encontrada"
+            return;
+        }
+
+        // Disparar evento para View abrir modal
+        TerapiaLocalRequested?.Invoke(this, new TerapiaLocalRequestedEventArgs(todasFrequencias));
     }
 }
 
