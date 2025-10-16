@@ -8,7 +8,25 @@
     d:DataContext="{d:DesignInstance Type=vm:HistoricoViewModel}"
     mc:Ignorable="d">
 
-    <GroupBox Margin="10" Header="Historico de sessoes">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <!-- Botão para abrir Histórico Completo -->
+        <Button 
+            Grid.Row="0"
+            Width="250"
+            Height="40"
+            Margin="10,10,10,5"
+            HorizontalAlignment="Right"
+            Content="📊 Ver Histórico Completo"
+            Click="OnVerHistoricoCompleto"
+            Style="{StaticResource BotaoPrimario}"
+            FontWeight="SemiBold" />
+
+    <GroupBox Grid.Row="1" Margin="10,5,10,10" Header="Historico de sessoes (legado)">
         <DataGrid
             Margin="10"
             AutoGenerateColumns="False"
@@ -29,4 +47,5 @@
             </DataGrid.Columns>
         </DataGrid>
     </GroupBox>
+    </Grid>
 </UserControl>
