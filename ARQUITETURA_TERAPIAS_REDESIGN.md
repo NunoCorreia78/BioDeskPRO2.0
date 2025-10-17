@@ -11,7 +11,7 @@
 
 ## 📐 Arquitetura Modular
 
-### **1. ABA AVALIAÇÃO** 
+### **1. ABA AVALIAÇÃO**
 **Função**: Terapia Remota (Informacional)
 
 #### Características:

@@ -454,7 +454,15 @@ Inner Exceptions:
         services.AddSingleton<IEmailService, EmailService>();
         services.AddHostedService<EmailQueueProcessor>();
 
-        // === DOCUMENTO SERVICE (gest├úo de pastas por paciente) ===
+        // === FREQUENCY EMISSION SERVICE (Emissão de Frequências via NAudio + WASAPI) ===
+        services.AddSingleton<BioDesk.Services.Audio.IFrequencyEmissionService, BioDesk.Services.Audio.FrequencyEmissionService>();
+        Console.WriteLine("🎵 Frequency Emission Service: REGISTRADO (NAudio + WASAPI)");
+
+        // === TERAPIA STATE SERVICE (Estado compartilhado de volume/forma de onda) ===
+        services.AddSingleton<BioDesk.Services.Audio.ITerapiaStateService, BioDesk.Services.Audio.TerapiaStateService>();
+        Console.WriteLine("⚙️ Terapia State Service: REGISTRADO (Singleton)");
+
+        // === DOCUMENTO SERVICE (gestão de pastas por paciente) ===
         services.AddSingleton<IDocumentoService, DocumentoService>();
         services.AddSingleton<IDocumentosPacienteService, DocumentosPacienteService>();
 
@@ -476,6 +484,9 @@ Inner Exceptions:
 
         // === IRIDOLOGY SERVICE (mapa iridol├│gico + JSON loader) ===
         services.AddSingleton<IIridologyService, IridologyService>();
+
+        // === TIEPIE HS3 SERVICE (emissão de frequências via hs3.dll) ===
+        services.AddSingleton<BioDesk.Services.Hardware.TiePie.ITiePieHS3Service, BioDesk.Services.Hardware.TiePie.TiePieHS3Service>();
 
         // === DEBUG SERVICES ===
         services.AddSingleton<IDragDebugService, DragDebugService>();
@@ -573,7 +584,8 @@ Inner Exceptions:
         services.AddTransient<HistoricoViewModel>();
         services.AddTransient<TerapiaCoreViewModel>();
         services.AddTransient<SelecionarTemplatesViewModel>();
-        
+        services.AddTransient<EmissaoConfiguracaoViewModel>();
+
         // ViewModels para Windows (modals e histórico)
         services.AddTransient<BioDesk.ViewModels.Windows.HistoricoViewModel>();
         services.AddTransient<BioDesk.ViewModels.Windows.TerapiaRemotaViewModel>();
@@ -589,8 +601,8 @@ Inner Exceptions:
         services.AddTransient<Views.ConsultasView>();
         services.AddTransient<Views.Dialogs.ConfiguracoesWindow>(); // Ô£à JANELA CONFIGURA├ç├òES CL├ìNICA
         services.AddTransient<Views.FichaPacienteView>();
-        services.AddTransient<Views.ListaPacientesView>(); // Ô£à LISTA DE PACIENTES
-        services.AddTransient<Views.ConfiguracoesView>(); // Ô£à CONFIGURA├ç├òES
+        services.AddTransient<Views.ListaPacientesView>(); // ✅ LISTA DE PACIENTES
+        services.AddTransient<Views.ConfiguracoesView>(); // ✅ CONFIGURAÇÕES
     }
 }
 

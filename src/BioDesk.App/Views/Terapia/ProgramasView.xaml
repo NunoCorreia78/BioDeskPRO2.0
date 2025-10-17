@@ -5,73 +5,186 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:BioDesk.ViewModels.UserControls.Terapia;assembly=BioDesk.ViewModels"
+    xmlns:controls="clr-namespace:BioDesk.App.Controls"
     d:DataContext="{d:DesignInstance Type=vm:ProgramasViewModel}"
     mc:Ignorable="d">
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Grid Margin="20">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250" />
-            <ColumnDefinition Width="10" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" MinWidth="400"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="1*" MinWidth="300"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBox
-                Width="400"
-                Margin="0,0,10,0"
-                Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                ToolTip="Pesquisar protocolos (filtragem automática)" />
-            <TextBlock VerticalAlignment="Center" Foreground="Gray" Text="Use Ctrl+Clique ou Shift+Clique para selecionar múltiplos" />
-        </StackPanel>
+        <!-- ESQUERDA: Lista de Programas com Checkboxes -->
+        <Border Grid.Column="0"
+                Background="{DynamicResource Cartao}"
+                BorderBrush="{DynamicResource Borda}"
+                BorderThickness="2"
+                CornerRadius="8"
+                Padding="15">
+            <DockPanel>
+                <!-- Cabeçalho + Pesquisa -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,15">
+                    <TextBlock Text="PROGRAMAS TERAPÊUTICOS"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextoPrincipal}"
+                               Margin="0,0,0,10"/>
 
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Programas (1.272 disponíveis)">
-            <ListBox
-                Margin="10"
-                SelectionMode="Extended"
-                ItemsSource="{Binding Programs}"
-                SelectedItem="{Binding SelectedProgram, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <EventSetter Event="Selected" Handler="ListBoxItem_Selected" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
-        </GroupBox>
+                    <TextBox Text="{Binding Search, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Height="35"
+                             FontSize="14"
+                             VerticalContentAlignment="Center"
+                             Padding="10,0"
+                             Margin="0,0,0,5">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Background" Value="White"/>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Background" Value="#F7F9F6"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
 
-        <GroupBox Grid.Row="1" Grid.Column="2" Header="Passos do programa">
-            <DockPanel Margin="10">
-                <Button
-                    DockPanel.Dock="Top"
-                    Margin="0,0,0,10"
-                    HorizontalAlignment="Left"
-                    Width="180"
-                    Height="35"
-                    Content="Iniciar Terapia Local"
-                    Command="{Binding IniciarTerapiaLocalCommand}"
-                    Background="#9CAF97"
-                    Foreground="White"
-                    FontWeight="SemiBold"
-                    ToolTip="Abre modal para terapia local com emissão Hz direta e controlo voltagem 0-12V" />
-                <DataGrid
-                    AutoGenerateColumns="False"
-                    CanUserAddRows="False"
-                    CanUserDeleteRows="False"
-                    HeadersVisibility="Column"
-                    IsReadOnly="True"
-                    ItemsSource="{Binding SelectedProgramSteps}">
+                    <TextBlock Text="💡 Selecione programas (Ctrl+Click ou Shift+Click para múltiplos)"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextoSecundario}"
+                               Margin="2,0,0,0"/>
+                </StackPanel>
+
+                <!-- DataGrid com Seleção Nativa (Ctrl+Click / Shift+Click) -->
+                <DataGrid x:Name="ProgramasDataGrid"
+                         ItemsSource="{Binding Programs}"
+                         SelectionMode="Extended"
+                         SelectionChanged="ProgramasDataGrid_SelectionChanged"
+                         AutoGenerateColumns="False"
+                         IsReadOnly="True"
+                         GridLinesVisibility="Horizontal"
+                         RowBackground="White"
+                         AlternatingRowBackground="#FAFBFA"
+                         HeadersVisibility="None"
+                         BorderThickness="0"
+                         CanUserResizeColumns="False"
+                         CanUserResizeRows="False"
+                         CanUserReorderColumns="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Width="50" Binding="{Binding Index}" Header="#" />
-                        <DataGridTextColumn Width="120" Binding="{Binding Hz, StringFormat='{}{0:N1} Hz'}" Header="Hz" />
-                        <DataGridTextColumn Width="80" Binding="{Binding Duty, StringFormat='{}{0:N0}%'}" Header="Duty" />
-                        <DataGridTextColumn Width="90" Binding="{Binding Seconds}" Header="Segundos" />
-                        <DataGridTextColumn Width="*" Binding="{Binding Notes}" Header="Notas" />
+                        <DataGridTextColumn Width="*" Binding="{Binding}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontSize" Value="13"/>
+                                    <Setter Property="FontWeight" Value="Medium"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextoPrincipal}"/>
+                                    <Setter Property="Padding" Value="10,8"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>
-        </GroupBox>
+        </Border>
+
+        <!-- DIREITA: Controlos Unificados + Progresso -->
+        <ScrollViewer Grid.Column="2"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <!-- Painel de Progresso em Tempo Real -->
+            <Border Background="{DynamicResource Cartao}"
+                    BorderBrush="{DynamicResource Borda}"
+                    BorderThickness="2"
+                    CornerRadius="8"
+                    Padding="15"
+                    Margin="0,0,0,15"
+                    Visibility="{Binding TerapiaEmAndamento, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="⚡ TERAPIA EM ANDAMENTO"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="#9CAF97"
+                               Margin="0,0,0,10"/>
+
+                    <!-- Programa Atual -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="Programa:"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextoPrincipal}"
+                                   Width="90"/>
+                        <TextBlock Text="{Binding ProgramaAtual}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Frequência Atual -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="Frequência:"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextoPrincipal}"
+                                   Width="90"/>
+                        <TextBlock Text="{Binding FrequenciaAtual}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Progresso -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="Progresso:"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextoPrincipal}"
+                                   Width="90"/>
+                        <TextBlock Text="{Binding FrequenciaAtualIndex}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"/>
+                        <TextBlock Text="/"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   Margin="2,0"/>
+                        <TextBlock Text="{Binding TotalFrequencias}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"/>
+                    </StackPanel>
+
+                    <!-- Tempo Restante -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Tempo restante:"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextoPrincipal}"
+                                   Width="90"/>
+                        <TextBlock Text="{Binding TempoRestanteSegundos}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"/>
+                        <TextBlock Text="s"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   Margin="2,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Barra de Progresso -->
+                    <ProgressBar Value="{Binding ProgressoPercentual}"
+                                 Maximum="100"
+                                 Height="20"
+                                 Background="#E3E9DE"
+                                 Foreground="#9CAF97"/>
+                    <TextBlock Text="{Binding ProgressoPercentual, StringFormat='{}{0:F1}%'}"
+                               FontSize="11"
+                               Foreground="{DynamicResource TextoSecundario}"
+                               HorizontalAlignment="Center"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <controls:TerapiaControlosUserControl x:Name="TerapiaControlos"
+                                                 VoltagemV="5.0"
+                                                 DuracaoTotalMinutos="30"
+                                                 TempoFrequenciaSegundos="10"
+                                                 AjusteHz="0"
+                                                 TextoBotao="Iniciar Programas"
+                                                 IniciarClick="TerapiaControlos_IniciarClick"
+                                                 PararClick="TerapiaControlos_PararClick"/>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

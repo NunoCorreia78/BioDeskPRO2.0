@@ -10,7 +10,7 @@
 
     <UserControl.Resources>
         <converters:PathToImageSourceConverter x:Key="PathToImageConverter"/>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <!--  BooleanToVisibilityConverter já definido no App.xaml linha 13  -->
 
         <!-- Converter: Percentual (0-100) para Opacity (0-1) -->
         <converters:PercentToOpacityConverter x:Key="PercentToOpacityConverter"/>

@@ -34,7 +34,7 @@ foreach (var cat in categorias)
     var count = await db.Database
         .SqlQueryRaw<int>($"SELECT COUNT(*) as Value FROM ItemBancoCore WHERE Categoria = '{cat.Replace("'", "''")}'")
         .FirstOrDefaultAsync();
-    
+
     Console.WriteLine($"• {cat,-30} ({count,5} itens)");
 }
 

@@ -9,18 +9,21 @@ public partial class TerapiaCoreViewModel : ObservableObject
     public RessonantesViewModel Ressonantes { get; }
     public BiofeedbackViewModel Biofeedback { get; }
     public HistoricoViewModel Historico { get; }
+    public EmissaoConfiguracaoViewModel EmissaoConfiguracao { get; }
 
     public TerapiaCoreViewModel(
         AvaliacaoViewModel avaliacao,
         ProgramasViewModel programas,
         RessonantesViewModel ressonantes,
         BiofeedbackViewModel biofeedback,
-        HistoricoViewModel historico)
+        HistoricoViewModel historico,
+        EmissaoConfiguracaoViewModel emissaoConfiguracao)
     {
         Avaliacao = avaliacao;
         Programas = programas;
         Ressonantes = ressonantes;
         Biofeedback = biofeedback;
         Historico = historico;
+        EmissaoConfiguracao = emissaoConfiguracao;
     }
 }

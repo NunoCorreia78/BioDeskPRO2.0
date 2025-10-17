@@ -16,10 +16,9 @@
     <SolidColorBrush x:Key="TextoPrincipal">#3F4A3D</SolidColorBrush>
     <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
 
-    <!--  Converter para progresso das abas  -->
-    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    <!--  Converters: BoolToVisibilityConverter já no App.xaml linha 28  -->
+    <!--  Converter local específico para estilo das abas  -->
     <converters:TabStyleConverter x:Key="TabStyleConverter" />
-    <converters:StringParameterToVisibilityConverter x:Key="StringParameterToVisibilityConverter" />
 
     <!--  DataTemplate para Aba 1: Dados Biogr├íficos  -->
     <DataTemplate x:Key="DadosBiograficosTemplate">
@@ -36,91 +35,10 @@
         TextWrapping="Wrap" />
     </DataTemplate>
 
-    <!--  Style para separadores INATIVOS - CART├òES FLUTUANTES MODERNOS  -->
-    <Style x:Key="TabButtonStyle" TargetType="Button">
-      <Setter Property="Background">
-        <Setter.Value>
-          <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Offset="0" Color="White" />
-            <GradientStop Offset="1" Color="#F8FAF7" />
-          </LinearGradientBrush>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
-      <Setter Property="BorderBrush" Value="#D6E2D3" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="Padding" Value="16,12,16,12" />
-      <Setter Property="Margin" Value="4,4,4,0" />
-      <Setter Property="FontSize" Value="13" />
-      <Setter Property="FontWeight" Value="Medium" />
-      <Setter Property="MinWidth" Value="110" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="Button">
-            <Border
-              Background="{TemplateBinding Background}"
-              BorderBrush="{TemplateBinding BorderBrush}"
-              BorderThickness="{TemplateBinding BorderThickness}"
-              CornerRadius="12">
-              <ContentPresenter
-                Margin="{TemplateBinding Padding}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center" />
-              <Border.Effect>
-                <DropShadowEffect
-                  BlurRadius="8"
-                  Opacity="0.25"
-                  ShadowDepth="2"
-                  Color="#C0C8C0" />
-              </Border.Effect>
-            </Border>
-            <ControlTemplate.Triggers>
-              <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background">
-                  <Setter.Value>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                      <GradientStop Offset="0" Color="White" />
-                      <GradientStop Offset="1" Color="#F0F6EE" />
-                    </LinearGradientBrush>
-                  </Setter.Value>
-                </Setter>
-                <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
-                <Setter Property="BorderBrush" Value="{StaticResource BotaoPrincipal}" />
-              </Trigger>
-            </ControlTemplate.Triggers>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-    </Style>
+      <!--  TabButtonStyle e TabButtonActiveStyle migrados para App.xaml (recursos globais)  -->
+  <!--  Motivo: TabStyleConverter usa Application.Current.TryFindResource() que só encontra recursos em Application.Resources  -->
 
-    <!--  Style para separador ATIVO - CART├âO PREMIUM DESTAQUE  -->
-    <Style
-      x:Key="TabButtonActiveStyle"
-      BasedOn="{StaticResource TabButtonStyle}"
-      TargetType="Button">
-      <Setter Property="Background">
-        <Setter.Value>
-          <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Offset="0" Color="#9CAF97" />
-            <GradientStop Offset="1" Color="#87A082" />
-          </LinearGradientBrush>
-        </Setter.Value>
-      </Setter>
-      <Setter Property="Foreground" Value="White" />
-      <Setter Property="BorderBrush" Value="#7A9074" />
-      <Setter Property="BorderThickness" Value="2" />
-      <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Margin" Value="8,4,8,0" />
-      <Setter Property="Effect">
-        <Setter.Value>
-          <DropShadowEffect
-            BlurRadius="12"
-            Opacity="0.4"
-            ShadowDepth="3"
-            Color="#9CAF97" />
-        </Setter.Value>
-      </Setter>
-    </Style>
+
 
     <!--  Style para bot├Áes de navega├º├úo no rodap├® - DESIGN MODERNO  -->
     <Style x:Key="NavigationButtonStyle" TargetType="Button">
@@ -492,3 +410,5 @@
     </Border>
   </Grid>
 </UserControl>
+
+

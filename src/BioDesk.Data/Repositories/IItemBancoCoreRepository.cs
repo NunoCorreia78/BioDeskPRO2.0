@@ -37,7 +37,7 @@ public interface IItemBancoCoreRepository
     /// Resultado esperado: BachFlorais=38, Chakras=28, Meridianos=20, Orgaos=70
     /// </summary>
     Task<Dictionary<CategoriaCore, int>> GetCountPorCategoriaAsync();
-    
+
     /// <summary>
     /// Retorna itens filtrando por género do paciente (crítico para órgãos reprodutores)
     /// </summary>

@@ -10,7 +10,7 @@
         Height="700" Width="750"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource FundoPrincipal}">
-    
+
     <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,14 +20,14 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <!-- Título -->
-        <TextBlock Grid.Row="0" 
+        <TextBlock Grid.Row="0"
                    Text="Biofeedback - Loop Autónomo"
                    FontSize="24" FontWeight="SemiBold"
                    Foreground="{DynamicResource TextoPrincipal}"
                    Margin="0,0,0,20"/>
-        
+
         <!-- Status de Execução -->
         <Border Grid.Row="1"
                 Background="{DynamicResource Cartao}"
@@ -42,14 +42,14 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <!-- Indicador de execução -->
-                <Ellipse Grid.Column="0" 
-                         Fill="#9CAF97" 
+                <Ellipse Grid.Column="0"
+                         Fill="#9CAF97"
                          Width="12" Height="12"
                          Margin="0,0,10,0"
                          VerticalAlignment="Center"/>
-                
+
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Text="A EXECUTAR"
                                FontSize="14" FontWeight="SemiBold"
@@ -58,7 +58,7 @@
                                FontSize="12"
                                Foreground="{DynamicResource TextoSecundario}"/>
                 </StackPanel>
-                
+
                 <TextBlock Grid.Column="2"
                            Text="{Binding TempoDecorridoTotal}"
                            FontSize="16" FontWeight="SemiBold"
@@ -66,7 +66,7 @@
                            VerticalAlignment="Center"/>
             </Grid>
         </Border>
-        
+
         <!-- Controlo Voltagem (GRANDE E VISÍVEL) -->
         <Border Grid.Row="2"
                 Background="{DynamicResource Cartao}"
@@ -79,13 +79,13 @@
                            FontSize="16" FontWeight="SemiBold"
                            Foreground="{DynamicResource TextoPrincipal}"
                            Margin="0,0,0,10"/>
-                
+
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <!-- Slider GRANDE -->
                     <Slider Grid.Column="0"
                             Minimum="0" Maximum="12"
@@ -94,7 +94,7 @@
                             TickPlacement="BottomRight"
                             Height="40"
                             Margin="0,0,20,0"/>
-                    
+
                     <!-- Valor numérico GRANDE -->
                     <TextBlock Grid.Column="1"
                                Text="{Binding VoltagemV, StringFormat='{}{0:F1} V'}"
@@ -104,26 +104,46 @@
                                Width="100"
                                TextAlignment="Right"/>
                 </Grid>
-                
+
                 <Grid Margin="0,10,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Grid.Column="0"
                                Text="{Binding CorrenteMaxMa, StringFormat='Corrente Máxima: {0:F0} mA'}"
                                FontSize="12"
                                Foreground="{DynamicResource TextoSecundario}"/>
-                    
+
                     <CheckBox Grid.Column="1"
                               Content="Auto-ajustar"
                               IsChecked="{Binding AutoAdjustVoltage}"
                               FontSize="12"/>
                 </Grid>
+
+                <!-- NOVO: Duração Uniforme -->
+                <Separator Margin="0,10,0,5"/>
+                <TextBlock Text="Duração por Hz (uniforme):"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextoPrincipal}"
+                           Margin="0,5,0,8"/>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Content="5 segundos"
+                                 IsChecked="{Binding DuracaoUniformeSegundos, Converter={StaticResource IntToBoolConverter}, ConverterParameter=5}"
+                                 GroupName="Duracao"
+                                 Margin="0,0,20,0"/>
+                    <RadioButton Content="10 segundos"
+                                 IsChecked="{Binding DuracaoUniformeSegundos, Converter={StaticResource IntToBoolConverter}, ConverterParameter=10}"
+                                 GroupName="Duracao"
+                                 Margin="0,0,20,0"/>
+                    <RadioButton Content="15 segundos"
+                                 IsChecked="{Binding DuracaoUniformeSegundos, Converter={StaticResource IntToBoolConverter}, ConverterParameter=15}"
+                                 GroupName="Duracao"/>
+                </StackPanel>
             </StackPanel>
         </Border>
-        
+
         <!-- Estado Atual / Progress -->
         <Border Grid.Row="3"
                 Background="{DynamicResource Cartao}"
@@ -137,22 +157,22 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Grid.Column="0" 
+
+                    <TextBlock Grid.Column="0"
                                Text="{Binding CurrentHz, StringFormat='Hz Atual: {0}'}"
                                FontSize="18" FontWeight="SemiBold"
                                Foreground="#9CAF97"/>
-                    
+
                     <TextBlock Grid.Column="1"
                                Text="{Binding ProgressoPercent, StringFormat='{}{0:F0}%'}"
                                FontSize="14"
                                Foreground="{DynamicResource TextoSecundario}"/>
                 </Grid>
-                
+
                 <ProgressBar Value="{Binding ProgressoPercent}"
                              Height="25"
                              Margin="0,0,0,10"/>
-                
+
                 <TextBlock Text="{Binding NextScanCountdown, StringFormat='Próximo scan em: {0}'}"
                            FontSize="12"
                            Foreground="{DynamicResource TextoSecundario}"
@@ -160,7 +180,7 @@
                            Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </StackPanel>
         </Border>
-        
+
         <!-- Histórico dos Últimos 3 Ciclos -->
         <GroupBox Grid.Row="4" Header="Histórico (Últimos 3 Ciclos)" Margin="0,0,0,20">
             <ListBox ItemsSource="{Binding History}"
@@ -183,7 +203,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                
+
                                 <!-- Número do ciclo -->
                                 <TextBlock Grid.Row="0" Grid.Column="0"
                                            Text="{Binding CicloNumero, StringFormat='Ciclo {0}'}"
@@ -191,14 +211,14 @@
                                            FontSize="14"
                                            Foreground="{DynamicResource TextoPrincipal}"
                                            Margin="0,0,10,5"/>
-                                
+
                                 <!-- Data/hora -->
                                 <TextBlock Grid.Row="0" Grid.Column="2"
                                            Text="{Binding DataHoraFormatted}"
                                            FontSize="11"
                                            Foreground="{DynamicResource TextoSecundario}"
                                            Margin="0,0,0,5"/>
-                                
+
                                 <!-- Hz detectados -->
                                 <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                                            Text="{Binding HzFormatted}"
@@ -206,13 +226,13 @@
                                            Foreground="#9CAF97"
                                            TextWrapping="Wrap"
                                            Margin="0,0,0,5"/>
-                                
+
                                 <!-- Duração e voltagem -->
                                 <TextBlock Grid.Row="2" Grid.Column="0"
                                            Text="{Binding DuracaoFormatted, StringFormat='Duração: {0}'}"
                                            FontSize="11"
                                            Foreground="{DynamicResource TextoSecundario}"/>
-                                
+
                                 <TextBlock Grid.Row="2" Grid.Column="2"
                                            Text="{Binding VoltagemFormatted}"
                                            FontSize="11"
@@ -223,7 +243,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </GroupBox>
-        
+
         <!-- Botões -->
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Iniciar Sessão"
@@ -234,7 +254,7 @@
                     FontWeight="SemiBold"
                     Margin="0,0,10,0"
                     Visibility="{Binding IsRunning, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-            
+
             <Button Content="{Binding Pausado, Converter={StaticResource PausedTextConverter}}"
                     Command="{Binding PausarCommand}"
                     Width="100" Height="40"
@@ -243,7 +263,7 @@
                     FontWeight="SemiBold"
                     Margin="0,0,10,0"
                     Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            
+
             <Button Content="Parar Sessão"
                     Command="{Binding PararCommand}"
                     Width="120" Height="40"
@@ -252,7 +272,7 @@
                     FontWeight="SemiBold"
                     Margin="0,0,10,0"
                     Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            
+
             <Button Content="Fechar"
                     Click="CloseButton_Click"
                     Width="100" Height="40"

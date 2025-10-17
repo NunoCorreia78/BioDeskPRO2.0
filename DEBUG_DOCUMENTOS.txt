@@ -1,4 +1,4 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-16 11:23:26 ===
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-17 22:59:58 ===
 PacienteId: 4
 NomePaciente: Nuno Filipe Correia
 NomeNormalizado: nunofilipecorreia
@@ -7,10 +7,11 @@ BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes
 Pasta existe? True
 
-Total de pastas em Pacientes/: 5
+Total de pastas em Pacientes/: 6
   - Jorge Maria Barreto Rosado Pereira
   - Luís Manuel Pinguelo Vilhalva
   - Maria João Moacho Boquinhas
+  - Maria Luzia da Silva Batista
   - Nuno Filipe Correia
   - Susana Daniela Silva Freita
 
@@ -19,6 +20,7 @@ Buscando pastas que contenham: 'nunofilipecorreia' OU 'nuno_filipe_correia'
   Pasta 'Jorge Maria Barreto Rosado Pereira' (normalizado: 'jorgemariabarretorosadopereira') → match: False
   Pasta 'Luís Manuel Pinguelo Vilhalva' (normalizado: 'luísmanuelpinguelovilhalva') → match: False
   Pasta 'Maria João Moacho Boquinhas' (normalizado: 'mariajoãomoachoboquinhas') → match: False
+  Pasta 'Maria Luzia da Silva Batista' (normalizado: 'marialuziadasilvabatista') → match: False
   Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: True
   Pasta 'Susana Daniela Silva Freita' (normalizado: 'susanadanielasilvafreita') → match: False
 

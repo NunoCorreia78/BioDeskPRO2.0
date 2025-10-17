@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="clr-namespace:BioDesk.ViewModels.UserControls.Terapia;assembly=BioDesk.ViewModels"
+    xmlns:vm="clr-namespace:BioDesk.ViewModels.Windows;assembly=BioDesk.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:HistoricoViewModel}"
     mc:Ignorable="d">
 
@@ -13,9 +13,9 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
+
         <!-- Botão para abrir Histórico Completo -->
-        <Button 
+        <Button
             Grid.Row="0"
             Width="250"
             Height="40"
@@ -23,7 +23,7 @@
             HorizontalAlignment="Right"
             Content="📊 Ver Histórico Completo"
             Click="OnVerHistoricoCompleto"
-            Style="{StaticResource BotaoPrimario}"
+            Style="{StaticResource PrimaryButtonStyle}"
             FontWeight="SemiBold" />
 
     <GroupBox Grid.Row="1" Margin="10,5,10,10" Header="Historico de sessoes (legado)">

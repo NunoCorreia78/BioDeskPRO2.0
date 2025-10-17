@@ -9,10 +9,10 @@ public enum TipoTerapia
 {
     /// <summary>Terapia remota/informacional (seeds, RNG, 14 dias).</summary>
     Remota = 0,
-    
+
     /// <summary>Terapia local com emissão direta de Hz + voltagem controlada.</summary>
     Local = 1,
-    
+
     /// <summary>Sessão biofeedback autónoma (loop scan→emit).</summary>
     Biofeedback = 2
 }

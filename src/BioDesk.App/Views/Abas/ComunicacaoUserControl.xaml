@@ -14,10 +14,7 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-
-        <!--  Conversor para inverter bool (IsLoading=true → IsEnabled=false)  -->
-        <local:InverseBooleanConverter x:Key="InverseBoolConverter" />
+        <!--  BooleanToVisibilityConverter e InverseBooleanConverter já estão no App.xaml  -->
     </UserControl.Resources>
 
     <Grid Margin="20">

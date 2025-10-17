@@ -16,7 +16,7 @@ public partial class HistoricoWindow : Window
     public HistoricoWindow()
     {
         InitializeComponent();
-        
+
         // Carregar sessões ao abrir
         Loaded += async (s, e) =>
         {
@@ -26,20 +26,28 @@ public partial class HistoricoWindow : Window
             }
         };
     }
-    
+
     /// <summary>
     /// Constructor com ViewModel (para DI)
     /// </summary>
     public HistoricoWindow(HistoricoVM viewModel) : this()
     {
         DataContext = viewModel;
-        
+
         // Subscrever eventos para abrir modais apropriados
         viewModel.TerapiaRemotaRequested += OnTerapiaRemotaRequested;
         viewModel.TerapiaLocalRequested += OnTerapiaLocalRequested;
         viewModel.BiofeedbackSessaoRequested += OnBiofeedbackSessaoRequested;
+
+        // CRÍTICO: Unsubscribe ao fechar para evitar memory leaks e janelas duplicadas
+        Closing += (s, e) =>
+        {
+            viewModel.TerapiaRemotaRequested -= OnTerapiaRemotaRequested;
+            viewModel.TerapiaLocalRequested -= OnTerapiaLocalRequested;
+            viewModel.BiofeedbackSessaoRequested -= OnBiofeedbackSessaoRequested;
+        };
     }
-    
+
     private void OnTerapiaRemotaRequested(object? sender, TerapiaRemotaRequestedEventArgs e)
     {
         var vm = new TerapiaRemotaVM();
@@ -47,11 +55,11 @@ public partial class HistoricoWindow : Window
         {
             vm.ProtocolosSelecionados.Add(protocolo);
         }
-        
+
         var window = new TerapiaRemotaWindow { DataContext = vm, Owner = this };
         window.ShowDialog();
     }
-    
+
     private void OnTerapiaLocalRequested(object? sender, TerapiaLocalRequestedEventArgs e)
     {
         var vm = new TerapiaLocalVM();
@@ -63,11 +71,11 @@ public partial class HistoricoWindow : Window
                 (int)freq.DuracaoSegundos
             ));
         }
-        
+
         var window = new TerapiaLocalWindow { DataContext = vm, Owner = this };
         window.ShowDialog();
     }
-    
+
     private void OnBiofeedbackSessaoRequested(object? sender, BiofeedbackSessaoRequestedEventArgs e)
     {
         var vm = new BiofeedbackSessionVM();

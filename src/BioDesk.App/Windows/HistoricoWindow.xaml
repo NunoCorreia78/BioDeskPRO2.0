@@ -10,7 +10,7 @@
         Height="600" Width="1000"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource FundoPrincipal}">
-    
+
     <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,16 +18,16 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <!-- Título -->
-        <TextBlock Grid.Row="0" 
+        <TextBlock Grid.Row="0"
                    Text="📊 Histórico de Sessões Terapêuticas"
                    FontSize="24" FontWeight="SemiBold"
                    Foreground="{DynamicResource TextoPrincipal}"
                    Margin="0,0,0,20"/>
-        
+
         <!-- Filtros -->
-        <Border Grid.Row="1" 
+        <Border Grid.Row="1"
                 Background="{DynamicResource Cartao}"
                 BorderBrush="{DynamicResource Borda}"
                 BorderThickness="1"
@@ -44,49 +44,49 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <!-- Data Início -->
                 <TextBlock Grid.Column="0" Text="De:"
                            VerticalAlignment="Center"
                            Margin="0,0,10,0"
                            Foreground="{DynamicResource TextoPrincipal}"/>
-                <DatePicker Grid.Column="1" 
+                <DatePicker Grid.Column="1"
                             SelectedDate="{Binding DataInicio, Mode=TwoWay}"
                             Margin="0,0,15,0"/>
-                
+
                 <!-- Data Fim -->
                 <TextBlock Grid.Column="2" Text="Até:"
                            VerticalAlignment="Center"
                            Margin="0,0,10,0"
                            Foreground="{DynamicResource TextoPrincipal}"/>
-                <DatePicker Grid.Column="3" 
+                <DatePicker Grid.Column="3"
                             SelectedDate="{Binding DataFim, Mode=TwoWay}"
                             Margin="0,0,15,0"/>
-                
+
                 <!-- Tipo Terapia -->
                 <TextBlock Grid.Column="4" Text="Tipo:"
                            VerticalAlignment="Center"
                            Margin="0,0,10,0"
                            Foreground="{DynamicResource TextoPrincipal}"/>
-                <ComboBox Grid.Column="5" 
+                <ComboBox Grid.Column="5"
                           ItemsSource="{Binding TiposTerapiaDisplay}"
                           SelectedItem="{Binding TipoFiltro, Mode=TwoWay}"
                           Width="130"
                           Margin="0,0,15,0"/>
-                
+
                 <!-- Botão Filtrar -->
-                <Button Grid.Column="6" 
+                <Button Grid.Column="6"
                         Content="🔍 Filtrar"
                         Command="{Binding LoadSessionsCommand}"
-                        Style="{StaticResource BotaoPrimario}"
+                        Style="{StaticResource PrimaryButtonStyle}"
                         Width="120"
                         Height="35"
                         FontWeight="SemiBold"/>
             </Grid>
         </Border>
-        
+
         <!-- DataGrid Sessões -->
-        <DataGrid Grid.Row="2" 
+        <DataGrid Grid.Row="2"
                   ItemsSource="{Binding Sessions}"
                   SelectedItem="{Binding SessaoSelecionada, Mode=TwoWay}"
                   AutoGenerateColumns="False"
@@ -134,7 +134,7 @@
                 </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        
+
         <!-- Botões Ação -->
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
@@ -142,28 +142,28 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            
-            <TextBlock Grid.Column="0" 
+
+            <TextBlock Grid.Column="0"
                        VerticalAlignment="Center"
                        Foreground="{DynamicResource TextoSecundario}"
                        FontSize="12">
                 <Run Text="{Binding Sessions.Count, Mode=OneWay}"/>
                 <Run Text="sessões encontradas"/>
             </TextBlock>
-            
-            <Button Grid.Column="1" 
+
+            <Button Grid.Column="1"
                     Content="🔄 Repetir Sessão"
                     Command="{Binding RepetirSessaoCommand}"
                     CommandParameter="{Binding SessaoSelecionada}"
-                    Style="{StaticResource BotaoPrimario}"
+                    Style="{StaticResource PrimaryButtonStyle}"
                     Width="160"
                     Height="40"
                     FontSize="14"
                     FontWeight="SemiBold"
                     Margin="0,0,15,0"
                     IsEnabled="{Binding SessaoSelecionada, Converter={StaticResource NullToBooleanConverter}}"/>
-            
-            <Button Grid.Column="2" 
+
+            <Button Grid.Column="2"
                     Content="Fechar"
                     IsCancel="True"
                     Width="120"

@@ -21,17 +21,17 @@ public partial class HistoricoViewModel : ObservableObject
     private readonly ISessionHistoricoRepository _repository;
 
     [ObservableProperty] private DateTime _dataInicio = DateTime.Today.AddDays(-7);
-    
+
     [ObservableProperty] private DateTime _dataFim = DateTime.Today.AddDays(1);
-    
+
     [ObservableProperty] private string _tipoFiltro = "Todas";
-    
+
     [ObservableProperty] private bool _isLoading;
-    
+
     [ObservableProperty] private SessionHistorico? _sessaoSelecionada;
-    
+
     public ObservableCollection<SessionHistorico> Sessions { get; } = new();
-    
+
     public List<string> TiposTerapiaDisplay { get; } = new()
     {
         "Todas",
@@ -39,17 +39,17 @@ public partial class HistoricoViewModel : ObservableObject
         "Local",
         "Biofeedback"
     };
-    
+
     // Eventos para repetir sessões (dispatched para View abrir modais apropriados)
     public event EventHandler<TerapiaRemotaRequestedEventArgs>? TerapiaRemotaRequested;
     public event EventHandler<TerapiaLocalRequestedEventArgs>? TerapiaLocalRequested;
     public event EventHandler<BiofeedbackSessaoRequestedEventArgs>? BiofeedbackSessaoRequested;
-    
+
     public HistoricoViewModel(ISessionHistoricoRepository repository)
     {
         _repository = repository;
     }
-    
+
     [RelayCommand]
     private async Task LoadSessionsAsync()
     {
@@ -57,10 +57,10 @@ public partial class HistoricoViewModel : ObservableObject
         {
             IsLoading = true;
             Sessions.Clear();
-            
+
             // Fetch do repository (sempre by date range)
             var sessions = await _repository.GetByDateRangeAsync(DataInicio, DataFim);
-            
+
             // Filtrar por tipo se não for "Todas"
             if (TipoFiltro != "Todas")
             {
@@ -71,13 +71,13 @@ public partial class HistoricoViewModel : ObservableObject
                     "Biofeedback" => TipoTerapia.Biofeedback,
                     _ => (TipoTerapia?)null
                 };
-                
+
                 if (tipoEnum.HasValue)
                 {
                     sessions = sessions.Where(s => s.TipoTerapia == tipoEnum.Value);
                 }
             }
-            
+
             // Popular coleção
             foreach (var session in sessions)
             {
@@ -94,12 +94,12 @@ public partial class HistoricoViewModel : ObservableObject
             IsLoading = false;
         }
     }
-    
+
     [RelayCommand(CanExecute = nameof(CanRepetirSessao))]
     private void RepetirSessao(SessionHistorico? sessao)
     {
         if (sessao == null) return;
-        
+
         // Disparar evento apropriado com dados desserializados
         switch (sessao.TipoTerapia)
         {
@@ -108,19 +108,19 @@ public partial class HistoricoViewModel : ObservableObject
                 var protocolos = JsonSerializer.Deserialize<List<string>>(sessao.ProtocolosJson) ?? new();
                 TerapiaRemotaRequested?.Invoke(this, new TerapiaRemotaRequestedEventArgs(protocolos));
                 break;
-                
+
             case TipoTerapia.Local:
                 // Deserializar frequências
                 var frequencias = JsonSerializer.Deserialize<List<FrequenciaInfo>>(sessao.FrequenciasHzJson) ?? new();
                 TerapiaLocalRequested?.Invoke(this, new TerapiaLocalRequestedEventArgs(frequencias));
                 break;
-                
+
             case TipoTerapia.Biofeedback:
                 // Biofeedback é autónomo - sem dados pré-carregados
                 BiofeedbackSessaoRequested?.Invoke(this, new BiofeedbackSessaoRequestedEventArgs());
                 break;
         }
     }
-    
+
     private bool CanRepetirSessao(SessionHistorico? sessao) => sessao != null;
 }

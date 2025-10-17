@@ -11,21 +11,21 @@ public partial class HistoricoView : UserControl
     {
         InitializeComponent();
     }
-    
+
     private void OnVerHistoricoCompleto(object sender, RoutedEventArgs e)
     {
         // Obter ViewModel via DI
         var app = (App)Application.Current;
         var viewModel = app.ServiceProvider?.GetRequiredService<BioDesk.ViewModels.Windows.HistoricoViewModel>();
-        
+
         if (viewModel == null) return;
-        
+
         // Criar e mostrar janela
         var window = new HistoricoWindow(viewModel)
         {
             Owner = Window.GetWindow(this)
         };
-        
+
         window.ShowDialog();
     }
 }

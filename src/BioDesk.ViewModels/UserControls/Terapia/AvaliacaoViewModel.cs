@@ -59,22 +59,22 @@ public partial class AvaliacaoViewModel : ObservableObject
     private async Task RunScanAsync()
     {
         var cfg = DemoConfigs.BuildScanConfig(SelectedSeedSource, SessionSalt, SelectedRngEngine, Iterations);
-        
+
         // Aplicar filtro de categoria se não for "Todas"
         if (SelectedCategoryFilter != "Todas")
         {
-            cfg = cfg with 
-            { 
+            cfg = cfg with
+            {
                 Filter = new ItemFilter(
                     IncludeCategories: new[] { SelectedCategoryFilter },
                     ExcludeCategories: Array.Empty<string>())
             };
         }
-        
+
         var list = await _engine.RunScanAsync(cfg, CancellationToken.None);
 
         Results.Clear();
-        
+
         // Debug: Se não houver resultados, mostrar mensagem
         if (list.Count == 0)
         {

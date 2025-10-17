@@ -1,0 +1,254 @@
+<UserControl x:Class="BioDesk.App.Views.Terapia.EmissaoConfiguracaoUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:BioDesk.ViewModels.UserControls.Terapia;assembly=BioDesk.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:EmissaoConfiguracaoViewModel}"
+             d:DesignHeight="400" d:DesignWidth="600"
+             Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <!-- Estilo para GroupBox -->
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Borda}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource Cartao}"/>
+        </Style>
+
+        <!-- Estilo para Labels -->
+        <Style TargetType="TextBlock" x:Key="LabelStyle">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextoPrincipal}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <!-- Estilo para ComboBox -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="10,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <!-- Cabeçalho -->
+            <TextBlock Text="🎵 Configuração de Emissão de Frequências"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TextoPrincipal}"
+                       Margin="0,0,0,20"/>
+
+            <TextBlock Text="Configure o dispositivo de áudio e parâmetros para emissão de frequências terapêuticas."
+                       FontSize="13"
+                       Foreground="{DynamicResource TextoSecundario}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,25"/>
+
+            <!-- Dispositivo de Áudio -->
+            <GroupBox Header="🔊 Dispositivo de Áudio">
+                <StackPanel>
+                    <TextBlock Text="Dispositivo de Saída:"
+                               Style="{StaticResource LabelStyle}"/>
+
+                    <ComboBox ItemsSource="{Binding DispositivosDisponiveis}"
+                              SelectedItem="{Binding DispositivoSelecionado}"
+                              DisplayMemberPath="Name"
+                              IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBoolConverter}}"/>
+
+                    <TextBlock Margin="0,10,0,0"
+                               Foreground="{DynamicResource TextoSecundario}"
+                               FontSize="12"
+                               TextWrapping="Wrap">
+                        <Run Text="💡 "/>
+                        <Run Text="TiePie Handyscope HS3 é automaticamente priorizado se detectado."/>
+                    </TextBlock>
+
+                    <Button Content="🔄 Recarregar Dispositivos"
+                            Command="{Binding CarregarDispositivosCommand}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBoolConverter}}"
+                            HorizontalAlignment="Left"
+                            Margin="0,15,0,0"
+                            Padding="15,8"
+                            Style="{StaticResource BotaoSecundarioStyle}"/>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Volume -->
+            <GroupBox Header="🔊 Volume de Emissão">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Volume:"
+                                   Style="{StaticResource LabelStyle}"
+                                   VerticalAlignment="Center"
+                                   Grid.Column="0"/>
+
+                        <Slider Grid.Column="1"
+                                Minimum="0"
+                                Maximum="100"
+                                Value="{Binding VolumePercent}"
+                                TickFrequency="10"
+                                IsSnapToTickEnabled="True"
+                                VerticalAlignment="Center"
+                                Margin="15,0"/>
+
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding VolumePercent, StringFormat='{}{0}%'}"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource BotaoPrimario}"
+                                   VerticalAlignment="Center"
+                                   MinWidth="50"
+                                   TextAlignment="Right"/>
+                    </Grid>
+
+                    <TextBlock Margin="0,15,0,0"
+                               Foreground="{DynamicResource TextoSecundario}"
+                               FontSize="12"
+                               TextWrapping="Wrap">
+                        <Run Text="💡 "/>
+                        <Run Text="Volume padrão: 70% (~7V no TiePie HS3). Ajuste conforme necessidade clínica."/>
+                    </TextBlock>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Forma de Onda -->
+            <GroupBox Header="🌊 Forma de Onda">
+                <StackPanel>
+                    <TextBlock Text="Tipo de Sinal:"
+                               Style="{StaticResource LabelStyle}"/>
+
+                    <ComboBox ItemsSource="{Binding FormasOnda}"
+                              SelectedValue="{Binding FormaOndaSelecionada}"
+                              SelectedValuePath="Tipo"
+                              IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBoolConverter}}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Emoji}" FontSize="16" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{Binding Nome}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <TextBlock Margin="0,15,0,0"
+                               Foreground="{DynamicResource TextoSecundario}"
+                               FontSize="12"
+                               TextWrapping="Wrap">
+                        <Run Text="💡 "/>
+                        <Run Text="Senoidal (padrão) - Forma de onda mais suave, indicada para terapias gerais."/>
+                        <LineBreak/>
+                        <Run Text="   Quadrada - Mais incisiva, para terapias de ressonância intensiva."/>
+                    </TextBlock>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Teste de Emissão -->
+            <GroupBox Header="🎹 Teste de Emissão">
+                <StackPanel>
+                    <TextBlock Text="Teste com 440 Hz (Lá musical) por 2 segundos para verificar configuração."
+                               Foreground="{DynamicResource TextoSecundario}"
+                               FontSize="13"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,15"/>
+
+                    <Button Content="🎵 Testar Emissão"
+                            Command="{Binding TestarEmissaoCommand}"
+                            IsEnabled="{Binding Testando, Converter={StaticResource InvertBoolConverter}}"
+                            HorizontalAlignment="Left"
+                            Padding="20,10"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Style="{StaticResource BotaoPrimarioStyle}"/>
+
+                    <!-- Mensagem de Teste -->
+                    <TextBlock Text="{Binding MensagemTeste}"
+                               FontSize="13"
+                               FontWeight="Medium"
+                               Margin="0,15,0,0"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding MensagemTeste, Converter={StaticResource StringToVisibilityConverter}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding MensagemTeste, Converter={StaticResource StringContainsConverter}, ConverterParameter='✅'}" Value="True">
+                                        <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding MensagemTeste, Converter={StaticResource StringContainsConverter}, ConverterParameter='❌'}" Value="True">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding MensagemTeste, Converter={StaticResource StringContainsConverter}, ConverterParameter='🎵'}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource BotaoPrimario}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- Spinner durante teste -->
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,10,0,0"
+                                Visibility="{Binding Testando, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="⏳" FontSize="16" Margin="0,0,8,0"/>
+                        <TextBlock Text="Emitindo frequência de teste..."
+                                   FontSize="13"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- Informações Técnicas -->
+            <Border BorderBrush="{DynamicResource Borda}"
+                    BorderThickness="1"
+                    Background="#F0F5E8"
+                    Padding="15"
+                    CornerRadius="5">
+                <StackPanel>
+                    <TextBlock Text="📊 Parâmetros Técnicos (Baseados em CoRe System)"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextoPrincipal}"
+                               Margin="0,0,0,10"/>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="• Sample Rate:" Grid.Row="0" Grid.Column="0" Margin="0,3"/>
+                        <TextBlock Text="44100 Hz (CD Quality)" Grid.Row="0" Grid.Column="1" Margin="10,3,0,3" Foreground="{DynamicResource TextoSecundario}"/>
+
+                        <TextBlock Text="• Canais:" Grid.Row="1" Grid.Column="0" Margin="0,3"/>
+                        <TextBlock Text="1 (Mono)" Grid.Row="1" Grid.Column="1" Margin="10,3,0,3" Foreground="{DynamicResource TextoSecundario}"/>
+
+                        <TextBlock Text="• Bit Depth:" Grid.Row="2" Grid.Column="0" Margin="0,3"/>
+                        <TextBlock Text="16-bit" Grid.Row="2" Grid.Column="1" Margin="10,3,0,3" Foreground="{DynamicResource TextoSecundario}"/>
+
+                        <TextBlock Text="• Intervalo:" Grid.Row="3" Grid.Column="0" Margin="0,3"/>
+                        <TextBlock Text="10 Hz - 20 kHz" Grid.Row="3" Grid.Column="1" Margin="10,3,0,3" Foreground="{DynamicResource TextoSecundario}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

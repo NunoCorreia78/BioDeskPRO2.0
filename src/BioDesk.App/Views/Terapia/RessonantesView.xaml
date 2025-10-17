@@ -5,85 +5,273 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:BioDesk.ViewModels.UserControls.Terapia;assembly=BioDesk.ViewModels"
+    xmlns:controls="clr-namespace:BioDesk.App.Controls"
     d:DataContext="{d:DesignInstance Type=vm:RessonantesViewModel}"
     mc:Ignorable="d">
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" MinWidth="500"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="1*" MinWidth="300"/>
+        </Grid.ColumnDefinitions>
 
-        <GroupBox Header="Configuracao do sweep" Margin="0,0,0,10">
-            <Grid Margin="10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="120" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="120" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <!-- ESQUERDA: Configuração Sweep + Tabela Resultados -->
+        <Border Grid.Column="0"
+                Background="{DynamicResource Cartao}"
+                BorderBrush="{DynamicResource Borda}"
+                BorderThickness="2"
+                CornerRadius="8"
+                Padding="15">
+            <DockPanel>
+                <!-- Cabeçalho + Config Sweep -->
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,15">
+                    <TextBlock Text="SCAN RESSONANTE"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextoPrincipal}"
+                               Margin="0,0,0,15"/>
 
-                <Label Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Inicio (Hz):" />
-                <TextBox
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Text="{Binding StartHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <!-- Configuração Sweep em linha horizontal -->
+                    <WrapPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Início:" VerticalAlignment="Center" Margin="0,0,5,0" Width="45"/>
+                            <TextBox Text="{Binding StartHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="80" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                            <TextBlock Text="Hz" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                        </StackPanel>
 
-                <Label Grid.Row="0" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Fim (Hz):" />
-                <TextBox
-                    Grid.Row="0"
-                    Grid.Column="4"
-                    Text="{Binding StopHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Fim:" VerticalAlignment="Center" Margin="0,0,5,0" Width="35"/>
+                            <TextBox Text="{Binding StopHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="80" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                            <TextBlock Text="Hz" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                        </StackPanel>
 
-                <Label Grid.Row="1" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" Content="Passo (Hz):" />
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Text="{Binding StepHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Passo:" VerticalAlignment="Center" Margin="0,0,5,0" Width="45"/>
+                            <TextBox Text="{Binding StepHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="60" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                            <TextBlock Text="Hz" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                        </StackPanel>
 
-                <Label Grid.Row="1" Grid.Column="3" Margin="0,0,10,10" VerticalAlignment="Center" Content="Dwell (ms):" />
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="4"
-                    Text="{Binding DwellMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Dwell:" VerticalAlignment="Center" Margin="0,0,5,0" Width="45"/>
+                            <TextBox Text="{Binding DwellMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="60" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                            <TextBlock Text="ms" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                        </StackPanel>
+                    </WrapPanel>
 
-                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Orientation="Horizontal">
-                    <Button Width="140" Margin="0,0,10,0" Content="Executar sweep" Command="{Binding RunSweepCommand}" />
-                    <Button 
-                        Width="180" 
-                        Height="35"
-                        Background="#9CAF97"
-                        Foreground="White"
-                        FontWeight="SemiBold"
-                        Content="Iniciar Terapia Local" 
-                        Command="{Binding IniciarTerapiaLocalCommand}"
-                        ToolTip="Abre modal para terapia local com Hz ressonantes (Duty=50%, Duração=3min)" />
+                    <!-- Botão Executar Sweep -->
+                    <Button Content="🔍 Executar Sweep"
+                            Command="{Binding RunSweepCommand}"
+                            Height="35"
+                            Margin="0,0,0,5"
+                            Background="#7B8FA3"
+                            Foreground="White"
+                            FontWeight="SemiBold"
+                            BorderThickness="0"
+                            Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="6"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#6A7D91"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <TextBlock Text="💡 Selecione frequências ressonantes (Ctrl+Click ou Shift+Click para múltiplas)"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextoSecundario}"/>
                 </StackPanel>
-            </Grid>
-        </GroupBox>
 
-        <GroupBox Grid.Row="1" Header="Resultados do sweep">
-            <DataGrid
-                Margin="10"
-                AutoGenerateColumns="False"
-                CanUserAddRows="False"
-                CanUserDeleteRows="False"
-                HeadersVisibility="Column"
-                IsReadOnly="True"
-                ItemsSource="{Binding SweepResults}"
-                SelectedItem="{Binding SelectedPoint, Mode=TwoWay}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Width="*" Binding="{Binding Hz, StringFormat='{}{0:N2} Hz'}" Header="Hz" />
-                    <DataGridTextColumn Width="120" Binding="{Binding Score, StringFormat='{}{0:N2}%'}" Header="Score" />
-                    <DataGridTextColumn Width="*" Binding="{Binding Notes}" Header="Notas" />
-                </DataGrid.Columns>
-            </DataGrid>
-        </GroupBox>
+                <!-- Tabela de Resultados com Checkboxes -->
+                <Border BorderBrush="#E3E9DE"
+                        BorderThickness="1"
+                        CornerRadius="4">
+                    <DataGrid x:Name="ResultadosDataGrid"
+                              ItemsSource="{Binding SweepResults}"
+                              SelectedItem="{Binding SelectedPoint, Mode=TwoWay}"
+                              SelectionMode="Extended"
+                              SelectionChanged="ResultadosDataGrid_SelectionChanged"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              AlternatingRowBackground="#F9FAFB"
+                              RowHeight="35">
+                        <DataGrid.Columns>
+                            <!-- Hz Column -->
+                            <DataGridTextColumn Width="120"
+                                              Binding="{Binding Hz, StringFormat='{}{0:N2} Hz'}"
+                                              Header="Frequência (Hz)"/>
+
+                            <!-- Score Column -->
+                            <DataGridTextColumn Width="80"
+                                              Binding="{Binding Score, StringFormat='{}{0:N1}%'}"
+                                              Header="Score %"/>
+
+                            <!-- Status Column -->
+                            <DataGridTextColumn Width="180"
+                                              Binding="{Binding Status}"
+                                              Header="Status"/>
+
+                            <!-- Progress Bar Column -->
+                            <DataGridTemplateColumn Header="Progresso" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <ProgressBar Value="{Binding ProgressoIndividual}"
+                                                         Height="20"
+                                                         Foreground="#9CAF97"
+                                                         Background="#E3E9DE"/>
+                                            <TextBlock Text="{Binding ProgressoIndividual, StringFormat='{}{0:F0}%'}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="10"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextoPrincipal}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Tempo Restante Column -->
+                            <DataGridTextColumn Width="70"
+                                              Binding="{Binding TempoRestante, StringFormat='{}{0}s'}"
+                                              Header="Tempo"/>
+
+                            <!-- Notes Column -->
+                            <DataGridTextColumn Width="*"
+                                              Binding="{Binding Notes}"
+                                              Header="Notas"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </DockPanel>
+        </Border>
+
+        <!-- DIREITA: Controlos Unificados + Progresso -->
+        <ScrollViewer Grid.Column="2"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <!-- DEBUG PERMANENTE: Estado da Terapia -->
+            <Border Background="Orange"
+                    Padding="5"
+                    Margin="0,0,0,10"
+                    CornerRadius="4">
+                <StackPanel>
+                    <TextBlock Text="{Binding TerapiaEmAndamento, StringFormat='🔥 DEBUG: TerapiaEmAndamento = {0}'}"
+                               FontSize="12" FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding FrequenciaAtual, StringFormat='Freq: {0}'}"
+                               FontSize="10"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+                <!-- Painel de Progresso em Tempo Real -->
+            <Border Background="{DynamicResource Cartao}"
+                    BorderBrush="{DynamicResource Borda}"
+                    BorderThickness="2"
+                    CornerRadius="8"
+                    Padding="15"
+                    Margin="0,0,0,15"
+                    Visibility="{Binding TerapiaEmAndamento, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="⚡ TERAPIA EM ANDAMENTO"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="#9CAF97"
+                               Margin="0,0,0,10"/>
+
+                    <!-- Frequência Atual -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="Frequência:"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextoPrincipal}"
+                                   Width="90"/>
+                        <TextBlock Text="{Binding FrequenciaAtual}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Progresso -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="Progresso:"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextoPrincipal}"
+                                   Width="90"/>
+                        <TextBlock Text="{Binding FrequenciaAtualIndex}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"/>
+                        <TextBlock Text="/"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   Margin="2,0"/>
+                        <TextBlock Text="{Binding TotalFrequencias}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"/>
+                    </StackPanel>
+
+                    <!-- Tempo Restante -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Tempo restante:"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextoPrincipal}"
+                                   Width="90"/>
+                        <TextBlock Text="{Binding TempoRestanteSegundos}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"/>
+                        <TextBlock Text="s"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextoSecundario}"
+                                   Margin="2,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Barra de Progresso -->
+                    <ProgressBar Value="{Binding ProgressoPercentual}"
+                                 Maximum="100"
+                                 Height="20"
+                                 Background="#E3E9DE"
+                                 Foreground="#9CAF97"/>
+                    <TextBlock Text="{Binding ProgressoPercentual, StringFormat='{}{0:F1}%'}"
+                               FontSize="11"
+                               Foreground="{DynamicResource TextoSecundario}"
+                               HorizontalAlignment="Center"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <controls:TerapiaControlosUserControl x:Name="TerapiaControlos"
+                                                 VoltagemV="5.0"
+                                                 DuracaoTotalMinutos="30"
+                                                 TempoFrequenciaSegundos="10"
+                                                 AjusteHz="0"
+                                                 TextoBotao="Iniciar Ressonantes"
+                                                 IniciarClick="TerapiaControlos_IniciarClick"
+                                                 PararClick="TerapiaControlos_PararClick"/>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

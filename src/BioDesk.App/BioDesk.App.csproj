@@ -40,6 +40,10 @@
     <Content Include="Resources\IridologyMaps\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- TiePie HS3 DLL nativa (P/Invoke) -->
+    <Content Include="hs3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -10,7 +10,7 @@ public partial class AvaliacaoView : UserControl
     public AvaliacaoView()
     {
         InitializeComponent();
-        
+
         // Escutar evento de solicitação de terapia remota
         Loaded += (s, e) =>
         {
@@ -19,7 +19,7 @@ public partial class AvaliacaoView : UserControl
                 vm.TerapiaRemotaRequested += OnTerapiaRemotaRequested;
             }
         };
-        
+
         Unloaded += (s, e) =>
         {
             if (DataContext is AvaliacaoViewModel vm)

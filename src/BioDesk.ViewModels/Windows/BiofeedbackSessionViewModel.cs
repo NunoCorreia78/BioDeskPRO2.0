@@ -4,7 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace BioDesk.ViewModels.Windows;
 
@@ -13,14 +15,24 @@ namespace BioDesk.ViewModels.Windows;
 /// Implementa loop autónomo: auto-scan → deteta Hz → emite → aguarda intervalo → repete.
 /// 100% independente de outras abas (não depende de Avaliação/Programas).
 /// </summary>
-public partial class BiofeedbackSessionViewModel : ObservableObject
+public partial class BiofeedbackSessionViewModel : ObservableObject, IDisposable
 {
+    private bool _disposed = false;
     private readonly ISessionHistoricoRepository? _sessionRepository;
-    
+    private DispatcherTimer? _timer;
+    private int _totalElapsedSeconds = 0;
+    private int _countdownSeconds = 0;
+    private bool _isScanning = false;
+    private bool _isEmitting = false;
+    private double[] _currentCycleHz = Array.Empty<double>();
+    private int _currentHzIndex = 0;
+    private int _currentHzElapsedSeconds = 0;
+    private DateTime _sessionStartTime = DateTime.Now;
+
     // ══════════════════════════════════════════════════════════════
     // PROPRIEDADES - Controlo de Sessão
     // ══════════════════════════════════════════════════════════════
-    
+
     /// <summary>
     /// Indica se sessão está em execução (loop ativo).
     /// </summary>
@@ -55,7 +67,7 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
     // ══════════════════════════════════════════════════════════════
     // PROPRIEDADES - Voltagem e Corrente
     // ══════════════════════════════════════════════════════════════
-    
+
     /// <summary>
     /// Voltagem aplicada durante emissão (0-12V).
     /// User REQUIREMENT: "forma clara e óbvia de controlar a voltagem".
@@ -76,10 +88,17 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
     [ObservableProperty]
     private bool _autoAdjustVoltage = false;
 
+    /// <summary>
+    /// Duração uniforme para cada Hz detectado (5, 10 ou 15 segundos).
+    /// User requirement: "o tempo escolhido para a frequência A, passa para a freq B que leva o mesmo tempo"
+    /// </summary>
+    [ObservableProperty]
+    private int _duracaoUniformeSegundos = 10;
+
     // ══════════════════════════════════════════════════════════════
     // PROPRIEDADES - Estado Atual
     // ══════════════════════════════════════════════════════════════
-    
+
     /// <summary>
     /// Hz atualmente sendo emitido (ou "A detetar..." durante scan).
     /// </summary>
@@ -109,19 +128,19 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
     // ══════════════════════════════════════════════════════════════
     // COLEÇÃO - Histórico de Ciclos
     // ══════════════════════════════════════════════════════════════
-    
+
     /// <summary>
     /// Histórico dos últimos 3 ciclos (FIFO: remove oldest quando > 3).
     /// Mostra ao user o que foi detetado e emitido em cada ciclo.
     /// </summary>
     public ObservableCollection<CycleHistoryItem> History { get; } = new();
-    
+
     // ══════════════════════════════════════════════════════════════
     // CONSTRUTORES
     // ══════════════════════════════════════════════════════════════
-    
+
     public BiofeedbackSessionViewModel() { }
-    
+
     public BiofeedbackSessionViewModel(ISessionHistoricoRepository sessionRepository)
     {
         _sessionRepository = sessionRepository;
@@ -130,7 +149,7 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
     // ══════════════════════════════════════════════════════════════
     // COMANDOS
     // ══════════════════════════════════════════════════════════════
-    
+
     /// <summary>
     /// Inicia sessão de biofeedback (loop autónomo).
     /// User requirement: "Botão único" - scan + emit numa só ação.
@@ -144,7 +163,11 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
         ProgressoPercent = 0.0;
         CurrentHz = "A detetar...";
         History.Clear();
-        
+        _totalElapsedSeconds = 0;
+        _sessionStartTime = DateTime.Now;
+        _isScanning = true;
+        _isEmitting = false;
+
         // 📊 Persistir em SessionHistorico
         if (_sessionRepository != null)
         {
@@ -157,7 +180,7 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
                     VoltagemV = VoltagemV,
                     Notas = $"Ciclos máx: {MaxCycles?.ToString() ?? "∞"}, Intervalo: {ScanIntervalSeconds}s, Auto-ajuste: {(AutoAdjustVoltage ? "Sim" : "Não")}"
                 };
-                
+
                 await _sessionRepository.AddAsync(session);
             }
             catch (Exception ex)
@@ -166,53 +189,124 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
             }
         }
 
-        // TODO: Integrar com IResonanceEngine para loop:
-        // 1. Auto-scan → deteta Hz ressonantes
-        // 2. Emitir Hz com VoltagemV durante DuracaoSegundos
-        // 3. Adicionar CycleHistoryItem ao History (manter max 3)
-        // 4. Aguardar ScanIntervalSeconds
-        // 5. Repetir até MaxCycles ou user parar
-        //
-        // Pseudo-código:
-        // while (IsRunning && (!MaxCycles.HasValue || CurrentCycle < MaxCycles.Value))
-        // {
-        //     if (Pausado) { await Task.Delay(500); continue; }
-        //     
-        //     // 1. Scan (0-20% progress)
-        //     CurrentHz = "A detetar...";
-        //     var hzList = await _resonanceEngine.AutoScanAsync();
-        //     
-        //     // 2. Emit (20-100% progress)
-        //     foreach (var hz in hzList)
-        //     {
-        //         CurrentHz = $"{hz:F1} Hz";
-        //         await _tiepieService.EmitAsync(hz, VoltagemV, duracaoSegundos);
-        //         ProgressoPercent += (80.0 / hzList.Count);
-        //     }
-        //     
-        //     // 3. Adicionar ao histórico
-        //     var historyItem = new CycleHistoryItem(
-        //         CicloNumero: ++CurrentCycle,
-        //         HzDetectados: string.Join(", ", hzList.Select(h => $"{h:F1}")),
-        //         DuracaoSegundos: duracaoTotalCiclo,
-        //         VoltagemUsada: VoltagemV,
-        //         DataHora: DateTime.Now
-        //     );
-        //     History.Insert(0, historyItem); // FIFO: mais recente no topo
-        //     if (History.Count > 3) History.RemoveAt(3); // Manter apenas 3
-        //     
-        //     // 4. Countdown até próximo scan
-        //     for (int i = ScanIntervalSeconds; i > 0; i--)
-        //     {
-        //         if (!IsRunning || Pausado) break;
-        //         NextScanCountdown = $"{i}s";
-        //         await Task.Delay(1000);
-        //     }
-        //     
-        //     ProgressoPercent = 0.0; // Reset para próximo ciclo
-        // }
+        // Iniciar Timer (1 segundo)
+        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _timer.Tick += BiofeedbackTimer_Tick;
+        _timer.Start();
 
-        await Task.CompletedTask; // Placeholder
+        // Simular scan inicial (3 segundos) e começar emissão
+        await Task.Delay(3000);
+        if (IsRunning && !Pausado)
+        {
+            StartEmissionCycle();
+        }
+    }
+
+    private void StartEmissionCycle()
+    {
+        // Simular Hz detectados (em produção viria do ResonanceEngine)
+        _currentCycleHz = new[] { 728.0, 880.0, 1500.0 }; // Exemplo
+        _currentHzIndex = 0;
+        _currentHzElapsedSeconds = 0;
+        _isScanning = false;
+        _isEmitting = true;
+
+        CurrentCycle++;
+        CurrentHz = $"{_currentCycleHz[_currentHzIndex]:F1} Hz";
+        ProgressoPercent = 0;
+
+        // TODO: Iniciar emissão hardware
+        // await _tiepieService.StartEmissionAsync(_currentCycleHz[_currentHzIndex], VoltagemV);
+    }
+
+    private void BiofeedbackTimer_Tick(object? sender, EventArgs e)
+    {
+        if (Pausado) return;
+
+        _totalElapsedSeconds++;
+        TempoDecorridoTotal = TimeSpan.FromSeconds(_totalElapsedSeconds).ToString(@"mm\:ss");
+
+        if (_isScanning)
+        {
+            // Simular scan (3 segundos)
+            ProgressoPercent = Math.Min(20, (_totalElapsedSeconds % 3) * 6.67);
+            return;
+        }
+
+        if (_isEmitting)
+        {
+            _currentHzElapsedSeconds++;
+
+            // Usar duração uniforme configurada pelo user
+            int hzDurationSeconds = DuracaoUniformeSegundos;
+
+            if (_currentHzElapsedSeconds >= hzDurationSeconds)
+            {
+                // Avançar para próximo Hz
+                _currentHzIndex++;
+                _currentHzElapsedSeconds = 0;
+
+                if (_currentHzIndex < _currentCycleHz.Length)
+                {
+                    // Próximo Hz
+                    CurrentHz = $"{_currentCycleHz[_currentHzIndex]:F1} Hz";
+                    // TODO: Mudar frequência hardware
+                }
+                else
+                {
+                    // Ciclo completo - adicionar ao histórico
+                    var cycleEnd = DateTime.Now;
+                    var cycleDuration = (int)(cycleEnd - _sessionStartTime.AddSeconds(_totalElapsedSeconds - (_currentCycleHz.Length * hzDurationSeconds))).TotalSeconds;
+
+                    var historyItem = new CycleHistoryItem(
+                        CicloNumero: CurrentCycle,
+                        HzDetectados: string.Join(", ", _currentCycleHz.Select(h => $"{h:F1}")),
+                        DuracaoSegundos: _currentCycleHz.Length * hzDurationSeconds,
+                        VoltagemUsada: VoltagemV,
+                        DataHora: cycleEnd
+                    );
+
+                    History.Insert(0, historyItem);
+                    if (History.Count > 3) History.RemoveAt(3);
+
+                    // Verificar se atingiu limite de ciclos
+                    if (MaxCycles.HasValue && CurrentCycle >= MaxCycles.Value)
+                    {
+                        Parar();
+                        return;
+                    }
+
+                    // Iniciar countdown para próximo scan
+                    _countdownSeconds = ScanIntervalSeconds;
+                    _isEmitting = false;
+                    CurrentHz = "Aguardando próximo scan...";
+                }
+            }
+
+            // Atualizar progresso (20% scan + 80% emissão)
+            var emissionProgress = (_currentHzIndex * hzDurationSeconds + _currentHzElapsedSeconds) / (double)(_currentCycleHz.Length * hzDurationSeconds);
+            ProgressoPercent = 20 + (emissionProgress * 80);
+        }
+        else
+        {
+            // Countdown até próximo scan
+            _countdownSeconds--;
+            NextScanCountdown = $"{_countdownSeconds}s";
+
+            if (_countdownSeconds <= 0)
+            {
+                // Iniciar novo scan
+                _isScanning = true;
+                CurrentHz = "A detetar...";
+                Task.Delay(3000).ContinueWith(_ =>
+                {
+                    if (IsRunning && !Pausado)
+                    {
+                        System.Windows.Application.Current?.Dispatcher.Invoke(() => StartEmissionCycle());
+                    }
+                });
+            }
+        }
     }
 
     /// <summary>
@@ -231,24 +325,45 @@ public partial class BiofeedbackSessionViewModel : ObservableObject
     [RelayCommand]
     private void Parar()
     {
+        _timer?.Stop();
+        _timer = null;
+
         IsRunning = false;
         Pausado = false;
         CurrentHz = "---";
         ProgressoPercent = 0.0;
         NextScanCountdown = "---";
-        
+        _isScanning = false;
+        _isEmitting = false;
+
         // TODO: Parar emissão hardware, cancelar tasks async
     }
 
     // ══════════════════════════════════════════════════════════════
     // VALIDAÇÃO - Limites de Voltagem (SEGURANÇA)
     // ══════════════════════════════════════════════════════════════
-    
+
     partial void OnVoltagemVChanged(double value)
     {
         // Enforçar limite 0-12V (mesmo que user tente ultrapassar)
         if (value < 0) VoltagemV = 0;
         if (value > 12) VoltagemV = 12;
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed && disposing)
+        {
+            _timer?.Stop();
+            _timer = null;
+        }
+        _disposed = true;
     }
 }
 
