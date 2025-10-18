@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using BioDesk.Services.Audio;
+using BioDesk.Services.Hardware.TiePie;
 using BioDesk.ViewModels.Base;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -22,12 +23,16 @@ namespace BioDesk.ViewModels.UserControls.Terapia;
 public partial class EmissaoConfiguracaoViewModel : ViewModelBase
 {
     private readonly IFrequencyEmissionService _emissionService;
+    private readonly ITiePieHS3Service? _hs3Service; // Opcional: só existe se HS3 disponível
     private readonly ITerapiaStateService _stateService;
     private readonly ILogger<EmissaoConfiguracaoViewModel> _logger;
+    private const string Hs3DeviceId = "HS3_HARDWARE";
 
     [ObservableProperty] private ObservableCollection<AudioDevice> _dispositivosDisponiveis = new();
     [ObservableProperty] private bool _testando = false;
     [ObservableProperty] private string _mensagemTeste = string.Empty;
+    [ObservableProperty] private bool _hs3Disponivel = false;
+    [ObservableProperty] private string _hs3Status = "HS3 não detectado";
 
     // ✅ PROPRIEDADES LIGADAS AO TerapiaStateService (estado compartilhado)
     public AudioDevice? DispositivoSelecionado
@@ -81,11 +86,15 @@ public partial class EmissaoConfiguracaoViewModel : ViewModelBase
     public EmissaoConfiguracaoViewModel(
         IFrequencyEmissionService emissionService,
         ITerapiaStateService stateService,
-        ILogger<EmissaoConfiguracaoViewModel> logger)
+        ILogger<EmissaoConfiguracaoViewModel> logger,
+        ITiePieHS3Service? hs3Service = null) // Injeção opcional
     {
         _emissionService = emissionService;
         _stateService = stateService;
         _logger = logger;
+        _hs3Service = hs3Service;
+
+        // Verificação do HS3 será feita no CarregarDispositivosAsync
     }
 
     /// <summary>
@@ -93,28 +102,147 @@ public partial class EmissaoConfiguracaoViewModel : ViewModelBase
     /// </summary>
     [RelayCommand]
     private async Task CarregarDispositivosAsync()
+
     {
+
         await ExecuteWithErrorHandlingAsync(async () =>
+
         {
+
+            await VerificarHS3Async();
+
+
+
             var dispositivos = await _emissionService.GetAvailableDevicesAsync();
+
             DispositivosDisponiveis = new ObservableCollection<AudioDevice>(dispositivos);
 
-            // Selecionar TiePie HS3 se disponível, senão padrão
-            DispositivoSelecionado = dispositivos.FirstOrDefault(d =>
-                d.Name.Contains("TiePie", StringComparison.OrdinalIgnoreCase) ||
-                d.Name.Contains("Handyscope", StringComparison.OrdinalIgnoreCase))
+
+
+            if (Hs3Disponivel && _hs3Service != null)
+
+            {
+
+                var hs3Device = new AudioDevice(
+
+                    Id: Hs3DeviceId,
+
+                    Name: $"TiePie HS3 (SN: {_hs3Service.SerialNumber})",
+
+                    IsDefault: true);
+
+
+
+                DispositivosDisponiveis.Insert(0, hs3Device);
+
+                _logger.LogInformation("HS3 adicionado na lista de dispositivos");
+
+            }
+
+
+
+            DispositivoSelecionado = DispositivosDisponiveis.FirstOrDefault(d => d.Id == Hs3DeviceId)
+
                 ?? dispositivos.FirstOrDefault(d => d.IsDefault)
+
                 ?? dispositivos.FirstOrDefault();
 
+
+
             if (DispositivoSelecionado != null)
+
             {
-                await _emissionService.SelectDeviceAsync(DispositivoSelecionado.Id);
-                _logger.LogInformation("🔊 Dispositivo selecionado: {Name}", DispositivoSelecionado.Name);
+
+                _logger.LogInformation("Dispositivo selecionado: {Name}", DispositivoSelecionado.Name);
+
             }
+
         },
-        errorContext: "ao carregar dispositivos de áudio",
+
+        errorContext: "ao carregar dispositivos de audio",
+
         logger: _logger);
+
     }
+
+
+
+
+    /// <summary>
+    /// Verifica disponibilidade do TiePie HS3 via P/Invoke direto.
+    /// </summary>
+    private async Task VerificarHS3Async()
+
+    {
+
+        if (_hs3Service == null)
+
+        {
+
+            Hs3Status = "[HS3] Servico nao disponivel (nao injetado)";
+
+            Hs3Disponivel = false;
+
+            return;
+
+        }
+
+
+
+        try
+
+        {
+
+            _logger.LogInformation("[HS3] Verificando disponibilidade...");
+
+
+
+            var conectado = await _hs3Service.InitializeAsync();
+
+
+
+            if (conectado)
+
+            {
+
+                Hs3Disponivel = true;
+
+                Hs3Status = $"[HS3] Conectado (SN: {_hs3Service.SerialNumber})";
+
+                _logger.LogInformation("[HS3] Dispositivo disponivel");
+
+            }
+
+            else
+
+            {
+
+                Hs3Disponivel = false;
+
+                Hs3Status = "[HS3] Nao detectado (verifique USB/driver)";
+
+                _logger.LogWarning("[HS3] Dispositivo nao foi detectado");
+
+            }
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            Hs3Disponivel = false;
+
+            Hs3Status = $"[HS3] Erro: {ex.Message}";
+
+            _logger.LogError(ex, "[HS3] Erro ao verificar disponibilidade");
+
+        }
+
+    }
+
+
+
 
     /// <summary>
     /// Altera dispositivo selecionado.
@@ -179,3 +307,5 @@ public partial class EmissaoConfiguracaoViewModel : ViewModelBase
 /// Opção de forma de onda para ComboBox.
 /// </summary>
 public record WaveFormOption(string Nome, WaveForm Tipo, string Emoji);
+
+

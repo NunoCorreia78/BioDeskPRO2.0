@@ -69,6 +69,19 @@
                         <Run Text="TiePie Handyscope HS3 é automaticamente priorizado se detectado."/>
                     </TextBlock>
 
+                    <!-- Status do HS3 -->
+                    <Border Background="{DynamicResource FundoPrincipal}"
+                            BorderBrush="{DynamicResource Borda}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="10"
+                            Margin="0,10,0,0">
+                        <TextBlock Text="{Binding Hs3Status}"
+                                   FontSize="12"
+                                   FontWeight="Medium"
+                                   Foreground="{DynamicResource TextoPrincipal}"/>
+                    </Border>
+
                     <Button Content="🔄 Recarregar Dispositivos"
                             Command="{Binding CarregarDispositivosCommand}"
                             IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBoolConverter}}"

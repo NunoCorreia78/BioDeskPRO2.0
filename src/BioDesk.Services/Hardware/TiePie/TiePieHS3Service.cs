@@ -4,57 +4,51 @@ using Microsoft.Extensions.Logging;
 
 namespace BioDesk.Services.Hardware.TiePie;
 
-/// <summary>
-/// Serviço para controlo direto do TiePie Handyscope HS3
-/// Usa hs3.dll nativa via P/Invoke (mesma DLL que Inergetix CoRe)
-/// </summary>
 public interface ITiePieHS3Service : IDisposable
 {
     /// <summary>
-    /// Indica se o HS3 está conectado e inicializado
+    /// Indicates whether the HS3 device is connected and initialized.
     /// </summary>
     bool IsConnected { get; }
 
     /// <summary>
-    /// Número de série do HS3 conectado (0 se não conectado)
+    /// Device serial number (0 when not connected).
     /// </summary>
     uint SerialNumber { get; }
 
     /// <summary>
-    /// Inicializa a biblioteca e conecta ao HS3
+    /// Initializes the native library and opens the first HS3 device.
     /// </summary>
-    /// <returns>true se sucesso</returns>
     Task<bool> InitializeAsync();
 
     /// <summary>
-    /// Emite uma frequência específica com amplitude definida
+    /// Starts emitting a signal with the requested parameters.
     /// </summary>
-    /// <param name="frequencyHz">Frequência em Hz (0.1 - 10000)</param>
-    /// <param name="amplitudeVolts">Amplitude em Volts (0 - 10V)</param>
-    /// <param name="waveform">Tipo de onda (Sine, Square, Triangle)</param>
-    /// <returns>true se iniciou emissão</returns>
     Task<bool> EmitFrequencyAsync(double frequencyHz, double amplitudeVolts, string waveform = "Sine");
 
     /// <summary>
-    /// Para a emissão atual
+    /// Stops the current emission.
     /// </summary>
     Task StopEmissionAsync();
 
     /// <summary>
-    /// Obtém informações do dispositivo
+    /// Returns live information about the connected device.
     /// </summary>
     Task<string> GetDeviceInfoAsync();
+
+    /// <summary>
+    /// Performs a quick hardware validation (100 Hz, 10 V, square wave for 3 seconds).
+    /// </summary>
+    Task<bool> TestEmissionAsync();
 }
 
-/// <summary>
-/// Implementação do serviço TiePie HS3 usando hs3.dll nativa
-/// </summary>
-public class TiePieHS3Service : ITiePieHS3Service
+public sealed class TiePieHS3Service : ITiePieHS3Service
 {
     private readonly ILogger<TiePieHS3Service> _logger;
+    private readonly object _syncRoot = new();
     private nint _deviceHandle = nint.Zero;
-    private bool _isLibraryInitialized = false;
-    private bool _disposed = false;
+    private bool _isLibraryInitialized;
+    private bool _disposed;
 
     public bool IsConnected => _deviceHandle != nint.Zero;
     public uint SerialNumber { get; private set; }
@@ -64,197 +58,264 @@ public class TiePieHS3Service : ITiePieHS3Service
         _logger = logger;
     }
 
+    ~TiePieHS3Service()
+    {
+        Dispose(false);
+    }
+
     public async Task<bool> InitializeAsync()
     {
+        ThrowIfDisposed();
+
         return await Task.Run(() =>
         {
-            try
+            lock (_syncRoot)
             {
-                _logger.LogInformation("🔌 Inicializando TiePie HS3...");
-
-                // Inicializar biblioteca
-                if (!HS3Native.LibInit())
+                if (IsConnected)
                 {
-                    _logger.LogError("❌ Falha ao inicializar hs3.dll");
-                    return false;
-                }
-                _isLibraryInitialized = true;
-                _logger.LogInformation("✅ hs3.dll inicializada");
-
-                // Atualizar lista de dispositivos
-                int deviceCount = HS3Native.LstUpdate();
-                _logger.LogInformation($"🔍 Dispositivos encontrados: {deviceCount}");
-
-                if (deviceCount == 0)
-                {
-                    _logger.LogWarning("⚠️ Nenhum HS3 conectado");
-                    return false;
+                    _logger.LogInformation("[HS3] Already initialized (SN: {Serial})", SerialNumber);
+                    return true;
                 }
 
-                // Abrir primeiro dispositivo disponível (dwDeviceType=0, dwSerialNumber=0)
-                _deviceHandle = HS3Native.LstOpenDevice(0, 0);
-                if (_deviceHandle == nint.Zero)
+                try
                 {
-                    _logger.LogError("❌ Falha ao abrir dispositivo HS3");
+                    _logger.LogInformation("[HS3] Initializing Inergetix API...");
+
+                    if (!_isLibraryInitialized)
+                    {
+                        // InitInstrument retorna handle (int) ou 0 se erro
+                        int handle = HS3Native.InitInstrument();
+
+                        if (handle <= 0)
+                        {
+                            _logger.LogError("[HS3] InitInstrument() failed (returned {Handle}). Check USB/driver.", handle);
+                            return false;
+                        }
+
+                        _deviceHandle = (nint)handle;
+                        _isLibraryInitialized = true;
+
+                        _logger.LogInformation("[HS3] InitInstrument() succeeded (handle: {Handle})", handle);
+                    }
+                    else
+                    {
+                        _logger.LogDebug("[HS3] Already initialized in this session.");
+                    }
+
+                    // Obter número de série (não precisa de handle na API Inergetix)
+                    SerialNumber = HS3Native.GetSerialNumber();
+
+                    _logger.LogInformation("[HS3] Device ready. Serial: {Serial}", SerialNumber);
+
+                    // Configuração inicial: desligar output e definir defaults
+                    HS3Native.SetFuncGenOutputOn(false);
+                    HS3Native.SetFuncGenEnable(false);
+
+                    return true;
+                }
+                catch (DllNotFoundException ex)
+                {
+                    _logger.LogError(ex, "[HS3] hs3.dll not found. Ensure the DLL is in the application folder.");
+                    ResetStateOnFailure();
                     return false;
                 }
-
-                // Obter número de série
-                SerialNumber = HS3Native.DevGetSerialNumber(_deviceHandle);
-                uint firmwareVersion = HS3Native.DevGetFirmwareVersion(_deviceHandle);
-
-                _logger.LogInformation($"✅ HS3 conectado!");
-                _logger.LogInformation($"   Número de Série: {SerialNumber}");
-                _logger.LogInformation($"   Firmware: {firmwareVersion:X}");
-
-                // Configurar gerador para modo de frequência de sinal
-                HS3Native.GenSetFrequencyMode(_deviceHandle, (uint)HS3Native.FrequencyMode.SignalFrequency);
-
-                return true;
-            }
-            catch (DllNotFoundException ex)
-            {
-                _logger.LogError(ex, "❌ hs3.dll não encontrada! Certifique-se que está na pasta do executável.");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ Erro ao inicializar HS3");
-                return false;
+                catch (BadImageFormatException ex)
+                {
+                    _logger.LogError(ex, "[HS3] Architecture mismatch. Application MUST run as x86 (32-bit).");
+                    ResetStateOnFailure();
+                    return false;
+                }
+                catch (EntryPointNotFoundException ex)
+                {
+                    _logger.LogError(ex, "[HS3] Function not found in DLL. Verify hs3.dll version (expecting Inergetix CoRe wrapper).");
+                    ResetStateOnFailure();
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[HS3] Unexpected error during initialization.");
+                    ResetStateOnFailure();
+                    return false;
+                }
             }
         });
     }
 
     public async Task<bool> EmitFrequencyAsync(double frequencyHz, double amplitudeVolts, string waveform = "Sine")
     {
+        ThrowIfDisposed();
+
         return await Task.Run(() =>
         {
-            if (!IsConnected)
+            lock (_syncRoot)
             {
-                _logger.LogWarning("⚠️ HS3 não conectado");
-                return false;
-            }
-
-            try
-            {
-                _logger.LogInformation($"🎵 Configurando emissão: {frequencyHz} Hz @ {amplitudeVolts}V ({waveform})");
-
-                // Mapear waveform string para enum
-                var signalType = waveform.ToLower() switch
+                if (!IsConnected)
                 {
-                    "sine" => HS3Native.SignalType.Sine,
-                    "square" => HS3Native.SignalType.Square,
-                    "triangle" => HS3Native.SignalType.Triangle,
-                    "dc" => HS3Native.SignalType.DC,
-                    "noise" => HS3Native.SignalType.Noise,
-                    _ => HS3Native.SignalType.Sine
-                };
-
-                // 1. Parar emissão anterior (se existir)
-                HS3Native.GenStop(_deviceHandle);
-                HS3Native.GenSetOutputOn(_deviceHandle, false);
-
-                // 2. Configurar tipo de sinal
-                uint actualType = HS3Native.GenSetSignalType(_deviceHandle, (uint)signalType);
-                _logger.LogDebug($"   Tipo de sinal: {(HS3Native.SignalType)actualType}");
-
-                // 3. Configurar frequência
-                double actualFreq = HS3Native.GenSetFrequency(_deviceHandle, frequencyHz);
-                _logger.LogDebug($"   Frequência configurada: {actualFreq:F2} Hz");
-
-                // 4. Configurar amplitude
-                double actualAmp = HS3Native.GenSetAmplitude(_deviceHandle, amplitudeVolts);
-                _logger.LogDebug($"   Amplitude configurada: {actualAmp:F2} V");
-
-                // 5. Ativar saída
-                if (!HS3Native.GenSetOutputOn(_deviceHandle, true))
-                {
-                    _logger.LogError("❌ Falha ao ativar saída");
+                    _logger.LogWarning("[HS3] Cannot emit - device not initialized.");
                     return false;
                 }
 
-                // 6. Iniciar geração
-                if (!HS3Native.GenStart(_deviceHandle))
+                try
                 {
-                    _logger.LogError("❌ Falha ao iniciar geração");
+                    _logger.LogInformation("[HS3] Configuring: {Frequency} Hz @ {Amplitude} V ({Waveform})",
+                        frequencyHz, amplitudeVolts, waveform);
+
+                    // 1. Parar emissão anterior (se houver)
+                    HS3Native.SetFuncGenEnable(false);
+                    HS3Native.SetFuncGenOutputOn(false);
+
+                    // 2. Configurar parâmetros
+                    var signalType = MapWaveform(waveform);
+
+                    int resultType = HS3Native.SetFuncGenSignalType((int)signalType);
+                    int resultFreq = HS3Native.SetFuncGenFrequency(frequencyHz);
+                    int resultAmp = HS3Native.SetFuncGenAmplitude(amplitudeVolts);
+
+                    if (resultType != 0 || resultFreq != 0 || resultAmp != 0)
+                    {
+                        _logger.LogWarning("[HS3] Configuration warnings: Type={Type}, Freq={Freq}, Amp={Amp}",
+                            resultType, resultFreq, resultAmp);
+                    }
+
+                    // 3. Verificar valores reais
+                    double actualFreq = HS3Native.GetFuncGenFrequency();
+                    double actualAmp = HS3Native.GetFuncGenAmplitude();
+                    int actualType = HS3Native.GetFuncGenSignalType();
+
+                    _logger.LogDebug("[HS3] Configured: {Type} @ {Frequency} Hz, {Amplitude} V",
+                        (HS3Native.SignalType)actualType, actualFreq, actualAmp);
+
+                    // 4. Ativar output
+                    int resultOutput = HS3Native.SetFuncGenOutputOn(true);
+                    if (resultOutput != 0)
+                    {
+                        _logger.LogError("[HS3] Failed to enable output (error {Code})", resultOutput);
+                        return false;
+                    }
+
+                    // 5. Ativar gerador
+                    int resultEnable = HS3Native.SetFuncGenEnable(true);
+                    if (resultEnable != 0)
+                    {
+                        _logger.LogError("[HS3] Failed to enable generator (error {Code})", resultEnable);
+                        HS3Native.SetFuncGenOutputOn(false);
+                        return false;
+                    }
+
+                    _logger.LogInformation("[HS3] ✅ Emission started successfully!");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[HS3] Error during emission configuration.");
+
+                    // Cleanup
+                    try
+                    {
+                        HS3Native.SetFuncGenEnable(false);
+                        HS3Native.SetFuncGenOutputOn(false);
+                    }
+                    catch { /* best effort */ }
+
                     return false;
                 }
-
-                _logger.LogInformation($"✅ Emissão iniciada: {actualFreq:F2} Hz @ {actualAmp:F2}V");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ Erro ao emitir frequência");
-                return false;
             }
         });
     }
 
     public async Task StopEmissionAsync()
     {
+        ThrowIfDisposed();
+
         await Task.Run(() =>
         {
-            if (!IsConnected)
+            lock (_syncRoot)
             {
-                return;
-            }
+                if (!IsConnected)
+                {
+                    return;
+                }
 
-            try
-            {
-                _logger.LogInformation("⏹️ Parando emissão...");
-
-                // Parar geração
-                HS3Native.GenStop(_deviceHandle);
-
-                // Desativar saída
-                HS3Native.GenSetOutputOn(_deviceHandle, false);
-
-                _logger.LogInformation("✅ Emissão parada");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ Erro ao parar emissão");
+                try
+                {
+                    _logger.LogInformation("[HS3] Stopping emission...");
+                    HS3Native.SetFuncGenEnable(false);
+                    HS3Native.SetFuncGenOutputOn(false);
+                    _logger.LogInformation("[HS3] ✅ Emission stopped.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[HS3] Error while stopping emission.");
+                }
             }
         });
     }
 
     public async Task<string> GetDeviceInfoAsync()
     {
+        ThrowIfDisposed();
+
         return await Task.Run(() =>
         {
-            if (!IsConnected)
+            lock (_syncRoot)
             {
-                return "❌ HS3 não conectado";
-            }
+                if (!IsConnected)
+                {
+                    return "[HS3] Device not initialized.";
+                }
 
-            try
-            {
-                uint serial = HS3Native.DevGetSerialNumber(_deviceHandle);
-                uint firmware = HS3Native.DevGetFirmwareVersion(_deviceHandle);
-                double freq = HS3Native.GenGetFrequency(_deviceHandle);
-                double amp = HS3Native.GenGetAmplitude(_deviceHandle);
-                uint signalType = HS3Native.GenGetSignalType(_deviceHandle);
-                bool outputOn = HS3Native.GenGetOutputOn(_deviceHandle);
+                try
+                {
+                    uint serial = HS3Native.GetSerialNumber();
+                    double frequency = HS3Native.GetFuncGenFrequency();
+                    double amplitude = HS3Native.GetFuncGenAmplitude();
+                    int signalType = HS3Native.GetFuncGenSignalType();
+                    bool outputOn = HS3Native.GetFuncGenOutputOn();
+                    bool genEnabled = HS3Native.GetFuncGenEnable();
+                    int status = HS3Native.GetFunctionGenStatus();
 
-                return $"""
-                    📟 TiePie Handyscope HS3
-                    ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                    Número de Série: {serial}
-                    Firmware: v{firmware:X}
+                    return
+$@"[HS3] TiePie Handyscope HS3 (Inergetix API)
+Serial Number: {serial}
 
-                    ⚙️ Configuração Atual:
-                    Frequência: {freq:F2} Hz
-                    Amplitude: {amp:F2} V
-                    Tipo de Sinal: {(HS3Native.SignalType)signalType}
-                    Saída Ativa: {(outputOn ? "✅ SIM" : "❌ NÃO")}
-                    """;
-            }
-            catch (Exception ex)
-            {
-                return $"❌ Erro ao obter informações: {ex.Message}";
+Current Configuration:
+- Frequency: {frequency:F2} Hz
+- Amplitude: {amplitude:F2} V
+- Waveform: {(HS3Native.SignalType)signalType}
+- Output enabled: {outputOn}
+- Generator enabled: {genEnabled}
+- Status code: 0x{status:X}";
+                }
+                catch (Exception ex)
+                {
+                    return $"[HS3] Error reading device info: {ex.Message}";
+                }
             }
         });
+    }
+
+    public async Task<bool> TestEmissionAsync()
+    {
+        if (!await InitializeAsync())
+        {
+            return false;
+        }
+
+        var started = await EmitFrequencyAsync(100.0, 10.0, "Square");
+        if (!started)
+        {
+            return false;
+        }
+
+        try
+        {
+            await Task.Delay(3000);
+            return true;
+        }
+        finally
+        {
+            await StopEmissionAsync();
+        }
     }
 
     public void Dispose()
@@ -263,39 +324,116 @@ public class TiePieHS3Service : ITiePieHS3Service
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (_disposed)
-            return;
-
-        if (disposing)
         {
-            try
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            if (IsConnected)
             {
-                // Parar emissão se estiver ativa
-                if (IsConnected)
+                try
                 {
-                    HS3Native.GenStop(_deviceHandle);
-                    HS3Native.GenSetOutputOn(_deviceHandle, false);
-                    HS3Native.DevClose(_deviceHandle);
-                    _deviceHandle = nint.Zero;
-                    _logger.LogInformation("🔌 HS3 desconectado");
+                    // Parar emissão
+                    HS3Native.SetFuncGenEnable(false);
+                    HS3Native.SetFuncGenOutputOn(false);
+                }
+                catch (Exception ex) when (!disposing)
+                {
+                    _logger.LogDebug(ex, "[HS3] Ignoring stop errors during finalizer.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[HS3] Error stopping emission during dispose.");
                 }
 
-                // Finalizar biblioteca
-                if (_isLibraryInitialized)
+                _deviceHandle = nint.Zero;
+            }
+
+            if (_isLibraryInitialized)
+            {
+                try
                 {
-                    HS3Native.LibExit();
+                    // Finalizar instrumento (API Inergetix)
+                    HS3Native.ExitInstrument();
+                }
+                catch (Exception ex) when (!disposing)
+                {
+                    _logger.LogDebug(ex, "[HS3] Ignoring ExitInstrument errors during finalizer.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[HS3] Error during ExitInstrument.");
+                }
+                finally
+                {
                     _isLibraryInitialized = false;
-                    _logger.LogInformation("✅ hs3.dll finalizada");
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ Erro ao fazer dispose do HS3Service");
-            }
+
+            SerialNumber = 0;
         }
 
         _disposed = true;
+    }
+
+    private void ResetStateOnFailure()
+    {
+        if (_deviceHandle != nint.Zero)
+        {
+            try
+            {
+                HS3Native.SetFuncGenEnable(false);
+                HS3Native.SetFuncGenOutputOn(false);
+            }
+            catch
+            {
+                // best effort only
+            }
+            finally
+            {
+                _deviceHandle = nint.Zero;
+            }
+        }
+
+        if (_isLibraryInitialized)
+        {
+            try
+            {
+                HS3Native.ExitInstrument();
+            }
+            catch
+            {
+                // best effort only
+            }
+            finally
+            {
+                _isLibraryInitialized = false;
+            }
+        }
+
+        SerialNumber = 0;
+    }
+
+    private static HS3Native.SignalType MapWaveform(string waveform) =>
+        waveform?.ToLowerInvariant() switch
+        {
+            "square" => HS3Native.SignalType.Square,
+            "triangle" => HS3Native.SignalType.Triangle,
+            "dc" => HS3Native.SignalType.DC,
+            "noise" => HS3Native.SignalType.Noise,
+            "pulse" => HS3Native.SignalType.Pulse,
+            _ => HS3Native.SignalType.Sine
+        };
+
+    private void ThrowIfDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(TiePieHS3Service));
+        }
     }
 }

@@ -24,7 +24,9 @@ public partial class ProgramasView : UserControl
         InitializeComponent();
 
         // Obter IProgramLibrary via DI
-        _programLibrary = ((App)Application.Current).ServiceProvider.GetRequiredService<IProgramLibrary>();
+        // Null-forgiving: Application.Current e ServiceProvider sempre existem em runtime WPF após App.xaml.cs inicializar
+        var app = (Application.Current as App)!;
+        _programLibrary = app.ServiceProvider!.GetRequiredService<IProgramLibrary>();
 
         // Escutar evento de solicitação de terapia local
         Loaded += async (s, e) =>

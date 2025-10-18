@@ -7,6 +7,8 @@
     <UseWPF>true</UseWPF>
     <StartupObject>BioDesk.App.App</StartupObject>
     <UserSecretsId>biodesk-app-secrets-2025</UserSecretsId>
+    <!-- Forçar x86 (32-bit) para compatibilidade com hs3.dll -->
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,6 +44,10 @@
     </Content>
     <!-- TiePie HS3 DLL nativa (P/Invoke) -->
     <Content Include="hs3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!-- TiePie HS3 Firmware/Config (múltiplas versões - obrigatório para InitInstrument) -->
+    <Content Include="hs3*.hex">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

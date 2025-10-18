@@ -4,8 +4,11 @@ using System.Runtime.InteropServices;
 namespace BioDesk.Services.Hardware.TiePie;
 
 /// <summary>
-/// P/Invoke wrapper para hs3.dll (TiePie Handyscope HS3)
-/// Baseado em hs3.dll v2.90 da TiePie Engineering
+/// P/Invoke wrapper para hs3.dll (Inergetix CoRe Wrapper)
+/// ATENÇÃO: Esta DLL é um wrapper proprietário do Inergetix CoRe,
+/// NÃO é o SDK oficial libtiepie.dll da TiePie Engineering!
+///
+/// API descoberta via pefile - 18/10/2025
 /// </summary>
 internal static class HS3Native
 {
@@ -15,6 +18,7 @@ internal static class HS3Native
 
     /// <summary>
     /// Tipos de sinal suportados pelo HS3
+    /// NOTA: Valores empíricos - podem precisar ajuste
     /// </summary>
     public enum SignalType : int
     {
@@ -27,170 +31,166 @@ internal static class HS3Native
         Pulse = 6      // Pulso
     }
 
+    #endregion
+
+    #region Inicialização e Dispositivo (API Inergetix)
+
     /// <summary>
-    /// Modos de frequência
+    /// Inicializa o instrumento HS3 (API Inergetix).
+    /// Substitui LibInit() do SDK oficial.
     /// </summary>
-    public enum FrequencyMode : int
-    {
-        SignalFrequency = 0, // Frequência do sinal
-        SampleFrequency = 1  // Frequência de amostragem
-    }
+    /// <returns>Handle do dispositivo ou 0 se falha</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "InitInstrument")]
+    public static extern int InitInstrument();
+
+    /// <summary>
+    /// Finaliza o instrumento (API Inergetix).
+    /// Substitui LibExit() + DevClose() do SDK oficial.
+    /// </summary>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "ExitInstrument")]
+    public static extern void ExitInstrument();
+
+    /// <summary>
+    /// Obtém o número de série do dispositivo (API Inergetix).
+    /// </summary>
+    /// <returns>Número de série</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetSerialNumber")]
+    public static extern uint GetSerialNumber();
 
     #endregion
 
-    #region Inicialização e Dispositivo
+    #region Configuração do Gerador (API Inergetix)
 
     /// <summary>
-    /// Inicializa a biblioteca HS3
+    /// Define a frequência do gerador de funções.
     /// </summary>
-    /// <returns>true se sucesso</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool LibInit();
+    /// <param name="frequencyHz">Frequência em Hz</param>
+    /// <returns>0 se sucesso, código de erro caso contrário</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetFuncGenFrequency")]
+    public static extern int SetFuncGenFrequency(double frequencyHz);
 
     /// <summary>
-    /// Finaliza a biblioteca HS3
+    /// Obtém a frequência atual do gerador.
     /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern void LibExit();
+    /// <returns>Frequência em Hz</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFuncGenFrequency")]
+    public static extern double GetFuncGenFrequency();
 
     /// <summary>
-    /// Atualiza a lista de dispositivos
+    /// Define a amplitude do gerador de funções.
     /// </summary>
-    /// <returns>Número de dispositivos encontrados</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern int LstUpdate();
+    /// <param name="amplitudeVolts">Amplitude em Volts (0-10V típico)</param>
+    /// <returns>0 se sucesso, código de erro caso contrário</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetFuncGenAmplitude")]
+    public static extern int SetFuncGenAmplitude(double amplitudeVolts);
 
     /// <summary>
-    /// Retorna o número de dispositivos disponíveis
+    /// Obtém a amplitude atual.
     /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern int LstGetCount();
+    /// <returns>Amplitude em Volts</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFuncGenAmplitude")]
+    public static extern double GetFuncGenAmplitude();
 
     /// <summary>
-    /// Abre um dispositivo
+    /// Define o tipo de sinal (waveform).
     /// </summary>
-    /// <param name="dwDeviceType">Tipo de dispositivo</param>
-    /// <param name="dwSerialNumber">Número de série (0 = primeiro disponível)</param>
-    /// <returns>Handle do dispositivo ou 0 se erro</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern IntPtr LstOpenDevice(uint dwDeviceType, uint dwSerialNumber);
+    /// <param name="signalType">Tipo de sinal (0=Sine, 1=Triangle, 2=Square, etc)</param>
+    /// <returns>0 se sucesso, código de erro caso contrário</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetFuncGenSignalType")]
+    public static extern int SetFuncGenSignalType(int signalType);
 
     /// <summary>
-    /// Fecha um dispositivo
+    /// Obtém o tipo de sinal atual.
     /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern void DevClose(IntPtr hDevice);
+    /// <returns>Código do tipo de sinal</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFuncGenSignalType")]
+    public static extern int GetFuncGenSignalType();
+
+    /// <summary>
+    /// Define o offset DC do sinal.
+    /// </summary>
+    /// <param name="offsetVolts">Offset em Volts</param>
+    /// <returns>0 se sucesso</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetFuncGenDCOffset")]
+    public static extern int SetFuncGenDCOffset(double offsetVolts);
+
+    /// <summary>
+    /// Obtém o offset DC atual.
+    /// </summary>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFuncGenDCOffset")]
+    public static extern double GetFuncGenDCOffset();
+
+    /// <summary>
+    /// Define a simetria do sinal (duty cycle para square wave).
+    /// </summary>
+    /// <param name="symmetryPercent">Simetria em % (0-100)</param>
+    /// <returns>0 se sucesso</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetFuncGenSymmetry")]
+    public static extern int SetFuncGenSymmetry(double symmetryPercent);
+
+    /// <summary>
+    /// Obtém a simetria atual.
+    /// </summary>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFuncGenSymmetry")]
+    public static extern double GetFuncGenSymmetry();
 
     #endregion
 
-    #region Configuração do Gerador
+    #region Controle de Emissão (API Inergetix)
 
     /// <summary>
-    /// Define a frequência do sinal
+    /// Ativa ou desativa a saída do gerador.
+    /// CRÍTICO: Deve ser chamado ANTES de iniciar/parar emissão.
     /// </summary>
-    /// <param name="hDevice">Handle do dispositivo</param>
-    /// <param name="dFrequency">Frequência em Hz</param>
-    /// <returns>Frequência real configurada</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern double GenSetFrequency(IntPtr hDevice, double dFrequency);
+    /// <param name="enable">true para ativar, false para desativar</param>
+    /// <returns>0 se sucesso</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetFuncGenOutputOn")]
+    public static extern int SetFuncGenOutputOn([MarshalAs(UnmanagedType.Bool)] bool enable);
 
     /// <summary>
-    /// Obtém a frequência atual
+    /// Verifica se a saída está ativa.
     /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern double GenGetFrequency(IntPtr hDevice);
-
-    /// <summary>
-    /// Define a amplitude do sinal
-    /// </summary>
-    /// <param name="hDevice">Handle do dispositivo</param>
-    /// <param name="dAmplitude">Amplitude em Volts (0-10V)</param>
-    /// <returns>Amplitude real configurada</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern double GenSetAmplitude(IntPtr hDevice, double dAmplitude);
-
-    /// <summary>
-    /// Obtém a amplitude atual
-    /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern double GenGetAmplitude(IntPtr hDevice);
-
-    /// <summary>
-    /// Define o tipo de sinal
-    /// </summary>
-    /// <param name="hDevice">Handle do dispositivo</param>
-    /// <param name="dwSignalType">Tipo de sinal (0=Sine, 1=Triangle, 2=Square, etc)</param>
-    /// <returns>Tipo de sinal real configurado</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern uint GenSetSignalType(IntPtr hDevice, uint dwSignalType);
-
-    /// <summary>
-    /// Obtém o tipo de sinal atual
-    /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern uint GenGetSignalType(IntPtr hDevice);
-
-    /// <summary>
-    /// Define o modo de frequência
-    /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern uint GenSetFrequencyMode(IntPtr hDevice, uint dwFrequencyMode);
-
-    /// <summary>
-    /// Ativa/desativa a saída do gerador
-    /// </summary>
-    /// <param name="hDevice">Handle do dispositivo</param>
-    /// <param name="bEnable">true para ativar, false para desativar</param>
-    /// <returns>true se sucesso</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
+    /// <returns>true se ativa</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFuncGenOutputOn")]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool GenSetOutputOn(IntPtr hDevice, [MarshalAs(UnmanagedType.Bool)] bool bEnable);
+    public static extern bool GetFuncGenOutputOn();
 
     /// <summary>
-    /// Verifica se a saída está ativa
+    /// Ativa/desativa o gerador de funções.
     /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
+    /// <param name="enable">true para ativar</param>
+    /// <returns>0 se sucesso</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetFuncGenEnable")]
+    public static extern int SetFuncGenEnable([MarshalAs(UnmanagedType.Bool)] bool enable);
+
+    /// <summary>
+    /// Verifica se o gerador está ativo.
+    /// </summary>
+    /// <returns>true se ativo</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFuncGenEnable")]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool GenGetOutputOn(IntPtr hDevice);
+    public static extern bool GetFuncGenEnable();
+
+    /// <summary>
+    /// Obtém o status do gerador de funções.
+    /// </summary>
+    /// <returns>Código de status (significado desconhecido)</returns>
+    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetFunctionGenStatus")]
+    public static extern int GetFunctionGenStatus();
 
     #endregion
 
-    #region Controle de Emissão
+    #region Funções Auxiliares (Não Mapeadas - Documentação)
 
-    /// <summary>
-    /// Inicia a geração de sinal
-    /// </summary>
-    /// <param name="hDevice">Handle do dispositivo</param>
-    /// <returns>true se sucesso</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool GenStart(IntPtr hDevice);
-
-    /// <summary>
-    /// Para a geração de sinal
-    /// </summary>
-    /// <param name="hDevice">Handle do dispositivo</param>
-    /// <returns>true se sucesso</returns>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool GenStop(IntPtr hDevice);
-
-    #endregion
-
-    #region Informações do Dispositivo
-
-    /// <summary>
-    /// Obtém o número de série do dispositivo
-    /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern uint DevGetSerialNumber(IntPtr hDevice);
-
-    /// <summary>
-    /// Obtém a versão do firmware
-    /// </summary>
-    [DllImport(HS3_DLL, CallingConvention = CallingConvention.StdCall)]
-    public static extern uint DevGetFirmwareVersion(IntPtr hDevice);
+    // As seguintes funções existem na DLL mas não são usadas nesta implementação:
+    // - ADC_* (funções de aquisição - não necessárias para emissão)
+    // - DoMeasure, GetMeasurement*, etc (medições - fora de escopo)
+    // - I2C* (comunicação I2C - baixo nível)
+    // - SetDigitalOutputs, GetDigitalInputValues (GPIO - não usado)
+    // - FuncGenBurst (modo burst - feature avançada)
+    // - FillFuncGenMemory (arbitrary waveform - não implementado)
+    // - SetTrigger*, GetTrigger* (trigger modes - não necessário)
+    // - SetPXITrigger* (PXI backplane - hardware específico)
 
     #endregion
 }
