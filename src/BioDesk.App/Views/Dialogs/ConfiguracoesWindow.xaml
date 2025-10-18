@@ -16,9 +16,7 @@
     mc:Ignorable="d">
 
     <Window.Resources>
-        <!--  Converters  -->
-        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
-        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        <!--  Converters já definidos no App.xaml: StringToVisibilityConverter, InverseBooleanConverter  -->
 
         <!--  Estilo local para labels  -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">

@@ -213,7 +213,8 @@ public partial class DashboardViewModel : NavigationViewModelBase, IDisposable
                 // Fichas incompletas (pacientes sem todos os dados biográficos)
                 FichasIncompletas = await _cache.GetOrCreateAsync(
                     "Dashboard:FichasIncompletas",
-                    async () => {
+                    async () =>
+                    {
                         var pacientes = await _unitOfWork.Pacientes.GetAllAsync();
                         return System.Linq.Enumerable.Count(pacientes, p =>
                             p.Contacto == null ||

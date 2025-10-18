@@ -15,6 +15,7 @@
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:InvertBoolConverter x:Key="InvertBoolConverter"/>
             <converters:GreaterThanConverter x:Key="GreaterThanConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverterCollapsed"
@@ -24,34 +25,113 @@
             <converters:StringParameterToVisibilityConverter x:Key="StringParameterToVisibilityConverter"/>
             <converters:FlexibleDateConverter x:Key="FlexibleDateConverter"/>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <converters:StringContainsConverter x:Key="StringContainsConverter"/>
 
             <!-- Alias para compatibilidade -->
             <converters:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
-        <!-- Paleta de cores terroso pastel -->
-        <SolidColorBrush x:Key="FundoPrimario">#FCFDFB</SolidColorBrush>
-        <SolidColorBrush x:Key="FundoPrincipal">#FCFDFB</SolidColorBrush>
-        <SolidColorBrush x:Key="FundoSecundario">#F2F5F0</SolidColorBrush>
-        <SolidColorBrush x:Key="FundoCartao">#F7F9F6</SolidColorBrush>
-        <SolidColorBrush x:Key="CartaoBrush">#F7F9F6</SolidColorBrush>
-        <SolidColorBrush x:Key="CorBorda">#E3E9DE</SolidColorBrush>
-        <SolidColorBrush x:Key="BordaBrush">#E3E9DE</SolidColorBrush>
-        <SolidColorBrush x:Key="TextoPrincipal">#3F4A3D</SolidColorBrush>
-        <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
-        <SolidColorBrush x:Key="BotaoPrincipal">#9CAF97</SolidColorBrush>
-        <SolidColorBrush x:Key="BotaoPrimarioBrush">#9CAF97</SolidColorBrush>
-        <SolidColorBrush x:Key="BotaoPrincipalHover">#879B83</SolidColorBrush>
-    <SolidColorBrush x:Key="BotaoHover">#879B83</SolidColorBrush>
-    <SolidColorBrush x:Key="HoverBrush">#EDF2EB</SolidColorBrush>
-    <SolidColorBrush x:Key="DangerBackground">#E96B6B</SolidColorBrush>
-    <SolidColorBrush x:Key="DangerBackgroundHover">#D85A5A</SolidColorBrush>
-    <SolidColorBrush x:Key="DangerForeground">White</SolidColorBrush>
 
-        <!-- Estados dos dispositivos -->
-        <SolidColorBrush x:Key="StatusOnline">#2E7D32</SolidColorBrush>
-        <SolidColorBrush x:Key="StatusEspera">#EF6C00</SolidColorBrush>
-        <SolidColorBrush x:Key="StatusOffline">#C62828</SolidColorBrush>
-        <SolidColorBrush x:Key="StatusNaoDetectado">#9E9E9E</SolidColorBrush>
+            <!-- Converters para terapia CoRe -->
+            <converters:PausedTextConverter x:Key="PausedTextConverter"/>
+            <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
+            <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
+
+            <!-- Paleta de cores terroso pastel -->
+            <SolidColorBrush x:Key="FundoPrimario">#FCFDFB</SolidColorBrush>
+            <SolidColorBrush x:Key="FundoPrincipal">#FCFDFB</SolidColorBrush>
+            <SolidColorBrush x:Key="FundoSecundario">#F2F5F0</SolidColorBrush>
+            <SolidColorBrush x:Key="FundoCartao">#F7F9F6</SolidColorBrush>
+            <SolidColorBrush x:Key="CartaoBrush">#F7F9F6</SolidColorBrush>
+            <SolidColorBrush x:Key="CorBorda">#E3E9DE</SolidColorBrush>
+            <SolidColorBrush x:Key="BordaBrush">#E3E9DE</SolidColorBrush>
+            <SolidColorBrush x:Key="TextoPrincipal">#3F4A3D</SolidColorBrush>
+            <SolidColorBrush x:Key="TextoSecundario">#5A6558</SolidColorBrush>
+            <SolidColorBrush x:Key="BotaoPrincipal">#9CAF97</SolidColorBrush>
+            <SolidColorBrush x:Key="BotaoPrimarioBrush">#9CAF97</SolidColorBrush>
+            <SolidColorBrush x:Key="BotaoPrimario">#9CAF97</SolidColorBrush>
+            <SolidColorBrush x:Key="BotaoPrincipalHover">#879B83</SolidColorBrush>
+            <SolidColorBrush x:Key="BotaoHover">#879B83</SolidColorBrush>
+            <SolidColorBrush x:Key="BotaoPrimarioHover">#879B83</SolidColorBrush>
+            <SolidColorBrush x:Key="HoverBrush">#EDF2EB</SolidColorBrush>
+            <SolidColorBrush x:Key="DangerBackground">#E96B6B</SolidColorBrush>
+            <SolidColorBrush x:Key="DangerBackgroundHover">#D85A5A</SolidColorBrush>
+            <SolidColorBrush x:Key="DangerForeground">White</SolidColorBrush>
+
+            <!-- Estados dos dispositivos -->
+            <SolidColorBrush x:Key="StatusOnline">#2E7D32</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusEspera">#EF6C00</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusOffline">#C62828</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusNaoDetectado">#9E9E9E</SolidColorBrush>
+
+            <!--  Estilos para abas da Ficha de Paciente (migrados de FichaPacienteView.xaml)  -->
+            <!--  Style para separadores INATIVOS - CARTÕES FLUTUANTES MODERNOS  -->
+            <Style x:Key="TabButtonStyle" TargetType="Button">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Offset="0" Color="White" />
+                            <GradientStop Offset="1" Color="#F8FAF7" />
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="{StaticResource TextoSecundario}" />
+                <Setter Property="BorderBrush" Value="#D6E2D3" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="16,12,16,12" />
+                <Setter Property="Margin" Value="4,4,4,0" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="MinWidth" Value="110" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
+                                <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="8" Opacity="0.25" ShadowDepth="2" Color="#C0C8C0" />
+                                </Border.Effect>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0" Color="White" />
+                                                <GradientStop Offset="1" Color="#F0F6EE" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
+                                    <Setter Property="BorderBrush" Value="{StaticResource BotaoPrincipal}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--  Style para separador ATIVO - CARTÃO PREMIUM DESTAQUE  -->
+            <Style x:Key="TabButtonActiveStyle" BasedOn="{StaticResource TabButtonStyle}" TargetType="Button">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Offset="0" Color="#9CAF97" />
+                            <GradientStop Offset="1" Color="#87A082" />
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderBrush" Value="#7A9074" />
+                <Setter Property="BorderThickness" Value="2" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="8,4,8,0" />
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="12" Opacity="0.4" ShadowDepth="3" Color="#9CAF97" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
         <!-- Estilos base -->
         <Style x:Key="CartaoStyle" TargetType="Border">
@@ -370,6 +450,24 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Alias para compatibilidade com código legado (BotaoSecundarioStyle) -->
+        <Style x:Key="BotaoSecundarioStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}"/>
+
+        <!-- Alias para compatibilidade (BotaoPrimarioStyle → PrimaryButtonStyle) -->
+        <Style x:Key="BotaoPrimarioStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}"/>
+
+        <!-- Alias para compatibilidade (LabelStyle → FieldLabelStyle) -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock" BasedOn="{StaticResource FieldLabelStyle}"/>
+
+        <!-- Alias para compatibilidade (TextBoxPadraoStyle → FieldTextBoxStyle) -->
+        <Style x:Key="TextBoxPadraoStyle" TargetType="TextBox" BasedOn="{StaticResource FieldTextBoxStyle}"/>
+
+        <!-- Alias para compatibilidade (ComboBoxPadraoStyle → FieldComboBoxStyle) -->
+        <Style x:Key="ComboBoxPadraoStyle" TargetType="ComboBox" BasedOn="{StaticResource FieldComboBoxStyle}"/>
+
+        <!-- Alias para compatibilidade (ItemCardStyle → ConsultaCard) -->
+        <Style x:Key="ItemCardStyle" TargetType="Border" BasedOn="{StaticResource ConsultaCard}"/>
 
         <!-- Estilo para ações destrutivas (apagar) -->
         <Style x:Key="DangerButtonStyle" TargetType="Button">

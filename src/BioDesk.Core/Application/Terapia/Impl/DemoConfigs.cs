@@ -12,15 +12,16 @@ public static class DemoConfigs
         var anchor = $"{seedSource}:{rngEngine}";
         var seed = SeedProvider.BuildSeed(new SeedInputs(anchor, sessionSalt));
 
+        // NUNCA passar filtro default - sempre null (ViewModels controlam filtros)
         var filter = new ItemFilter(
-            IncludeCategories: new[] { "Florais", "Órgão", "Meridiano", "Chakra", "Vitamina" },
+            IncludeCategories: Array.Empty<string>(),
             ExcludeCategories: Array.Empty<string>());
 
         var validation = new PatternValidationConfig(
             NullModelRuns: 128,
-            MinZ: 1.25,
-            MinScorePercent: 25,
-            MaxQValue: 0.25,
+            MinZ: 0.5,           // Reduzido de 1.25 para permitir mais resultados
+            MinScorePercent: 10,  // Reduzido de 25 para permitir mais resultados
+            MaxQValue: 0.35,      // Aumentado de 0.25 para ser menos restritivo
             Replicas: 3,
             SaltJitter: 0.05);
 

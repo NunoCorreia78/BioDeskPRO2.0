@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
@@ -25,7 +26,6 @@ using BioDesk.ViewModels;
 using BioDesk.ViewModels.Abas;
 using BioDesk.ViewModels.UserControls;
 using BioDesk.ViewModels.UserControls.Terapia;
-using BioDesk.ViewModels.Services.Terapia;
 using BioDesk.Core.Application.Terapia;
 using BioDesk.Core.Application.Terapia.Impl;
 using BioDesk.Services.Core.Infrastructure;
@@ -387,31 +387,59 @@ Inner Exceptions:
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPacienteRepository, PacienteRepository>();
         services.AddScoped<ISessaoRepository, SessaoRepository>();
+        services.AddScoped<ISessionHistoricoRepository, SessionHistoricoRepository>();
         services.AddScoped<BioDesk.Data.Repositories.IProtocoloRepository, BioDesk.Data.Repositories.ProtocoloRepository>();
         services.AddScoped<BioDesk.Data.Repositories.IItemBancoCoreRepository, BioDesk.Data.Repositories.ItemBancoCoreRepository>();
 
-        services.AddSingleton<IActiveListService, ActiveListService>();
         services.AddSingleton<ISeedProvider, SeedProvider>();
         services.AddSingleton<IPatternValidator, PatternValidator>();
         services.AddSingleton<ICoreCatalogProvider, CoreCatalogProvider>();
         services.AddSingleton<IResonanceEngine, ResonanceEngine>();
         services.AddSingleton<IResonantFrequencyFinder, ResonantFrequencyFinder>();
-        
+
         // 📊 ExcelImportService (para importar FrequencyList.xls)
         services.AddSingleton<IExcelImportService, ExcelImportService>();
-        
+
         // 📚 ProgramLibrary com delegate wrapper para evitar dependência circular
         services.AddSingleton<IProgramLibrary>(sp =>
         {
             var excelService = sp.GetRequiredService<IExcelImportService>();
+
+            // Delegate 1: Importação Excel
             Func<string, Task<ExcelImportResultCore>> importFunc = async (path) =>
             {
                 var result = await excelService.ImportAsync(path);
                 return new ExcelImportResultCore(result.Sucesso, result.LinhasOk, result.MensagemErro);
             };
-            return new ProgramLibraryExcel(importFunc);
+
+            // Delegate 2: Pesquisa BD (usa IServiceScopeFactory para DbContext scoped)
+            var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+            Func<string?, Task<List<ProtocoloSimples>>> searchFunc = async (searchTerm) =>
+            {
+                using var scope = scopeFactory.CreateScope();
+                var repo = scope.ServiceProvider.GetRequiredService<BioDesk.Data.Repositories.IProtocoloRepository>();
+
+                List<BioDesk.Domain.Entities.ProtocoloTerapeutico> protocolos;
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    protocolos = await repo.GetAllActiveAsync();
+                }
+                else
+                {
+                    protocolos = await repo.SearchByNameAsync(searchTerm);
+                }
+
+                // Converter para DTO simples (sem dependência de Domain)
+                return protocolos.Select(p => new ProtocoloSimples(
+                    p.Nome,
+                    p.Categoria,
+                    p.FrequenciasJson ?? string.Empty
+                )).ToList();
+            };
+
+            return new ProgramLibraryExcel(importFunc, searchFunc);
         });
-        
+
         services.AddSingleton<IImprovementModel, LogisticImprovementModel>();
         services.AddSingleton<IEmissionDevice, NullInformationalEmitter>();
         services.AddSingleton<IBiofeedbackRunner, BiofeedbackRunner>();
@@ -426,7 +454,15 @@ Inner Exceptions:
         services.AddSingleton<IEmailService, EmailService>();
         services.AddHostedService<EmailQueueProcessor>();
 
-        // === DOCUMENTO SERVICE (gest├úo de pastas por paciente) ===
+        // === FREQUENCY EMISSION SERVICE (Emissão de Frequências via NAudio + WASAPI) ===
+        services.AddSingleton<BioDesk.Services.Audio.IFrequencyEmissionService, BioDesk.Services.Audio.FrequencyEmissionService>();
+        Console.WriteLine("🎵 Frequency Emission Service: REGISTRADO (NAudio + WASAPI)");
+
+        // === TERAPIA STATE SERVICE (Estado compartilhado de volume/forma de onda) ===
+        services.AddSingleton<BioDesk.Services.Audio.ITerapiaStateService, BioDesk.Services.Audio.TerapiaStateService>();
+        Console.WriteLine("⚙️ Terapia State Service: REGISTRADO (Singleton)");
+
+        // === DOCUMENTO SERVICE (gestão de pastas por paciente) ===
         services.AddSingleton<IDocumentoService, DocumentoService>();
         services.AddSingleton<IDocumentosPacienteService, DocumentosPacienteService>();
 
@@ -448,6 +484,9 @@ Inner Exceptions:
 
         // === IRIDOLOGY SERVICE (mapa iridol├│gico + JSON loader) ===
         services.AddSingleton<IIridologyService, IridologyService>();
+
+        // === TIEPIE HS3 SERVICE (emissão de frequências via hs3.dll) ===
+        services.AddSingleton<BioDesk.Services.Hardware.TiePie.ITiePieHS3Service, BioDesk.Services.Hardware.TiePie.TiePieHS3Service>();
 
         // === DEBUG SERVICES ===
         services.AddSingleton<IDragDebugService, DragDebugService>();
@@ -545,6 +584,13 @@ Inner Exceptions:
         services.AddTransient<HistoricoViewModel>();
         services.AddTransient<TerapiaCoreViewModel>();
         services.AddTransient<SelecionarTemplatesViewModel>();
+        services.AddTransient<EmissaoConfiguracaoViewModel>();
+
+        // ViewModels para Windows (modals e histórico)
+        services.AddTransient<BioDesk.ViewModels.Windows.HistoricoViewModel>();
+        services.AddTransient<BioDesk.ViewModels.Windows.TerapiaRemotaViewModel>();
+        services.AddTransient<BioDesk.ViewModels.Windows.TerapiaLocalViewModel>();
+        services.AddTransient<BioDesk.ViewModels.Windows.BiofeedbackSessionViewModel>();
 
         // UserControls (precisam de DI para construtores parametrizados)
         services.AddTransient<Views.Abas.TerapiasBioenergeticasUserControl>(); // Ô£à ABA 8: Terapias
@@ -555,8 +601,8 @@ Inner Exceptions:
         services.AddTransient<Views.ConsultasView>();
         services.AddTransient<Views.Dialogs.ConfiguracoesWindow>(); // Ô£à JANELA CONFIGURA├ç├òES CL├ìNICA
         services.AddTransient<Views.FichaPacienteView>();
-        services.AddTransient<Views.ListaPacientesView>(); // Ô£à LISTA DE PACIENTES
-        services.AddTransient<Views.ConfiguracoesView>(); // Ô£à CONFIGURA├ç├òES
+        services.AddTransient<Views.ListaPacientesView>(); // ✅ LISTA DE PACIENTES
+        services.AddTransient<Views.ConfiguracoesView>(); // ✅ CONFIGURAÇÕES
     }
 }
 

@@ -25,5 +25,8 @@
         <TabItem Header="Historico">
             <views:HistoricoView DataContext="{Binding Historico}" />
         </TabItem>
+        <TabItem Header="⚙️ Configuração">
+            <views:EmissaoConfiguracaoUserControl DataContext="{Binding EmissaoConfiguracao}" />
+        </TabItem>
     </TabControl>
 </UserControl>

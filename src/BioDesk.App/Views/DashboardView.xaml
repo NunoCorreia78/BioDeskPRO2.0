@@ -12,9 +12,7 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <!--  Converters  -->
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+        <!--  Converters já definidos no App.xaml: BooleanToVisibilityConverter, InverseBooleanToVisibilityConverter  -->
 
         <Style x:Key="ActionButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#9CAF97" />
@@ -90,6 +88,7 @@
             Height="60"
             VerticalAlignment="Top"
             Background="Transparent">
+            <!--  Botão Configurações  -->
             <Button
                 x:Name="BtnConfiguracoes"
                 HorizontalAlignment="Right"

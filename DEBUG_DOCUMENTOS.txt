@@ -1,4 +1,4 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-15 21:52:13 ===
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-18 13:10:03 ===
 PacienteId: 4
 NomePaciente: Nuno Filipe Correia
 NomeNormalizado: nunofilipecorreia
@@ -7,10 +7,11 @@ BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes
 Pasta existe? True
 
-Total de pastas em Pacientes/: 5
+Total de pastas em Pacientes/: 6
   - Jorge Maria Barreto Rosado Pereira
   - Luís Manuel Pinguelo Vilhalva
   - Maria João Moacho Boquinhas
+  - Maria Luzia da Silva Batista
   - Nuno Filipe Correia
   - Susana Daniela Silva Freita
 
@@ -19,17 +20,23 @@ Buscando pastas que contenham: 'nunofilipecorreia' OU 'nuno_filipe_correia'
   Pasta 'Jorge Maria Barreto Rosado Pereira' (normalizado: 'jorgemariabarretorosadopereira') → match: False
   Pasta 'Luís Manuel Pinguelo Vilhalva' (normalizado: 'luísmanuelpinguelovilhalva') → match: False
   Pasta 'Maria João Moacho Boquinhas' (normalizado: 'mariajoãomoachoboquinhas') → match: False
+  Pasta 'Maria Luzia da Silva Batista' (normalizado: 'marialuziadasilvabatista') → match: False
   Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: True
   Pasta 'Susana Daniela Silva Freita' (normalizado: 'susanadanielasilvafreita') → match: False
 
 Pastas encontradas para o paciente: 1
 
 📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Nuno Filipe Correia
-  Subpastas: 1
+  Subpastas: 3
+    - Consentimentos
+    - DeclaracoesSaude
     - Prescricoes
-  PDFs encontrados: 3
+  PDFs encontrados: 6
+    ✅ Consentimentos\Consentimento_🌿 Naturopatia - Consulta Geral_Nuno Filipe Correia_20251016_102451.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251016_105325.pdf
     ✅ Prescricoes\Prescricao_20251008_173501.pdf
     ✅ Prescricoes\Prescricao_20251009_112634.pdf
     ✅ Prescricoes\Prescricao_20251009_122522.pdf
+    ✅ Prescricoes\Prescricao_20251016_110917.pdf
 
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 3
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 6
