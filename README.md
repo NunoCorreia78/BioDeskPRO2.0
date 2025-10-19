@@ -125,6 +125,66 @@ dotnet test src/BioDesk.Tests
 - **Run BioDeskPro2**: Executa a aplicação
 - **Test BioDeskPro2**: Executa testes automatizados
 
+## 🔧 Configuração Ambiente Desenvolvimento
+
+### VS Code Shell Integration + GitHub Copilot
+
+Para workflows automáticos com Copilot (ex: "run tests and fix errors"), é necessário ativar **VS Code Shell Integration**.
+
+#### Setup Rápido (Windows PowerShell)
+
+1. **Criar perfil PowerShell** (se não existir):
+   ```powershell
+   New-Item -ItemType File -Path $PROFILE -Force
+   code $PROFILE
+   ```
+
+2. **Colar este código** no perfil (`Microsoft.VSCode_profile.ps1`):
+   ```powershell
+   # VS Code Shell Integration (obrigatório para Copilot ler terminal)
+   if ($env:TERM_PROGRAM -eq "vscode") {
+       $shellIntegrationPath = & code --locate-shell-integration-path pwsh
+       if ($shellIntegrationPath -and (Test-Path $shellIntegrationPath)) {
+           . $shellIntegrationPath
+       }
+   }
+   
+   # PSReadLine para melhor experiência terminal
+   Import-Module PSReadLine -ErrorAction SilentlyContinue
+   
+   # Aliases úteis
+   Set-Alias -Name build -Value dotnet
+   Set-Alias -Name test -Value dotnet
+   ```
+
+3. **Configurar VS Code** (`.vscode/settings.json` já inclui):
+   ```json
+   {
+     "terminal.integrated.shellIntegration.enabled": true,
+     "github.copilot.chat.agent.runTasks": true,
+     "chat.tools.terminal.autoApprove": {
+       "git": true,
+       "/^dotnet( |$)/": true
+     }
+   }
+   ```
+
+4. **Reiniciar terminal** (ou VS Code completo)
+
+#### Verificar se Funciona
+```powershell
+# Deve mostrar variável __VSCodeState
+Get-Variable __VSCodeState
+```
+
+✅ **Com Shell Integration ativa**, o Copilot consegue:
+- Ler output de comandos automaticamente
+- Executar `dotnet build` e analisar erros
+- Correr testes e sugerir fixes
+- Monitorizar git status
+
+📖 **Documentação completa**: Ver `SOLUCAO_SHELL_INTEGRATION_19OUT2025.md` para troubleshooting detalhado.
+
 ## 🧪 Testes Âncora
 
 Os testes definem contratos fundamentais:
