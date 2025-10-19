@@ -1,3 +1,39 @@
+# BioDeskPro2 - Guia rápido para agentes de codificação (IA)
+
+Este cabeçalho contém as instruções mínimas e accionáveis para um agente de codificação ser produtivo rapidamente neste repositório.
+
+- SDK: .NET 8 LTS fixado em `global.json` (8.0.403). Sempre respeitar este SDK quando construir ou executar.
+- Estrutura: solução multi-projeto em `src/` (App, ViewModels, Domain, Data, Services, Tests). Ex.: `src/BioDesk.App` contém o WPF entrypoint e `App.xaml.cs` registra DI.
+
+Regras essenciais (curtas):
+- Sempre usar `PathService` para obter paths (projeto depende fortemente disto; ver regras críticas em `REGRAS_CRITICAS_BD.md`).
+- Antes de navegar para a ficha do paciente: chamar `SetPacienteAtivo(paciente)` e só depois `NavigateTo("FichaPaciente")`.
+- Operações async em ViewModels devem usar `ExecuteWithErrorHandlingAsync(...)` (padrão obrigatório).
+- UI: quando múltiplos UserControls no mesmo Grid, definir `Panel.ZIndex` e `Background="Transparent"` para evitar sobreposição.
+
+Ficheiros/locais chave a usar como referência:
+- `src/BioDesk.App/App.xaml.cs` — bootstrap de DI e registo de serviços (ex.: AddSingleton/Scoped/AddTransient).
+- `src/**/PathService` (classe PathService) — GERENCIAMENTO de caminhos; NUNCA modificar sem backups.
+- `src/BioDesk.Tests/Services/PacienteServiceTests.cs` — exemplos de contratos de comportamento que não podem ser quebrados.
+- `.vscode/settings.json` e `omnisharp.json` — mostram que o projeto usa OmniSharp/Roslyn analyzers e formatação automática.
+
+Comandos essenciais (invocados por tarefas VS Code já existentes):
+```powershell
+dotnet restore
+dotnet build
+dotnet run --project src/BioDesk.App
+dotnet test src/BioDesk.Tests
+```
+
+Extensões recomendadas (mínimo detectável):
+- C# Dev Kit (recomendado no `README.md`) e a extensão C# (ms-dotnettools.csharp) — Omnisharp/formatador.
+- PowerShell (para executar os scripts `.ps1` e tasks locais).
+
+Notas de segurança e estabilidade rápidas:
+- NUNCA alterar `PathService.cs`, `DatabasePath` ou a linha do DbContext em `App.xaml.cs` sem entender o impacto (há regras críticas no repo).
+- Antes de afirmar que um problema está resolvido, executar: `dotnet build` + `dotnet test`.
+
+-- Fim da secção para agentes. O ficheiro continua com documentação humana detalhada abaixo.
 # BioDeskPro2 - Sistema de Gestão Médica
 
 Sistema WPF para gestão clínica com Naturopatia, Osteopatia e Irisdiagnóstico, desenvolvido em C# .NET 8.

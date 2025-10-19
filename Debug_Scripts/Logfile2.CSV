@@ -1,0 +1,3 @@
+﻿"Time of Day","Process Name","PID","Operation","Path","Result","Detail"
+"21:46:35,0248813","InergetixCoRe.exe","8596","Load Image","C:\Program Files (x86)\Inergetix\Inergetix-CoRe 5.0\hs3.dll","SUCCESS","Image Base: 0x20bf0000, Image Size: 0x81000"
+"21:46:35,0260406","InergetixCoRe.exe","8596","Load Image","C:\Program Files (x86)\Inergetix\Inergetix-CoRe 5.0\hs3.dll","SUCCESS","Image Base: 0x20bf0000, Image Size: 0x81000"

@@ -105,7 +105,23 @@ public sealed class TiePieHS3Service : ITiePieHS3Service
                     // Obter número de série (não precisa de handle na API Inergetix)
                     SerialNumber = HS3Native.GetSerialNumber();
 
-                    _logger.LogInformation("[HS3] Device ready. Serial: {Serial}", SerialNumber);
+                    _logger.LogInformation("[HS3] Device initialized. SN: {Serial}", SerialNumber);
+
+                    // 🔍 VALIDAÇÃO FÍSICA DO HARDWARE
+                    // Discovery provou que NÃO existem funções hidden de validação
+                    // Solução: usar error code 0x21600001 (559939585 decimal)
+                    // Este código aparece SEMPRE que hardware não está fisicamente conectado
+                    if (!ValidateHardwareConnection())
+                    {
+                        _logger.LogError("[HS3] ⚠️ HARDWARE NÃO DETECTADO FISICAMENTE!");
+                        _logger.LogError("[HS3] InitInstrument() retornou SN={Serial}, mas hardware não responde a comandos.", SerialNumber);
+                        _logger.LogError("[HS3] Verificar: USB conectado + LED aceso + Drivers instalados");
+
+                        ResetStateOnFailure();
+                        return false;
+                    }
+
+                    _logger.LogInformation("[HS3] ✅ Hardware validado com sucesso!");
 
                     // Configuração inicial: desligar output e definir defaults
                     HS3Native.SetFuncGenOutputOn(false);
@@ -434,6 +450,62 @@ Current Configuration:
         if (_disposed)
         {
             throw new ObjectDisposedException(nameof(TiePieHS3Service));
+        }
+    }
+
+    /// <summary>
+    /// Valida se o hardware HS3 está fisicamente conectado.
+    ///
+    /// CONTEXTO TÉCNICO:
+    /// - InitInstrument() e GetSerialNumber() SEMPRE retornam sucesso (bug da DLL Inergetix)
+    /// - Comandos de configuração retornam 0x21600001 (559939585) quando hardware ausente
+    /// - Discovery provou que NÃO existem funções hidden de validação
+    /// - Esta é a ÚNICA forma confiável de detectar hardware físico
+    /// </summary>
+    private bool ValidateHardwareConnection()
+    {
+        const uint HARDWARE_NOT_PRESENT_ERROR = 0x21600001;  // 559939585 decimal
+
+        try
+        {
+            _logger.LogInformation("[HS3] 🔍 Validating physical hardware connection...");
+
+            // Testar com comando de configuração simples (100 Hz)
+            // Se hardware presente: retorna 0 (sucesso) ou outro código de erro válido
+            // Se hardware ausente: retorna SEMPRE 0x21600001
+            int result = HS3Native.SetFuncGenFrequency(100.0);
+
+            _logger.LogInformation("[HS3] SetFuncGenFrequency(100.0) returned: 0x{ResultHex:X} (decimal: {ResultDec})",
+                (uint)result, result);
+
+            if (result == (int)HARDWARE_NOT_PRESENT_ERROR)
+            {
+                _logger.LogError("[HS3] ❌ Hardware validation FAILED: error code 0x{ErrorCode:X} ({ErrorCode})",
+                    HARDWARE_NOT_PRESENT_ERROR, HARDWARE_NOT_PRESENT_ERROR);
+                _logger.LogError("[HS3] This error code indicates hardware is NOT physically connected.");
+                return false;
+            }
+
+            // Validação secundária: testar comando de amplitude (10 V)
+            int result2 = HS3Native.SetFuncGenAmplitude(10.0);
+
+            _logger.LogInformation("[HS3] SetFuncGenAmplitude(10.0) returned: 0x{ResultHex:X} (decimal: {ResultDec})",
+                (uint)result2, result2);
+
+            if (result2 == (int)HARDWARE_NOT_PRESENT_ERROR)
+            {
+                _logger.LogError("[HS3] ❌ Hardware validation FAILED on secondary test: error code 0x{ErrorCode:X}",
+                    HARDWARE_NOT_PRESENT_ERROR);
+                return false;
+            }
+
+            _logger.LogInformation("[HS3] ✅ Hardware validation PASSED (both commands returned non-error codes)");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[HS3] Exception during hardware validation.");
+            return false;
         }
     }
 }

@@ -42,7 +42,7 @@ O dashboard implementa todas as especificações:
 
 ### Header com Status
 - Indicadores de Online/Offline
-- Estado do Iridoscópio e Osciloscópio  
+- Estado do Iridoscópio e Osciloscópio
 - Relógio e data em tempo real
 
 ### Pesquisa Global
@@ -75,7 +75,7 @@ Botão principal: #9CAF97 (hover #879B83)
 
 Estados dos dispositivos:
 - Online: Verde #2E7D32
-- Espera: Laranja #EF6C00  
+- Espera: Laranja #EF6C00
 - Offline: Vermelho #C62828
 - Não detectado: Cinza #9E9E9E
 
@@ -148,10 +148,10 @@ Para workflows automáticos com Copilot (ex: "run tests and fix errors"), é nec
            . $shellIntegrationPath
        }
    }
-   
+
    # PSReadLine para melhor experiência terminal
    Import-Module PSReadLine -ErrorAction SilentlyContinue
-   
+
    # Aliases úteis
    Set-Alias -Name build -Value dotnet
    Set-Alias -Name test -Value dotnet
@@ -199,7 +199,7 @@ Os testes definem contratos fundamentais:
 ### Seed Inicial
 A aplicação cria automaticamente 3 pacientes de exemplo:
 - Ana Silva (📧 ana.silva@email.com)
-- João Ferreira (📧 joao.ferreira@email.com)  
+- João Ferreira (📧 joao.ferreira@email.com)
 - Maria Costa (📧 maria.costa@email.com)
 
 ### Estrutura Paciente
@@ -230,7 +230,7 @@ public class Paciente
 
 ### Regras Fundamentais
 - ✅ **SEMPRE** verificar erros e debug
-- ✅ **SEMPRE** consultar logs e diagnostics  
+- ✅ **SEMPRE** consultar logs e diagnostics
 - ✅ **SEMPRE** evitar duplicações
 - ✅ **SEMPRE** apagar código obsoleto
 - ✅ **SEMPRE** validar antes de gravar
@@ -243,7 +243,7 @@ public partial class DashboardViewModel : ViewModelBase
 {
     [ObservableProperty]
     private string _pesquisarTexto = string.Empty;
-    
+
     [RelayCommand]
     private async Task PesquisarAsync() { /* ... */ }
 }
@@ -259,7 +259,7 @@ _navigationService.NavigateTo("FichaPaciente");
 ## 📝 Próximos Passos
 
 1. **Ficha do Paciente**: View detalhada com edição
-2. **Lista de Pacientes**: View com pesquisa avançada  
+2. **Lista de Pacientes**: View com pesquisa avançada
 3. **Novo Paciente**: Formulário de criação
 4. **Hardware Integration**: Iridoscópio e Osciloscópio
 5. **Relatórios**: Geração e envio por email
