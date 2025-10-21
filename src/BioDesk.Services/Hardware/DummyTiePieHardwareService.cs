@@ -12,7 +12,6 @@ namespace BioDesk.Services.Hardware;
 public class DummyTiePieHardwareService : ITiePieHardwareService
 {
     private readonly ILogger<DummyTiePieHardwareService> _logger;
-    private bool _isSimulatingSignal = false;
 
     public DummyTiePieHardwareService(ILogger<DummyTiePieHardwareService> logger)
     {
@@ -53,12 +52,8 @@ public class DummyTiePieHardwareService : ITiePieHardwareService
             "🔊 SIMULANDO envio de sinal: {Config}",
             config);
 
-        _isSimulatingSignal = true;
-
         // Simular duração do sinal
         await Task.Delay(TimeSpan.FromSeconds(Math.Min(config.DurationSeconds, 5.0))); // Máx 5s em dummy mode
-
-        _isSimulatingSignal = false;
 
         _logger.LogInformation("✅ Sinal simulado com sucesso");
         return true;
@@ -67,7 +62,6 @@ public class DummyTiePieHardwareService : ITiePieHardwareService
     public Task StopAllChannelsAsync()
     {
         _logger.LogInformation("🛑 SIMULANDO paragem de todos os canais");
-        _isSimulatingSignal = false;
         return Task.CompletedTask;
     }
 

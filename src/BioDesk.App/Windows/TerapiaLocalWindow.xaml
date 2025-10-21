@@ -7,23 +7,30 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:TerapiaLocalViewModel}"
         Title="Terapia Local (Emissão Direta)"
-        Height="600" Width="700"
+        Height="600"
+        Width="700"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource FundoPrincipal}">
 
     <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <!-- Título -->
             <RowDefinition Height="Auto"/>
+            <!-- Controlo Voltagem -->
             <RowDefinition Height="*"/>
+            <!-- Tabela Frequências -->
             <RowDefinition Height="Auto"/>
+            <!-- Progress -->
             <RowDefinition Height="Auto"/>
+            <!-- Botões -->
         </Grid.RowDefinitions>
 
         <!-- Título -->
         <TextBlock Grid.Row="0"
                    Text="Terapia Local - Emissão Direta"
-                   FontSize="24" FontWeight="SemiBold"
+                   FontSize="24"
+                   FontWeight="SemiBold"
                    Foreground="{DynamicResource TextoPrincipal}"
                    Margin="0,0,0,20"/>
 
@@ -36,7 +43,8 @@
                 Margin="0,0,0,20">
             <StackPanel>
                 <TextBlock Text="Controlo de Voltagem"
-                           FontSize="16" FontWeight="SemiBold"
+                           FontSize="16"
+                           FontWeight="SemiBold"
                            Foreground="{DynamicResource TextoPrincipal}"
                            Margin="0,0,0,10"/>
 
@@ -48,7 +56,8 @@
 
                     <!-- Slider GRANDE -->
                     <Slider Grid.Column="0"
-                            Minimum="0" Maximum="12"
+                            Minimum="0"
+                            Maximum="12"
                             Value="{Binding VoltagemV}"
                             TickFrequency="1"
                             TickPlacement="BottomRight"
@@ -58,7 +67,8 @@
                     <!-- Valor numérico GRANDE -->
                     <TextBlock Grid.Column="1"
                                Text="{Binding VoltagemV, StringFormat='{}{0:F1} V'}"
-                               FontSize="32" FontWeight="Bold"
+                               FontSize="32"
+                               FontWeight="Bold"
                                Foreground="#9CAF97"
                                VerticalAlignment="Center"
                                Width="100"
@@ -73,7 +83,8 @@
                 <!-- NOVO: Duração Uniforme -->
                 <Separator Margin="0,5"/>
                 <TextBlock Text="Duração por Frequência (uniforme):"
-                           FontSize="14" FontWeight="SemiBold"
+                           FontSize="14"
+                           FontWeight="SemiBold"
                            Foreground="{DynamicResource TextoPrincipal}"
                            Margin="0,10,0,8"/>
                 <StackPanel Orientation="Horizontal">
@@ -93,16 +104,24 @@
         </Border>
 
         <!-- Tabela de Frequências -->
-        <GroupBox Grid.Row="2" Header="Frequências a Emitir" Margin="0,0,0,20">
+        <GroupBox Grid.Row="2"
+                  Header="Frequências a Emitir"
+                  Margin="0,0,0,20">
             <DataGrid ItemsSource="{Binding Frequencias}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       Background="{DynamicResource Cartao}"
                       BorderBrush="{DynamicResource Borda}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Hz" Binding="{Binding HzFormatted}" Width="*"/>
-                    <DataGridTextColumn Header="Duty" Binding="{Binding DutyFormatted}" Width="80"/>
-                    <DataGridTextColumn Header="Duração" Binding="{Binding DuracaoFormatted}" Width="100"/>
+                    <DataGridTextColumn Header="Hz"
+                                        Binding="{Binding HzFormatted}"
+                                        Width="*"/>
+                    <DataGridTextColumn Header="Duty"
+                                        Binding="{Binding DutyFormatted}"
+                                        Width="80"/>
+                    <DataGridTextColumn Header="Duração"
+                                        Binding="{Binding DuracaoFormatted}"
+                                        Width="100"/>
                 </DataGrid.Columns>
             </DataGrid>
         </GroupBox>
@@ -123,7 +142,8 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0"
                                Text="{Binding HzAtual, StringFormat='Emitindo: {0}'}"
-                               FontSize="16" FontWeight="SemiBold"
+                               FontSize="16"
+                               FontWeight="SemiBold"
                                Foreground="#9CAF97"/>
                     <TextBlock Grid.Column="1"
                                Text="{Binding ProgressoPercent, StringFormat='{}{0:F0}%'}"
@@ -153,10 +173,13 @@
         </Border>
 
         <!-- Botões -->
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
             <Button Content="Iniciar"
                     Command="{Binding IniciarCommand}"
-                    Width="100" Height="40"
+                    Width="100"
+                    Height="40"
                     Background="#9CAF97"
                     Foreground="White"
                     FontWeight="SemiBold"
@@ -165,7 +188,8 @@
 
             <Button Content="{Binding Pausado, Converter={StaticResource PausedTextConverter}}"
                     Command="{Binding PausarCommand}"
-                    Width="100" Height="40"
+                    Width="100"
+                    Height="40"
                     Background="#F0AD4E"
                     Foreground="White"
                     FontWeight="SemiBold"
@@ -174,7 +198,8 @@
 
             <Button Content="Parar"
                     Command="{Binding PararCommand}"
-                    Width="100" Height="40"
+                    Width="100"
+                    Height="40"
                     Background="#D9534F"
                     Foreground="White"
                     FontWeight="SemiBold"
@@ -183,7 +208,8 @@
 
             <Button Content="Fechar"
                     Click="CloseButton_Click"
-                    Width="100" Height="40"
+                    Width="100"
+                    Height="40"
                     Background="{DynamicResource Borda}"
                     Foreground="{DynamicResource TextoPrincipal}"/>
         </StackPanel>

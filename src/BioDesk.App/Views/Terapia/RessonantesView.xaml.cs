@@ -93,10 +93,10 @@ public partial class RessonantesView : UserControl
 
         // Criar parâmetros de terapia
         var parametros = new TerapiaParametros(
-            VoltagemV: TerapiaControlos.VoltagemV,
-            DuracaoTotalMinutos: TerapiaControlos.DuracaoTotalMinutos,
-            TempoFrequenciaSegundos: TerapiaControlos.TempoFrequenciaSegundos,
-            AjusteHz: TerapiaControlos.AjusteHz
+            VoltagemV: TerapiaControlosCompacto.VoltagemV,
+            DuracaoTotalMinutos: (int)TerapiaControlosCompacto.DuracaoTotalMinutos,
+            TempoFrequenciaSegundos: (int)TerapiaControlosCompacto.TempoFrequenciaSegundos,
+            AjusteHz: (int)TerapiaControlosCompacto.AjusteHz
         );
 
         System.Diagnostics.Debug.WriteLine($"📝 RessonantesView: Parâmetros criados - V={parametros.VoltagemV}, Duração={parametros.DuracaoTotalMinutos}min, Tempo/Freq={parametros.TempoFrequenciaSegundos}s");

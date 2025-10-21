@@ -18,6 +18,18 @@ public enum TipoTerapia
 }
 
 /// <summary>
+/// Modo de aplicação da terapia (físico vs informacional/radiônico).
+/// </summary>
+public enum TipoModoAplicacao
+{
+    /// <summary>Modo físico - emissão real de sinais elétricos ao equipamento TiePie HS3.</summary>
+    Fisico = 0,
+
+    /// <summary>Modo informacional/radiônico - sem emissão física, apenas processamento simbólico/energético.</summary>
+    Informacional = 1
+}
+
+/// <summary>
 /// Histórico de sessões de terapia executadas.
 /// </summary>
 public class SessionHistorico
@@ -33,6 +45,12 @@ public class SessionHistorico
 
     /// <summary>Tipo de terapia executada.</summary>
     public TipoTerapia TipoTerapia { get; set; }
+
+    /// <summary>
+    /// Modo de aplicação da terapia (físico vs informacional).
+    /// Default: Fisico (para compatibilidade com registos existentes).
+    /// </summary>
+    public TipoModoAplicacao ModoAplicacao { get; set; } = TipoModoAplicacao.Fisico;
 
     /// <summary>
     /// Protocolos usados (JSON array de strings).

@@ -84,6 +84,14 @@ public partial class BiofeedbackViewModel : ObservableObject, IDisposable
     [ObservableProperty] private int _totalCiclos = 0;
     [ObservableProperty] private double _progressoPercentual = 0;
 
+    // Propriedades para TerapiaProgressoUserControl (REDESIGN 20OUT2025)
+    [ObservableProperty] private double _frequenciaAtualHz = 0;
+    [ObservableProperty] private double _frequenciaOriginalHz = 0;
+    [ObservableProperty] private double _ajusteAplicadoHz = 0;
+    [ObservableProperty] private string _tempoRestanteFormatado = "";
+    [ObservableProperty] private int _frequenciaAtualIndex = 0;
+    [ObservableProperty] private int _totalFrequencias = 1; // Biofeedback: 1 frequência configurada
+
     public bool IsLocalMode => SelectedMode.StartsWith("Local", StringComparison.OrdinalIgnoreCase);
     public bool IsRemoteMode => !IsLocalMode;
 
@@ -176,6 +184,13 @@ public partial class BiofeedbackViewModel : ObservableObject, IDisposable
                     CicloAtualIndex = i;
                     CicloAtual = $"[Sessão {sessaoAtual}] Ciclo {i}/{Cycles} - Scanning...";
 
+                    // ✅ PROPRIEDADES REDESIGN: Frequência configurada
+                    FrequenciaOriginalHz = FrequencyHz;
+                    AjusteAplicadoHz = 0; // Biofeedback não usa ajuste manual
+                    FrequenciaAtualHz = FrequencyHz;
+                    FrequenciaAtualIndex = 1;
+                    TotalFrequencias = 1;
+
                     // Fase 1: Scan (20s) - Detectar frequências ressonantes
                     // TODO: Integrar com IBiofeedbackRunner.ScanAsync()
                     TempoRestanteSegundos = 20;
@@ -220,6 +235,14 @@ public partial class BiofeedbackViewModel : ObservableObject, IDisposable
                         {
                             await Task.Delay(1000, _sessaoCts.Token);
                             TempoRestanteSegundos--;
+
+                            // ✅ REDESIGN: Formatar tempo restante (18min 45s)
+                            int minutos = TempoRestanteSegundos / 60;
+                            int segundos = TempoRestanteSegundos % 60;
+                            TempoRestanteFormatado = minutos > 0
+                                ? $"{minutos}min {segundos}s"
+                                : $"{segundos}s";
+
                             ProgressoPercentual = ((i - 1) * 100.0 / Cycles) +
                                                  ((PerItemSeconds - TempoRestanteSegundos) * 100.0 / (Cycles * PerItemSeconds));
                         }
@@ -238,6 +261,14 @@ public partial class BiofeedbackViewModel : ObservableObject, IDisposable
                         {
                             await Task.Delay(1000, _sessaoCts.Token);
                             TempoRestanteSegundos--;
+
+                            // ✅ REDESIGN: Formatar tempo restante (18min 45s)
+                            int minutos = TempoRestanteSegundos / 60;
+                            int segundos = TempoRestanteSegundos % 60;
+                            TempoRestanteFormatado = minutos > 0
+                                ? $"{minutos}min {segundos}s"
+                                : $"{segundos}s";
+
                             ProgressoPercentual = ((i - 1) * 100.0 / Cycles) +
                                                  ((PerItemSeconds - TempoRestanteSegundos) * 100.0 / (Cycles * PerItemSeconds));
                         }

@@ -78,7 +78,7 @@ Write-Host "  📂 Localização: $backupFolder" -ForegroundColor White
 
 # ===== CRIAR ZIP (OPCIONAL) =====
 Write-Host ""
-$createZip = Read-Host "Criar arquivo ZIP? (S/N)"
+$createZip = Read-Host 'Criar arquivo ZIP? (S/N)'
 
 if ($createZip -eq "S" -or $createZip -eq "s") {
     $zipPath = "$backupFolder.zip"
@@ -104,7 +104,7 @@ $backupsAntigos = Get-ChildItem -Path $backupRoot -Directory |
 
 if ($backupsAntigos) {
     Write-Host "  ⚠️  Encontrados $($backupsAntigos.Count) backups com mais de 5 versões" -ForegroundColor Yellow
-    $limpar = Read-Host "Remover backups antigos? (S/N)"
+    $limpar = Read-Host 'Remover backups antigos? (S/N)'
     
     if ($limpar -eq "S" -or $limpar -eq "s") {
         foreach ($backup in $backupsAntigos) {
@@ -130,4 +130,4 @@ Write-Host "💡 Dica: Execute este script regularmente para manter backups atua
 Write-Host ""
 
 # Pause para ler mensagem
-Read-Host "Pressione ENTER para sair"
+Read-Host 'Pressione ENTER para sair'

@@ -51,10 +51,10 @@ public partial class BiofeedbackView : UserControl
 
         // Criar parâmetros de terapia
         var parametros = new TerapiaParametros(
-            VoltagemV: TerapiaControlos.VoltagemV,
-            DuracaoTotalMinutos: TerapiaControlos.DuracaoTotalMinutos,
-            TempoFrequenciaSegundos: TerapiaControlos.TempoFrequenciaSegundos,
-            AjusteHz: TerapiaControlos.AjusteHz
+            VoltagemV: TerapiaControlosCompacto.VoltagemV,
+            DuracaoTotalMinutos: (int)TerapiaControlosCompacto.DuracaoTotalMinutos,
+            TempoFrequenciaSegundos: (int)TerapiaControlosCompacto.TempoFrequenciaSegundos,
+            AjusteHz: (int)TerapiaControlosCompacto.AjusteHz
         );
 
         // Iniciar sessão diretamente (sem modal) - via comando

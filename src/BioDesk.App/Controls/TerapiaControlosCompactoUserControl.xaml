@@ -1,0 +1,269 @@
+<UserControl x:Class="BioDesk.App.Controls.TerapiaControlosCompactoUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Name="RootControl"
+             d:DesignHeight="120"
+        d:DesignWidth="1200">
+
+    <!-- LAYOUT HORIZONTAL COMPACTO - 2 linhas -->
+    <Border Background="{DynamicResource Cartao}"
+            BorderBrush="{DynamicResource Borda}"
+            BorderThickness="2"
+            CornerRadius="8"
+            Padding="15,10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Linha 1: Controlos -->
+                <RowDefinition Height="10"/>
+                <!-- Espaçamento -->
+                <RowDefinition Height="Auto"/>
+                <!-- Linha 2: Botões -->
+            </Grid.RowDefinitions>
+
+            <!-- LINHA 1: CONTROLOS (4 colunas horizontais) -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <!-- Voltagem -->
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="250"/>
+                    <!-- Duração Total -->
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="220"/>
+                    <!-- Tempo/Freq -->
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <!-- Ajuste Hz -->
+                </Grid.ColumnDefinitions>
+
+                <!-- 1. VOLTAGEM -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="⚡ Voltagem"
+                               FontSize="12"
+                            FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextoPrincipal}"
+                               Margin="0,0,0,3"/>
+                    <ComboBox x:Name="VoltageComboBox"
+                              SelectedValue="{Binding ElementName=RootControl, Path=VoltagemV, Mode=TwoWay}"
+                              SelectedValuePath="Tag"
+                              Height="32"
+                              FontSize="13">
+                        <ComboBoxItem Content="0.0 V"
+                                Tag="0.0"/>
+                        <ComboBoxItem Content="2.5 V"
+                                Tag="2.5"/>
+                        <ComboBoxItem Content="5.0 V"
+                                Tag="5.0"
+                                IsSelected="True"/>
+                        <ComboBoxItem Content="7.5 V"
+                                Tag="7.5"/>
+                        <ComboBoxItem Content="10.0 V"
+                                Tag="10.0"/>
+                        <ComboBoxItem Content="12.0 V"
+                                Tag="12.0"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- 2. DURAÇÃO TOTAL -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="⏱ Duração Total"
+                               FontSize="12"
+                            FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextoPrincipal}"
+                               Margin="0,0,0,3"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Slider x:Name="DuracaoTotalSlider"
+                                Grid.Column="0"
+                                Minimum="5"
+                                Maximum="60"
+                                Value="{Binding ElementName=RootControl, Path=DuracaoTotalMinutos, Mode=TwoWay}"
+                                TickFrequency="5"
+                                IsSnapToTickEnabled="False"
+                                Height="32"
+                                VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ElementName=DuracaoTotalSlider, Path=Value, StringFormat='{}{0:F0} min'}"
+                                   FontSize="14"
+                                FontWeight="Bold"
+                                   Foreground="#9CAF97"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0"
+                                   Width="55"
+                                   TextAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- 3. TEMPO POR FREQUÊNCIA -->
+                <StackPanel Grid.Column="4">
+                    <TextBlock Text="🎵 Tempo/Frequência"
+                               FontSize="12"
+                            FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextoPrincipal}"
+                               Margin="0,0,0,3"/>
+                    <StackPanel Orientation="Horizontal"
+                            Height="32"
+                            VerticalAlignment="Center">
+                        <RadioButton x:Name="Tempo5s"
+                                     Content="5s"
+                                     GroupName="TempoFreq"
+                                     IsChecked="{Binding ElementName=RootControl, Path=TempoFrequenciaSegundos, Converter={StaticResource IntToBoolConverter}, ConverterParameter=5, Mode=TwoWay}"
+                                     Margin="0,0,15,0"
+                                     VerticalAlignment="Center"/>
+                        <RadioButton x:Name="Tempo10s"
+                                     Content="10s"
+                                     GroupName="TempoFreq"
+                                     IsChecked="{Binding ElementName=RootControl, Path=TempoFrequenciaSegundos, Converter={StaticResource IntToBoolConverter}, ConverterParameter=10, Mode=TwoWay}"
+                                     Margin="0,0,15,0"
+                                     VerticalAlignment="Center"/>
+                        <RadioButton x:Name="Tempo15s"
+                                     Content="15s"
+                                     GroupName="TempoFreq"
+                                     IsChecked="{Binding ElementName=RootControl, Path=TempoFrequenciaSegundos, Converter={StaticResource IntToBoolConverter}, ConverterParameter=15, Mode=TwoWay}"
+                                     VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 4. AJUSTE Hz -->
+                <StackPanel Grid.Column="6">
+                    <TextBlock Text="🔧 Ajuste ±Hz"
+                               FontSize="12"
+                            FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextoPrincipal}"
+                               Margin="0,0,0,3"/>
+                    <Grid Height="32">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="±"
+                                   FontSize="16"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"/>
+                        <TextBox x:Name="AjusteHzTextBox"
+                                 Grid.Column="1"
+                                 Text="{Binding ElementName=RootControl, Path=AjusteHz, Mode=TwoWay}"
+                                 FontSize="14"
+                                 Height="32"
+                                 TextAlignment="Center"
+                                 VerticalContentAlignment="Center"
+                                 MaxWidth="80"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="Hz"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Margin="5,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <!-- LINHA 2: BOTÕES AÇÃO (Iniciar + Parar lado a lado) -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <!-- Espaço vazio à direita -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Botão Iniciar (Verde) -->
+                <Button x:Name="IniciarButton"
+                        Grid.Column="0"
+                        Content="{Binding ElementName=RootControl, Path=TextoBotao}"
+                        Click="IniciarButton_Click"
+                        Height="45"
+                        Background="#9CAF97"
+                        Foreground="White"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="6"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                        Value="True">
+                                    <Setter Property="Background"
+                                            Value="#879B83"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled"
+                                        Value="False">
+                                    <Setter Property="Background"
+                                            Value="#CCCCCC"/>
+                                    <Setter Property="Foreground"
+                                            Value="#999999"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <!-- Botão Parar (Vermelho) -->
+                <Button x:Name="PararButton"
+                        Grid.Column="2"
+                        Content="⛔ PARAR"
+                        Click="PararButton_Click"
+                        Height="45"
+                        Background="#D32F2F"
+                        Foreground="White"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="6"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                        Value="True">
+                                    <Setter Property="Background"
+                                            Value="#B71C1C"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled"
+                                        Value="False">
+                                    <Setter Property="Background"
+                                            Value="#CCCCCC"/>
+                                    <Setter Property="Foreground"
+                                            Value="#999999"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

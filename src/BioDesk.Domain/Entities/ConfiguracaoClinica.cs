@@ -48,4 +48,55 @@ public class ConfiguracaoClinica
     /// Data da última atualização dos dados
     /// </summary>
     public DateTime DataAtualizacao { get; set; } = DateTime.Now;
+
+    // ==================== CONFIGURAÇÕES DE TERAPIA ====================
+
+    /// <summary>
+    /// Modo Informacional padrão para novas terapias
+    /// True = aplicar sem equipamento (radiônico)
+    /// False = aplicar com equipamento físico (TiePie HS3)
+    /// </summary>
+    public bool ModoInformacionalPadrao { get; set; } = false;
+
+    /// <summary>
+    /// Voltagem padrão para terapias físicas (V)
+    /// Range: 0.1V - 10V
+    /// </summary>
+    public double VoltageemPadraoV { get; set; } = 5.0;
+
+    /// <summary>
+    /// Corrente máxima padrão para terapias físicas (mA)
+    /// Range: 1mA - 100mA
+    /// </summary>
+    public double CorrenteMaxPadraoma { get; set; } = 50.0;
+
+    /// <summary>
+    /// Duração uniforme padrão por frequência (segundos)
+    /// Opções típicas: 5, 10, 15 segundos
+    /// </summary>
+    public int DuracaoUniformePadraoSegundos { get; set; } = 10;
+
+    /// <summary>
+    /// Alvo de melhoria padrão para auto-stop (%)
+    /// Range: 0-100, típico: 95%
+    /// </summary>
+    public double AlvoMelhoriaPadraoPercent { get; set; } = 95.0;
+
+    // ==================== CONFIGURAÇÕES POR TIPO DE TERAPIA ====================
+
+    /// <summary>
+    /// Configurações específicas para Terapias de Programas (serializado JSON).
+    /// Armazena TerapiaSettings com FormaOnda, Voltagem, Amplitude, Duração, etc.
+    /// </summary>
+    public string? TerapiaProgramasSettingsJson { get; set; }
+
+    /// <summary>
+    /// Configurações específicas para Terapias Ressonantes (serializado JSON).
+    /// </summary>
+    public string? TerapiaRessonantesSettingsJson { get; set; }
+
+    /// <summary>
+    /// Configurações específicas para Terapias de Biofeedback (serializado JSON).
+    /// </summary>
+    public string? TerapiaBiofeedbackSettingsJson { get; set; }
 }

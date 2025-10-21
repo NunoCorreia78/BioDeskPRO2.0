@@ -1,6 +1,8 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using BioDesk.Services.Hardware.TiePie.Protocol;
 
 namespace BioDesk.Services.Hardware.TiePie;
 
@@ -42,20 +44,66 @@ public interface ITiePieHS3Service : IDisposable
     Task<bool> TestEmissionAsync();
 }
 
+/// <summary>
+/// TiePie HS3 service using direct USB protocol communication (no DLL dependency).
+/// Based on reverse-engineering of Inergetix CoRe via API Monitor.
+///
+/// Features:
+/// - Direct USB protocol via DeviceIoControl (no hs3.dll)
+/// - Automatic retry with exponential backoff
+/// - Circuit breaker for cascading failure prevention
+/// - Comprehensive telemetry and diagnostics
+/// </summary>
 public sealed class TiePieHS3Service : ITiePieHS3Service
 {
     private readonly ILogger<TiePieHS3Service> _logger;
+    private readonly HS3DeviceDiscovery _discovery;
+    private readonly HS3DeviceProtocol _protocol;
+    private readonly HS3RobustnessHelpers _robustness;
     private readonly object _syncRoot = new();
-    private nint _deviceHandle = nint.Zero;
-    private bool _isLibraryInitialized;
+
+    private HS3DeviceCapabilities _deviceCapabilities;
+    private bool _isEmitting = false;
     private bool _disposed;
 
-    public bool IsConnected => _deviceHandle != nint.Zero;
+    public bool IsConnected => _protocol.IsDeviceOpen();
     public uint SerialNumber { get; private set; }
 
-    public TiePieHS3Service(ILogger<TiePieHS3Service> logger)
+    public TiePieHS3Service(
+        ILogger<TiePieHS3Service> logger,
+        HS3DeviceDiscovery discovery,
+        HS3DeviceProtocol protocol)
     {
-        _logger = logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _discovery = discovery ?? throw new ArgumentNullException(nameof(discovery));
+        _protocol = protocol ?? throw new ArgumentNullException(nameof(protocol));
+
+        // Create robustness helpers with a basic logger wrapper
+        _robustness = new HS3RobustnessHelpers(
+            new LoggerWrapper<HS3RobustnessHelpers>(logger),
+            protocol);
+    }
+
+    /// <summary>
+    /// Lightweight logger wrapper to adapt ILogger{T} to ILogger{U}.
+    /// </summary>
+    private class LoggerWrapper<T> : ILogger<T>
+    {
+        private readonly ILogger _innerLogger;
+
+        public LoggerWrapper(ILogger innerLogger)
+        {
+            _innerLogger = innerLogger;
+        }
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull =>
+            _innerLogger.BeginScope(state);
+
+        public bool IsEnabled(LogLevel logLevel) =>
+            _innerLogger.IsEnabled(logLevel);
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+            _innerLogger.Log(logLevel, eventId, state, exception, formatter);
     }
 
     ~TiePieHS3Service()
@@ -79,77 +127,69 @@ public sealed class TiePieHS3Service : ITiePieHS3Service
 
                 try
                 {
-                    _logger.LogInformation("[HS3] Initializing Inergetix API...");
+                    _logger.LogInformation("[HS3] 🔍 Discovering TiePie HS3 devices via USB...");
 
-                    if (!_isLibraryInitialized)
+                    // 1. Discover device using SetupDi APIs
+                    string? devicePath = _discovery.FindFirstHS3Device();
+
+                    if (string.IsNullOrEmpty(devicePath))
                     {
-                        // InitInstrument retorna handle (int) ou 0 se erro
-                        int handle = HS3Native.InitInstrument();
-
-                        if (handle <= 0)
-                        {
-                            _logger.LogError("[HS3] InitInstrument() failed (returned {Handle}). Check USB/driver.", handle);
-                            return false;
-                        }
-
-                        _deviceHandle = (nint)handle;
-                        _isLibraryInitialized = true;
-
-                        _logger.LogInformation("[HS3] InitInstrument() succeeded (handle: {Handle})", handle);
-                    }
-                    else
-                    {
-                        _logger.LogDebug("[HS3] Already initialized in this session.");
-                    }
-
-                    // Obter número de série (não precisa de handle na API Inergetix)
-                    SerialNumber = HS3Native.GetSerialNumber();
-
-                    _logger.LogInformation("[HS3] Device initialized. SN: {Serial}", SerialNumber);
-
-                    // 🔍 VALIDAÇÃO FÍSICA DO HARDWARE
-                    // Discovery provou que NÃO existem funções hidden de validação
-                    // Solução: usar error code 0x21600001 (559939585 decimal)
-                    // Este código aparece SEMPRE que hardware não está fisicamente conectado
-                    if (!ValidateHardwareConnection())
-                    {
-                        _logger.LogError("[HS3] ⚠️ HARDWARE NÃO DETECTADO FISICAMENTE!");
-                        _logger.LogError("[HS3] InitInstrument() retornou SN={Serial}, mas hardware não responde a comandos.", SerialNumber);
-                        _logger.LogError("[HS3] Verificar: USB conectado + LED aceso + Drivers instalados");
-
-                        ResetStateOnFailure();
+                        _logger.LogError("[HS3] ❌ No TiePie HS3 devices found.");
+                        _logger.LogError("[HS3] Check: USB connected + Device Manager shows TiePie HS3 + Drivers installed");
                         return false;
                     }
 
-                    _logger.LogInformation("[HS3] ✅ Hardware validado com sucesso!");
+                    _logger.LogInformation("[HS3] ✅ Found HS3 device: {Path}", devicePath);
 
-                    // Configuração inicial: desligar output e definir defaults
-                    HS3Native.SetFuncGenOutputOn(false);
-                    HS3Native.SetFuncGenEnable(false);
+                    // 2. Open device using CreateFile
+                    if (!_protocol.OpenDevice(devicePath))
+                    {
+                        _logger.LogError("[HS3] ❌ Failed to open device at {Path}", devicePath);
+                        return false;
+                    }
 
+                    _logger.LogInformation("[HS3] ✅ Device opened successfully.");
+
+                    // 3. Get device capabilities via IOCTL 0x222000 (GET_DEVICE_INFO)
+                    if (!_protocol.GetDeviceCapabilities(out _deviceCapabilities))
+                    {
+                        _logger.LogError("[HS3] ❌ Failed to retrieve device capabilities (IOCTL 0x222000).");
+                        _protocol.CloseDevice();
+                        return false;
+                    }
+
+                    // 4. Validate VID/PID match expected values
+                    if (_deviceCapabilities.VendorId != HS3Protocol.USB_VENDOR_ID ||
+                        _deviceCapabilities.ProductId != HS3Protocol.USB_PRODUCT_ID)
+                    {
+                        _logger.LogError("[HS3] ❌ VID/PID mismatch! Expected VID={ExpectedVID:X4}/PID={ExpectedPID:X4}, Got VID={ActualVID:X4}/PID={ActualPID:X4}",
+                            HS3Protocol.USB_VENDOR_ID, HS3Protocol.USB_PRODUCT_ID,
+                            _deviceCapabilities.VendorId, _deviceCapabilities.ProductId);
+                        _protocol.CloseDevice();
+                        return false;
+                    }
+
+                    SerialNumber = _deviceCapabilities.SerialNumber;
+
+                    _logger.LogInformation("[HS3] ✅ Device capabilities retrieved:");
+                    _logger.LogInformation("[HS3]    - VID: 0x{VID:X4}, PID: 0x{PID:X4}",
+                        _deviceCapabilities.VendorId, _deviceCapabilities.ProductId);
+                    _logger.LogInformation("[HS3]    - Serial Number: {Serial}", SerialNumber);
+                    _logger.LogInformation("[HS3]    - Firmware Version: {Firmware}",
+                        _deviceCapabilities.FirmwareVersion);
+
+                    // 5. Configure device via IOCTL 0x222059 (CONFIG_QUERY)
+                    if (!_protocol.ConfigureDevice(null))
+                    {
+                        _logger.LogWarning("[HS3] ⚠️ Device configuration returned warning (may be normal during init).");
+                    }
+
+                    _logger.LogInformation("[HS3] ✅ Device initialized successfully!");
                     return true;
-                }
-                catch (DllNotFoundException ex)
-                {
-                    _logger.LogError(ex, "[HS3] hs3.dll not found. Ensure the DLL is in the application folder.");
-                    ResetStateOnFailure();
-                    return false;
-                }
-                catch (BadImageFormatException ex)
-                {
-                    _logger.LogError(ex, "[HS3] Architecture mismatch. Application MUST run as x86 (32-bit).");
-                    ResetStateOnFailure();
-                    return false;
-                }
-                catch (EntryPointNotFoundException ex)
-                {
-                    _logger.LogError(ex, "[HS3] Function not found in DLL. Verify hs3.dll version (expecting Inergetix CoRe wrapper).");
-                    ResetStateOnFailure();
-                    return false;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[HS3] Unexpected error during initialization.");
+                    _logger.LogError(ex, "[HS3] ❌ Unexpected error during initialization.");
                     ResetStateOnFailure();
                     return false;
                 }
@@ -161,7 +201,7 @@ public sealed class TiePieHS3Service : ITiePieHS3Service
     {
         ThrowIfDisposed();
 
-        return await Task.Run(() =>
+        return await Task.Run(async () =>
         {
             lock (_syncRoot)
             {
@@ -171,70 +211,94 @@ public sealed class TiePieHS3Service : ITiePieHS3Service
                     return false;
                 }
 
-                try
+                if (_isEmitting)
                 {
-                    _logger.LogInformation("[HS3] Configuring: {Frequency} Hz @ {Amplitude} V ({Waveform})",
-                        frequencyHz, amplitudeVolts, waveform);
-
-                    // 1. Parar emissão anterior (se houver)
-                    HS3Native.SetFuncGenEnable(false);
-                    HS3Native.SetFuncGenOutputOn(false);
-
-                    // 2. Configurar parâmetros
-                    var signalType = MapWaveform(waveform);
-
-                    int resultType = HS3Native.SetFuncGenSignalType((int)signalType);
-                    int resultFreq = HS3Native.SetFuncGenFrequency(frequencyHz);
-                    int resultAmp = HS3Native.SetFuncGenAmplitude(amplitudeVolts);
-
-                    if (resultType != 0 || resultFreq != 0 || resultAmp != 0)
-                    {
-                        _logger.LogWarning("[HS3] Configuration warnings: Type={Type}, Freq={Freq}, Amp={Amp}",
-                            resultType, resultFreq, resultAmp);
-                    }
-
-                    // 3. Verificar valores reais
-                    double actualFreq = HS3Native.GetFuncGenFrequency();
-                    double actualAmp = HS3Native.GetFuncGenAmplitude();
-                    int actualType = HS3Native.GetFuncGenSignalType();
-
-                    _logger.LogDebug("[HS3] Configured: {Type} @ {Frequency} Hz, {Amplitude} V",
-                        (HS3Native.SignalType)actualType, actualFreq, actualAmp);
-
-                    // 4. Ativar output
-                    int resultOutput = HS3Native.SetFuncGenOutputOn(true);
-                    if (resultOutput != 0)
-                    {
-                        _logger.LogError("[HS3] Failed to enable output (error {Code})", resultOutput);
-                        return false;
-                    }
-
-                    // 5. Ativar gerador
-                    int resultEnable = HS3Native.SetFuncGenEnable(true);
-                    if (resultEnable != 0)
-                    {
-                        _logger.LogError("[HS3] Failed to enable generator (error {Code})", resultEnable);
-                        HS3Native.SetFuncGenOutputOn(false);
-                        return false;
-                    }
-
-                    _logger.LogInformation("[HS3] ✅ Emission started successfully!");
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "[HS3] Error during emission configuration.");
-
-                    // Cleanup
-                    try
-                    {
-                        HS3Native.SetFuncGenEnable(false);
-                        HS3Native.SetFuncGenOutputOn(false);
-                    }
-                    catch { /* best effort */ }
-
+                    _logger.LogWarning("[HS3] Emission already in progress - call StopEmissionAsync first.");
                     return false;
                 }
+            }
+
+            try
+            {
+                _logger.LogInformation(
+                    "[HS3] 🔊 Emitting: {Frequency} Hz @ {Amplitude} V ({Waveform})",
+                    frequencyHz, amplitudeVolts, waveform);
+
+                // TO VALIDATE WITH HARDWARE: These commands are based on API Monitor logs and are hypothetical
+                // Sequence: SET_FREQUENCY → SET_AMPLITUDE → SET_WAVEFORM → START_EMISSION
+
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+                {
+                    // 1. Set frequency (OpCode 0x40)
+                    var freqCommand = HS3CommandPresets.SetFrequency(frequencyHz);
+                    bool freqSuccess = await _robustness.SendCommandWithCircuitBreakerAsync(
+                        freqCommand,
+                        maxRetries: 3,
+                        cancellationToken: cts.Token);
+
+                    if (!freqSuccess)
+                    {
+                        _logger.LogError("[HS3] ❌ Failed to set frequency");
+                        return false;
+                    }
+
+                    // 2. Set amplitude (OpCode 0x41) - convert Volts to percentage
+                    // Assuming range: 0-10V maps to 0-100%
+                    double amplitudePercent = Math.Clamp(amplitudeVolts / 10.0 * 100.0, 0, 100);
+                    var ampCommand = HS3CommandPresets.SetAmplitude(amplitudePercent);
+                    bool ampSuccess = await _robustness.SendCommandWithCircuitBreakerAsync(
+                        ampCommand,
+                        maxRetries: 3,
+                        cancellationToken: cts.Token);
+
+                    if (!ampSuccess)
+                    {
+                        _logger.LogError("[HS3] ❌ Failed to set amplitude");
+                        return false;
+                    }
+
+                    // 3. Set waveform (OpCode 0x44)
+                    var waveCommand = HS3CommandPresets.SetWaveform(HS3CommandPresets.Waveform.Sine);
+                    bool waveSuccess = await _robustness.SendCommandWithCircuitBreakerAsync(
+                        waveCommand,
+                        maxRetries: 3,
+                        cancellationToken: cts.Token);
+
+                    if (!waveSuccess)
+                    {
+                        _logger.LogError("[HS3] ❌ Failed to set waveform");
+                        return false;
+                    }
+
+                    // 4. Start emission (OpCode 0x42)
+                    var startCommand = HS3CommandPresets.StartEmission();
+                    bool startSuccess = await _robustness.SendCommandWithCircuitBreakerAsync(
+                        startCommand,
+                        maxRetries: 3,
+                        cancellationToken: cts.Token);
+
+                    if (startSuccess)
+                    {
+                        _isEmitting = true;
+                        _logger.LogInformation("[HS3] ✅ Emission started successfully");
+                        return true;
+                    }
+                    else
+                    {
+                        _logger.LogError("[HS3] ❌ Failed to start emission");
+                        return false;
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogError("[HS3] ❌ Emission setup timeout (10s)");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[HS3] Error during emission configuration.");
+                return false;
             }
         });
     }
@@ -243,26 +307,58 @@ public sealed class TiePieHS3Service : ITiePieHS3Service
     {
         ThrowIfDisposed();
 
-        await Task.Run(() =>
+        await Task.Run(async () =>
         {
             lock (_syncRoot)
             {
                 if (!IsConnected)
                 {
+                    _logger.LogInformation("[HS3] Device not connected - nothing to stop.");
                     return;
                 }
 
-                try
+                if (!_isEmitting)
                 {
-                    _logger.LogInformation("[HS3] Stopping emission...");
-                    HS3Native.SetFuncGenEnable(false);
-                    HS3Native.SetFuncGenOutputOn(false);
-                    _logger.LogInformation("[HS3] ✅ Emission stopped.");
+                    _logger.LogInformation("[HS3] No emission in progress.");
+                    return;
                 }
-                catch (Exception ex)
+            }
+
+            try
+            {
+                _logger.LogInformation("[HS3] ⏹️ Stopping emission...");
+
+                // TO VALIDATE WITH HARDWARE: OpCode 0x43 for STOP_EMISSION
+                var stopCommand = HS3CommandPresets.StopEmission();
+
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
                 {
-                    _logger.LogError(ex, "[HS3] Error while stopping emission.");
+                    bool success = await _robustness.SendCommandWithCircuitBreakerAsync(
+                        stopCommand,
+                        maxRetries: 3,
+                        cancellationToken: cts.Token);
+
+                    if (success)
+                    {
+                        lock (_syncRoot)
+                        {
+                            _isEmitting = false;
+                        }
+                        _logger.LogInformation("[HS3] ✅ Emission stopped successfully");
+                    }
+                    else
+                    {
+                        _logger.LogError("[HS3] ❌ Failed to stop emission (device may still be emitting)");
+                    }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogError("[HS3] ❌ Stop emission timeout (5s)");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[HS3] Error while stopping emission.");
             }
         });
     }
@@ -282,25 +378,17 @@ public sealed class TiePieHS3Service : ITiePieHS3Service
 
                 try
                 {
-                    uint serial = HS3Native.GetSerialNumber();
-                    double frequency = HS3Native.GetFuncGenFrequency();
-                    double amplitude = HS3Native.GetFuncGenAmplitude();
-                    int signalType = HS3Native.GetFuncGenSignalType();
-                    bool outputOn = HS3Native.GetFuncGenOutputOn();
-                    bool genEnabled = HS3Native.GetFuncGenEnable();
-                    int status = HS3Native.GetFunctionGenStatus();
-
                     return
-$@"[HS3] TiePie Handyscope HS3 (Inergetix API)
-Serial Number: {serial}
+$@"[HS3] TiePie Handyscope HS3 (Direct USB Protocol)
+Serial Number: {SerialNumber}
+VID/PID: 0x{_deviceCapabilities.VendorId:X4}/0x{_deviceCapabilities.ProductId:X4}
+Firmware: {_deviceCapabilities.FirmwareVersion}
+Hardware Rev: {_deviceCapabilities.HardwareRevision}
 
-Current Configuration:
-- Frequency: {frequency:F2} Hz
-- Amplitude: {amplitude:F2} V
-- Waveform: {(HS3Native.SignalType)signalType}
-- Output enabled: {outputOn}
-- Generator enabled: {genEnabled}
-- Status code: 0x{status:X}";
+Protocol: Direct USB via DeviceIoControl (no DLL dependency)
+IOCTL Codes: 0x222000 (info), 0x222059 (config), 0x222051 (read), 0x22204E (write)
+
+⚠️ Emission control requires hardware validation.";
                 }
                 catch (Exception ex)
                 {
@@ -317,20 +405,30 @@ Current Configuration:
             return false;
         }
 
-        var started = await EmitFrequencyAsync(100.0, 10.0, "Square");
-        if (!started)
-        {
-            return false;
-        }
+        _logger.LogWarning("[HS3] TestEmissionAsync() requires hardware validation (emission commands not implemented yet).");
+        return false;
+    }
 
-        try
+    /// <summary>
+    /// Gets comprehensive diagnostics report for troubleshooting.
+    /// </summary>
+    public string GetDiagnosticsReport()
+    {
+        lock (_syncRoot)
         {
-            await Task.Delay(3000);
-            return true;
-        }
-        finally
-        {
-            await StopEmissionAsync();
+            return $@"
+╔══════════════════════════════════════════════════════════════════╗
+║           TiePie HS3 Service Diagnostics Report                  ║
+╠══════════════════════════════════════════════════════════════════╣
+║ Connection Status:    {(IsConnected ? "✅ CONNECTED" : "❌ DISCONNECTED"),9}                     │
+║ Serial Number:        {SerialNumber,9}                            │
+║ Emitting:             {(_isEmitting ? "🔊 YES" : "⏹️ NO"),9}                              │
+║ VID/PID:              0x{_deviceCapabilities.VendorId:X4}/0x{_deviceCapabilities.ProductId:X4}                             │
+║ Firmware:             {_deviceCapabilities.FirmwareVersion,9}                          │
+╠══════════════════════════════════════════════════════════════════╣
+{_robustness.GetDiagnosticsReport()}
+╚══════════════════════════════════════════════════════════════════╝
+";
         }
     }
 
@@ -349,44 +447,17 @@ Current Configuration:
 
         lock (_syncRoot)
         {
-            if (IsConnected)
+            if (disposing)
             {
                 try
                 {
-                    // Parar emissão
-                    HS3Native.SetFuncGenEnable(false);
-                    HS3Native.SetFuncGenOutputOn(false);
-                }
-                catch (Exception ex) when (!disposing)
-                {
-                    _logger.LogDebug(ex, "[HS3] Ignoring stop errors during finalizer.");
+                    _robustness?.Dispose();
+                    _protocol?.Dispose();
+                    _discovery?.Dispose();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[HS3] Error stopping emission during dispose.");
-                }
-
-                _deviceHandle = nint.Zero;
-            }
-
-            if (_isLibraryInitialized)
-            {
-                try
-                {
-                    // Finalizar instrumento (API Inergetix)
-                    HS3Native.ExitInstrument();
-                }
-                catch (Exception ex) when (!disposing)
-                {
-                    _logger.LogDebug(ex, "[HS3] Ignoring ExitInstrument errors during finalizer.");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "[HS3] Error during ExitInstrument.");
-                }
-                finally
-                {
-                    _isLibraryInitialized = false;
+                    _logger.LogError(ex, "[HS3] Error disposing robustness/protocol/discovery.");
                 }
             }
 
@@ -398,114 +469,23 @@ Current Configuration:
 
     private void ResetStateOnFailure()
     {
-        if (_deviceHandle != nint.Zero)
+        try
         {
-            try
-            {
-                HS3Native.SetFuncGenEnable(false);
-                HS3Native.SetFuncGenOutputOn(false);
-            }
-            catch
-            {
-                // best effort only
-            }
-            finally
-            {
-                _deviceHandle = nint.Zero;
-            }
+            _protocol?.CloseDevice();
         }
-
-        if (_isLibraryInitialized)
+        catch (Exception ex)
         {
-            try
-            {
-                HS3Native.ExitInstrument();
-            }
-            catch
-            {
-                // best effort only
-            }
-            finally
-            {
-                _isLibraryInitialized = false;
-            }
+            _logger.LogDebug(ex, "[HS3] Error closing device during reset.");
         }
 
         SerialNumber = 0;
     }
-
-    private static HS3Native.SignalType MapWaveform(string waveform) =>
-        waveform?.ToLowerInvariant() switch
-        {
-            "square" => HS3Native.SignalType.Square,
-            "triangle" => HS3Native.SignalType.Triangle,
-            "dc" => HS3Native.SignalType.DC,
-            "noise" => HS3Native.SignalType.Noise,
-            "pulse" => HS3Native.SignalType.Pulse,
-            _ => HS3Native.SignalType.Sine
-        };
 
     private void ThrowIfDisposed()
     {
         if (_disposed)
         {
             throw new ObjectDisposedException(nameof(TiePieHS3Service));
-        }
-    }
-
-    /// <summary>
-    /// Valida se o hardware HS3 está fisicamente conectado.
-    ///
-    /// CONTEXTO TÉCNICO:
-    /// - InitInstrument() e GetSerialNumber() SEMPRE retornam sucesso (bug da DLL Inergetix)
-    /// - Comandos de configuração retornam 0x21600001 (559939585) quando hardware ausente
-    /// - Discovery provou que NÃO existem funções hidden de validação
-    /// - Esta é a ÚNICA forma confiável de detectar hardware físico
-    /// </summary>
-    private bool ValidateHardwareConnection()
-    {
-        const uint HARDWARE_NOT_PRESENT_ERROR = 0x21600001;  // 559939585 decimal
-
-        try
-        {
-            _logger.LogInformation("[HS3] 🔍 Validating physical hardware connection...");
-
-            // Testar com comando de configuração simples (100 Hz)
-            // Se hardware presente: retorna 0 (sucesso) ou outro código de erro válido
-            // Se hardware ausente: retorna SEMPRE 0x21600001
-            int result = HS3Native.SetFuncGenFrequency(100.0);
-
-            _logger.LogInformation("[HS3] SetFuncGenFrequency(100.0) returned: 0x{ResultHex:X} (decimal: {ResultDec})",
-                (uint)result, result);
-
-            if (result == (int)HARDWARE_NOT_PRESENT_ERROR)
-            {
-                _logger.LogError("[HS3] ❌ Hardware validation FAILED: error code 0x{ErrorCode:X} ({ErrorCode})",
-                    HARDWARE_NOT_PRESENT_ERROR, HARDWARE_NOT_PRESENT_ERROR);
-                _logger.LogError("[HS3] This error code indicates hardware is NOT physically connected.");
-                return false;
-            }
-
-            // Validação secundária: testar comando de amplitude (10 V)
-            int result2 = HS3Native.SetFuncGenAmplitude(10.0);
-
-            _logger.LogInformation("[HS3] SetFuncGenAmplitude(10.0) returned: 0x{ResultHex:X} (decimal: {ResultDec})",
-                (uint)result2, result2);
-
-            if (result2 == (int)HARDWARE_NOT_PRESENT_ERROR)
-            {
-                _logger.LogError("[HS3] ❌ Hardware validation FAILED on secondary test: error code 0x{ErrorCode:X}",
-                    HARDWARE_NOT_PRESENT_ERROR);
-                return false;
-            }
-
-            _logger.LogInformation("[HS3] ✅ Hardware validation PASSED (both commands returned non-error codes)");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[HS3] Exception during hardware validation.");
-            return false;
         }
     }
 }

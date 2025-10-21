@@ -49,6 +49,12 @@ public partial class RessonantesViewModel : ObservableObject, IDisposable
     [ObservableProperty] private int _totalFrequencias = 0;
     [ObservableProperty] private double _progressoPercentual = 0;
 
+    // Propriedades para TerapiaProgressoUserControl (REDESIGN 20OUT2025)
+    [ObservableProperty] private double _frequenciaAtualHz = 0;
+    [ObservableProperty] private double _frequenciaOriginalHz = 0;
+    [ObservableProperty] private double _ajusteAplicadoHz = 0;
+    [ObservableProperty] private string _tempoRestanteFormatado = "";
+
     public ObservableCollection<SweepPointVM> SweepResults { get; } = new();
     public ObservableCollection<SweepPointVM> SelectedPoints { get; } = new(); // Seleção múltipla
 
@@ -185,7 +191,13 @@ public partial class RessonantesViewModel : ObservableObject, IDisposable
                     }
 
                     FrequenciaAtualIndex++;
-                    FrequenciaAtual = $"[Ciclo {cicloAtual}] {ponto.Hz:F2} Hz (Score: {ponto.Score:F1}%)";
+
+                    // ✅ PROPRIEDADES REDESIGN: Frequência com variação
+                    FrequenciaOriginalHz = ponto.Hz;
+                    AjusteAplicadoHz = parametros.AjusteHz;
+                    FrequenciaAtualHz = ponto.Hz + parametros.AjusteHz; // Frequência real emitida
+                    FrequenciaAtual = $"[Ciclo {cicloAtual}] {FrequenciaAtualHz:F2} Hz (Score: {ponto.Score:F1}%)";
+
                     TempoRestanteSegundos = parametros.TempoFrequenciaSegundos;
 
                     System.Diagnostics.Debug.WriteLine($"🎯 Freq {FrequenciaAtualIndex}/{TotalFrequencias}: {FrequenciaAtual}, Tempo: {TempoRestanteSegundos}s");
@@ -216,6 +228,14 @@ public partial class RessonantesViewModel : ObservableObject, IDisposable
                         {
                             await Task.Delay(1000, _terapiaCts.Token);
                             TempoRestanteSegundos--;
+
+                            // ✅ REDESIGN: Formatar tempo restante (18min 45s)
+                            int minutos = TempoRestanteSegundos / 60;
+                            int segundos = TempoRestanteSegundos % 60;
+                            TempoRestanteFormatado = minutos > 0
+                                ? $"{minutos}min {segundos}s"
+                                : $"{segundos}s";
+
                             ponto.TempoRestante = TempoRestanteSegundos;
                             ponto.ProgressoIndividual = ((parametros.TempoFrequenciaSegundos - TempoRestanteSegundos) * 100.0) / parametros.TempoFrequenciaSegundos;
                             ProgressoPercentual = ((FrequenciaAtualIndex - 1) * 100.0 / TotalFrequencias) +
@@ -236,6 +256,14 @@ public partial class RessonantesViewModel : ObservableObject, IDisposable
                         {
                             await Task.Delay(1000, _terapiaCts.Token);
                             TempoRestanteSegundos--;
+
+                            // ✅ REDESIGN: Formatar tempo restante (18min 45s)
+                            int minutos = TempoRestanteSegundos / 60;
+                            int segundos = TempoRestanteSegundos % 60;
+                            TempoRestanteFormatado = minutos > 0
+                                ? $"{minutos}min {segundos}s"
+                                : $"{segundos}s";
+
                             ponto.TempoRestante = TempoRestanteSegundos;
                             ponto.ProgressoIndividual = ((parametros.TempoFrequenciaSegundos - TempoRestanteSegundos) * 100.0) / parametros.TempoFrequenciaSegundos;
                             ProgressoPercentual = ((FrequenciaAtualIndex - 1) * 100.0 / TotalFrequencias) +

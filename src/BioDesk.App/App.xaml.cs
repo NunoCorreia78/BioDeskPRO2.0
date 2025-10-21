@@ -482,10 +482,14 @@ Inner Exceptions:
         // === CAMERA SERVICE (captura REAL de ├¡ris via USB com AForge.NET) ===
         services.AddSingleton<ICameraService, RealCameraService>();
 
-        // === IRIDOLOGY SERVICE (mapa iridol├│gico + JSON loader) ===
+        // === IRIDOLOGY SERVICE (mapa iridológico + JSON loader) ===
         services.AddSingleton<IIridologyService, IridologyService>();
 
-        // === TIEPIE HS3 SERVICE (emissão de frequências via hs3.dll) ===
+        // === TIEPIE HS3 SERVICE (emissão de frequências via protocolo USB direto) ===
+        // Camada de protocolo USB (discovery + communication)
+        services.AddSingleton<BioDesk.Services.Hardware.TiePie.Protocol.HS3DeviceDiscovery>();
+        services.AddSingleton<BioDesk.Services.Hardware.TiePie.Protocol.HS3DeviceProtocol>();
+        // Serviço principal (usa discovery + protocol)
         services.AddSingleton<BioDesk.Services.Hardware.TiePie.ITiePieHS3Service, BioDesk.Services.Hardware.TiePie.TiePieHS3Service>();
 
         // === DEBUG SERVICES ===
