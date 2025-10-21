@@ -1,4 +1,4 @@
-<Window
+﻿<Window
     x:Class="BioDesk.App.Views.Dialogs.ConfiguracoesWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
-    Title="Configurações da Clínica"
+    Title="ConfiguraÃ§Ãµes da ClÃ­nica"
     Width="700"
     Height="650"
     d:DataContext="{d:DesignInstance Type=viewmodels:ConfiguracaoClinicaViewModel}"
@@ -16,7 +16,7 @@
     mc:Ignorable="d">
 
     <Window.Resources>
-        <!--  Converters já definidos no App.xaml: StringToVisibilityConverter, InverseBooleanConverter  -->
+        <!--  Converters jÃ¡ definidos no App.xaml: StringToVisibilityConverter, InverseBooleanConverter  -->
 
         <!--  Estilo local para labels  -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
@@ -30,28 +30,28 @@
     <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <!--  Título  -->
+            <!--  TÃ­tulo  -->
             <RowDefinition Height="*" />
-            <!--  Conteúdo  -->
+            <!--  ConteÃºdo  -->
             <RowDefinition Height="Auto" />
-            <!--  Botões  -->
+            <!--  BotÃµes  -->
         </Grid.RowDefinitions>
 
-        <!--  Título  -->
+        <!--  TÃ­tulo  -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
             <TextBlock
                 FontSize="24"
                 FontWeight="Bold"
                 Foreground="#3F4A3D"
-                Text="Configurações da Clínica" />
+                Text="ConfiguraÃ§Ãµes da ClÃ­nica" />
             <TextBlock
                 Margin="0,5,0,0"
                 FontSize="13"
                 Foreground="#5A6558"
-                Text="Configure os dados da clínica que aparecerão nos documentos e PDFs" />
+                Text="Configure os dados da clÃ­nica que aparecerÃ£o nos documentos e PDFs" />
         </StackPanel>
 
-        <!--  TabControl para organizar configurações  -->
+        <!--  TabControl para organizar configuraÃ§Ãµes  -->
         <TabControl
             Grid.Row="1"
             Margin="0,0,0,20"
@@ -78,12 +78,12 @@
                 </Style>
             </TabControl.Resources>
 
-            <!--  TAB 1: Dados da Clínica  -->
-            <TabItem Header="Dados da Clínica">
+            <!--  TAB 1: Dados da ClÃ­nica  -->
+            <TabItem Header="Dados da ClÃ­nica">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
-                        <!--  Nome da Clínica  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Nome da Clínica *" />
+                        <!--  Nome da ClÃ­nica  -->
+                        <TextBlock Style="{StaticResource LabelStyle}" Text="Nome da ClÃ­nica *" />
                         <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding NomeClinica, UpdateSourceTrigger=PropertyChanged}" />
 
                         <!--  Morada  -->
@@ -111,7 +111,7 @@
                         <TextBlock
                             Margin="0,10,0,8"
                             Style="{StaticResource LabelStyle}"
-                            Text="Logo da Clínica" />
+                            Text="Logo da ClÃ­nica" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -152,7 +152,7 @@
                                 </Grid>
                             </Border>
 
-                            <!--  Botão selecionar logo  -->
+                            <!--  BotÃ£o selecionar logo  -->
                             <Button
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
@@ -165,13 +165,13 @@
                             Margin="0,5,0,0"
                             FontSize="12"
                             Foreground="#5A6558"
-                            Text="Formatos suportados: PNG, JPG, JPEG (máx. 2MB)" />
+                            Text="Formatos suportados: PNG, JPG, JPEG (mÃ¡x. 2MB)" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
-            <!--  TAB 2: Configurações de Email  -->
-            <TabItem Header="Configurações de Email">
+            <!--  TAB 2: ConfiguraÃ§Ãµes de Email  -->
+            <TabItem Header="ConfiguraÃ§Ãµes de Email">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
                         <!--  Servidor SMTP  -->
@@ -204,16 +204,16 @@
                             Padding="10,8"
                             PasswordChanged="SmtpPasswordBox_PasswordChanged"
                             Style="{StaticResource FieldPasswordBoxStyle}"
-                            ToolTip="Para Gmail, use App Password (senha de aplicação)" />
+                            ToolTip="Para Gmail, use App Password (senha de aplicaÃ§Ã£o)" />
 
                         <!--  Nome do remetente  -->
                         <TextBlock Style="{StaticResource LabelStyle}" Text="Nome do Remetente *" />
                         <TextBox
                             Style="{StaticResource FieldTextBoxStyle}"
                             Text="{Binding SmtpFromName, UpdateSourceTrigger=PropertyChanged}"
-                            ToolTip="Nome que aparecerá como remetente" />
+                            ToolTip="Nome que aparecerÃ¡ como remetente" />
 
-                        <!--  Informação sobre Gmail App Password  -->
+                        <!--  InformaÃ§Ã£o sobre Gmail App Password  -->
                         <Border
                             Margin="0,10,0,20"
                             Padding="12"
@@ -226,18 +226,18 @@
                                     FontSize="13"
                                     FontWeight="SemiBold"
                                     Foreground="#8B7500"
-                                    Text="ℹ️ Como configurar Gmail:" />
+                                    Text="â„¹ï¸ Como configurar Gmail:" />
                                 <TextBlock
                                     Margin="0,5,0,0"
                                     FontSize="12"
                                     Foreground="#5A6558"
-                                    Text="1. Ative a verificação em 2 passos na sua conta Google"
+                                    Text="1. Ative a verificaÃ§Ã£o em 2 passos na sua conta Google"
                                     TextWrapping="Wrap" />
                                 <TextBlock
                                     Margin="0,2,0,0"
                                     FontSize="12"
                                     Foreground="#5A6558"
-                                    Text="2. Vá a: Conta Google &gt; Segurança &gt; Senhas de aplicações"
+                                    Text="2. VÃ¡ a: Conta Google &gt; SeguranÃ§a &gt; Senhas de aplicaÃ§Ãµes"
                                     TextWrapping="Wrap" />
                                 <TextBlock
                                     Margin="0,2,0,0"
@@ -248,14 +248,14 @@
                             </StackPanel>
                         </Border>
 
-                        <!--  Botão testar conexão  -->
+                        <!--  BotÃ£o testar conexÃ£o  -->
                         <Button
                             Margin="0,10,0,0"
                             HorizontalAlignment="Left"
                             Command="{Binding TestarConexaoCommand}"
-                            Content="🔌 Testar Conexão SMTP"
+                            Content="ðŸ”Œ Testar ConexÃ£o SMTP"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            ToolTip="Envia um email de teste para verificar as configurações" />
+                            ToolTip="Envia um email de teste para verificar as configuraÃ§Ãµes" />
 
                         <!--  Mensagem de sucesso do teste  -->
                         <TextBlock
@@ -269,10 +269,10 @@
             </TabItem>
 
             <!--  TAB 3: Documentos & Templates  -->
-            <TabItem Header="📁 Documentos">
+            <TabItem Header="ðŸ“ Documentos">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
-                        <!--  Secção Templates PDF  -->
+                        <!--  SecÃ§Ã£o Templates PDF  -->
                         <Border
                             Margin="0,0,0,20"
                             Padding="20"
@@ -285,19 +285,19 @@
                                     <TextBlock
                                         Margin="0,0,10,0"
                                         FontSize="18"
-                                        Text="📄" />
+                                        Text="ðŸ“„" />
                                     <TextBlock
                                         FontSize="16"
                                         FontWeight="SemiBold"
                                         Foreground="{StaticResource TextoPrincipal}"
-                                        Text="Templates PDF para Prescrições" />
+                                        Text="Templates PDF para PrescriÃ§Ãµes" />
                                 </StackPanel>
 
                                 <TextBlock
                                     Margin="0,0,0,15"
                                     FontSize="12"
                                     Foreground="{StaticResource TextoSecundario}"
-                                    Text="Ficheiros PDF usados como base para prescrições naturopáticas"
+                                    Text="Ficheiros PDF usados como base para prescriÃ§Ãµes naturopÃ¡ticas"
                                     TextWrapping="Wrap" />
 
                                 <Button
@@ -313,7 +313,7 @@
                                         <TextBlock
                                             Margin="0,0,8,0"
                                             FontSize="16"
-                                            Text="➕" />
+                                            Text="âž•" />
                                         <TextBlock FontSize="14" Text="Adicionar Template PDF" />
                                     </StackPanel>
                                     <Button.Style>
@@ -339,18 +339,30 @@
                                         <TextBlock
                                             Margin="0,0,0,8"
                                             FontWeight="SemiBold"
-                                            Text="📂 Templates Encontrados:" />
+                                            Text="ðŸ“‚ Templates Encontrados:" />
+                                        <ItemsControl ItemsSource="{Binding TemplatesPdf}" Margin="0,0,0,8">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="• "/>
+                                                        <TextBlock Text="{Binding Nome}"/>
+                                                        <TextBlock Text="  ("/>
+                                                        <TextBlock Text="{Binding TamanhoFormatado}"/>
+                                                        <TextBlock Text=")"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                         <TextBlock
                                             FontSize="12"
-                                            FontStyle="Italic"
                                             Foreground="#999"
-                                            Text="(Lista de templates será implementada em versão futura)" />
+                                            Text="(Procura em Templates/PDFs e Templates/)" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
                         </Border>
 
-                        <!--  Secção Logos e Assinaturas  -->
+                        <!--  SecÃ§Ã£o Logos e Assinaturas  -->
                         <Border
                             Padding="20"
                             Background="White"
@@ -362,7 +374,7 @@
                                     <TextBlock
                                         Margin="0,0,10,0"
                                         FontSize="18"
-                                        Text="🖼️" />
+                                        Text="ðŸ–¼ï¸" />
                                     <TextBlock
                                         FontSize="16"
                                         FontWeight="SemiBold"
@@ -374,7 +386,7 @@
                                     Margin="0,0,0,15"
                                     FontSize="12"
                                     Foreground="{StaticResource TextoSecundario}"
-                                    Text="Imagens usadas em cabeçalhos de documentos (logo, assinatura digital)"
+                                    Text="Imagens usadas em cabeÃ§alhos de documentos (logo, assinatura digital)"
                                     TextWrapping="Wrap" />
 
                                 <Border
@@ -387,11 +399,11 @@
                                         <TextBlock
                                             Margin="0,0,8,0"
                                             FontSize="14"
-                                            Text="ℹ️" />
+                                            Text="â„¹ï¸" />
                                         <TextBlock
                                             FontSize="11"
                                             Foreground="#92400E"
-                                            Text="Configure o logo da clínica na aba 'Dados da Clínica' acima"
+                                            Text="Configure o logo da clÃ­nica na aba 'Dados da ClÃ­nica' acima"
                                             TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Border>
@@ -402,7 +414,7 @@
             </TabItem>
 
             <!--  TAB 4: BACKUPS  -->
-            <TabItem Header="💾 Backups">
+            <TabItem Header="ðŸ’¾ Backups">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
                         <TextBlock
@@ -410,7 +422,7 @@
                             FontSize="18"
                             FontWeight="SemiBold"
                             Foreground="{StaticResource TextoPrincipal}"
-                            Text="💾 Gestão de Backups" />
+                            Text="ðŸ’¾ GestÃ£o de Backups" />
 
                         <!--  Criar Backup  -->
                         <Border
@@ -425,7 +437,7 @@
                                     Margin="0,0,0,10"
                                     FontSize="15"
                                     FontWeight="SemiBold"
-                                    Text="📦 Criar Backup" />
+                                    Text="ðŸ“¦ Criar Backup" />
                                 <TextBlock
                                     Margin="0,0,0,15"
                                     FontSize="12"
@@ -436,13 +448,13 @@
                                     <Button
                                         Padding="12,8"
                                         Command="{Binding CriarBackupCommand}"
-                                        Content="💾 Criar Backup Agora"
+                                        Content="ðŸ’¾ Criar Backup Agora"
                                         Style="{StaticResource PrimaryButtonStyle}" />
                                     <Button
                                         Margin="10,0,0,0"
                                         Padding="12,8"
                                         Command="{Binding AbrirPastaBackupsCommand}"
-                                        Content="📂 Abrir Pasta"
+                                        Content="ðŸ“‚ Abrir Pasta"
                                         Style="{StaticResource SecondaryButtonStyle}" />
                                 </StackPanel>
                             </StackPanel>
@@ -462,7 +474,7 @@
                                         FontSize="18"
                                         FontWeight="Bold"
                                         Foreground="#F57C00"
-                                        Text="⚠️ " />
+                                        Text="âš ï¸ " />
                                     <TextBlock
                                         FontSize="15"
                                         FontWeight="SemiBold"
@@ -473,12 +485,12 @@
                                     Margin="0,0,0,15"
                                     FontSize="12"
                                     Foreground="#BF360C"
-                                    Text="ATENÇÃO: Restaurar irá SUBSTITUIR todos os dados atuais!"
+                                    Text="ATENÃ‡ÃƒO: Restaurar irÃ¡ SUBSTITUIR todos os dados atuais!"
                                     TextWrapping="Wrap" />
                                 <Button
                                     Padding="12,8"
                                     Command="{Binding RestaurarBackupCommand}"
-                                    Content="📥 Restaurar Backup..."
+                                    Content="ðŸ“¥ Restaurar Backup..."
                                     Style="{StaticResource SecondaryButtonStyle}" />
                             </StackPanel>
                         </Border>
@@ -495,12 +507,12 @@
                                     <TextBlock
                                         FontSize="15"
                                         FontWeight="SemiBold"
-                                        Text="📋 Backups Disponíveis" />
+                                        Text="ðŸ“‹ Backups DisponÃ­veis" />
                                     <Button
                                         Margin="10,0,0,0"
                                         Padding="6,4"
                                         Command="{Binding AtualizarListaBackupsCommand}"
-                                        Content="🔄"
+                                        Content="ðŸ”„"
                                         Style="{StaticResource SecondaryButtonStyle}" />
                                 </StackPanel>
                                 <DataGrid
@@ -528,7 +540,7 @@
                                     Margin="0,10,0,0"
                                     FontSize="11"
                                     Foreground="#666"
-                                    Text="💡 Os backups são criados automaticamente ao fechar a aplicação" />
+                                    Text="ðŸ’¡ Os backups sÃ£o criados automaticamente ao fechar a aplicaÃ§Ã£o" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -536,7 +548,7 @@
             </TabItem>
         </TabControl>
 
-        <!--  Botões de ação  -->
+        <!--  BotÃµes de aÃ§Ã£o  -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -553,7 +565,7 @@
                 Text="{Binding ErrorMessage}"
                 Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
 
-            <!--  Botão Cancelar  -->
+            <!--  BotÃ£o Cancelar  -->
             <Button
                 Grid.Column="1"
                 Margin="0,0,10,0"
@@ -561,7 +573,7 @@
                 Content="Cancelar"
                 Style="{StaticResource SecondaryButtonStyle}" />
 
-            <!--  Botão Guardar  -->
+            <!--  BotÃ£o Guardar  -->
             <Button
                 Grid.Column="2"
                 Command="{Binding GuardarCommand}"

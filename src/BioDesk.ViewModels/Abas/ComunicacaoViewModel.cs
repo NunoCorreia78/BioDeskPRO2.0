@@ -21,14 +21,14 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BioDesk.ViewModels.Abas;
 
 /// <summary>
-/// ViewModel para Aba 5: Comunicação & Seguimento
-/// Suporta envio de emails offline com fila automática
+/// ViewModel para Aba 5: ComunicaÃ§Ã£o & Seguimento
+/// Suporta envio de emails offline com fila automÃ¡tica
 /// </summary>
 public partial class ComunicacaoViewModel : ViewModelBase
 {
     private readonly ILogger<ComunicacaoViewModel> _logger;
     private readonly IEmailService _emailService;
-    private readonly IServiceScopeFactory _scopeFactory; // ⭐ CORREÇÃO: Usa scope factory para DbContext isolado
+    private readonly IServiceScopeFactory _scopeFactory; // â­ CORREÃ‡ÃƒO: Usa scope factory para DbContext isolado
     private readonly IDocumentoService _documentoService;
     private readonly IDocumentosPacienteService _documentosPacienteService;
     private readonly ITemplatesPdfService _templatesPdfService;
@@ -37,7 +37,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<Comunicacao> _historicoComunicacoes = new();
 
     /// <summary>
-    /// Informação do cabeçalho do histórico
+    /// InformaÃ§Ã£o do cabeÃ§alho do histÃ³rico
     /// </summary>
     public int TotalEnviados => HistoricoComunicacoes?.Count(c => c.Status == StatusComunicacao.Enviado) ?? 0;
 
@@ -65,7 +65,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Notifica UI quando o histórico muda
+    /// Notifica UI quando o histÃ³rico muda
     /// </summary>
     partial void OnHistoricoComunicacoesChanged(ObservableCollection<Comunicacao> value)
     {
@@ -73,12 +73,12 @@ public partial class ComunicacaoViewModel : ViewModelBase
         OnPropertyChanged(nameof(ProximoAgendamento));
     }
 
-    // ⭐ NOVO: Gestão de documentos do paciente
+    // â­ NOVO: GestÃ£o de documentos do paciente
     [ObservableProperty] private ObservableCollection<DocumentoPacienteViewModel> _documentosPaciente = new();
     [ObservableProperty] private bool _carregandoDocumentos = false;
     [ObservableProperty] private string _statusDocumentos = "Nenhum documento encontrado";
 
-    // Formulário de envio
+    // FormulÃ¡rio de envio
     [ObservableProperty] private TipoComunicacao _tipoSelecionado = TipoComunicacao.Email;
     [ObservableProperty] private string _destinatario = string.Empty;
 
@@ -90,14 +90,14 @@ public partial class ComunicacaoViewModel : ViewModelBase
         if (value?.Contacto != null && !string.IsNullOrWhiteSpace(value.Contacto.EmailPrincipal))
         {
             Destinatario = value.Contacto.EmailPrincipal;
-            _logger.LogInformation("📧 Auto-preenchido email do paciente: {Email}", Destinatario);
+            _logger.LogInformation("ðŸ“§ Auto-preenchido email do paciente: {Email}", Destinatario);
         }
         else
         {
-            _logger.LogWarning("⚠️ Paciente sem email no contacto");
+            _logger.LogWarning("âš ï¸ Paciente sem email no contacto");
         }
 
-        // ⭐ NOVO: Carregar documentos do paciente automaticamente
+        // â­ NOVO: Carregar documentos do paciente automaticamente
         if (value != null)
         {
             _ = CarregarDocumentosPacienteAsync();
@@ -111,15 +111,15 @@ public partial class ComunicacaoViewModel : ViewModelBase
     [ObservableProperty] private string _assunto = string.Empty;
     [ObservableProperty] private string _corpo = string.Empty;
 
-    // ⭐ Agendamento de envio do email
+    // â­ Agendamento de envio do email
     [ObservableProperty] private bool _agendarEnvio = false;
-    [ObservableProperty] private DateTime _dataEnvioAgendado = DateTime.Now.AddDays(1).Date.AddHours(9); // Amanhã às 9h por padrão
+    [ObservableProperty] private DateTime _dataEnvioAgendado = DateTime.Now.AddDays(1).Date.AddHours(9); // AmanhÃ£ Ã s 9h por padrÃ£o
 
-    // ⭐ NOVO: Gestão de anexos
+    // â­ NOVO: GestÃ£o de anexos
     [ObservableProperty] private ObservableCollection<string> _anexos = new();
     [ObservableProperty] private string _statusAnexos = string.Empty;
 
-    // Estatísticas
+    // EstatÃ­sticas
     [ObservableProperty] private int _totalEmails;
     [ObservableProperty] private int _totalSMS;
     [ObservableProperty] private int _totalChamadas;
@@ -132,9 +132,9 @@ public partial class ComunicacaoViewModel : ViewModelBase
     // Templates
     public ObservableCollection<string> Templates { get; } = new()
     {
-        "Envio de Documentos", // ⭐ NOVO: Template para anexar documentos
-        "Prescrição",
-        "Confirmação de Consulta",
+        "Envio de Documentos", // â­ NOVO: Template para anexar documentos
+        "PrescriÃ§Ã£o",
+        "ConfirmaÃ§Ã£o de Consulta",
         "Follow-up",
         "Lembrete",
         "Personalizado"
@@ -145,7 +145,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
     public ComunicacaoViewModel(
         ILogger<ComunicacaoViewModel> logger,
         IEmailService emailService,
-        IServiceScopeFactory scopeFactory, // ⭐ CORREÇÃO: Scope factory para DbContext isolado
+        IServiceScopeFactory scopeFactory, // â­ CORREÃ‡ÃƒO: Scope factory para DbContext isolado
         IDocumentoService documentoService,
         IDocumentosPacienteService documentosPacienteService,
         ITemplatesPdfService templatesPdfService)
@@ -161,11 +161,11 @@ public partial class ComunicacaoViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// ⭐ CORREÇÃO: Task de background para verificar conexão
+    /// â­ CORREÃ‡ÃƒO: Task de background para verificar conexÃ£o
     /// </summary>
     private void IniciarMonitorConexao()
     {
-        // ⭐ CORREÇÃO: Verificar conexão E recarregar histórico a cada 30 segundos
+        // â­ CORREÃ‡ÃƒO: Verificar conexÃ£o E recarregar histÃ³rico a cada 30 segundos
         Task.Run(async () =>
         {
             while (true)
@@ -175,7 +175,7 @@ public partial class ComunicacaoViewModel : ViewModelBase
                     TemConexao = _emailService.TemConexao;
                     MensagensNaFila = await _emailService.ContarMensagensNaFilaAsync();
 
-                    // ⭐ NOVO: Recarregar histórico para ver emails enviados pelo processador em background
+                    // â­ NOVO: Recarregar histÃ³rico para ver emails enviados pelo processador em background
                     if (PacienteAtual != null)
                     {
                         // Precisa ser executado na UI thread por causa da ObservableCollection
@@ -184,12 +184,12 @@ public partial class ComunicacaoViewModel : ViewModelBase
                             await CarregarHistoricoAsync();
                         });
 
-                        _logger.LogDebug("🔄 Histórico recarregado automaticamente");
+                        _logger.LogDebug("ðŸ”„ HistÃ³rico recarregado automaticamente");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Erro ao atualizar status de conexão/histórico");
+                    _logger.LogError(ex, "Erro ao atualizar status de conexÃ£o/histÃ³rico");
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(30));
@@ -201,12 +201,12 @@ public partial class ComunicacaoViewModel : ViewModelBase
     {
         if (PacienteAtual == null) return;
 
-        // ⭐ CORREÇÃO: Preencher ASSUNTO automaticamente
+        // â­ CORREÃ‡ÃƒO: Preencher ASSUNTO automaticamente
         Assunto = value switch
         {
-            "Envio de Documentos" => "Documentação Anexa", // ⭐ NOVO
-            "Prescrição" => "Prescrição de Tratamento",
-            "Confirmação de Consulta" => "Confirmação de Consulta",
+            "Envio de Documentos" => "DocumentaÃ§Ã£o Anexa", // â­ NOVO
+            "PrescriÃ§Ã£o" => "PrescriÃ§Ã£o de Tratamento",
+            "ConfirmaÃ§Ã£o de Consulta" => "ConfirmaÃ§Ã£o de Consulta",
             "Follow-up" => "Acompanhamento de Tratamento",
             "Lembrete" => "Lembrete",
             _ => string.Empty
@@ -214,33 +214,33 @@ public partial class ComunicacaoViewModel : ViewModelBase
 
         Corpo = value switch
         {
-            "Envio de Documentos" => $@"Olá {PacienteAtual.NomeCompleto},
+            "Envio de Documentos" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
 
-Conforme solicitado, segue em anexo a documentação necessária.
+Conforme solicitado, segue em anexo a documentaÃ§Ã£o necessÃ¡ria.
 
-Se tiver alguma dúvida, estou à disposição.
-
-Cumprimentos,
-
-Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina Bioenergética
-📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
-🌿 Cuidar de si, naturalmente",
-
-            "Prescrição" => $@"Olá {PacienteAtual.NomeCompleto},
-
-Conforme conversado na consulta, segue em anexo a prescrição recomendada.
-
-Qualquer dúvida, estou à disposição.
+Se tiver alguma dÃºvida, estou Ã  disposiÃ§Ã£o.
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina Bioenergética
-📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
-🌿 Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
+ðŸŒ¿ Cuidar de si, naturalmente",
 
-            "Confirmação de Consulta" => $@"Olá {PacienteAtual.NomeCompleto},
+            "PrescriÃ§Ã£o" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+
+Conforme conversado na consulta, segue em anexo a prescriÃ§Ã£o recomendada.
+
+Qualquer dÃºvida, estou Ã  disposiÃ§Ã£o.
+
+Cumprimentos,
+
+Nuno Correia - Terapias Naturais
+Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
+ðŸŒ¿ Cuidar de si, naturalmente",
+
+            "ConfirmaÃ§Ã£o de Consulta" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
 
 Confirmamos a sua consulta para [DATA/HORA].
 
@@ -249,40 +249,40 @@ Em caso de necessidade de reagendar, por favor contacte-nos.
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina Bioenergética
-📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
-🌿 Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
+ðŸŒ¿ Cuidar de si, naturalmente",
 
-            "Follow-up" => $@"Olá {PacienteAtual.NomeCompleto},
+            "Follow-up" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
 
-Como está a decorrer o tratamento? Sente melhorias?
+Como estÃ¡ a decorrer o tratamento? Sente melhorias?
 
-Estou disponível para qualquer esclarecimento.
+Estou disponÃ­vel para qualquer esclarecimento.
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina Bioenergética
-📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
-🌿 Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
+ðŸŒ¿ Cuidar de si, naturalmente",
 
-            "Lembrete" => $@"Olá {PacienteAtual.NomeCompleto},
+            "Lembrete" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
 
 Lembrete: [DETALHE DO LEMBRETE]
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina Bioenergética
-📧 nunocorreiaterapiasnaturais@gmail.com | 📞 +351 964 860 387
-🌿 Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
+ðŸŒ¿ Cuidar de si, naturalmente",
 
             _ => string.Empty
         };
     }
 
     /// <summary>
-    /// ⭐ NOVO: Anexar ficheiro ao email
+    /// â­ NOVO: Anexar ficheiro ao email
     /// </summary>
     [RelayCommand]
     private void AnexarFicheiro()
@@ -303,7 +303,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                     if (!Anexos.Contains(file))
                     {
                         Anexos.Add(file);
-                        _logger.LogInformation("📎 Anexo adicionado: {File}", file);
+                        _logger.LogInformation("ðŸ“Ž Anexo adicionado: {File}", file);
                     }
                 }
 
@@ -318,14 +318,14 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     }
 
     /// <summary>
-    /// ⭐ NOVO: Remover anexo da lista
+    /// â­ NOVO: Remover anexo da lista
     /// </summary>
     [RelayCommand]
     private void RemoverAnexo(string caminhoFicheiro)
     {
         Anexos.Remove(caminhoFicheiro);
         AtualizarStatusAnexos();
-        _logger.LogInformation("🗑️ Anexo removido: {File}", caminhoFicheiro);
+        _logger.LogInformation("ðŸ—‘ï¸ Anexo removido: {File}", caminhoFicheiro);
     }
 
     [RelayCommand]
@@ -339,42 +339,42 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 return;
             }
 
-            // Validações
+            // ValidaÃ§Ãµes
             if (string.IsNullOrWhiteSpace(Destinatario))
             {
-                ErrorMessage = "Email do destinatário é obrigatório!";
+                ErrorMessage = "Email do destinatÃ¡rio Ã© obrigatÃ³rio!";
                 return;
             }
 
-            // ⭐ Validar formato de email (apenas warning, não bloqueia)
+            // â­ Validar formato de email (apenas warning, nÃ£o bloqueia)
             if (!IsValidEmail(Destinatario))
             {
-                _logger.LogWarning("⚠️ Email com formato suspeito: {Email}", Destinatario);
+                _logger.LogWarning("âš ï¸ Email com formato suspeito: {Email}", Destinatario);
                 // Continua mesmo assim (pode ser email interno/teste)
             }
 
             if (string.IsNullOrWhiteSpace(Assunto))
             {
-                ErrorMessage = "Assunto é obrigatório!";
+                ErrorMessage = "Assunto Ã© obrigatÃ³rio!";
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(Corpo))
             {
-                ErrorMessage = "Corpo da mensagem é obrigatório!";
+                ErrorMessage = "Corpo da mensagem Ã© obrigatÃ³rio!";
                 return;
             }
 
             IsLoading = true;
 
-            // ⭐ NOVO: Verificar se deve agendar o envio para data futura
+            // â­ NOVO: Verificar se deve agendar o envio para data futura
             if (AgendarEnvio && DataEnvioAgendado > DateTime.Now)
             {
-                // ⭐ CORREÇÃO: Usar scope isolado para DbContext
+                // â­ CORREÃ‡ÃƒO: Usar scope isolado para DbContext
                 using var scope = _scopeFactory.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
 
-                // AGENDAR para envio futuro (não enviar imediatamente)
+                // AGENDAR para envio futuro (nÃ£o enviar imediatamente)
                 var comunicacaoAgendada = new Comunicacao
                 {
                     PacienteId = PacienteAtual.Id,
@@ -387,14 +387,14 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                     IsEnviado = false,
                     DataCriacao = DateTime.Now,
                     DataEnvio = null,
-                    ProximaTentativa = DataEnvioAgendado, // ⭐ Data escolhida pelo utilizador
+                    ProximaTentativa = DataEnvioAgendado, // â­ Data escolhida pelo utilizador
                     TentativasEnvio = 0,
                     UltimoErro = null
                 };
 
                 await dbContext.Comunicacoes.AddAsync(comunicacaoAgendada);
 
-                // ⭐ CRÍTICO: Salvar primeiro para obter ID
+                // â­ CRÃTICO: Salvar primeiro para obter ID
                 await dbContext.SaveChangesAsync();
 
                 // Gravar anexos na BD (agora com ID correto)
@@ -402,7 +402,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 {
                     var anexo = new AnexoComunicacao
                     {
-                        ComunicacaoId = comunicacaoAgendada.Id, // ⭐ Agora tem ID válido
+                        ComunicacaoId = comunicacaoAgendada.Id, // â­ Agora tem ID vÃ¡lido
                         CaminhoArquivo = caminhoFicheiro,
                         NomeArquivo = System.IO.Path.GetFileName(caminhoFicheiro),
                         TamanhoBytes = new System.IO.FileInfo(caminhoFicheiro).Length,
@@ -420,29 +420,29 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 var tempoDiferenca = DataEnvioAgendado - DateTime.Now;
                 string mensagemTempo = tempoDiferenca.TotalHours < 24
                     ? $"em {(int)tempoDiferenca.TotalHours}h"
-                    : DataEnvioAgendado.ToString("dd/MM às HH:mm");
+                    : DataEnvioAgendado.ToString("dd/MM Ã s HH:mm");
 
-                SuccessMessage = $"📅 Email agendado para envio {mensagemTempo}";
-                _logger.LogInformation("📅 Email ID {Id} agendado para {Data}", comunicacaoAgendada.Id, DataEnvioAgendado);
+                SuccessMessage = $"ðŸ“… Email agendado para envio {mensagemTempo}";
+                _logger.LogInformation("ðŸ“… Email ID {Id} agendado para {Data}", comunicacaoAgendada.Id, DataEnvioAgendado);
 
-                // Limpar formulário
+                // Limpar formulÃ¡rio
                 Assunto = string.Empty;
                 Corpo = string.Empty;
-                TemplateSelecionado = "Personalizado"; // ⭐ CORREÇÃO: Limpar dropdown
+                TemplateSelecionado = "Personalizado"; // â­ CORREÃ‡ÃƒO: Limpar dropdown
                 AgendarEnvio = false;
                 DataEnvioAgendado = DateTime.Now.AddDays(1).Date.AddHours(9);
                 Anexos.Clear();
                 StatusAnexos = string.Empty;
 
-                // Recarregar histórico
+                // Recarregar histÃ³rico
                 await CarregarHistoricoAsync();
 
                 IsLoading = false;
-                return; // ⭐ IMPORTANTE: Não continuar para envio imediato
+                return; // â­ IMPORTANTE: NÃ£o continuar para envio imediato
             }
 
-            // ⚡ ENVIO IMEDIATO (código original)
-            // Isso evita duplicação pelo EmailProcessorService background task
+            // âš¡ ENVIO IMEDIATO (cÃ³digo original)
+            // Isso evita duplicaÃ§Ã£o pelo EmailProcessorService background task
             var emailMessage = new EmailMessage
             {
                 To = Destinatario,
@@ -455,11 +455,11 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             var resultado = await _emailService.EnviarAsync(emailMessage);
 
-            // ⭐ CORREÇÃO: Usar scope isolado para DbContext
+            // â­ CORREÃ‡ÃƒO: Usar scope isolado para DbContext
             using var scope2 = _scopeFactory.CreateScope();
             var dbContext2 = scope2.ServiceProvider.GetRequiredService<BioDeskDbContext>();
 
-            // Criar comunicação na DB com STATUS CORRETO desde o início
+            // Criar comunicaÃ§Ã£o na DB com STATUS CORRETO desde o inÃ­cio
             var comunicacao = new Comunicacao
             {
                 PacienteId = PacienteAtual.Id,
@@ -479,7 +479,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             await dbContext2.Comunicacoes.AddAsync(comunicacao);
 
-            // ⭐ CRÍTICO: Salvar primeiro para obter ID da comunicação
+            // â­ CRÃTICO: Salvar primeiro para obter ID da comunicaÃ§Ã£o
             await dbContext2.SaveChangesAsync();
 
             // Gravar anexos na BD (agora com ID correto)
@@ -487,7 +487,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
             {
                 var anexo = new AnexoComunicacao
                 {
-                    ComunicacaoId = comunicacao.Id, // ⭐ Agora tem ID válido
+                    ComunicacaoId = comunicacao.Id, // â­ Agora tem ID vÃ¡lido
                     CaminhoArquivo = caminhoFicheiro,
                     NomeArquivo = System.IO.Path.GetFileName(caminhoFicheiro),
                     TamanhoBytes = new System.IO.FileInfo(caminhoFicheiro).Length,
@@ -505,31 +505,31 @@ Naturopatia - Osteopatia - Medicina Bioenergética
             // Mensagem de feedback conforme resultado
             if (resultado.Sucesso)
             {
-                SuccessMessage = "✅ Email enviado com sucesso!";
-                _logger.LogInformation("✅ Email ID {Id} enviado IMEDIATAMENTE (Status={Status})", comunicacao.Id, comunicacao.Status);
+                SuccessMessage = "âœ… Email enviado com sucesso!";
+                _logger.LogInformation("âœ… Email ID {Id} enviado IMEDIATAMENTE (Status={Status})", comunicacao.Id, comunicacao.Status);
             }
             else
             {
                 if (resultado.AdicionadoNaFila)
                 {
-                    SuccessMessage = "⚠️ Sem conexão. Email agendado para envio automático.";
-                    _logger.LogWarning("⚠️ Email ID {Id} agendado (sem rede, Status={Status})", comunicacao.Id, comunicacao.Status);
+                    SuccessMessage = "âš ï¸ Sem conexÃ£o. Email agendado para envio automÃ¡tico.";
+                    _logger.LogWarning("âš ï¸ Email ID {Id} agendado (sem rede, Status={Status})", comunicacao.Id, comunicacao.Status);
                 }
                 else
                 {
-                    SuccessMessage = $"⚠️ Erro ao enviar. Email agendado para retry em 2 minutos.";
-                    _logger.LogWarning("⚠️ Email ID {Id} agendado para retry (erro: {Error}, Status={Status})", comunicacao.Id, resultado.Mensagem, comunicacao.Status);
+                    SuccessMessage = $"âš ï¸ Erro ao enviar. Email agendado para retry em 2 minutos.";
+                    _logger.LogWarning("âš ï¸ Email ID {Id} agendado para retry (erro: {Error}, Status={Status})", comunicacao.Id, resultado.Mensagem, comunicacao.Status);
                 }
             }
 
-            // Limpar formulário
+            // Limpar formulÃ¡rio
             Assunto = string.Empty;
             Corpo = string.Empty;
-            TemplateSelecionado = "Personalizado"; // ⭐ CORREÇÃO: Limpar dropdown
-            Anexos.Clear(); // ⭐ Limpar anexos
+            TemplateSelecionado = "Personalizado"; // â­ CORREÃ‡ÃƒO: Limpar dropdown
+            Anexos.Clear(); // â­ Limpar anexos
             StatusAnexos = string.Empty;
 
-            // Recarregar histórico
+            // Recarregar histÃ³rico
             await CarregarHistoricoAsync();
 
             IsLoading = false;
@@ -538,31 +538,31 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     }
 
     /// <summary>
-    /// ⭐ NOVO: Cancelar email agendado (impede envio automático)
+    /// â­ NOVO: Cancelar email agendado (impede envio automÃ¡tico)
     /// </summary>
     [RelayCommand]
     private async Task CancelarEmailAsync(Comunicacao comunicacao)
     {
         if (comunicacao == null)
         {
-            ErrorMessage = "❌ Nenhuma comunicação selecionada!";
+            ErrorMessage = "âŒ Nenhuma comunicaÃ§Ã£o selecionada!";
             return;
         }
 
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            _logger.LogInformation("🚫 Tentando cancelar email ID {Id} com status {Status}", comunicacao.Id, comunicacao.Status);
+            _logger.LogInformation("ðŸš« Tentando cancelar email ID {Id} com status {Status}", comunicacao.Id, comunicacao.Status);
 
             if (comunicacao.Status != StatusComunicacao.Agendado)
             {
-                ErrorMessage = $"❌ Apenas emails 'Agendados' podem ser cancelados!\n\nStatus atual: {comunicacao.Status}";
-                _logger.LogWarning("⚠️ Email ID {Id} não pode ser cancelado (Status: {Status})", comunicacao.Id, comunicacao.Status);
+                ErrorMessage = $"âŒ Apenas emails 'Agendados' podem ser cancelados!\nStatus atual: {comunicacao.Status}";
+                _logger.LogWarning("âš ï¸ Email ID {Id} nÃ£o pode ser cancelado (Status: {Status})", comunicacao.Id, comunicacao.Status);
                 return;
             }
 
             IsLoading = true;
 
-            // ⭐ CORREÇÃO: Usar scope isolado para DbContext
+            // â­ CORREÃ‡ÃƒO: Usar scope isolado para DbContext
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
 
@@ -571,8 +571,8 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             if (comunicacaoDb == null)
             {
-                ErrorMessage = "❌ Email não encontrado na base de dados!";
-                _logger.LogError("Email ID {Id} não encontrado na BD", comunicacao.Id);
+                ErrorMessage = "âŒ Email nÃ£o encontrado na base de dados!";
+                _logger.LogError("Email ID {Id} nÃ£o encontrado na BD", comunicacao.Id);
                 IsLoading = false;
                 return;
             }
@@ -581,10 +581,10 @@ Naturopatia - Osteopatia - Medicina Bioenergética
             comunicacaoDb.UltimoErro = "Cancelado pelo utilizador";
             await dbContext.SaveChangesAsync();
 
-            SuccessMessage = "✅ Email cancelado com sucesso!";
-            _logger.LogInformation("✅ Email ID {Id} cancelado pelo utilizador", comunicacao.Id);
+            SuccessMessage = "âœ… Email cancelado com sucesso!";
+            _logger.LogInformation("âœ… Email ID {Id} cancelado pelo utilizador", comunicacao.Id);
 
-            // Recarregar histórico
+            // Recarregar histÃ³rico
             await CarregarHistoricoAsync();
 
             IsLoading = false;
@@ -603,7 +603,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     }
 
     /// <summary>
-    /// ⭐ NOVO: Abre pasta documental do paciente
+    /// â­ NOVO: Abre pasta documental do paciente
     /// </summary>
     [RelayCommand]
     private async Task AbrirPastaPacienteAsync()
@@ -618,13 +618,13 @@ Naturopatia - Osteopatia - Medicina Bioenergética
         {
             IsLoading = true;
             await _documentoService.AbrirPastaPacienteAsync(PacienteAtual.Id, PacienteAtual.NomeCompleto);
-            _logger.LogInformation("📂 Pasta aberta para paciente {Id}", PacienteAtual.Id);
+            _logger.LogInformation("ðŸ“‚ Pasta aberta para paciente {Id}", PacienteAtual.Id);
             IsLoading = false;
         }, "Erro ao abrir pasta do paciente", _logger);
     }
 
     /// <summary>
-    /// ⭐ NOVO: Adiciona anexo usando diálogo de ficheiros
+    /// â­ NOVO: Adiciona anexo usando diÃ¡logo de ficheiros
     /// Abre automaticamente na pasta do paciente se existir
     /// </summary>
     [RelayCommand]
@@ -645,7 +645,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 Multiselect = true
             };
 
-            // ⭐ NOVO: Abre automaticamente na pasta do paciente
+            // â­ NOVO: Abre automaticamente na pasta do paciente
             var pastaPaciente = _documentoService.ObterPastaPaciente(PacienteAtual.Id, PacienteAtual.NomeCompleto);
             if (_documentoService.PastaExiste(PacienteAtual.Id, PacienteAtual.NomeCompleto))
             {
@@ -663,7 +663,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 }
 
                 AtualizarStatusAnexos();
-                _logger.LogInformation("📎 {Count} anexos adicionados", openFileDialog.FileNames.Length);
+                _logger.LogInformation("ðŸ“Ž {Count} anexos adicionados", openFileDialog.FileNames.Length);
             }
         }
         catch (Exception ex)
@@ -674,8 +674,8 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     }
 
     /// <summary>
-    /// ⭐ NOVO: Abre pop-up para selecionar templates PDF
-    /// Templates selecionados são adicionados automaticamente aos anexos
+    /// â­ NOVO: Abre pop-up para selecionar templates PDF
+    /// Templates selecionados sÃ£o adicionados automaticamente aos anexos
     /// </summary>
     [RelayCommand]
     private async Task SelecionarTemplatesPdfAsync()
@@ -688,18 +688,18 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            // Criar lista de templates disponíveis
+            // Criar lista de templates disponÃ­veis
             var templates = await _templatesPdfService.ListarTemplatesAsync();
 
             if (!templates.Any())
             {
                 ErrorMessage = "Nenhum template PDF encontrado na pasta Templates/PDFs/";
-                _logger.LogWarning("⚠️ Pasta de templates vazia");
+                _logger.LogWarning("âš ï¸ Pasta de templates vazia");
                 return;
             }
 
-            // ✅ Adicionar templates diretamente aos anexos
-            // Integração com pop-up será feita na View (code-behind) para respeitar MVVM
+            // âœ… Adicionar templates diretamente aos anexos
+            // IntegraÃ§Ã£o com pop-up serÃ¡ feita na View (code-behind) para respeitar MVVM
             foreach (var template in templates)
             {
                 if (!Anexos.Contains(template.CaminhoCompleto))
@@ -710,75 +710,79 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             AtualizarStatusAnexos();
 
-            _logger.LogInformation("✅ {Count} templates disponíveis para anexar", templates.Count);
+            _logger.LogInformation("âœ… {Count} templates disponÃ­veis para anexar", templates.Count);
 
         }, "Erro ao selecionar templates", _logger);
     }
 
     /// <summary>
-    /// ⭐ NOVO: Abre file picker para adicionar novo template PDF à pasta Templates/PDFs/
+    /// â­ NOVO: Abre file picker para adicionar novo template PDF Ã  pasta Templates/PDFs/
     /// </summary>
     [RelayCommand]
     private async Task AdicionarNovoTemplatePdfAsync()
     {
         await ExecuteWithErrorHandlingAsync(async () =>
         {
-            await Task.CompletedTask; // Suprime warning CS1998 (diálogo é síncrono)
+            await Task.CompletedTask; // diálogo é síncrono
 
-            // Abrir file picker para selecionar PDF
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "Selecionar Template PDF",
+                Title = "Selecionar Template(s) PDF",
                 Filter = "Ficheiros PDF (*.pdf)|*.pdf",
-                Multiselect = false,
+                Multiselect = true,
                 CheckFileExists = true
             };
 
             if (dialog.ShowDialog() != true)
             {
-                _logger.LogDebug("📋 Utilizador cancelou seleção de template");
+                _logger.LogDebug("Utilizador cancelou seleção de template");
                 return;
             }
 
-            var sourceFile = dialog.FileName;
-            var fileName = System.IO.Path.GetFileName(sourceFile);
-
-            // Usar PathService para obter caminho dos templates (Debug/Release)
             var templatesPdfFullPath = System.IO.Path.Combine(
                 BioDesk.Services.PathService.TemplatesPath, "PDFs");
 
-            // Garantir que pasta existe
             System.IO.Directory.CreateDirectory(templatesPdfFullPath);
 
-            var destFile = System.IO.Path.Combine(templatesPdfFullPath, fileName);
+            int adicionados = 0;
+            int atualizados = 0;
+            var ficheirosSelecionados = dialog.FileNames != null && dialog.FileNames.Length > 0
+                ? dialog.FileNames
+                : new[] { dialog.FileName };
 
-            // Verificar se já existe
-            if (System.IO.File.Exists(destFile))
+            foreach (var sourceFile in ficheirosSelecionados)
             {
-                var msgBox = System.Windows.MessageBox.Show(
-                    $"O ficheiro '{fileName}' já existe na pasta de templates.\n\nDeseja substituir?",
-                    "Template Existente",
-                    System.Windows.MessageBoxButton.YesNo,
-                    System.Windows.MessageBoxImage.Question);
+                var fileName = System.IO.Path.GetFileName(sourceFile);
+                if (string.IsNullOrWhiteSpace(fileName))
+                    continue;
 
-                if (msgBox != System.Windows.MessageBoxResult.Yes)
+                var destFile = System.IO.Path.Combine(templatesPdfFullPath, fileName);
+
+                if (System.IO.File.Exists(destFile))
                 {
-                    _logger.LogDebug("📋 Utilizador cancelou substituição de template existente");
-                    return;
+                    var msgBox = System.Windows.MessageBox.Show(
+                        $"O ficheiro '{fileName}' já existe na pasta de templates.\n\nDeseja substituir?",
+                        "Template Existente",
+                        System.Windows.MessageBoxButton.YesNo,
+                        System.Windows.MessageBoxImage.Question);
+                    if (msgBox != System.Windows.MessageBoxResult.Yes)
+                        continue;
+
+                    atualizados++;
                 }
+                else
+                {
+                    adicionados++;
+                }
+
+                System.IO.File.Copy(sourceFile, destFile, overwrite: true);
+                _logger.LogInformation("Template PDF copiado para {Destino}", destFile);
             }
 
-            // Copiar ficheiro
-            System.IO.File.Copy(sourceFile, destFile, overwrite: true);
-
-            SuccessMessage = $"✅ Template '{fileName}' adicionado com sucesso!";
-            _logger.LogInformation("📋 Template adicionado: {File} → {Dest}", sourceFile, destFile);
-
+            SuccessMessage = $"{adicionados} adicionado(s), {atualizados} atualizado(s).";
         }, "Erro ao adicionar template", _logger);
     }
-
-    /// <summary>
-    /// ✅ Atualiza o status de anexos (público para ser chamado do code-behind)
+    /// âœ… Atualiza o status de anexos (pÃºblico para ser chamado do code-behind)
     /// </summary>
     public void AtualizarStatusAnexos()
     {
@@ -813,15 +817,15 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         try
         {
-            // ⭐ CORREÇÃO CRÍTICA: Usar scope isolado para evitar threading issues
+            // â­ CORREÃ‡ÃƒO CRÃTICA: Usar scope isolado para evitar threading issues
             using var scope = _scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
 
             var historico = await dbContext.Comunicacoes
-                .AsNoTracking() // ⭐ Garantir dados frescos da BD (não cache)
+                .AsNoTracking() // â­ Garantir dados frescos da BD (nÃ£o cache)
                 .Where(c => c.PacienteId == PacienteAtual.Id && !c.IsDeleted)
                 .OrderByDescending(c => c.DataCriacao)
-                .Take(10)  // ⭐ Limitar aos últimos 10 para melhor performance
+                .Take(10)  // â­ Limitar aos Ãºltimos 10 para melhor performance
                 .ToListAsync();
 
             HistoricoComunicacoes.Clear();
@@ -830,12 +834,12 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 HistoricoComunicacoes.Add(comunicacao);
             }
 
-            _logger.LogInformation("📋 Histórico recarregado: {Count} comunicações para paciente {PacienteId}",
+            _logger.LogInformation("ðŸ“‹ HistÃ³rico recarregado: {Count} comunicaÃ§Ãµes para paciente {PacienteId}",
                 historico.Count, PacienteAtual.Id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao carregar histórico de comunicações");
+            _logger.LogError(ex, "âŒ Erro ao carregar histÃ³rico de comunicaÃ§Ãµes");
         }
         finally
         {
@@ -847,7 +851,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     {
         if (PacienteAtual == null) return;
 
-        // ⭐ CORREÇÃO: Usar scope isolado
+        // â­ CORREÃ‡ÃƒO: Usar scope isolado
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
 
@@ -867,7 +871,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         UltimaComunicacao = todas.OrderByDescending(c => c.DataEnvio).FirstOrDefault()?.DataEnvio;
 
-        // ⭐ CORREÇÃO: Scope já está ativo (mesmo método), reutilizar dbContext
+        // â­ CORREÃ‡ÃƒO: Scope jÃ¡ estÃ¡ ativo (mesmo mÃ©todo), reutilizar dbContext
         ProximoFollowUp = await dbContext.Comunicacoes
             .AsNoTracking()
             .Where(c => c.PacienteId == PacienteAtual.Id && c.DataFollowUp.HasValue && !c.FollowUpEnviado)
@@ -877,7 +881,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     }
 
     // ============================
-    // ⭐ NOVO: GESTÃO DE DOCUMENTOS DO PACIENTE
+    // â­ NOVO: GESTÃƒO DE DOCUMENTOS DO PACIENTE
     // ============================
 
     /// <summary>
@@ -887,14 +891,14 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     [RelayCommand]
     private async Task CarregarDocumentosPacienteAsync()
     {
-        // 🔥 GUARD ABSOLUTO: Se paciente null OU sem Id → LIMPAR E SAIR
+        // ðŸ”¥ GUARD ABSOLUTO: Se paciente null OU sem Id â†’ LIMPAR E SAIR
         if (PacienteAtual == null || PacienteAtual.Id == 0)
         {
             DocumentosPaciente.Clear();
             StatusDocumentos = PacienteAtual == null
                 ? "Nenhum paciente selecionado"
-                : "Paciente ainda não foi salvo";
-            _logger.LogWarning("⚠️ Tentativa de carregar documentos sem paciente válido");
+                : "Paciente ainda nÃ£o foi salvo";
+            _logger.LogWarning("âš ï¸ Tentativa de carregar documentos sem paciente vÃ¡lido");
             return;
         }
 
@@ -920,7 +924,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 _ => $"{DocumentosPaciente.Count} documentos encontrados"
             };
 
-            _logger.LogInformation("📄 Carregados {Count} documentos do paciente {PacienteId}",
+            _logger.LogInformation("ðŸ“„ Carregados {Count} documentos do paciente {PacienteId}",
                 DocumentosPaciente.Count, PacienteAtual.Id);
 
             CarregandoDocumentos = false;
@@ -952,19 +956,19 @@ Naturopatia - Osteopatia - Medicina Bioenergética
                 {
                     Anexos.Add(doc.CaminhoCompleto);
                     adicionados++;
-                    _logger.LogInformation("📎 Documento anexado: {Nome}", doc.Nome);
+                    _logger.LogInformation("ðŸ“Ž Documento anexado: {Nome}", doc.Nome);
                 }
             }
 
             AtualizarStatusAnexos();
 
-            // Limpar seleção após anexar
+            // Limpar seleÃ§Ã£o apÃ³s anexar
             foreach (var doc in selecionados)
             {
                 doc.Selecionado = false;
             }
 
-            _logger.LogInformation("✅ {Count} documento(s) anexado(s) ao email", adicionados);
+            _logger.LogInformation("âœ… {Count} documento(s) anexado(s) ao email", adicionados);
 
             if (adicionados > 0)
             {
@@ -973,14 +977,14 @@ Naturopatia - Osteopatia - Medicina Bioenergética
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao anexar documentos selecionados");
+            _logger.LogError(ex, "âŒ Erro ao anexar documentos selecionados");
             ErrorMessage = $"Erro ao anexar documentos: {ex.Message}";
         }
     }
 
     /// <summary>
     /// Seleciona/deseleciona todos os documentos
-    /// ⚠️ ACEITA object para compatibilidade com XAML (converte string/bool)
+    /// âš ï¸ ACEITA object para compatibilidade com XAML (converte string/bool)
     /// </summary>
     [RelayCommand]
     private void SelecionarTodosDocumentos(object? parameter)
@@ -1002,14 +1006,14 @@ Naturopatia - Osteopatia - Medicina Bioenergética
     }
 
     /// <summary>
-    /// ⭐ NOVO: Abre documento PDF no visualizador padrão do sistema
+    /// â­ NOVO: Abre documento PDF no visualizador padrÃ£o do sistema
     /// </summary>
     [RelayCommand]
     private void AbrirDocumento(DocumentoPacienteViewModel? documento)
     {
         if (documento == null)
         {
-            _logger.LogWarning("⚠️ Tentativa de abrir documento null");
+            _logger.LogWarning("âš ï¸ Tentativa de abrir documento null");
             return;
         }
 
@@ -1017,12 +1021,12 @@ Naturopatia - Osteopatia - Medicina Bioenergética
         {
             if (!File.Exists(documento.CaminhoCompleto))
             {
-                ErrorMessage = $"Documento não encontrado: {documento.Nome}";
-                _logger.LogWarning("📄 Documento não existe: {Caminho}", documento.CaminhoCompleto);
+                ErrorMessage = $"Documento nÃ£o encontrado: {documento.Nome}";
+                _logger.LogWarning("ðŸ“„ Documento nÃ£o existe: {Caminho}", documento.CaminhoCompleto);
                 return;
             }
 
-            _logger.LogInformation("📂 Abrindo documento: {Nome}", documento.Nome);
+            _logger.LogInformation("ðŸ“‚ Abrindo documento: {Nome}", documento.Nome);
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -1032,11 +1036,11 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
             Process.Start(processStartInfo);
 
-            _logger.LogInformation("✅ Documento aberto com sucesso: {Nome}", documento.Nome);
+            _logger.LogInformation("âœ… Documento aberto com sucesso: {Nome}", documento.Nome);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao abrir documento: {Nome}", documento.Nome);
+            _logger.LogError(ex, "âŒ Erro ao abrir documento: {Nome}", documento.Nome);
             ErrorMessage = $"Erro ao abrir documento: {ex.Message}";
         }
     }
@@ -1051,7 +1055,7 @@ Naturopatia - Osteopatia - Medicina Bioenergética
 
         try
         {
-            // Validação básica: deve conter @ e domínio
+            // ValidaÃ§Ã£o bÃ¡sica: deve conter @ e domÃ­nio
             var addr = new System.Net.Mail.MailAddress(email);
             return addr.Address == email;
         }

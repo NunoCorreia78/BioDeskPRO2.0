@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -20,7 +20,7 @@ using BioDesk.ViewModels.Validators;
 namespace BioDesk.ViewModels;
 
 /// <summary>
-/// ConfiguracaoClinicaViewModel - ViewModel para configuração da clínica
+/// ConfiguracaoClinicaViewModel - ViewModel para configuraÃ§Ã£o da clÃ­nica
 /// Permite editar: Nome, Morada, Telefone, Email, NIPC, Logo
 /// Singleton pattern: sempre carrega/salva ConfiguracaoClinica com Id=1
 /// </summary>
@@ -30,12 +30,13 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
     private readonly IBackupService? _backupService;
+    private readonly BioDesk.Services.Templates.ITemplatesPdfService? _templatesPdfService;
     private ConfiguracaoClinica? _configuracaoOriginal; // Para guardar logo antigo
 
-    #region === PROPRIEDADES - DADOS DA CLÍNICA ===
+    #region === PROPRIEDADES - DADOS DA CLÃNICA ===
 
     [ObservableProperty]
-    private string _nomeClinica = "Minha Clínica";
+    private string _nomeClinica = "Minha ClÃ­nica";
 
     [ObservableProperty]
     private string? _morada;
@@ -54,7 +55,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
 
     #endregion
 
-    #region === PROPRIEDADES - CONFIGURAÇÕES SMTP ===
+    #region === PROPRIEDADES - CONFIGURAÃ‡Ã•ES SMTP ===
 
     [ObservableProperty]
     private string _smtpHost = "smtp.gmail.com";
@@ -98,7 +99,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     #region === EVENTOS ===
 
     /// <summary>
-    /// Evento disparado quando a configuração é salva com sucesso
+    /// Evento disparado quando a configuraÃ§Ã£o Ã© salva com sucesso
     /// </summary>
     public event EventHandler? ConfiguracaoSalvaComSucesso;
 
@@ -108,20 +109,47 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
         IUnitOfWork unitOfWork,
         IConfiguration configuration,
         ILogger<ConfiguracaoClinicaViewModel> logger,
-        IBackupService backupService)
+        IBackupService backupService,
+        BioDesk.Services.Templates.ITemplatesPdfService? templatesPdfService = null)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _backupService = backupService ?? throw new ArgumentNullException(nameof(backupService));
+        _templatesPdfService = templatesPdfService; // opcional (para retrocompatibilidade)
 
-        _logger.LogInformation("📋 ConfiguracaoClinicaViewModel inicializado");
+        _logger.LogInformation("ðŸ“‹ ConfiguracaoClinicaViewModel inicializado");
 
-        // Carregar configuração existente
+        // Carregar configuraÃ§Ã£o existente
         _ = CarregarConfiguracaoAsync();
 
-        // Carregar lista de backups disponíveis
+        // Carregar lista de backups disponÃ­veis
         _ = AtualizarListaBackupsAsync();
+        // Carregar lista de templates PDF (se serviço disponível)
+        if (_templatesPdfService != null)
+        {
+            _ = AtualizarListaTemplatesAsync();
+        }
+    }
+
+    // Lista de templates PDF encontrados (para mostrar na UI de Configurações)
+    [ObservableProperty]
+    private System.Collections.ObjectModel.ObservableCollection<BioDesk.Services.Templates.TemplatePdf> _templatesPdf = new();
+
+    private async Task AtualizarListaTemplatesAsync()
+    {
+        try
+        {
+            if (_templatesPdfService == null) return;
+            var lista = await _templatesPdfService.ListarTemplatesAsync();
+            TemplatesPdf.Clear();
+            foreach (var t in lista) TemplatesPdf.Add(t);
+            _logger.LogInformation("Templates PDF encontrados: {Count}", TemplatesPdf.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao carregar templates PDF");
+        }
     }
 
     #region === COMANDOS ===
@@ -146,24 +174,24 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
 
     #endregion
 
-    #region === MÉTODOS PRIVADOS ===
+    #region === MÃ‰TODOS PRIVADOS ===
 
     /// <summary>
-    /// Carrega a configuração da clínica (Id=1)
-    /// Se não existir, cria com valores padrão
+    /// Carrega a configuraÃ§Ã£o da clÃ­nica (Id=1)
+    /// Se nÃ£o existir, cria com valores padrÃ£o
     /// </summary>
     private async Task CarregarConfiguracaoAsync()
     {
         try
         {
-            _logger.LogInformation("📂 Carregando configuração da clínica...");
+            _logger.LogInformation("ðŸ“‚ Carregando configuraÃ§Ã£o da clÃ­nica...");
 
             var config = await _unitOfWork.ConfiguracaoClinica.GetByIdAsync(1);
 
             if (config == null)
             {
-                _logger.LogWarning("⚠️ Configuração não encontrada, usando valores padrão");
-                NomeClinica = "Minha Clínica";
+                _logger.LogWarning("âš ï¸ ConfiguraÃ§Ã£o nÃ£o encontrada, usando valores padrÃ£o");
+                NomeClinica = "Minha ClÃ­nica";
                 Morada = null;
                 Telefone = null;
                 Email = null;
@@ -180,30 +208,30 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 Nipc = config.NIPC;
                 LogoPath = config.LogoPath;
 
-                // ✅ GUARDAR REFERÊNCIA para apagar logo antigo
+                // âœ… GUARDAR REFERÃŠNCIA para apagar logo antigo
                 _configuracaoOriginal = config;
 
-                _logger.LogInformation("✅ Configuração carregada: {Nome}", config.NomeClinica);
+                _logger.LogInformation("âœ… ConfiguraÃ§Ã£o carregada: {Nome}", config.NomeClinica);
             }
 
-            // ✅ CARREGAR CONFIGURAÇÕES SMTP do appsettings.json
+            // âœ… CARREGAR CONFIGURAÃ‡Ã•ES SMTP do appsettings.json
             SmtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
             SmtpPort = int.TryParse(_configuration["Email:SmtpPort"], out var port) ? port : 587;
             SmtpFromEmail = _configuration["Email:FromEmail"];
-            SmtpFromName = _configuration["Email:FromName"] ?? "BioDeskPro - Clínica";
-            // Nota: Password não é carregado por segurança (apenas gravado)
+            SmtpFromName = _configuration["Email:FromName"] ?? "BioDeskPro - ClÃ­nica";
+            // Nota: Password nÃ£o Ã© carregado por seguranÃ§a (apenas gravado)
 
-            _logger.LogInformation("✅ Configurações SMTP carregadas");
+            _logger.LogInformation("âœ… ConfiguraÃ§Ãµes SMTP carregadas");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao carregar configuração");
-            ErrorMessage = $"Erro ao carregar configuração: {ex.Message}";
+            _logger.LogError(ex, "âŒ Erro ao carregar configuraÃ§Ã£o");
+            ErrorMessage = $"Erro ao carregar configuraÃ§Ã£o: {ex.Message}";
         }
     }
 
     /// <summary>
-    /// Salva a configuração da clínica
+    /// Salva a configuraÃ§Ã£o da clÃ­nica
     /// </summary>
     private async Task GuardarAsync()
     {
@@ -212,9 +240,9 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             IsLoading = true;
             ErrorMessage = null;
 
-            _logger.LogInformation("💾 Guardando configuração da clínica...");
+            _logger.LogInformation("ðŸ’¾ Guardando configuraÃ§Ã£o da clÃ­nica...");
 
-            // 🔍 CONSTRUIR ENTIDADE para validação
+            // ðŸ” CONSTRUIR ENTIDADE para validaÃ§Ã£o
             var configuracaoParaValidar = new ConfiguracaoClinica
             {
                 Id = 1,
@@ -227,29 +255,29 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 DataAtualizacao = DateTime.UtcNow
             };
 
-            // ✅ VALIDAR COM FLUENTVALIDATION
+            // âœ… VALIDAR COM FLUENTVALIDATION
             var validator = new ConfiguracaoClinicaValidator();
             var resultado = await validator.ValidateAsync(configuracaoParaValidar);
 
             if (!resultado.IsValid)
             {
                 ErrorMessage = string.Join("\n", resultado.Errors.Select(e => e.ErrorMessage));
-                _logger.LogWarning("⚠️ Validação falhou: {Erros}", ErrorMessage);
+                _logger.LogWarning("âš ï¸ ValidaÃ§Ã£o falhou: {Erros}", ErrorMessage);
                 return;
             }
 
-            // Buscar configuração existente ou criar nova
+            // Buscar configuraÃ§Ã£o existente ou criar nova
             var config = await _unitOfWork.ConfiguracaoClinica.GetByIdAsync(1);
 
             if (config == null)
             {
-                // Criar nova configuração
+                // Criar nova configuraÃ§Ã£o
                 await _unitOfWork.ConfiguracaoClinica.AddAsync(configuracaoParaValidar);
-                _logger.LogInformation("➕ Nova configuração criada");
+                _logger.LogInformation("âž• Nova configuraÃ§Ã£o criada");
             }
             else
             {
-                // Atualizar configuração existente
+                // Atualizar configuraÃ§Ã£o existente
                 config.NomeClinica = NomeClinica;
                 config.Morada = Morada;
                 config.Telefone = Telefone;
@@ -259,38 +287,38 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 config.DataAtualizacao = DateTime.UtcNow;
 
                 _unitOfWork.ConfiguracaoClinica.Update(config);
-                _logger.LogInformation("🔄 Configuração existente atualizada");
+                _logger.LogInformation("ðŸ”„ ConfiguraÃ§Ã£o existente atualizada");
             }
 
             // Salvar no banco de dados
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("✅ Configuração guardada com sucesso: {Nome}", NomeClinica);
+            _logger.LogInformation("âœ… ConfiguraÃ§Ã£o guardada com sucesso: {Nome}", NomeClinica);
 
-            // ✅ SALVAR CONFIGURAÇÕES SMTP no appsettings.json
+            // âœ… SALVAR CONFIGURAÃ‡Ã•ES SMTP no appsettings.json
             await SalvarConfiguracoesSmtpAsync();
 
             // Disparar evento de sucesso
             ConfiguracaoSalvaComSucesso?.Invoke(this, EventArgs.Empty);
 
-        }, "Guardar configuração", _logger);
+        }, "Guardar configuraÃ§Ã£o", _logger);
 
         IsLoading = false;
     }
 
     /// <summary>
-    /// Abre diálogo para selecionar logo e copiar para Templates/
+    /// Abre diÃ¡logo para selecionar logo e copiar para Templates/
     /// </summary>
     private async Task SelecionarLogoAsync()
     {
         try
         {
-            _logger.LogInformation("🖼️ Abrindo diálogo para selecionar logo...");
+            _logger.LogInformation("ðŸ–¼ï¸ Abrindo diÃ¡logo para selecionar logo...");
 
             // Criar OpenFileDialog
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "Selecionar Logo da Clínica",
+                Title = "Selecionar Logo da ClÃ­nica",
                 Filter = "Imagens (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|Todos os ficheiros (*.*)|*.*",
                 FilterIndex = 1,
                 Multiselect = false
@@ -299,20 +327,20 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             if (dialog.ShowDialog() == true)
             {
                 var filePath = dialog.FileName;
-                _logger.LogInformation("📁 Ficheiro selecionado: {Path}", filePath);
+                _logger.LogInformation("ðŸ“ Ficheiro selecionado: {Path}", filePath);
 
-                // 1️⃣ VALIDAR TAMANHO (máx 2MB)
+                // 1ï¸âƒ£ VALIDAR TAMANHO (mÃ¡x 2MB)
                 var fileInfo = new FileInfo(filePath);
                 if (fileInfo.Length > 2 * 1024 * 1024)
                 {
-                    ErrorMessage = "❌ Ficheiro muito grande! Tamanho máximo: 2MB";
-                    _logger.LogWarning("⚠️ Ficheiro muito grande: {Size} KB", fileInfo.Length / 1024);
+                    ErrorMessage = "âŒ Ficheiro muito grande! Tamanho mÃ¡ximo: 2MB";
+                    _logger.LogWarning("âš ï¸ Ficheiro muito grande: {Size} KB", fileInfo.Length / 1024);
                     return;
                 }
 
-                _logger.LogInformation("✅ Tamanho válido: {Size} KB", fileInfo.Length / 1024);
+                _logger.LogInformation("âœ… Tamanho vÃ¡lido: {Size} KB", fileInfo.Length / 1024);
 
-                // 2️⃣ COPIAR para Templates/ com nome único
+                // 2ï¸âƒ£ COPIAR para Templates/ com nome Ãºnico
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 var extension = fileInfo.Extension;
                 var novoNome = $"logo_{timestamp}{extension}";
@@ -328,12 +356,12 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 // Copiar ficheiro
                 await Task.Run(() => File.Copy(filePath, destinoPath, overwrite: true));
 
-                _logger.LogInformation("📂 Logo copiado para: {Destino}", destinoPath);
+                _logger.LogInformation("ðŸ“‚ Logo copiado para: {Destino}", destinoPath);
 
-                // 3️⃣ ATUALIZAR LogoPath (caminho relativo para BD)
+                // 3ï¸âƒ£ ATUALIZAR LogoPath (caminho relativo para BD)
                 LogoPath = $"Templates/{novoNome}";
 
-                // 4️⃣ APAGAR logo antigo (se existir e for diferente do novo)
+                // 4ï¸âƒ£ APAGAR logo antigo (se existir e for diferente do novo)
                 if (!string.IsNullOrEmpty(_configuracaoOriginal?.LogoPath) &&
                     _configuracaoOriginal.LogoPath != LogoPath)
                 {
@@ -347,56 +375,56 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                         if (File.Exists(logoAntigoPath))
                         {
                             File.Delete(logoAntigoPath);
-                            _logger.LogInformation("🗑️ Logo antigo apagado: {Path}", logoAntigoPath);
+                            _logger.LogInformation("ðŸ—‘ï¸ Logo antigo apagado: {Path}", logoAntigoPath);
                         }
                     }
                     catch (Exception exDelete)
                     {
-                        _logger.LogWarning(exDelete, "⚠️ Não foi possível apagar logo antigo");
-                        // Não bloquear operação se não conseguir apagar
+                        _logger.LogWarning(exDelete, "âš ï¸ NÃ£o foi possÃ­vel apagar logo antigo");
+                        // NÃ£o bloquear operaÃ§Ã£o se nÃ£o conseguir apagar
                     }
                 }
 
-                _logger.LogInformation("✅ Logo selecionado com sucesso: {Path}", LogoPath);
-                ErrorMessage = "✅ Logo carregado com sucesso!";
+                _logger.LogInformation("âœ… Logo selecionado com sucesso: {Path}", LogoPath);
+                ErrorMessage = "âœ… Logo carregado com sucesso!";
             }
             else
             {
-                _logger.LogInformation("ℹ️ Seleção de logo cancelada pelo utilizador");
+                _logger.LogInformation("â„¹ï¸ SeleÃ§Ã£o de logo cancelada pelo utilizador");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao selecionar logo");
-            ErrorMessage = $"❌ Erro ao copiar logo: {ex.Message}";
+            _logger.LogError(ex, "âŒ Erro ao selecionar logo");
+            ErrorMessage = $"âŒ Erro ao copiar logo: {ex.Message}";
         }
     }
 
     /// <summary>
-    /// Salva as configurações SMTP no appsettings.json
+    /// Salva as configuraÃ§Ãµes SMTP no appsettings.json
     /// </summary>
     private async Task SalvarConfiguracoesSmtpAsync()
     {
         try
         {
-            _logger.LogInformation("💾 Salvando configurações SMTP no appsettings.json...");
+            _logger.LogInformation("ðŸ’¾ Salvando configuraÃ§Ãµes SMTP no appsettings.json...");
 
             var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
 
             if (!File.Exists(appSettingsPath))
             {
-                _logger.LogWarning("⚠️ Arquivo appsettings.json não encontrado em: {Path}", appSettingsPath);
+                _logger.LogWarning("âš ï¸ Arquivo appsettings.json nÃ£o encontrado em: {Path}", appSettingsPath);
                 return;
             }
 
-            // Ler conteúdo atual
+            // Ler conteÃºdo atual
             var json = await File.ReadAllTextAsync(appSettingsPath);
             using var settings = System.Text.Json.JsonDocument.Parse(json);
 
-            // Criar dicionário mutável para manter todas as secções existentes
+            // Criar dicionÃ¡rio mutÃ¡vel para manter todas as secÃ§Ãµes existentes
             var settingsDict = new Dictionary<string, object>();
 
-            // Copiar todas as secções existentes (Logging, etc.)
+            // Copiar todas as secÃ§Ãµes existentes (Logging, etc.)
             foreach (var property in settings.RootElement.EnumerateObject())
             {
                 if (property.Name != "Email") // Vamos substituir Email
@@ -405,7 +433,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 }
             }
 
-            // Adicionar/atualizar secção Email com novos valores
+            // Adicionar/atualizar secÃ§Ã£o Email com novos valores
             settingsDict["Email"] = new Dictionary<string, object>
             {
                 ["SmtpHost"] = SmtpHost,
@@ -413,7 +441,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 ["Sender"] = SmtpFromEmail ?? "",
                 ["Password"] = SmtpPassword ?? "",
                 ["FromEmail"] = SmtpFromEmail ?? "",
-                ["FromName"] = SmtpFromName ?? "BioDeskPro - Clínica"
+                ["FromName"] = SmtpFromName ?? "BioDeskPro - ClÃ­nica"
             };
 
             // Serializar de volta para JSON
@@ -426,17 +454,17 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             // Salvar arquivo
             await File.WriteAllTextAsync(appSettingsPath, updatedJson);
 
-            _logger.LogInformation("✅ Configurações SMTP salvas com sucesso");
+            _logger.LogInformation("âœ… ConfiguraÃ§Ãµes SMTP salvas com sucesso");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao salvar configurações SMTP");
-            ErrorMessage = $"Erro ao salvar configurações de email: {ex.Message}";
+            _logger.LogError(ex, "âŒ Erro ao salvar configuraÃ§Ãµes SMTP");
+            ErrorMessage = $"Erro ao salvar configuraÃ§Ãµes de email: {ex.Message}";
         }
     }
 
     /// <summary>
-    /// Testa a conexão SMTP enviando um email de teste
+    /// Testa a conexÃ£o SMTP enviando um email de teste
     /// </summary>
     private async Task TestarConexaoSmtpAsync()
     {
@@ -446,28 +474,28 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             ErrorMessage = null;
             TesteSucessoMessage = null;
 
-            _logger.LogInformation("🔌 Testando conexão SMTP...");
+            _logger.LogInformation("ðŸ”Œ Testando conexÃ£o SMTP...");
 
-            // Validar campos obrigatórios
+            // Validar campos obrigatÃ³rios
             if (string.IsNullOrWhiteSpace(SmtpHost))
             {
-                ErrorMessage = "❌ Servidor SMTP é obrigatório";
+                ErrorMessage = "âŒ Servidor SMTP Ã© obrigatÃ³rio";
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(SmtpFromEmail))
             {
-                ErrorMessage = "❌ Email de envio é obrigatório";
+                ErrorMessage = "âŒ Email de envio Ã© obrigatÃ³rio";
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(SmtpPassword))
             {
-                ErrorMessage = "❌ Senha é obrigatória";
+                ErrorMessage = "âŒ Senha Ã© obrigatÃ³ria";
                 return;
             }
 
-            // Salvar temporariamente as configurações para teste
+            // Salvar temporariamente as configuraÃ§Ãµes para teste
             await SalvarConfiguracoesSmtpAsync();
 
             // Tentar enviar email de teste usando System.Net.Mail
@@ -482,25 +510,25 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 var mailMessage = new System.Net.Mail.MailMessage
                 {
                     From = new System.Net.Mail.MailAddress(SmtpFromEmail ?? "", SmtpFromName ?? "BioDeskPro"),
-                    Subject = "🔌 Teste de Conexão SMTP - BioDeskPro",
-                    Body = $"Este é um email de teste enviado em {DateTime.Now:dd/MM/yyyy HH:mm:ss}.\n\n✅ Se recebeu este email, a configuração SMTP está correta!",
+                    Subject = "ðŸ”Œ Teste de ConexÃ£o SMTP - BioDeskPro",
+                    Body = $"Este Ã© um email de teste enviado em {DateTime.Now:dd/MM/yyyy HH:mm:ss}.\n\nâœ… Se recebeu este email, a configuraÃ§Ã£o SMTP estÃ¡ correta!",
                     IsBodyHtml = false
                 };
 
-                mailMessage.To.Add(SmtpFromEmail ?? ""); // Enviar para si próprio
+                mailMessage.To.Add(SmtpFromEmail ?? ""); // Enviar para si prÃ³prio
 
                 await smtpClient.SendMailAsync(mailMessage);
 
-                TesteSucessoMessage = "✅ Email de teste enviado com sucesso! Verifique a sua caixa de entrada.";
-                _logger.LogInformation("✅ Conexão SMTP testada com sucesso");
+                TesteSucessoMessage = "âœ… Email de teste enviado com sucesso! Verifique a sua caixa de entrada.";
+                _logger.LogInformation("âœ… ConexÃ£o SMTP testada com sucesso");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Erro ao testar conexão SMTP");
-                ErrorMessage = $"❌ Falha no teste: {ex.Message}";
+                _logger.LogError(ex, "âŒ Erro ao testar conexÃ£o SMTP");
+                ErrorMessage = $"âŒ Falha no teste: {ex.Message}";
             }
 
-        }, "Testar conexão SMTP", _logger);
+        }, "Testar conexÃ£o SMTP", _logger);
 
         IsLoading = false;
     }
@@ -510,7 +538,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     #region === COMANDO: ADICIONAR TEMPLATE PDF ===
 
     /// <summary>
-    /// Comando para adicionar novo template PDF para prescrições
+    /// Comando para adicionar novo template PDF para prescriÃ§Ãµes
     /// </summary>
     [RelayCommand]
     private void AdicionarTemplatePdf()
@@ -519,43 +547,57 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
         {
             var dialog = new OpenFileDialog
             {
-                Title = "Selecionar Template PDF",
+                Title = "Selecionar Template(s) PDF",
                 Filter = "Ficheiros PDF (*.pdf)|*.pdf",
-                Multiselect = false
+                Multiselect = true
             };
 
             var resultado = dialog.ShowDialog();
             if (resultado is not true)
             {
-                _logger.LogInformation("Importação de template PDF cancelada pelo utilizador.");
+                _logger.LogInformation("ImportaÃ§Ã£o de template PDF cancelada pelo utilizador.");
                 return;
             }
 
-            // ✅ USAR PathService.TemplatesPath (funciona em qualquer PC/instalação)
-            var templatesDirectory = PathService.TemplatesPath;
+            var templatesDirectory = System.IO.Path.Combine(PathService.TemplatesPath, "PDFs");
             Directory.CreateDirectory(templatesDirectory);
 
-            var ficheiroOrigem = dialog.FileName;
-            var nomeFicheiro = Path.GetFileName(ficheiroOrigem);
-            if (string.IsNullOrWhiteSpace(nomeFicheiro))
+            int adicionados = 0;
+            int atualizados = 0;
+            var ficheirosSelecionados = dialog.FileNames != null && dialog.FileNames.Length > 0
+                ? dialog.FileNames
+                : new[] { dialog.FileName };
+
+            foreach (var ficheiroOrigem in ficheirosSelecionados)
             {
-                _logger.LogWarning("Nome de ficheiro inválido ao importar template PDF.");
-                ErrorMessage = "Não foi possível determinar o nome do ficheiro selecionado.";
-                return;
+                var nomeFicheiro = Path.GetFileName(ficheiroOrigem);
+                if (string.IsNullOrWhiteSpace(nomeFicheiro))
+                {
+                    _logger.LogWarning("Nome de ficheiro invÃ¡lido ao importar template PDF.");
+                    continue;
+                }
+
+                var destino = Path.Combine(templatesDirectory, nomeFicheiro);
+                var substituido = File.Exists(destino);
+
+                File.Copy(ficheiroOrigem, destino, overwrite: true);
+
+                if (substituido)
+                    atualizados++;
+                else
+                    adicionados++;
+
+                _logger.LogInformation("Template PDF importado para {Destino}", destino);
             }
 
-            var destino = Path.Combine(templatesDirectory, nomeFicheiro);
-            var substituido = File.Exists(destino);
-
-            File.Copy(ficheiroOrigem, destino, overwrite: true);
-
-            var mensagemSucesso = substituido
-                ? $"✅ Template '{nomeFicheiro}' atualizado com sucesso!\n📂 Localização: {destino}"
-                : $"✅ Template '{nomeFicheiro}' adicionado com sucesso!\n📂 Localização: {destino}";
-
+            var mensagemSucesso = $"{adicionados} adicionado(s), {atualizados} atualizado(s).";
             TesteSucessoMessage = mensagemSucesso;
-            MessageBox.Show(mensagemSucesso, "Templates PDF", MessageBoxButton.OK, MessageBoxImage.Information);
-            _logger.LogInformation("Template PDF importado para {Destino}", destino);
+            MessageBox.Show(mensagemSucesso + "\n\nPasta: " + templatesDirectory, "Templates PDF", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            if (_templatesPdfService != null)
+            {
+                _ = AtualizarListaTemplatesAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -574,7 +616,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     {
         if (_backupService == null)
         {
-            MessageBox.Show("⚠️ Serviço de backup não disponível.", "Backup", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("âš ï¸ ServiÃ§o de backup nÃ£o disponÃ­vel.", "Backup", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -585,22 +627,22 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
 
             if (resultado.Sucesso)
             {
-                TesteSucessoMessage = $"✅ Backup criado! {resultado.TamanhoFormatado}";
+                TesteSucessoMessage = $"Backup criado! {resultado.TamanhoFormatado}";
                 MessageBox.Show(
-                    $"✅ Backup criado com sucesso!\n\n📂 {Path.GetFileName(resultado.CaminhoZip)}\n💾 {resultado.TamanhoFormatado}\n📦 {resultado.NumeroFicheiros} ficheiros",
+                    $"Backup criado com sucesso!\n\nFicheiro: {Path.GetFileName(resultado.CaminhoZip)}\nTamanho: {resultado.TamanhoFormatado}\nTotal ficheiros: {resultado.NumeroFicheiros}",
                     "Backup", MessageBoxButton.OK, MessageBoxImage.Information);
                 await AtualizarListaBackupsAsync();
             }
             else
             {
-                ErrorMessage = $"❌ Erro: {resultado.Erro}";
-                MessageBox.Show($"❌ Erro ao criar backup:\n\n{resultado.Erro}", "Backup", MessageBoxButton.OK, MessageBoxImage.Error);
+                ErrorMessage = $"âŒ Erro: {resultado.Erro}";
+                MessageBox.Show($"âŒ Erro ao criar backup:\n\n{resultado.Erro}", "Backup", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao criar backup");
-            ErrorMessage = $"❌ Erro: {ex.Message}";
+            ErrorMessage = $"âŒ Erro: {ex.Message}";
         }
         finally
         {
@@ -614,7 +656,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
         if (_backupService == null) return;
 
         var confirmacao = MessageBox.Show(
-            "⚠️ ATENÇÃO!\n\nRestaurar um backup irá SUBSTITUIR todos os dados atuais.\nUm backup de segurança será criado antes.\n\nContinuar?",
+            "âš ï¸ ATENÃ‡ÃƒO!\n\nRestaurar um backup irÃ¡ SUBSTITUIR todos os dados atuais.\nUm backup de seguranÃ§a serÃ¡ criado antes.\n\nContinuar?",
             "Restaurar Backup", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
 
         if (confirmacao != MessageBoxResult.Yes) return;
@@ -635,28 +677,28 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
 
             if (resultado.Sucesso)
             {
-                var mensagem = $"✅ Backup restaurado com sucesso!\n\n" +
-                               $"📂 Ficheiros restaurados: {resultado.FicheirosRestaurados}\n" +
-                               $"⏱️ Duração: {resultado.Duracao.TotalSeconds:N1}s\n\n" +
-                               $"⚠️ IMPORTANTE:\n" +
-                               $"A aplicação PRECISA ser reiniciada agora!\n\n" +
-                               $"Clique OK para fechar a aplicação.";
+                var mensagem = $"âœ… Backup restaurado com sucesso!\n\n" +
+                               $"ðŸ“‚ Ficheiros restaurados: {resultado.FicheirosRestaurados}\n" +
+                               $"â±ï¸ DuraÃ§Ã£o: {resultado.Duracao.TotalSeconds:N1}s\n\n" +
+                               $"âš ï¸ IMPORTANTE:\n" +
+                               $"A aplicaÃ§Ã£o PRECISA ser reiniciada agora!\n\n" +
+                               $"Clique OK para fechar a aplicaÃ§Ã£o.";
 
                 MessageBox.Show(mensagem, "Backup Restaurado", MessageBoxButton.OK, MessageBoxImage.Warning);
 
-                // Fechar aplicação após restore
+                // Fechar aplicaÃ§Ã£o apÃ³s restore
                 System.Windows.Application.Current.Shutdown();
             }
             else
             {
-                MessageBox.Show($"❌ Erro ao restaurar backup:\n\n{resultado.Erro}",
+                MessageBox.Show($"âŒ Erro ao restaurar backup:\n\n{resultado.Erro}",
                     "Restaurar Backup", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao restaurar backup");
-            MessageBox.Show($"❌ Erro: {ex.Message}", "Restaurar Backup", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"âŒ Erro: {ex.Message}", "Restaurar Backup", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -698,11 +740,11 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             if (TemBackups)
             {
                 var ultimo = BackupsDisponiveis.First();
-                UltimoBackupInfo = $"Último: {ultimo.DataFormatada} ({ultimo.TamanhoFormatado})";
+                UltimoBackupInfo = $"Ãšltimo: {ultimo.DataFormatada} ({ultimo.TamanhoFormatado})";
             }
             else
             {
-                UltimoBackupInfo = "Nenhum backup disponível";
+                UltimoBackupInfo = "Nenhum backup disponÃ­vel";
             }
         }
         catch (Exception ex)

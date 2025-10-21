@@ -193,9 +193,11 @@ public partial class IrisdiagnosticoUserControl : UserControl
 
             if (captureWindow.ShowDialog() == true && !string.IsNullOrEmpty(captureWindow.CapturedImagePath))
             {
-                // Imagem capturada com sucesso! Adicionar à galeria
+                // ✅ CORREÇÃO CRÍTICA 6: Definir olho selecionado ANTES de carregar imagem
+                // Previne problema de não conseguir selecionar olho após captura
                 if (DataContext is IrisdiagnosticoViewModel viewModel)
                 {
+                    viewModel.OlhoSelecionado = captureWindow.OlhoSelecionado;
                     await viewModel.CarregarImagemCapturadaAsync(captureWindow.CapturedImagePath);
                 }
             }
