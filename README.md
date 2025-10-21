@@ -10,6 +10,9 @@ BioDeskPro2 é um sistema de gestão médica desenvolvido em C# WPF com .NET 8, 
 - **Base de Dados SQLite**: Persistência local com Entity Framework Core
 - **Paleta Terrosa Pastel**: Interface visualmente agradável
 - **Testes Âncora**: Contratos definidos por testes automatizados
+- **🔒 Segurança**: User Secrets para credenciais (sem passwords no código)
+
+> **⚠️ IMPORTANTE**: Para primeira execução, consultar [CONFIGURACAO_INICIAL.md](./CONFIGURACAO_INICIAL.md)
 
 ## 🏗️ Arquitetura
 
@@ -103,6 +106,22 @@ Dashboard → Selecionar Recente → SetPacienteAtivo → Ficha do Paciente
 - .NET 8 SDK
 - Visual Studio Code (recomendado)
 - Extensão C# Dev Kit
+
+### ⚠️ Configuração Inicial Obrigatória
+
+**ANTES de executar a aplicação pela primeira vez**, é necessário configurar as credenciais de email:
+
+```powershell
+cd src/BioDesk.App
+
+# Configurar User Secrets (recomendado para desenvolvimento)
+dotnet user-secrets set "Email:Sender" "seu-email@gmail.com"
+dotnet user-secrets set "Email:Password" "sua-app-password-do-gmail"
+dotnet user-secrets set "Email:FromEmail" "seu-email@gmail.com"
+dotnet user-secrets set "Email:FromName" "Seu Nome"
+```
+
+📖 **Documentação completa**: [CONFIGURACAO_SEGURA_EMAIL.md](./CONFIGURACAO_SEGURA_EMAIL.md)
 
 ### Build e Execução
 ```bash
