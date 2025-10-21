@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BioDesk.ViewModels;assembly=BioDesk.ViewModels"
-    Title="ConfiguraÃ§Ãµes da ClÃ­nica"
+    Title="Configurações da Clínica"
     Width="700"
     Height="650"
     d:DataContext="{d:DesignInstance Type=viewmodels:ConfiguracaoClinicaViewModel}"
@@ -16,42 +16,48 @@
     mc:Ignorable="d">
 
     <Window.Resources>
-        <!--  Converters jÃ¡ definidos no App.xaml: StringToVisibilityConverter, InverseBooleanConverter  -->
+        <!--  Converters já definidos no App.xaml: StringToVisibilityConverter, InverseBooleanConverter  -->
 
         <!--  Estilo local para labels  -->
-        <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
-            <Setter Property="Margin" Value="0,0,0,8" />
+        <Style x:Key="LabelStyle"
+               TargetType="TextBlock">
+            <Setter Property="FontSize"
+                    Value="14"/>
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+            <Setter Property="Foreground"
+                    Value="{StaticResource TextoPrincipal}"/>
+            <Setter Property="Margin"
+                    Value="0,0,0,8"/>
         </Style>
     </Window.Resources>
 
     <Grid Margin="30">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!--  TÃ­tulo  -->
-            <RowDefinition Height="*" />
-            <!--  ConteÃºdo  -->
-            <RowDefinition Height="Auto" />
-            <!--  BotÃµes  -->
+            <RowDefinition Height="Auto"/>
+            <!--  Título  -->
+            <RowDefinition Height="*"/>
+            <!--  Conteúdo  -->
+            <RowDefinition Height="Auto"/>
+            <!--  Botões  -->
         </Grid.RowDefinitions>
 
-        <!--  TÃ­tulo  -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+        <!--  Título  -->
+        <StackPanel Grid.Row="0"
+                    Margin="0,0,0,20">
             <TextBlock
                 FontSize="24"
                 FontWeight="Bold"
                 Foreground="#3F4A3D"
-                Text="ConfiguraÃ§Ãµes da ClÃ­nica" />
+                Text="Configurações da Clínica"/>
             <TextBlock
                 Margin="0,5,0,0"
                 FontSize="13"
                 Foreground="#5A6558"
-                Text="Configure os dados da clÃ­nica que aparecerÃ£o nos documentos e PDFs" />
+                Text="Configure os dados da clínica que aparecerão nos documentos e PDFs"/>
         </StackPanel>
 
-        <!--  TabControl para organizar configuraÃ§Ãµes  -->
+        <!--  TabControl para organizar configurações  -->
         <TabControl
             Grid.Row="1"
             Margin="0,0,0,20"
@@ -60,62 +66,82 @@
             BorderThickness="1">
             <TabControl.Resources>
                 <Style TargetType="TabItem">
-                    <Setter Property="FontSize" Value="14" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                    <Setter Property="Foreground" Value="#5A6558" />
-                    <Setter Property="Padding" Value="15,8" />
-                    <Setter Property="Margin" Value="2,0" />
-                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="FontSize"
+                            Value="14"/>
+                    <Setter Property="FontWeight"
+                            Value="SemiBold"/>
+                    <Setter Property="Foreground"
+                            Value="#5A6558"/>
+                    <Setter Property="Padding"
+                            Value="15,8"/>
+                    <Setter Property="Margin"
+                            Value="2,0"/>
+                    <Setter Property="Background"
+                            Value="Transparent"/>
                     <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
-                            <Setter Property="Background" Value="{StaticResource FundoPrincipal}" />
+                        <Trigger Property="IsSelected"
+                                 Value="True">
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource TextoPrincipal}"/>
+                            <Setter Property="Background"
+                                    Value="{StaticResource FundoPrincipal}"/>
                         </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Foreground" Value="{StaticResource TextoPrincipal}" />
+                        <Trigger Property="IsMouseOver"
+                                 Value="True">
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource TextoPrincipal}"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
             </TabControl.Resources>
 
-            <!--  TAB 1: Dados da ClÃ­nica  -->
-            <TabItem Header="Dados da ClÃ­nica">
+            <!--  TAB 1: Dados da Clínica  -->
+            <TabItem Header="Dados da Clínica">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <!--  Nome da ClÃ­nica  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Nome da ClÃ­nica *" />
-                        <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding NomeClinica, UpdateSourceTrigger=PropertyChanged}" />
+                    <StackPanel Margin="20">
+                        <!--  Nome da Clínica  -->
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Nome da Clínica *"/>
+                        <TextBox Style="{StaticResource FieldTextBoxStyle}"
+                                 Text="{Binding NomeClinica, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <!--  Morada  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Morada" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Morada"/>
                         <TextBox
                             Height="60"
                             AcceptsReturn="True"
                             Style="{StaticResource FieldTextBoxStyle}"
                             Text="{Binding Morada, UpdateSourceTrigger=PropertyChanged}"
-                            TextWrapping="Wrap" />
+                            TextWrapping="Wrap"/>
 
                         <!--  Telefone  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Telefone" />
-                        <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding Telefone, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Telefone"/>
+                        <TextBox Style="{StaticResource FieldTextBoxStyle}"
+                                 Text="{Binding Telefone, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <!--  Email  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Email" />
-                        <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Email"/>
+                        <TextBox Style="{StaticResource FieldTextBoxStyle}"
+                                 Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <!--  NIPC  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="NIPC / NIF" />
-                        <TextBox Style="{StaticResource FieldTextBoxStyle}" Text="{Binding Nipc, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="NIPC / NIF"/>
+                        <TextBox Style="{StaticResource FieldTextBoxStyle}"
+                                 Text="{Binding Nipc, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <!--  Logo  -->
                         <TextBlock
-                            Margin="0,10,0,8"
+                            Margin="0,20,0,8"
                             Style="{StaticResource LabelStyle}"
-                            Text="Logo da ClÃ­nica" />
+                            Text="Logo da Clínica"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <!--  Preview do logo  -->
@@ -136,7 +162,8 @@
                                         Foreground="#5A6558"
                                         Text="Nenhum logo selecionado">
                                         <TextBlock.Visibility>
-                                            <Binding Converter="{StaticResource StringToVisibilityConverter}" Path="LogoPath">
+                                            <Binding Converter="{StaticResource StringToVisibilityConverter}"
+                                                     Path="LogoPath">
                                                 <Binding.ConverterParameter>
                                                     <Visibility>Collapsed</Visibility>
                                                 </Binding.ConverterParameter>
@@ -148,55 +175,59 @@
                                         Margin="10"
                                         Source="{Binding LogoPath}"
                                         Stretch="Uniform"
-                                        Visibility="{Binding LogoPath, Converter={StaticResource StringToVisibilityConverter}}" />
+                                        Visibility="{Binding LogoPath, Converter={StaticResource StringToVisibilityConverter}}"/>
                                 </Grid>
                             </Border>
 
-                            <!--  BotÃ£o selecionar logo  -->
+                            <!--  Botão selecionar logo  -->
                             <Button
                                 Grid.Column="1"
                                 VerticalAlignment="Center"
                                 Command="{Binding SelecionarLogoCommand}"
                                 Content="Selecionar Logo"
-                                Style="{StaticResource SecondaryButtonStyle}" />
+                                Style="{StaticResource SecondaryButtonStyle}"/>
                         </Grid>
 
                         <TextBlock
                             Margin="0,5,0,0"
                             FontSize="12"
                             Foreground="#5A6558"
-                            Text="Formatos suportados: PNG, JPG, JPEG (mÃ¡x. 2MB)" />
+                            Text="Formatos suportados: PNG, JPG, JPEG (máx. 2MB)"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
-            <!--  TAB 2: ConfiguraÃ§Ãµes de Email  -->
-            <TabItem Header="ConfiguraÃ§Ãµes de Email">
+            <!--  TAB 2: Configurações de Email  -->
+            <TabItem Header="Configurações de Email">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
                         <!--  Servidor SMTP  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Servidor SMTP *" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Servidor SMTP *"/>
                         <TextBox
                             Style="{StaticResource FieldTextBoxStyle}"
                             Text="{Binding SmtpHost, UpdateSourceTrigger=PropertyChanged}"
-                            ToolTip="Ex: smtp.gmail.com, smtp.office365.com" />
+                            ToolTip="Ex: smtp.gmail.com, smtp.office365.com"/>
 
                         <!--  Porta SMTP  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Porta SMTP *" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Porta SMTP *"/>
                         <TextBox
                             Style="{StaticResource FieldTextBoxStyle}"
                             Text="{Binding SmtpPort, UpdateSourceTrigger=PropertyChanged}"
-                            ToolTip="Ex: 587 (TLS), 465 (SSL)" />
+                            ToolTip="Ex: 587 (TLS), 465 (SSL)"/>
 
                         <!--  Email de envio  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Email de Envio *" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Email de Envio *"/>
                         <TextBox
                             Style="{StaticResource FieldTextBoxStyle}"
                             Text="{Binding SmtpFromEmail, UpdateSourceTrigger=PropertyChanged}"
-                            ToolTip="Email usado para enviar mensagens" />
+                            ToolTip="Email usado para enviar mensagens"/>
 
                         <!--  Senha / App Password  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Senha / App Password *" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Senha / App Password *"/>
                         <PasswordBox
                             x:Name="SmtpPasswordBox"
                             Height="36"
@@ -204,16 +235,17 @@
                             Padding="10,8"
                             PasswordChanged="SmtpPasswordBox_PasswordChanged"
                             Style="{StaticResource FieldPasswordBoxStyle}"
-                            ToolTip="Para Gmail, use App Password (senha de aplicaÃ§Ã£o)" />
+                            ToolTip="Para Gmail, use App Password (senha de aplicação)"/>
 
                         <!--  Nome do remetente  -->
-                        <TextBlock Style="{StaticResource LabelStyle}" Text="Nome do Remetente *" />
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="Nome do Remetente *"/>
                         <TextBox
                             Style="{StaticResource FieldTextBoxStyle}"
                             Text="{Binding SmtpFromName, UpdateSourceTrigger=PropertyChanged}"
-                            ToolTip="Nome que aparecerÃ¡ como remetente" />
+                            ToolTip="Nome que aparecerá como remetente"/>
 
-                        <!--  InformaÃ§Ã£o sobre Gmail App Password  -->
+                        <!--  Informação sobre Gmail App Password  -->
                         <Border
                             Margin="0,10,0,20"
                             Padding="12"
@@ -226,36 +258,36 @@
                                     FontSize="13"
                                     FontWeight="SemiBold"
                                     Foreground="#8B7500"
-                                    Text="â„¹ï¸ Como configurar Gmail:" />
+                                    Text="ℹ️ Como configurar Gmail:"/>
                                 <TextBlock
                                     Margin="0,5,0,0"
                                     FontSize="12"
                                     Foreground="#5A6558"
-                                    Text="1. Ative a verificaÃ§Ã£o em 2 passos na sua conta Google"
-                                    TextWrapping="Wrap" />
+                                    Text="1. Ative a verificação em 2 passos na sua conta Google"
+                                    TextWrapping="Wrap"/>
                                 <TextBlock
                                     Margin="0,2,0,0"
                                     FontSize="12"
                                     Foreground="#5A6558"
-                                    Text="2. VÃ¡ a: Conta Google &gt; SeguranÃ§a &gt; Senhas de aplicaÃ§Ãµes"
-                                    TextWrapping="Wrap" />
+                                    Text="2. Vá a: Conta Google &gt; Segurança &gt; Senhas de aplicações"
+                                    TextWrapping="Wrap"/>
                                 <TextBlock
                                     Margin="0,2,0,0"
                                     FontSize="12"
                                     Foreground="#5A6558"
                                     Text="3. Crie uma senha para 'Email' e use-a no campo acima"
-                                    TextWrapping="Wrap" />
+                                    TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
 
-                        <!--  BotÃ£o testar conexÃ£o  -->
+                        <!--  Botão testar conexão  -->
                         <Button
                             Margin="0,10,0,0"
                             HorizontalAlignment="Left"
                             Command="{Binding TestarConexaoCommand}"
-                            Content="ðŸ”Œ Testar ConexÃ£o SMTP"
+                            Content="🔌 Testar Conexão SMTP"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            ToolTip="Envia um email de teste para verificar as configuraÃ§Ãµes" />
+                            ToolTip="Envia um email de teste para verificar as configurações"/>
 
                         <!--  Mensagem de sucesso do teste  -->
                         <TextBlock
@@ -263,16 +295,16 @@
                             FontSize="13"
                             Foreground="#5CB85C"
                             Text="{Binding TesteSucessoMessage}"
-                            Visibility="{Binding TesteSucessoMessage, Converter={StaticResource StringToVisibilityConverter}}" />
+                            Visibility="{Binding TesteSucessoMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
             <!--  TAB 3: Documentos & Templates  -->
-            <TabItem Header="ðŸ“ Documentos">
+            <TabItem Header="📋 Documentos">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
-                        <!--  SecÃ§Ã£o Templates PDF  -->
+                        <!--  Secção Templates PDF  -->
                         <Border
                             Margin="0,0,0,20"
                             Padding="20"
@@ -281,24 +313,25 @@
                             BorderThickness="1"
                             CornerRadius="8">
                             <StackPanel>
-                                <StackPanel Margin="0,0,0,15" Orientation="Horizontal">
+                                <StackPanel Margin="0,0,0,15"
+                                            Orientation="Horizontal">
                                     <TextBlock
                                         Margin="0,0,10,0"
                                         FontSize="18"
-                                        Text="ðŸ“„" />
+                                        Text="📄"/>
                                     <TextBlock
                                         FontSize="16"
                                         FontWeight="SemiBold"
                                         Foreground="{StaticResource TextoPrincipal}"
-                                        Text="Templates PDF para PrescriÃ§Ãµes" />
+                                        Text="Templates PDF para Prescrições"/>
                                 </StackPanel>
 
                                 <TextBlock
                                     Margin="0,0,0,15"
                                     FontSize="12"
                                     Foreground="{StaticResource TextoSecundario}"
-                                    Text="Ficheiros PDF usados como base para prescriÃ§Ãµes naturopÃ¡ticas"
-                                    TextWrapping="Wrap" />
+                                    Text="Ficheiros PDF usados como base para prescrições naturopáticas"
+                                    TextWrapping="Wrap"/>
 
                                 <Button
                                     Padding="15,10"
@@ -313,15 +346,19 @@
                                         <TextBlock
                                             Margin="0,0,8,0"
                                             FontSize="16"
-                                            Text="âž•" />
-                                        <TextBlock FontSize="14" Text="Adicionar Template PDF" />
+                                            Text="➕"/>
+                                        <TextBlock FontSize="14"
+                                                   Text="Adicionar Template PDF"/>
                                     </StackPanel>
                                     <Button.Style>
                                         <Style TargetType="Button">
-                                            <Setter Property="Cursor" Value="Hand" />
+                                            <Setter Property="Cursor"
+                                                    Value="Hand"/>
                                             <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#879B83" />
+                                                <Trigger Property="IsMouseOver"
+                                                         Value="True">
+                                                    <Setter Property="Background"
+                                                            Value="#879B83"/>
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -339,8 +376,9 @@
                                         <TextBlock
                                             Margin="0,0,0,8"
                                             FontWeight="SemiBold"
-                                            Text="ðŸ“‚ Templates Encontrados:" />
-                                        <ItemsControl ItemsSource="{Binding TemplatesPdf}" Margin="0,0,0,8">
+                                            Text="📂 Templates Encontrados:"/>
+                                        <ItemsControl ItemsSource="{Binding TemplatesPdf}"
+                                                      Margin="0,0,0,8">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
@@ -356,13 +394,13 @@
                                         <TextBlock
                                             FontSize="12"
                                             Foreground="#999"
-                                            Text="(Procura em Templates/PDFs e Templates/)" />
+                                            Text="(Procura em Templates/PDFs e Templates/)"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
                         </Border>
 
-                        <!--  SecÃ§Ã£o Logos e Assinaturas  -->
+                        <!--  Secção Logos e Assinaturas  -->
                         <Border
                             Padding="20"
                             Background="White"
@@ -370,24 +408,25 @@
                             BorderThickness="1"
                             CornerRadius="8">
                             <StackPanel>
-                                <StackPanel Margin="0,0,0,15" Orientation="Horizontal">
+                                <StackPanel Margin="0,0,0,15"
+                                            Orientation="Horizontal">
                                     <TextBlock
                                         Margin="0,0,10,0"
                                         FontSize="18"
-                                        Text="ðŸ–¼ï¸" />
+                                        Text="🖼️"/>
                                     <TextBlock
                                         FontSize="16"
                                         FontWeight="SemiBold"
                                         Foreground="{StaticResource TextoPrincipal}"
-                                        Text="Logos e Assinaturas" />
+                                        Text="Logos e Assinaturas"/>
                                 </StackPanel>
 
                                 <TextBlock
                                     Margin="0,0,0,15"
                                     FontSize="12"
                                     Foreground="{StaticResource TextoSecundario}"
-                                    Text="Imagens usadas em cabeÃ§alhos de documentos (logo, assinatura digital)"
-                                    TextWrapping="Wrap" />
+                                    Text="Imagens usadas em cabeçalhos de documentos (logo, assinatura digital)"
+                                    TextWrapping="Wrap"/>
 
                                 <Border
                                     Padding="12"
@@ -399,12 +438,12 @@
                                         <TextBlock
                                             Margin="0,0,8,0"
                                             FontSize="14"
-                                            Text="â„¹ï¸" />
+                                            Text="ℹ️"/>
                                         <TextBlock
                                             FontSize="11"
                                             Foreground="#92400E"
-                                            Text="Configure o logo da clÃ­nica na aba 'Dados da ClÃ­nica' acima"
-                                            TextWrapping="Wrap" />
+                                            Text="Configure o logo da clínica na aba 'Dados da Clínica' acima"
+                                            TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -414,7 +453,7 @@
             </TabItem>
 
             <!--  TAB 4: BACKUPS  -->
-            <TabItem Header="ðŸ’¾ Backups">
+            <TabItem Header="💾 Backups">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
                         <TextBlock
@@ -422,7 +461,7 @@
                             FontSize="18"
                             FontWeight="SemiBold"
                             Foreground="{StaticResource TextoPrincipal}"
-                            Text="ðŸ’¾ GestÃ£o de Backups" />
+                            Text="💾 Gestão de Backups"/>
 
                         <!--  Criar Backup  -->
                         <Border
@@ -437,25 +476,25 @@
                                     Margin="0,0,0,10"
                                     FontSize="15"
                                     FontWeight="SemiBold"
-                                    Text="ðŸ“¦ Criar Backup" />
+                                    Text="📦 Criar Backup"/>
                                 <TextBlock
                                     Margin="0,0,0,15"
                                     FontSize="12"
                                     Foreground="#666"
                                     Text="Cria um backup completo da base de dados em formato ZIP"
-                                    TextWrapping="Wrap" />
+                                    TextWrapping="Wrap"/>
                                 <StackPanel Orientation="Horizontal">
                                     <Button
                                         Padding="12,8"
                                         Command="{Binding CriarBackupCommand}"
-                                        Content="ðŸ’¾ Criar Backup Agora"
-                                        Style="{StaticResource PrimaryButtonStyle}" />
+                                        Content="💾 Criar Backup Agora"
+                                        Style="{StaticResource PrimaryButtonStyle}"/>
                                     <Button
                                         Margin="10,0,0,0"
                                         Padding="12,8"
                                         Command="{Binding AbrirPastaBackupsCommand}"
-                                        Content="ðŸ“‚ Abrir Pasta"
-                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                        Content="📂 Abrir Pasta"
+                                        Style="{StaticResource SecondaryButtonStyle}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -469,29 +508,30 @@
                             BorderThickness="2"
                             CornerRadius="8">
                             <StackPanel>
-                                <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                                <StackPanel Margin="0,0,0,10"
+                                            Orientation="Horizontal">
                                     <TextBlock
                                         FontSize="18"
                                         FontWeight="Bold"
                                         Foreground="#F57C00"
-                                        Text="âš ï¸ " />
+                                        Text="⚠️ "/>
                                     <TextBlock
                                         FontSize="15"
                                         FontWeight="SemiBold"
                                         Foreground="#E65100"
-                                        Text="Restaurar Backup" />
+                                        Text="Restaurar Backup"/>
                                 </StackPanel>
                                 <TextBlock
                                     Margin="0,0,0,15"
                                     FontSize="12"
                                     Foreground="#BF360C"
-                                    Text="ATENÃ‡ÃƒO: Restaurar irÃ¡ SUBSTITUIR todos os dados atuais!"
-                                    TextWrapping="Wrap" />
+                                    Text="ATENÇÃO: Restaurar irá SUBSTITUIR todos os dados atuais!"
+                                    TextWrapping="Wrap"/>
                                 <Button
                                     Padding="12,8"
                                     Command="{Binding RestaurarBackupCommand}"
-                                    Content="ðŸ“¥ Restaurar Backup..."
-                                    Style="{StaticResource SecondaryButtonStyle}" />
+                                    Content="📥 Restaurar Backup..."
+                                    Style="{StaticResource SecondaryButtonStyle}"/>
                             </StackPanel>
                         </Border>
 
@@ -503,17 +543,18 @@
                             BorderThickness="1"
                             CornerRadius="8">
                             <StackPanel>
-                                <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                                <StackPanel Margin="0,0,0,10"
+                                            Orientation="Horizontal">
                                     <TextBlock
                                         FontSize="15"
                                         FontWeight="SemiBold"
-                                        Text="ðŸ“‹ Backups DisponÃ­veis" />
+                                        Text="📋 Backups Disponíveis"/>
                                     <Button
                                         Margin="10,0,0,0"
                                         Padding="6,4"
                                         Command="{Binding AtualizarListaBackupsCommand}"
-                                        Content="ðŸ”„"
-                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                        Content="🔄"
+                                        Style="{StaticResource SecondaryButtonStyle}"/>
                                 </StackPanel>
                                 <DataGrid
                                     Height="180"
@@ -525,22 +566,22 @@
                                         <DataGridTextColumn
                                             Width="*"
                                             Binding="{Binding NomeFicheiro}"
-                                            Header="Nome" />
+                                            Header="Nome"/>
                                         <DataGridTextColumn
                                             Width="140"
                                             Binding="{Binding DataFormatada}"
-                                            Header="Data" />
+                                            Header="Data"/>
                                         <DataGridTextColumn
                                             Width="80"
                                             Binding="{Binding TamanhoFormatado}"
-                                            Header="Tamanho" />
+                                            Header="Tamanho"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                                 <TextBlock
                                     Margin="0,10,0,0"
                                     FontSize="11"
                                     Foreground="#666"
-                                    Text="ðŸ’¡ Os backups sÃ£o criados automaticamente ao fechar a aplicaÃ§Ã£o" />
+                                    Text="💡 Os backups são criados automaticamente ao fechar a aplicação"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -548,12 +589,12 @@
             </TabItem>
         </TabControl>
 
-        <!--  BotÃµes de aÃ§Ã£o  -->
+        <!--  Botões de ação  -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!--  Mensagem de erro  -->
@@ -563,7 +604,7 @@
                 FontSize="13"
                 Foreground="#D9534F"
                 Text="{Binding ErrorMessage}"
-                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
+                Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
 
             <!--  BotÃ£o Cancelar  -->
             <Button
@@ -571,7 +612,7 @@
                 Margin="0,0,10,0"
                 Click="Cancelar_Click"
                 Content="Cancelar"
-                Style="{StaticResource SecondaryButtonStyle}" />
+                Style="{StaticResource SecondaryButtonStyle}"/>
 
             <!--  BotÃ£o Guardar  -->
             <Button
@@ -579,7 +620,7 @@
                 Command="{Binding GuardarCommand}"
                 Content="Guardar"
                 IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                Style="{StaticResource PrimaryButtonStyle}" />
+                Style="{StaticResource PrimaryButtonStyle}"/>
         </Grid>
     </Grid>
 </Window>

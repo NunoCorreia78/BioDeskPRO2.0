@@ -111,7 +111,7 @@ public class EmailService : IEmailService
             return new EmailResult
             {
                 Sucesso = false,
-                AdicionadoNaFila = false, // âš ï¸ NÃƒO foi adicionado Ã  fila - estÃ¡ na BD como Agendado
+                AdicionadoNaFila = false, // âš ï¸ NÃƒO foi adicionado Ã  fila - está na BD como Agendado
                 Mensagem = $"âŒ Erro ao enviar: {ex.Message}"
             };
         }
@@ -135,6 +135,32 @@ public class EmailService : IEmailService
         // âœ… Criar scope para resolver DbContext
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<BioDeskDbContext>();
+        
+        // 🔍 DIAGNÓSTICO: Verificar TODOS os emails na BD primeiro
+        var todosEmails = await dbContext.Comunicacoes
+            .Select(c => new { c.Id, c.Status, c.IsEnviado, c.TentativasEnvio, c.ProximaTentativa })
+            .ToListAsync();
+        _logger.LogWarning("🔍 [ProcessarFila] TOTAL de emails na BD: {Count}", todosEmails.Count);
+        foreach (var email in todosEmails)
+        {
+            _logger.LogWarning("   Email ID {Id}: Status={Status}, IsEnviado={IsEnviado}, Tentativas={Tentativas}, ProximaTentativa={Proxima}",
+                email.Id, email.Status, email.IsEnviado, email.TentativasEnvio, email.ProximaTentativa);
+        }
+        
+        // 🔍 DIAGNÓSTICO: Verificar filtros individualmente
+        var agora = DateTime.Now;
+        _logger.LogWarning("🕐 [ProcessarFila] DateTime.Now = {Now}", agora);
+        
+        var naoEnviados = await dbContext.Comunicacoes.CountAsync(c => !c.IsEnviado);
+        var agendados = await dbContext.Comunicacoes.CountAsync(c => c.Status == StatusComunicacao.Agendado);
+        var tentativasBaixas = await dbContext.Comunicacoes.CountAsync(c => c.TentativasEnvio < 3);
+        var prontoParaEnvio = await dbContext.Comunicacoes.CountAsync(c => !c.ProximaTentativa.HasValue || c.ProximaTentativa.Value <= agora);
+        
+        _logger.LogWarning("📊 [ProcessarFila] Filtros:");
+        _logger.LogWarning("   !IsEnviado: {Count} emails", naoEnviados);
+        _logger.LogWarning("   Status==Agendado: {Count} emails", agendados);
+        _logger.LogWarning("   TentativasEnvio<3: {Count} emails", tentativasBaixas);
+        _logger.LogWarning("   ProximaTentativa<=Now: {Count} emails", prontoParaEnvio);
 
         // Buscar mensagens na fila (nÃ£o enviadas, com tentativas < 3, e prÃ³xima tentativa <= agora)
         var mensagensNaFila = await dbContext.Comunicacoes
@@ -253,7 +279,7 @@ public class EmailService : IEmailService
                 <html>
                 <body style='font-family: Arial, sans-serif; padding: 20px;'>
                     <h2 style='color: #059669;'>âœ… ConfiguraÃ§Ã£o de Email Bem-Sucedida!</h2>
-                    <p>ParabÃ©ns! O seu sistema de email do <strong>BioDeskPro</strong> estÃ¡ configurado corretamente.</p>
+                    <p>ParabÃ©ns! O seu sistema de email do <strong>BioDeskPro</strong> está configurado corretamente.</p>
                     <hr style='border: 1px solid #E3E9DE; margin: 20px 0;'/>
                     <p><strong>Detalhes da ConfiguraÃ§Ã£o:</strong></p>
                     <ul>
@@ -263,7 +289,7 @@ public class EmailService : IEmailService
                     </ul>
                     <p style='color: #6B7280; font-size: 12px; margin-top: 30px;'>
                         Este Ã© um email de teste automÃ¡tico do BioDeskPro.<br/>
-                        Se recebeu esta mensagem, significa que estÃ¡ tudo a funcionar perfeitamente! ðŸŽ‰
+                        Se recebeu esta mensagem, significa que está tudo a funcionar perfeitamente! ðŸŽ‰
                     </p>
                 </body>
                 </html>";
@@ -329,36 +355,62 @@ public class EmailService : IEmailService
     /// </summary>
     private async Task EnviarViaSMTPAsync(EmailMessage message)
     {
-        using var smtpClient = new SmtpClient(SmtpHost, SmtpPort)
+        _logger.LogInformation("📧 [EnviarViaSMTP] Iniciando envio para {To}", message.To);
+        _logger.LogInformation("   Host: {Host}:{Port}, From: {From}", SmtpHost, SmtpPort, FromEmail);
+        
+        try
         {
-            Credentials = new NetworkCredential(SmtpUsername, SmtpPassword),
-            EnableSsl = true
-        };
-
-        using var mailMessage = new MailMessage
-        {
-            From = new MailAddress(FromEmail, FromName),
-            Subject = message.Subject,
-            Body = message.Body,
-            IsBodyHtml = message.IsHtml
-        };
-
-        mailMessage.To.Add(new MailAddress(message.To, message.ToName ?? string.Empty));
-
-        // Adicionar anexos
-        foreach (var attachmentPath in message.Attachments)
-        {
-            if (System.IO.File.Exists(attachmentPath))
+            using var smtpClient = new SmtpClient(SmtpHost, SmtpPort)
             {
-                var attachment = new Attachment(attachmentPath);
-                mailMessage.Attachments.Add(attachment);
-            }
-            else
+                Credentials = new NetworkCredential(SmtpUsername, SmtpPassword),
+                EnableSsl = true,
+                Timeout = 30000 // 30 segundos timeout
+            };
+
+            using var mailMessage = new MailMessage
             {
-                _logger.LogWarning("âš ï¸ Anexo nÃ£o encontrado: {Path}", attachmentPath);
+                From = new MailAddress(FromEmail, FromName),
+                Subject = message.Subject,
+                Body = message.Body,
+                IsBodyHtml = message.IsHtml
+            };
+
+            mailMessage.To.Add(new MailAddress(message.To, message.ToName ?? string.Empty));
+            
+            _logger.LogInformation("   Anexos: {Count}", message.Attachments.Count);
+
+            // Adicionar anexos
+            foreach (var attachmentPath in message.Attachments)
+            {
+                if (System.IO.File.Exists(attachmentPath))
+                {
+                    var attachment = new Attachment(attachmentPath);
+                    mailMessage.Attachments.Add(attachment);
+                    _logger.LogInformation("   ✅ Anexo OK: {File}", System.IO.Path.GetFileName(attachmentPath));
+                }
+                else
+                {
+                    _logger.LogWarning("   ⚠️ Anexo não encontrado: {Path}", attachmentPath);
+                    throw new FileNotFoundException($"Anexo não encontrado: {attachmentPath}");
+                }
             }
+
+            _logger.LogInformation("📤 [EnviarViaSMTP] Enviando via SMTP...");
+            await smtpClient.SendMailAsync(mailMessage);
+            _logger.LogInformation("✅ [EnviarViaSMTP] Email enviado com SUCESSO!");
         }
-
-        await smtpClient.SendMailAsync(mailMessage);
+        catch (SmtpException smtpEx)
+        {
+            _logger.LogError("❌ [EnviarViaSMTP] SMTP Exception: {Code} - {Message}", smtpEx.StatusCode, smtpEx.Message);
+            _logger.LogError("   Stack: {Stack}", smtpEx.StackTrace);
+            throw; // Re-lançar para o caller tratar
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("❌ [EnviarViaSMTP] Exception: {Type} - {Message}", ex.GetType().Name, ex.Message);
+            _logger.LogError("   Stack: {Stack}", ex.StackTrace);
+            throw; // Re-lançar para o caller tratar
+        }
     }
+
 }

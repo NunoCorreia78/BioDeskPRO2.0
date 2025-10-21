@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BioDesk.Data.Repositories;
@@ -12,12 +13,12 @@ namespace BioDesk.Data.Repositories;
 public interface IRepository<TEntity> where TEntity : class
 {
     // === QUERIES ===
-    Task<TEntity?> GetByIdAsync(int id);
-    Task<IEnumerable<TEntity>> GetAllAsync();
-    Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate);
-    Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
-    Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate);
-    Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null);
+    Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default);
 
     // === COMMANDS ===
     Task<TEntity> AddAsync(TEntity entity);

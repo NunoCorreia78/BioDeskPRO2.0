@@ -24,6 +24,7 @@ public class IridologyService : IIridologyService
     private readonly ILogger<IridologyService> _logger;
     private readonly Dictionary<string, IridologyMap> _cacheMapas = new();
     private readonly string _caminhoJsonBase;
+    private double _rotationOffsetDegrees = 0.0;
 
     public IridologyService(ILogger<IridologyService> logger)
     {
@@ -47,6 +48,13 @@ public class IridologyService : IIridologyService
         {
             _logger.LogError("❌ PASTA NÃO EXISTE: {Caminho}", caminhoResolvido);
         }
+    }
+
+    // Expor propriedade para calibragem em runtime
+    public double RotationOffsetDegrees
+    {
+        get => _rotationOffsetDegrees;
+        set => _rotationOffsetDegrees = value;
     }
 
     /// <summary>
@@ -129,8 +137,11 @@ public class IridologyService : IIridologyService
         // Raio em pixels (raio normalizado 0-1 × raio da íris)
         var raioPixels = polarPoint.Raio * calibracao.RaioIris;
 
-        // Converter ângulo de graus para radianos
-        var anguloRad = polarPoint.Angulo * Math.PI / 180.0;
+        // Converter do sistema MATH do JSON (0°=3h, sentido anti-horário)
+        // para o sistema visual usado pelo canvas (0°=12h). Aplicar também o offset
+        // de rotação definido em runtime para calibragem fina.
+        var anguloCorrigido = polarPoint.Angulo - 90.0 + _rotationOffsetDegrees;
+        var anguloRad = anguloCorrigido * Math.PI / 180.0;
 
         // Coordenadas cartesianas
         var x = centroX + raioPixels * Math.Cos(anguloRad);

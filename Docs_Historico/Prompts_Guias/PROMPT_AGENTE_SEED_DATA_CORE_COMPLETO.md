@@ -783,7 +783,7 @@ public static class ItemBancoCoreValidator
 
 ---
 
-## � FORMATO DE ENTREGA (OBRIGATÓRIO)
+## 📋 FORMATO DE ENTREGA (OBRIGATÓRIO)
 
 ### **Output Esperado**: Ficheiro ÚNICO em bloco de código markdown
 

@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -15,7 +16,7 @@ public partial class CameraCaptureWindow : Window
     private bool _isPreviewRunning = false;
 
     public string? CapturedImagePath { get; private set; }
-    
+
     /// <summary>
     /// ✅ NOVO: Olho selecionado pelo utilizador (Direito/Esquerdo)
     /// </summary>
@@ -26,6 +27,29 @@ public partial class CameraCaptureWindow : Window
         InitializeComponent();
         _cameraService = cameraService;
         _cameraService.FrameAvailable += OnFrameAvailable;
+
+        // ✅ NOVO: Auto-start do preview quando janela carregar
+        Loaded += async (s, e) => await AutoStartPreviewAsync();
+    }
+
+    /// <summary>
+    /// ✅ NOVO: Inicia preview automaticamente ao abrir a janela
+    /// </summary>
+    private async Task AutoStartPreviewAsync()
+    {
+        try
+        {
+            await _cameraService.StartPreviewAsync(_selectedCameraIndex);
+            _isPreviewRunning = true;
+
+            StartPreviewButton.Content = "⏹️ Parar Preview";
+            StartPreviewButton.Background = System.Windows.Media.Brushes.OrangeRed;
+            CaptureButton.IsEnabled = true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erro ao iniciar preview automático: {ex.Message}", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void OnFrameAvailable(object? sender, byte[] frameBytes)
@@ -47,7 +71,7 @@ public partial class CameraCaptureWindow : Window
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                 bitmapImage.StreamSource = ms;
                 bitmapImage.EndInit();
-                
+
                 // ✅ CORREÇÃO CRÍTICA 2: SEMPRE chamar .Freeze() para uso cross-thread
                 // Sem Freeze(), WPF não permite acesso de outras threads → "object in use"
                 bitmapImage.Freeze();
@@ -66,18 +90,35 @@ public partial class CameraCaptureWindow : Window
         try
         {
             StartPreviewButton.IsEnabled = false;
-            CaptureButton.IsEnabled = false;
 
-            await _cameraService.StartPreviewAsync(_selectedCameraIndex);
-            _isPreviewRunning = true;
+            if (_isPreviewRunning)
+            {
+                // Parar preview
+                await _cameraService.StopPreviewAsync();
+                _isPreviewRunning = false;
 
-            StartPreviewButton.Content = "⏹️ Parar Preview";
-            StartPreviewButton.Background = System.Windows.Media.Brushes.OrangeRed;
-            CaptureButton.IsEnabled = true;
+                StartPreviewButton.Content = "▶️ Iniciar Preview";
+                StartPreviewButton.Background = System.Windows.Media.Brushes.LightGray;
+                CaptureButton.IsEnabled = false;
+            }
+            else
+            {
+                // Iniciar preview
+                CaptureButton.IsEnabled = false;
+                await _cameraService.StartPreviewAsync(_selectedCameraIndex);
+                _isPreviewRunning = true;
+
+                StartPreviewButton.Content = "⏹️ Parar Preview";
+                StartPreviewButton.Background = System.Windows.Media.Brushes.OrangeRed;
+                CaptureButton.IsEnabled = true;
+            }
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Erro ao iniciar preview: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Erro ao alternar preview: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
             StartPreviewButton.IsEnabled = true;
         }
     }
@@ -88,22 +129,21 @@ public partial class CameraCaptureWindow : Window
         {
             CaptureButton.IsEnabled = false;
 
-            // ✅ CORREÇÃO CRÍTICA 3: SEMPRE parar preview IMEDIATAMENTE após captura
-            // Deve ser ANTES de MessageBox para prevenir deadlock + liberta recursos
-            if (_isPreviewRunning)
-            {
-                await _cameraService.StopPreviewAsync();
-                _isPreviewRunning = false;
-            }
-
-            // Capturar frame atual (já parado o preview, frame está em buffer)
+            // ✅ CORREÇÃO: Capturar frame ANTES de parar preview (RealCameraService precisa de preview ativo)
             _capturedFrameBytes = await _cameraService.CaptureFrameAsync();
 
             if (_capturedFrameBytes == null)
             {
-                MessageBox.Show("Falha ao capturar frame.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Falha ao capturar frame. Certifique-se de que o preview está ativo.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
                 CaptureButton.IsEnabled = true;
                 return;
+            }
+
+            // ✅ Parar preview DEPOIS de capturar com sucesso
+            if (_isPreviewRunning)
+            {
+                await _cameraService.StopPreviewAsync();
+                _isPreviewRunning = false;
             }
 
             // Confirmar captura (agora SEM preview a correr)
@@ -195,3 +235,4 @@ public partial class CameraCaptureWindow : Window
         base.OnClosed(e);
     }
 }
+

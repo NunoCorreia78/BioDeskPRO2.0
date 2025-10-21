@@ -19,6 +19,7 @@ public sealed class RealCameraService : ICameraService, IDisposable
     private CameraInfo? _activeCamera;
     private Bitmap? _lastCapturedFrame;
     private VideoCaptureDevice? _videoSource;
+    private readonly object _frameLock = new();
     private bool _disposed;
 
     public event EventHandler<byte[]>? FrameAvailable;
@@ -132,13 +133,30 @@ public sealed class RealCameraService : ICameraService, IDisposable
             var croppedFrame = CropToSquare(frame);
             frame.Dispose();
 
-            // Guardar última captura (já em formato quadrado)
-            _lastCapturedFrame?.Dispose();
-            _lastCapturedFrame = croppedFrame;
+            // Guardar última captura (já em formato quadrado) de forma thread-safe
+            Bitmap? eventBitmap = null;
+            lock (_frameLock)
+            {
+                _lastCapturedFrame?.Dispose();
+                // Clonar para garantir que o bitmap que guardamos não seja alterado externamente
+                _lastCapturedFrame = (Bitmap)croppedFrame.Clone();
 
-            // Converter para byte[] e emitir evento
-            byte[] frameBytes = BitmapToByteArray(croppedFrame);
-            FrameAvailable?.Invoke(this, frameBytes);
+                // Criar uma cópia dedicada para o evento para evitar races com _lastCapturedFrame
+                eventBitmap = (Bitmap)_lastCapturedFrame.Clone();
+            }
+
+            try
+            {
+                // Converter para byte[] a partir da cópia dedicada (sem risco de race)
+                byte[] frameBytes = BitmapToByteArray(eventBitmap);
+                FrameAvailable?.Invoke(this, frameBytes);
+            }
+            finally
+            {
+                // Dispor do croppedFrame original e da cópia do evento
+                eventBitmap?.Dispose();
+                croppedFrame.Dispose();
+            }
         }
         catch
         {
@@ -216,26 +234,58 @@ public sealed class RealCameraService : ICameraService, IDisposable
         if (!_isPreviewRunning || _lastCapturedFrame == null)
             return Task.FromResult<byte[]?>(null);
 
-        // Retornar último frame capturado
-        byte[] frameBytes = BitmapToByteArray(_lastCapturedFrame);
-        return Task.FromResult<byte[]?>(frameBytes);
+        // Clonar o bitmap enquanto protegido por lock para evitar
+        // que o frame seja alterado/descartado por outro thread
+        Bitmap? clone = null;
+        lock (_frameLock)
+        {
+            if (_lastCapturedFrame == null)
+                return Task.FromResult<byte[]?>(null);
+
+            clone = (Bitmap)_lastCapturedFrame.Clone();
+        }
+
+        try
+        {
+            // Converter a cópia para bytes (sem risco de race)
+            byte[] frameBytes = BitmapToByteArray(clone);
+            return Task.FromResult<byte[]?>(frameBytes);
+        }
+        finally
+        {
+            clone?.Dispose();
+        }
     }
 
     public Task<string> SaveCapturedFrameAsync(string folderPath, string fileName)
     {
-        if (_lastCapturedFrame == null)
-            throw new InvalidOperationException("Nenhum frame capturado disponível.");
+        Bitmap? clone;
+        lock (_frameLock)
+        {
+            if (_lastCapturedFrame == null)
+                throw new InvalidOperationException("Nenhum frame capturado disponível.");
 
-        // Criar pasta se não existir
-        Directory.CreateDirectory(folderPath);
+            // Clonar sob lock para garantir que o bitmap não é alterado enquanto gravamos
+            clone = (Bitmap)_lastCapturedFrame.Clone();
+        }
 
-        // Caminho completo
-        var fullPath = Path.Combine(folderPath, fileName);
+        try
+        {
+            // Criar pasta se não existir
+            Directory.CreateDirectory(folderPath);
 
-        // Guardar como JPEG
-        _lastCapturedFrame.Save(fullPath, ImageFormat.Jpeg);
+            // Caminho completo
+            var fullPath = Path.Combine(folderPath, fileName);
 
-        return Task.FromResult(fullPath);
+            // Guardar como JPEG usando a cópia
+            clone.Save(fullPath, ImageFormat.Jpeg);
+
+            return Task.FromResult(fullPath);
+        }
+        finally
+        {
+            clone?.Dispose();
+        }
     }
 
     private byte[] BitmapToByteArray(Bitmap bitmap)

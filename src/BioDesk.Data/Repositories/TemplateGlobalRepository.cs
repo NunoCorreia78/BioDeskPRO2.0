@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using BioDesk.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -68,12 +69,12 @@ public class TemplateGlobalRepository : Repository<TemplateGlobal>, ITemplateGlo
     /// <summary>
     /// Obter todos (sem soft-deleted)
     /// </summary>
-    public override async Task<IEnumerable<TemplateGlobal>> GetAllAsync()
+    public override async Task<IEnumerable<TemplateGlobal>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet
             .Where(t => !t.IsDeleted)
             .OrderBy(t => t.Categoria)
             .ThenBy(t => t.Nome)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 }

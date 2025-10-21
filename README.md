@@ -330,7 +330,7 @@ _pacienteService.SetPacienteAtivo(paciente);
 _navigationService.NavigateTo("FichaPaciente");
 ```
 
-## � Protocolo USB TiePie HS3
+## 🔌 Protocolo USB TiePie HS3
 
 O BioDeskPro2 implementa **comunicação USB direta** com o osciloscópio TiePie Handyscope HS3 através de **DeviceIoControl** (Win32 API), **sem dependência** da biblioteca `hs3.dll`.
 
@@ -462,7 +462,7 @@ public async Task Test_OpenDevice_WithRealHardware() { /* ... */ }
 - **PR #14**: API Monitor analysis completo (7 ficheiros, 112 KB)
 - **Source code**: `src/BioDesk.Services/Hardware/TiePie/Protocol/`
 
-## �📝 Próximos Passos
+## 🎯📝 Próximos Passos
 
 1. **Ficha do Paciente**: View detalhada com edição
 2. **Lista de Pacientes**: View com pesquisa avançada
