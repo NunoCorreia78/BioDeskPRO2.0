@@ -308,9 +308,7 @@
                 MouseLeave="MapaOverlayCanvas_MouseLeave">
                             <Canvas.RenderTransform>
                                 <TransformGroup>
-                                    <ScaleTransform ScaleY="-1"
-                                                    CenterX="{Binding CentroIrisX}"
-                                                    CenterY="{Binding CentroIrisY}"/>
+                                    <RotateTransform Angle="-90" CenterX="800" CenterY="800"/>
                                     <ScaleTransform
                                         ScaleX="{Binding MapaZoom}"
                                         ScaleY="{Binding MapaZoom}"
