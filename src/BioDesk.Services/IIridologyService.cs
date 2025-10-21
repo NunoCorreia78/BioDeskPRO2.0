@@ -62,4 +62,11 @@ public interface IIridologyService
     /// <param name="canvasHeight">Altura do canvas (padrão: 600px)</param>
     /// <returns>Zona detectada ou null</returns>
     IridologyZone? DetectarZonaCliqueCanvasFixo(double clickX, double clickY, IridologyMap mapa, double canvasWidth = 600, double canvasHeight = 600);
+
+    /// <summary>
+    /// Offset de rotação (em graus) aplicado à conversão polar→cartesiano.
+    /// Permite calibrar o mapa em runtime (ex.: deslizador na UI).
+    /// Positivo = roda no sentido horário.
+    /// </summary>
+    double RotationOffsetDegrees { get; set; }
 }

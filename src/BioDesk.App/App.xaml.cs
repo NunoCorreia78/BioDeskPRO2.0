@@ -576,8 +576,8 @@ Inner Exceptions:
         // ViewModels das Abas
         services.AddTransient<DeclaracaoSaudeViewModel>();
         services.AddTransient<ConsentimentosViewModel>();
-        services.AddTransient<RegistoConsultasViewModel>(); // ABA 4: Registo de Sess├Áes
-        services.AddTransient<IrisdiagnosticoViewModel>(); // Ô£à ABA 5: Irisdiagn├│stico
+        services.AddTransient<RegistoConsultasViewModel>(); // ABA 4: Registo de Sessões
+        services.AddTransient<IrisdiagnosticoViewModel>(); // ABA 5: Irisdiagnóstico
         services.AddTransient<ComunicacaoViewModel>();
         services.AddTransient<BioDesk.ViewModels.FichaPaciente.TerapiasBioenergeticasViewModel>();
         services.AddTransient<TerapiasBioenergeticasUserControlViewModel>();

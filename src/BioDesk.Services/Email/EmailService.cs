@@ -111,7 +111,7 @@ public class EmailService : IEmailService
             return new EmailResult
             {
                 Sucesso = false,
-                AdicionadoNaFila = false, // âš ï¸ NÃƒO foi adicionado Ã  fila - estÃ¡ na BD como Agendado
+                AdicionadoNaFila = false, // âš ï¸ NÃƒO foi adicionado Ã  fila - está na BD como Agendado
                 Mensagem = $"âŒ Erro ao enviar: {ex.Message}"
             };
         }
@@ -253,7 +253,7 @@ public class EmailService : IEmailService
                 <html>
                 <body style='font-family: Arial, sans-serif; padding: 20px;'>
                     <h2 style='color: #059669;'>âœ… ConfiguraÃ§Ã£o de Email Bem-Sucedida!</h2>
-                    <p>ParabÃ©ns! O seu sistema de email do <strong>BioDeskPro</strong> estÃ¡ configurado corretamente.</p>
+                    <p>ParabÃ©ns! O seu sistema de email do <strong>BioDeskPro</strong> está configurado corretamente.</p>
                     <hr style='border: 1px solid #E3E9DE; margin: 20px 0;'/>
                     <p><strong>Detalhes da ConfiguraÃ§Ã£o:</strong></p>
                     <ul>
@@ -263,7 +263,7 @@ public class EmailService : IEmailService
                     </ul>
                     <p style='color: #6B7280; font-size: 12px; margin-top: 30px;'>
                         Este Ã© um email de teste automÃ¡tico do BioDeskPro.<br/>
-                        Se recebeu esta mensagem, significa que estÃ¡ tudo a funcionar perfeitamente! ðŸŽ‰
+                        Se recebeu esta mensagem, significa que está tudo a funcionar perfeitamente! ðŸŽ‰
                     </p>
                 </body>
                 </html>";

@@ -20,8 +20,8 @@ Todos os 3 botões estavam empilhados na coluna 0 (sobreposição total):
     </Grid.ColumnDefinitions>
 
     <Button Grid.Column="0" Content="➕ Adicionar"/>  <!-- ✅ OK -->
-    <Button Content="� Capturar"/>                    <!-- ❌ SEM Grid.Column (fica em 0) -->
-    <Button Content="�🗑️ Remover"/>                   <!-- ❌ SEM Grid.Column (fica em 0) -->
+    <Button Content="📷 Capturar"/>                    <!-- ❌ SEM Grid.Column (fica em 0) -->
+    <Button Content="🗑️ Remover"/>                   <!-- ❌ SEM Grid.Column (fica em 0) -->
 </Grid>
 ```
 
@@ -30,8 +30,8 @@ Todos os 3 botões estavam empilhados na coluna 0 (sobreposição total):
 ---
 
 ### 2. **Ícones UTF-8 Corrompidos** ❌
-- `�` ao invés de 📷 (câmera)
-- `�🗑️` ao invés de 🗑️ (lixeira)
+- `📷` ao invés de 📷 (câmera)
+- `🗑️` ao invés de 🗑️ (lixeira)
 
 **Causa**: Problemas de encoding ao reconstruir ficheiro XAML.
 

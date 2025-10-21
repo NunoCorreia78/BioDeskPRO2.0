@@ -20,7 +20,7 @@ using BioDesk.ViewModels.Validators;
 namespace BioDesk.ViewModels;
 
 /// <summary>
-/// ConfiguracaoClinicaViewModel - ViewModel para configuraÃ§Ã£o da clÃ­nica
+/// ConfiguracaoClinicaViewModel - ViewModel para configuração da clínica
 /// Permite editar: Nome, Morada, Telefone, Email, NIPC, Logo
 /// Singleton pattern: sempre carrega/salva ConfiguracaoClinica com Id=1
 /// </summary>
@@ -33,10 +33,10 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     private readonly BioDesk.Services.Templates.ITemplatesPdfService? _templatesPdfService;
     private ConfiguracaoClinica? _configuracaoOriginal; // Para guardar logo antigo
 
-    #region === PROPRIEDADES - DADOS DA CLÃNICA ===
+    #region === PROPRIEDADES - DADOS DA CLÍNICA ===
 
     [ObservableProperty]
-    private string _nomeClinica = "Minha ClÃ­nica";
+    private string _nomeClinica = "Minha Clínica";
 
     [ObservableProperty]
     private string? _morada;
@@ -511,7 +511,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 {
                     From = new System.Net.Mail.MailAddress(SmtpFromEmail ?? "", SmtpFromName ?? "BioDeskPro"),
                     Subject = "ðŸ”Œ Teste de ConexÃ£o SMTP - BioDeskPro",
-                    Body = $"Este Ã© um email de teste enviado em {DateTime.Now:dd/MM/yyyy HH:mm:ss}.\n\nâœ… Se recebeu este email, a configuraÃ§Ã£o SMTP estÃ¡ correta!",
+                    Body = $"Este Ã© um email de teste enviado em {DateTime.Now:dd/MM/yyyy HH:mm:ss}.\n\nâœ… Se recebeu este email, a configuraÃ§Ã£o SMTP está correta!",
                     IsBodyHtml = false
                 };
 
@@ -616,7 +616,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     {
         if (_backupService == null)
         {
-            MessageBox.Show("âš ï¸ ServiÃ§o de backup nÃ£o disponÃ­vel.", "Backup", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("âš ï¸ ServiÃ§o de backup nÃ£o disponível.", "Backup", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -744,7 +744,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             }
             else
             {
-                UltimoBackupInfo = "Nenhum backup disponÃ­vel";
+                UltimoBackupInfo = "Nenhum backup disponível";
             }
         }
         catch (Exception ex)

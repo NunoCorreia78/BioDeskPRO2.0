@@ -133,8 +133,8 @@ public partial class ComunicacaoViewModel : ViewModelBase
     public ObservableCollection<string> Templates { get; } = new()
     {
         "Envio de Documentos", // â­ NOVO: Template para anexar documentos
-        "PrescriÃ§Ã£o",
-        "ConfirmaÃ§Ã£o de Consulta",
+        "prescrição",
+        "Confirmação de Consulta",
         "Follow-up",
         "Lembrete",
         "Personalizado"
@@ -205,8 +205,8 @@ public partial class ComunicacaoViewModel : ViewModelBase
         Assunto = value switch
         {
             "Envio de Documentos" => "DocumentaÃ§Ã£o Anexa", // â­ NOVO
-            "PrescriÃ§Ã£o" => "PrescriÃ§Ã£o de Tratamento",
-            "ConfirmaÃ§Ã£o de Consulta" => "ConfirmaÃ§Ã£o de Consulta",
+            "prescrição" => "prescrição de Tratamento",
+            "Confirmação de Consulta" => "Confirmação de Consulta",
             "Follow-up" => "Acompanhamento de Tratamento",
             "Lembrete" => "Lembrete",
             _ => string.Empty
@@ -214,33 +214,33 @@ public partial class ComunicacaoViewModel : ViewModelBase
 
         Corpo = value switch
         {
-            "Envio de Documentos" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Envio de Documentos" => $@"Olá {PacienteAtual.NomeCompleto},
 
-Conforme solicitado, segue em anexo a documentaÃ§Ã£o necessÃ¡ria.
+Conforme solicitado, segue em anexo a ddocumentação necessária.
 
-Se tiver alguma dÃºvida, estou Ã  disposiÃ§Ã£o.
-
-Cumprimentos,
-
-Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
-ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
-
-            "PrescriÃ§Ã£o" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
-
-Conforme conversado na consulta, segue em anexo a prescriÃ§Ã£o recomendada.
-
-Qualquer dÃºvida, estou Ã  disposiÃ§Ã£o.
+Se tiver alguma dúvida, estou Ã  disposiÃ§Ã£o.
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+Naturopatia - Osteopatia - Medicina Bioenergética
 ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+🌿 Cuidar de si, naturalmente",
 
-            "ConfirmaÃ§Ã£o de Consulta" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "prescrição" => $@"Olá {PacienteAtual.NomeCompleto},
+
+Conforme conversado na consulta, segue em anexo a prescrição recomendada.
+
+Qualquer dúvida, estou Ã  disposiÃ§Ã£o.
+
+Cumprimentos,
+
+Nuno Correia - Terapias Naturais
+Naturopatia - Osteopatia - Medicina Bioenergética
+ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
+🌿 Cuidar de si, naturalmente",
+
+            "Confirmação de Consulta" => $@"Olá {PacienteAtual.NomeCompleto},
 
 Confirmamos a sua consulta para [DATA/HORA].
 
@@ -249,33 +249,33 @@ Em caso de necessidade de reagendar, por favor contacte-nos.
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+Naturopatia - Osteopatia - Medicina Bioenergética
 ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+🌿 Cuidar de si, naturalmente",
 
-            "Follow-up" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Follow-up" => $@"Olá {PacienteAtual.NomeCompleto},
 
-Como estÃ¡ a decorrer o tratamento? Sente melhorias?
+Como está a decorrer o tratamento? Sente melhorias?
 
-Estou disponÃ­vel para qualquer esclarecimento.
+Estou disponível para qualquer esclarecimento.
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+Naturopatia - Osteopatia - Medicina Bioenergética
 ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+🌿 Cuidar de si, naturalmente",
 
-            "Lembrete" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Lembrete" => $@"Olá {PacienteAtual.NomeCompleto},
 
 Lembrete: [DETALHE DO LEMBRETE]
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
+Naturopatia - Osteopatia - Medicina Bioenergética
 ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+🌿 Cuidar de si, naturalmente",
 
             _ => string.Empty
         };
@@ -871,7 +871,7 @@ Naturopatia - Osteopatia - Medicina BioenergÃ©tica
 
         UltimaComunicacao = todas.OrderByDescending(c => c.DataEnvio).FirstOrDefault()?.DataEnvio;
 
-        // â­ CORREÃ‡ÃƒO: Scope jÃ¡ estÃ¡ ativo (mesmo mÃ©todo), reutilizar dbContext
+        // â­ CORREÃ‡ÃƒO: Scope jÃ¡ está ativo (mesmo mÃ©todo), reutilizar dbContext
         ProximoFollowUp = await dbContext.Comunicacoes
             .AsNoTracking()
             .Where(c => c.PacienteId == PacienteAtual.Id && c.DataFollowUp.HasValue && !c.FollowUpEnviado)
