@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -40,7 +40,9 @@ public class EmailQueueProcessor : BackgroundService
         {
             try
             {
+                _logger.LogWarning("🔄 [EmailQueueProcessor] ========== CICLO INICIADO ==========");
                 _logger.LogWarning("🔄 [EmailQueueProcessor] EXECUTANDO AGORA - {Time}", DateTime.Now.ToString("HH:mm:ss"));
+                _logger.LogWarning("🔄 [EmailQueueProcessor] Thread ID: {ThreadId}", System.Threading.Thread.CurrentThread.ManagedThreadId);
 
                 // Criar scope para resolver IEmailService
                 using var scope = _serviceProvider.CreateScope();

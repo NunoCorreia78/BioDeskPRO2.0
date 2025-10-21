@@ -592,6 +592,31 @@ Naturopatia - Osteopatia - Medicina Bioenergética
         }, "Erro ao cancelar email", _logger);
     }
 
+
+    /// <summary>
+    /// 🔧 DIAGNÓSTICO: Forçar processamento imediato da fila de emails
+    /// </summary>
+    [RelayCommand]
+    private async Task ProcessarFilaManualmenteAsync()
+    {
+        await ExecuteWithErrorHandlingAsync(async () =>
+        {
+            _logger.LogWarning("🔧 [ProcessarFilaManual] INICIANDO processamento MANUAL da fila...");
+            IsLoading = true;
+            
+            await _emailService.ProcessarFilaAsync();
+            
+            _logger.LogWarning("✅ [ProcessarFilaManual] Processamento manual CONCLUÍDO!");
+            
+            // Recarregar histórico para ver atualizações
+            await CarregarHistoricoAsync();
+            
+            SuccessMessage = "✅ Fila processada! Verifique o histórico e os logs.";
+            IsLoading = false;
+            
+        }, "Erro ao processar fila manualmente", _logger);
+    }
+
     [RelayCommand]
     private void LimparFormulario()
     {
