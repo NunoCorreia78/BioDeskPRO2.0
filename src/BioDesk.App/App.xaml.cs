@@ -230,11 +230,22 @@ Inner Exceptions:
             _host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                    // ÔÜí Carregar appsettings.json primeiro
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                    // 🔴 PROTEGIDO - VER REGRAS_CRITICAS_EMAIL.md ANTES DE ALTERAR!
+                    // ⚠️ CRITICAL: Definir base path para garantir que appsettings.json seja encontrado
+                    // Bug histórico: WPF não define CurrentDirectory=BaseDirectory automaticamente
+                    // Sintoma sem este código: Email:Sender aparece VAZIO nos logs
+                    // Data da correção: 22/10/2025 (17h de debug)
+                    config.SetBasePath(AppContext.BaseDirectory);
 
-                    // ÔÜí CRITICAL: Garantir carregamento de User Secrets em WPF
-                    config.AddUserSecrets<App>();
+                    // ⚠️ Carregar appsettings.json primeiro (optional: false = fail-fast se missing)
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+                    // ⚠️ CRITICAL: Garantir carregamento de User Secrets em WPF
+                    config.AddUserSecrets<App>(optional: true);
+
+                    Console.WriteLine($"­ƒôé [CONFIG] Base Path: {AppContext.BaseDirectory}");
+                    Console.WriteLine($"­ƒôé [CONFIG] appsettings.json path: {System.IO.Path.Combine(AppContext.BaseDirectory, "appsettings.json")}");
+                    Console.WriteLine($"­ƒôé [CONFIG] appsettings.json EXISTS: {System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, "appsettings.json"))}");
                 })
                 .ConfigureServices(ConfigureServices)
                 .ConfigureLogging(logging =>

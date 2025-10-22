@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -133,8 +133,8 @@ public partial class ComunicacaoViewModel : ViewModelBase
     public ObservableCollection<string> Templates { get; } = new()
     {
         "Envio de Documentos", // â­ NOVO: Template para anexar documentos
-        "PrescriÃ§Ã£o",
-        "ConfirmaÃ§Ã£o de Consulta",
+        "Prescrição",
+        "Confirmação de Consulta",
         "Follow-up",
         "Lembrete",
         "Personalizado"
@@ -204,9 +204,9 @@ public partial class ComunicacaoViewModel : ViewModelBase
         // â­ CORREÃ‡ÃƒO: Preencher ASSUNTO automaticamente
         Assunto = value switch
         {
-            "Envio de Documentos" => "DocumentaÃ§Ã£o Anexa", // â­ NOVO
-            "PrescriÃ§Ã£o" => "PrescriÃ§Ã£o de Tratamento",
-            "ConfirmaÃ§Ã£o de Consulta" => "ConfirmaÃ§Ã£o de Consulta",
+            "Envio de Documentos" => "Documentação Anexa", // â­ NOVO
+            "Prescrição" => "Prescrição de Tratamento",
+            "Confirmação de Consulta" => "Confirmação de Consulta",
             "Follow-up" => "Acompanhamento de Tratamento",
             "Lembrete" => "Lembrete",
             _ => string.Empty
@@ -214,33 +214,33 @@ public partial class ComunicacaoViewModel : ViewModelBase
 
         Corpo = value switch
         {
-            "Envio de Documentos" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Envio de Documentos" => $@"Olá {PacienteAtual.NomeCompleto},
 
 Conforme solicitado, segue em anexo a documentaÃ§Ã£o necessÃ¡ria.
 
-Se tiver alguma dÃºvida, estou Ã  disposiÃ§Ã£o.
+Se tiver alguma dúvida, estou à disposição
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
-ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina Bioenergética
+✉ nunocorreiaterapiasnaturais@gmail.com | ☎ +351 964 860 387
+🍃 A cuidar de si, naturalmente",
 
-            "PrescriÃ§Ã£o" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Prescrição" => $@"Olá {PacienteAtual.NomeCompleto},
 
-Conforme conversado na consulta, segue em anexo a prescriÃ§Ã£o recomendada.
+Conforme conversado na consulta, segue em anexo a prescrição recomendada.
 
-Qualquer dÃºvida, estou Ã  disposiÃ§Ã£o.
+Qualquer dúvida, estou à disposição
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
-ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina Bioenergética
+✉ nunocorreiaterapiasnaturais@gmail.com | ☎ +351 964 860 387
+🍃 A cuidar de si, naturalmente",
 
-            "ConfirmaÃ§Ã£o de Consulta" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Confirmação de Consulta" => $@"Olá {PacienteAtual.NomeCompleto},
 
 Confirmamos a sua consulta para [DATA/HORA].
 
@@ -249,33 +249,33 @@ Em caso de necessidade de reagendar, por favor contacte-nos.
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
-ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina Bioenergética
+✉ nunocorreiaterapiasnaturais@gmail.com | ☎ +351 964 860 387
+🍃 A cuidar de si, naturalmente",
 
-            "Follow-up" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Follow-up" => $@"Olá {PacienteAtual.NomeCompleto},
 
-Como estÃ¡ a decorrer o tratamento? Sente melhorias?
+Como está a decorrer o tratamento? Sente melhorias?
 
-Estou disponÃ­vel para qualquer esclarecimento.
+Estou disponível para qualquer esclarecimento.
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
-ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina Bioenergética
+✉ nunocorreiaterapiasnaturais@gmail.com | ☎ +351 964 860 387
+🍃 A cuidar de si, naturalmente",
 
-            "Lembrete" => $@"OlÃ¡ {PacienteAtual.NomeCompleto},
+            "Lembrete" => $@"Olá {PacienteAtual.NomeCompleto},
 
 Lembrete: [DETALHE DO LEMBRETE]
 
 Cumprimentos,
 
 Nuno Correia - Terapias Naturais
-Naturopatia - Osteopatia - Medicina BioenergÃ©tica
-ðŸ“§ nunocorreiaterapiasnaturais@gmail.com | ðŸ“ž +351 964 860 387
-ðŸŒ¿ Cuidar de si, naturalmente",
+Naturopatia - Osteopatia - Medicina Bioenergética
+✉ nunocorreiaterapiasnaturais@gmail.com | ☎ +351 964 860 387
+🍃 A cuidar de si, naturalmente",
 
             _ => string.Empty
         };
@@ -453,9 +453,25 @@ Naturopatia - Osteopatia - Medicina BioenergÃ©tica
                 Attachments = Anexos.ToList()
             };
 
+            _logger.LogWarning("ðŸ“§ [ComunicacaoViewModel] Tentando enviar email IMEDIATO para {Email}...", Destinatario);
+
             var resultado = await _emailService.EnviarAsync(emailMessage);
 
-            // â­ CORREÃ‡ÃƒO: Usar scope isolado para DbContext
+            // âœ… CORREÃ‡ÃƒO CRÃTICA: SÃ³ grava na BD se ENVIOU COM SUCESSO ou se estÃ¡ SEM INTERNET
+            // Se falhou por erro SMTP â†’ NÃƒO gravar na BD (mostrar erro e parar)
+
+            if (!resultado.Sucesso && !resultado.AdicionadoNaFila)
+            {
+                // âŒ ERRO SMTP (autenticaÃ§Ã£o, credenciais, etc.) - NÃƒO AGENDAR!
+                ErrorMessage = resultado.Mensagem ?? "Erro desconhecido ao enviar email.";
+                _logger.LogError("âŒ Email FALHOU e NÃƒO foi agendado: {Erro}", resultado.Mensagem);
+                IsLoading = false;
+                return; // âš ï¸ PARAR AQUI - NÃ£o gravar na BD
+            }
+
+            // âœ… Se chegou aqui: ou enviou com sucesso OU estÃ¡ sem internet (agendado)
+
+            // âš¡ CORREÃ‡ÃƒO: Usar scope isolado para DbContext
             using var scope2 = _scopeFactory.CreateScope();
             var dbContext2 = scope2.ServiceProvider.GetRequiredService<BioDeskDbContext>();
 
@@ -474,7 +490,7 @@ Naturopatia - Osteopatia - Medicina BioenergÃ©tica
                 DataEnvio = resultado.Sucesso ? DateTime.Now : null,
                 ProximaTentativa = resultado.Sucesso ? null : DateTime.Now.AddMinutes(2),
                 TentativasEnvio = resultado.Sucesso ? 0 : 1,
-                UltimoErro = resultado.Sucesso ? null : resultado.Mensagem
+                UltimoErro = resultado.Sucesso ? null : "Sem conexÃ£o Ã  internet"
             };
 
             await dbContext2.Comunicacoes.AddAsync(comunicacao);
@@ -502,24 +518,17 @@ Naturopatia - Osteopatia - Medicina BioenergÃ©tica
                 await dbContext2.SaveChangesAsync();
             }
 
-            // Mensagem de feedback conforme resultado
+            // âœ… Mensagem de feedback conforme resultado
             if (resultado.Sucesso)
             {
                 SuccessMessage = "âœ… Email enviado com sucesso!";
                 _logger.LogInformation("âœ… Email ID {Id} enviado IMEDIATAMENTE (Status={Status})", comunicacao.Id, comunicacao.Status);
             }
-            else
+            else if (resultado.AdicionadoNaFila)
             {
-                if (resultado.AdicionadoNaFila)
-                {
-                    SuccessMessage = "âš ï¸ Sem conexÃ£o. Email agendado para envio automÃ¡tico.";
-                    _logger.LogWarning("âš ï¸ Email ID {Id} agendado (sem rede, Status={Status})", comunicacao.Id, comunicacao.Status);
-                }
-                else
-                {
-                    SuccessMessage = $"âš ï¸ Erro ao enviar. Email agendado para retry em 2 minutos.";
-                    _logger.LogWarning("âš ï¸ Email ID {Id} agendado para retry (erro: {Error}, Status={Status})", comunicacao.Id, resultado.Mensagem, comunicacao.Status);
-                }
+                // Sem internet â†’ Agendado para retry automÃ¡tico
+                SuccessMessage = "âš ï¸ Sem conexÃ£o. Email agendado para envio automÃ¡tico quando houver internet.";
+                _logger.LogWarning("âš ï¸ Email ID {Id} agendado (sem rede, Status={Status})", comunicacao.Id, comunicacao.Status);
             }
 
             // Limpar formulÃ¡rio

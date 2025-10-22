@@ -7,12 +7,15 @@ Este cabeçalho contém as instruções mínimas e accionáveis para um agente d
 
 Regras essenciais (curtas):
 - Sempre usar `PathService` para obter paths (projeto depende fortemente disto; ver regras críticas em `REGRAS_CRITICAS_BD.md`).
+- 🔴 **NUNCA ALTERAR sistema de EMAIL** sem ler `REGRAS_CRITICAS_EMAIL.md` primeiro (17h de debug, sistema 100% funcional).
 - Antes de navegar para a ficha do paciente: chamar `SetPacienteAtivo(paciente)` e só depois `NavigateTo("FichaPaciente")`.
 - Operações async em ViewModels devem usar `ExecuteWithErrorHandlingAsync(...)` (padrão obrigatório).
 - UI: quando múltiplos UserControls no mesmo Grid, definir `Panel.ZIndex` e `Background="Transparent"` para evitar sobreposição.
 
 Ficheiros/locais chave a usar como referência:
-- `src/BioDesk.App/App.xaml.cs` — bootstrap de DI e registo de serviços (ex.: AddSingleton/Scoped/AddTransient).
+- `src/BioDesk.App/App.xaml.cs` — bootstrap de DI e registo de serviços (ex.: AddSingleton/Scoped/AddTransient). **🔴 LINHAS 228-245 PROTEGIDAS** (ConfigureAppConfiguration).
+- `src/BioDesk.Services/Email/EmailService.cs` — **🔴 LINHAS 17-55 E 80-150 PROTEGIDAS** (validação credenciais + retry logic).
+- `src/BioDesk.ViewModels/Abas/ComunicacaoViewModel.cs` — **🔴 LINHAS ~445-520 PROTEGIDAS** (early return anti-duplicação).
 - `src/**/PathService` (classe PathService) — GERENCIAMENTO de caminhos; NUNCA modificar sem backups.
 - `src/BioDesk.Tests/Services/PacienteServiceTests.cs` — exemplos de contratos de comportamento que não podem ser quebrados.
 - `.vscode/settings.json` e `omnisharp.json` — mostram que o projeto usa OmniSharp/Roslyn analyzers e formatação automática.
@@ -31,6 +34,8 @@ Extensões recomendadas (mínimo detectável):
 
 Notas de segurança e estabilidade rápidas:
 - NUNCA alterar `PathService.cs`, `DatabasePath` ou a linha do DbContext em `App.xaml.cs` sem entender o impacto (há regras críticas no repo).
+- 🔴 **NUNCA ALTERAR código marcado como PROTEGIDO** (ver `REGRAS_CRITICAS_EMAIL.md` e `REGRAS_CRITICAS_BD.md`).
+- 🔴 **Sistema de EMAIL está 100% funcional** (testado 22/10/2025) - Não "melhorar" ou "refatorar" sem pedido explícito.
 - Antes de afirmar que um problema está resolvido, executar: `dotnet build` + `dotnet test`.
 
 -- Fim da secção para agentes. O ficheiro continua com documentação humana detalhada abaixo.

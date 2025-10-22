@@ -15,8 +15,15 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BioDesk.Services.Email;
 
 /// <summary>
-/// ImplementaÃ§Ã£o do serviÃ§o de email com suporte offline e retry automÃ¡tico
+/// Implementação do serviço de email com suporte offline e retry automático
 /// SINGLETON - Usa IServiceProvider para resolver BioDeskDbContext (scoped)
+///
+/// 🔴 PROTEGIDO - VER REGRAS_CRITICAS_EMAIL.md ANTES DE ALTERAR!
+/// Sistema 100% funcional (testado 22/10/2025)
+/// - Retry automático (3 tentativas com backoff exponencial)
+/// - Queue fallback para cenários offline
+/// - Validação robusta de credenciais
+/// - Logging detalhado de SMTP errors
 /// </summary>
 public class EmailService : IEmailService
 {
@@ -24,14 +31,39 @@ public class EmailService : IEmailService
     private readonly IConfiguration _configuration;
     private readonly ILogger<EmailService> _logger;
 
-    // ConfiguraÃ§Ãµes SMTP dinÃ¢micas (lidas do IConfiguration/User Secrets)
-    private string SmtpHost => "smtp.gmail.com";
-    private int SmtpPort => 587;
-    private string SmtpUsername =>
-        _configuration["Email:Sender"] ??
-        _configuration["Email:FromEmail"] ??
-        throw new InvalidOperationException("Email:Sender nÃ£o configurado. Use o botÃ£o ConfiguraÃ§Ãµes.");
-    private string SmtpPassword => _configuration["Email:Password"] ?? throw new InvalidOperationException("Email:Password nÃ£o configurado. Use o botÃ£o ConfiguraÃ§Ãµes.");
+    // 🔴 PROTEGIDO - Configurações SMTP dinâmicas (NÃO REMOVER VALIDAÇÃO!)
+    private string SmtpHost => _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
+    private int SmtpPort => int.TryParse(_configuration["Email:SmtpPort"], out var p) ? p : 587;
+
+    // 🔴 PROTEGIDO - Validação crítica de credenciais (NÃO SIMPLIFICAR!)
+    // Bug histórico: Validação com "!= null" não detectava strings vazias
+    // Fix: IsNullOrWhiteSpace + mensagens acionáveis ao usuário
+    private string SmtpUsername
+    {
+        get
+        {
+            var sender = _configuration["Email:Sender"] ?? _configuration["Email:FromEmail"];
+            if (string.IsNullOrWhiteSpace(sender))
+            {
+                throw new InvalidOperationException("❌ Email:Sender não configurado ou vazio. Use Configurações → Email para definir credenciais.");
+            }
+            return sender;
+        }
+    }
+
+    private string SmtpPassword
+    {
+        get
+        {
+            var password = _configuration["Email:Password"];
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new InvalidOperationException("❌ Email:Password não configurado ou vazio. Use Configurações → Email para definir App Password do Gmail.");
+            }
+            return password;
+        }
+    }
+
     private string FromEmail => _configuration["Email:FromEmail"] ?? _configuration["Email:Sender"] ?? throw new InvalidOperationException("Email:Sender nÃ£o configurado.");
     private string FromName => _configuration["Email:SenderName"] ?? _configuration["Email:FromName"] ?? "BioDeskPro - Terapias Naturais";
 
@@ -273,7 +305,9 @@ public class EmailService : IEmailService
             {
                 Credentials = new NetworkCredential(smtpUsername, smtpPassword),
                 EnableSsl = true,
-                Timeout = 30000 // 30 segundos
+                UseDefaultCredentials = false,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 30000
             };
 
             using var mailMessage = new MailMessage
@@ -329,10 +363,17 @@ public class EmailService : IEmailService
     /// </summary>
     private async Task EnviarViaSMTPAsync(EmailMessage message)
     {
+        _logger.LogInformation("ðŸ“§ [EnviarViaSMTPAsync] Iniciando envio...");
+        _logger.LogInformation("  â†’ Host: {Host}:{Port} | SSL: {EnableSsl}", SmtpHost, SmtpPort, true);
+        _logger.LogInformation("  â†’ De: {From} | Para: {To}", FromEmail, message.To);
+        _logger.LogInformation("  â†’ Assunto: {Subject}", message.Subject);
         using var smtpClient = new SmtpClient(SmtpHost, SmtpPort)
         {
             Credentials = new NetworkCredential(SmtpUsername, SmtpPassword),
-            EnableSsl = true
+            EnableSsl = true,
+            UseDefaultCredentials = false,
+            DeliveryMethod = SmtpDeliveryMethod.Network,
+            Timeout = 30000
         };
 
         using var mailMessage = new MailMessage
@@ -352,6 +393,7 @@ public class EmailService : IEmailService
             {
                 var attachment = new Attachment(attachmentPath);
                 mailMessage.Attachments.Add(attachment);
+                _logger.LogInformation("  ðŸ“Ž Anexo: {Path}", System.IO.Path.GetFileName(attachmentPath));
             }
             else
             {
@@ -359,6 +401,34 @@ public class EmailService : IEmailService
             }
         }
 
-        await smtpClient.SendMailAsync(mailMessage);
+        try
+        {
+            _logger.LogWarning("ðŸ”Œ [EnviarViaSMTPAsync] Conectando ao servidor SMTP...");
+            await smtpClient.SendMailAsync(mailMessage);
+            _logger.LogInformation("âœ… [EnviarViaSMTPAsync] Email enviado com SUCESSO!");
+        }
+        catch (SmtpException smtpEx)
+        {
+            _logger.LogError("âŒ [SMTP ERROR] StatusCode: {StatusCode} | Message: {Message}", smtpEx.StatusCode, smtpEx.Message);
+            _logger.LogError("âŒ [SMTP ERROR] StackTrace: {StackTrace}", smtpEx.StackTrace);
+
+            var mensagemAmigavel = smtpEx.StatusCode switch
+            {
+                SmtpStatusCode.ServiceNotAvailable => "Servidor SMTP indisponÃ­vel. Tente novamente mais tarde.",
+                SmtpStatusCode.MailboxUnavailable => "Email destinatÃ¡rio invÃ¡lido ou nÃ£o encontrado.",
+                SmtpStatusCode.ExceededStorageAllocation => "Caixa de email do destinatÃ¡rio estÃ¡ cheia.",
+                SmtpStatusCode.TransactionFailed => "Falha na autenticaÃ§Ã£o. Verifique email e App Password.",
+                SmtpStatusCode.GeneralFailure => "Falha geral no servidor SMTP. Verifique credenciais e conexÃ£o.",
+                _ => $"Erro SMTP: {smtpEx.Message}"
+            };
+
+            _logger.LogError("âŒ [SMTP ERROR] DiagnÃ³stico: {Diagnostico}", mensagemAmigavel);
+            throw new InvalidOperationException(mensagemAmigavel, smtpEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "âŒ [EnviarViaSMTPAsync] Erro inesperado ao enviar email");
+            throw;
+        }
     }
 }
