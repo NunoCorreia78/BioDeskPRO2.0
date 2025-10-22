@@ -90,10 +90,10 @@ public partial class ProgramasView : UserControl
         {
             // Capturar parâmetros do controlo
             var parametros = new TerapiaParametros(
-                VoltagemV: TerapiaControlos.VoltagemV,
-                DuracaoTotalMinutos: TerapiaControlos.DuracaoTotalMinutos,
-                TempoFrequenciaSegundos: TerapiaControlos.TempoFrequenciaSegundos,
-                AjusteHz: TerapiaControlos.AjusteHz
+                VoltagemV: TerapiaControlosCompacto.VoltagemV,
+                DuracaoTotalMinutos: (int)TerapiaControlosCompacto.DuracaoTotalMinutos,
+                TempoFrequenciaSegundos: (int)TerapiaControlosCompacto.TempoFrequenciaSegundos,
+                AjusteHz: (int)TerapiaControlosCompacto.AjusteHz
             );
 
             // Iniciar terapia diretamente (sem modal) - via comando
@@ -158,8 +158,8 @@ public partial class ProgramasView : UserControl
         }
 
         // Aplicar valores dos controlos unificados
-        viewModel.VoltagemV = TerapiaControlos.VoltagemV;
-        viewModel.DuracaoUniformeSegundos = TerapiaControlos.TempoFrequenciaSegundos;
+        viewModel.VoltagemV = TerapiaControlosCompacto.VoltagemV;
+        viewModel.DuracaoUniformeSegundos = TerapiaControlosCompacto.TempoFrequenciaSegundos;
         // TODO: Implementar DuracaoTotalMinutos e AjusteHz no ViewModel
 
         // Abrir modal

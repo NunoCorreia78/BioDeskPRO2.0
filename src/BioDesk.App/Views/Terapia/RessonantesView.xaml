@@ -10,14 +10,40 @@
     mc:Ignorable="d">
 
     <Grid Margin="20">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" MinWidth="500"/>
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="1*" MinWidth="300"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Controlos compactos -->
+            <RowDefinition Height="Auto"/> <!-- Progresso -->
+            <RowDefinition Height="*"/>    <!-- Configuração Sweep + Tabela -->
+        </Grid.RowDefinitions>
 
-        <!-- ESQUERDA: Configuração Sweep + Tabela Resultados -->
-        <Border Grid.Column="0"
+        <!-- ROW 0: CONTROLOS COMPACTOS -->
+        <controls:TerapiaControlosCompactoUserControl x:Name="TerapiaControlosCompacto"
+                                                      Grid.Row="0"
+                                                      VoltagemV="5.0"
+                                                      DuracaoTotalMinutos="30"
+                                                      TempoFrequenciaSegundos="10"
+                                                      AjusteHz="0"
+                                                      TextoBotao="Iniciar Ressonantes"
+                                                      IniciarClick="TerapiaControlos_IniciarClick"
+                                                      PararClick="TerapiaControlos_PararClick"
+                                                      Margin="0,0,0,15"/>
+
+        <!-- ROW 1: PROGRESSO (sem linha de programa) -->
+        <controls:TerapiaProgressoUserControl x:Name="TerapiaProgresso"
+                                              Grid.Row="1"
+                                              TerapiaEmAndamento="{Binding TerapiaEmAndamento}"
+                                              FrequenciaAtualHz="{Binding FrequenciaAtualHz}"
+                                              FrequenciaOriginalHz="{Binding FrequenciaOriginalHz}"
+                                              AjusteAplicadoHz="{Binding AjusteHz}"
+                                              MostrarPrograma="False"
+                                              FrequenciaAtualIndex="{Binding FrequenciaAtualIndex}"
+                                              TotalFrequencias="{Binding TotalFrequencias}"
+                                              ProgressoPercentual="{Binding ProgressoPercentual}"
+                                              TempoRestanteFormatado="{Binding TempoRestanteFormatado}"
+                                              Margin="0,0,0,15"/>
+
+        <!-- ROW 2: Configuração Sweep + Tabela Resultados -->
+        <Border Grid.Row="2"
                 Background="{DynamicResource Cartao}"
                 BorderBrush="{DynamicResource Borda}"
                 BorderThickness="2"
@@ -25,40 +51,78 @@
                 Padding="15">
             <DockPanel>
                 <!-- Cabeçalho + Config Sweep -->
-                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,15">
+                <StackPanel DockPanel.Dock="Top"
+                        Margin="0,0,0,15">
                     <TextBlock Text="SCAN RESSONANTE"
-                               FontSize="16" FontWeight="SemiBold"
+                               FontSize="16"
+                            FontWeight="SemiBold"
                                Foreground="{DynamicResource TextoPrincipal}"
                                Margin="0,0,0,15"/>
 
                     <!-- Configuração Sweep em linha horizontal -->
-                    <WrapPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
-                            <TextBlock Text="Início:" VerticalAlignment="Center" Margin="0,0,5,0" Width="45"/>
+                    <WrapPanel Orientation="Horizontal"
+                            Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal"
+                                Margin="0,0,15,0">
+                            <TextBlock Text="Início:"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"
+                                    Width="45"/>
                             <TextBox Text="{Binding StartHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="80" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
-                            <TextBlock Text="Hz" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                     Width="80"
+                                    Height="30"
+                                    VerticalContentAlignment="Center"
+                                    Padding="5,0"/>
+                            <TextBlock Text="Hz"
+                                    VerticalAlignment="Center"
+                                    Margin="3,0,0,0"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
-                            <TextBlock Text="Fim:" VerticalAlignment="Center" Margin="0,0,5,0" Width="35"/>
+                        <StackPanel Orientation="Horizontal"
+                                Margin="0,0,15,0">
+                            <TextBlock Text="Fim:"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"
+                                    Width="35"/>
                             <TextBox Text="{Binding StopHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="80" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
-                            <TextBlock Text="Hz" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                     Width="80"
+                                    Height="30"
+                                    VerticalContentAlignment="Center"
+                                    Padding="5,0"/>
+                            <TextBlock Text="Hz"
+                                    VerticalAlignment="Center"
+                                    Margin="3,0,0,0"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
-                            <TextBlock Text="Passo:" VerticalAlignment="Center" Margin="0,0,5,0" Width="45"/>
+                        <StackPanel Orientation="Horizontal"
+                                Margin="0,0,15,0">
+                            <TextBlock Text="Passo:"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"
+                                    Width="45"/>
                             <TextBox Text="{Binding StepHz, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="60" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
-                            <TextBlock Text="Hz" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                     Width="60"
+                                    Height="30"
+                                    VerticalContentAlignment="Center"
+                                    Padding="5,0"/>
+                            <TextBlock Text="Hz"
+                                    VerticalAlignment="Center"
+                                    Margin="3,0,0,0"/>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Dwell:" VerticalAlignment="Center" Margin="0,0,5,0" Width="45"/>
+                            <TextBlock Text="Dwell:"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,5,0"
+                                    Width="45"/>
                             <TextBox Text="{Binding DwellMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="60" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
-                            <TextBlock Text="ms" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                     Width="60"
+                                    Height="30"
+                                    VerticalContentAlignment="Center"
+                                    Padding="5,0"/>
+                            <TextBlock Text="ms"
+                                    VerticalAlignment="Center"
+                                    Margin="3,0,0,0"/>
                         </StackPanel>
                     </WrapPanel>
 
@@ -81,14 +145,16 @@
                                                     CornerRadius="6"
                                                     Padding="{TemplateBinding Padding}">
                                                 <ContentPresenter HorizontalAlignment="Center"
-                                                                VerticalAlignment="Center"/>
+                                                                  VerticalAlignment="Center"/>
                                             </Border>
                                         </ControlTemplate>
                                     </Setter.Value>
                                 </Setter>
                                 <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#6A7D91"/>
+                                    <Trigger Property="IsMouseOver"
+                                            Value="True">
+                                        <Setter Property="Background"
+                                                Value="#6A7D91"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -119,21 +185,22 @@
                         <DataGrid.Columns>
                             <!-- Hz Column -->
                             <DataGridTextColumn Width="120"
-                                              Binding="{Binding Hz, StringFormat='{}{0:N2} Hz'}"
-                                              Header="Frequência (Hz)"/>
+                                                Binding="{Binding Hz, StringFormat='{}{0:N2} Hz'}"
+                                                Header="Frequência (Hz)"/>
 
                             <!-- Score Column -->
                             <DataGridTextColumn Width="80"
-                                              Binding="{Binding Score, StringFormat='{}{0:N1}%'}"
-                                              Header="Score %"/>
+                                                Binding="{Binding Score, StringFormat='{}{0:N1}%'}"
+                                                Header="Score %"/>
 
                             <!-- Status Column -->
                             <DataGridTextColumn Width="180"
-                                              Binding="{Binding Status}"
-                                              Header="Status"/>
+                                                Binding="{Binding Status}"
+                                                Header="Status"/>
 
                             <!-- Progress Bar Column -->
-                            <DataGridTemplateColumn Header="Progresso" Width="150">
+                            <DataGridTemplateColumn Header="Progresso"
+                                    Width="150">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
@@ -154,124 +221,17 @@
 
                             <!-- Tempo Restante Column -->
                             <DataGridTextColumn Width="70"
-                                              Binding="{Binding TempoRestante, StringFormat='{}{0}s'}"
-                                              Header="Tempo"/>
+                                                Binding="{Binding TempoRestante, StringFormat='{}{0}s'}"
+                                                Header="Tempo"/>
 
                             <!-- Notes Column -->
                             <DataGridTextColumn Width="*"
-                                              Binding="{Binding Notes}"
-                                              Header="Notas"/>
+                                                Binding="{Binding Notes}"
+                                                Header="Notas"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
             </DockPanel>
         </Border>
-
-        <!-- DIREITA: Controlos Unificados + Progresso -->
-        <ScrollViewer Grid.Column="2"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <StackPanel>
-                <!-- DEBUG PERMANENTE: Estado da Terapia -->
-            <Border Background="Orange"
-                    Padding="5"
-                    Margin="0,0,0,10"
-                    CornerRadius="4">
-                <StackPanel>
-                    <TextBlock Text="{Binding TerapiaEmAndamento, StringFormat='🔥 DEBUG: TerapiaEmAndamento = {0}'}"
-                               FontSize="12" FontWeight="Bold"
-                               Foreground="White"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding FrequenciaAtual, StringFormat='Freq: {0}'}"
-                               FontSize="10"
-                               Foreground="White"
-                               HorizontalAlignment="Center"
-                               Margin="0,2,0,0"/>
-                </StackPanel>
-            </Border>
-
-                <!-- Painel de Progresso em Tempo Real -->
-            <Border Background="{DynamicResource Cartao}"
-                    BorderBrush="{DynamicResource Borda}"
-                    BorderThickness="2"
-                    CornerRadius="8"
-                    Padding="15"
-                    Margin="0,0,0,15"
-                    Visibility="{Binding TerapiaEmAndamento, Converter={StaticResource BoolToVisibilityConverter}}">
-                <StackPanel>
-                    <TextBlock Text="⚡ TERAPIA EM ANDAMENTO"
-                               FontSize="14" FontWeight="SemiBold"
-                               Foreground="#9CAF97"
-                               Margin="0,0,0,10"/>
-
-                    <!-- Frequência Atual -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="Frequência:"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextoPrincipal}"
-                                   Width="90"/>
-                        <TextBlock Text="{Binding FrequenciaAtual}"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextoSecundario}"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
-
-                    <!-- Progresso -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="Progresso:"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextoPrincipal}"
-                                   Width="90"/>
-                        <TextBlock Text="{Binding FrequenciaAtualIndex}"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextoSecundario}"/>
-                        <TextBlock Text="/"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextoSecundario}"
-                                   Margin="2,0"/>
-                        <TextBlock Text="{Binding TotalFrequencias}"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextoSecundario}"/>
-                    </StackPanel>
-
-                    <!-- Tempo Restante -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <TextBlock Text="Tempo restante:"
-                                   FontSize="12" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextoPrincipal}"
-                                   Width="90"/>
-                        <TextBlock Text="{Binding TempoRestanteSegundos}"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextoSecundario}"/>
-                        <TextBlock Text="s"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextoSecundario}"
-                                   Margin="2,0,0,0"/>
-                    </StackPanel>
-
-                    <!-- Barra de Progresso -->
-                    <ProgressBar Value="{Binding ProgressoPercentual}"
-                                 Maximum="100"
-                                 Height="20"
-                                 Background="#E3E9DE"
-                                 Foreground="#9CAF97"/>
-                    <TextBlock Text="{Binding ProgressoPercentual, StringFormat='{}{0:F1}%'}"
-                               FontSize="11"
-                               Foreground="{DynamicResource TextoSecundario}"
-                               HorizontalAlignment="Center"
-                               Margin="0,3,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <controls:TerapiaControlosUserControl x:Name="TerapiaControlos"
-                                                 VoltagemV="5.0"
-                                                 DuracaoTotalMinutos="30"
-                                                 TempoFrequenciaSegundos="10"
-                                                 AjusteHz="0"
-                                                 TextoBotao="Iniciar Ressonantes"
-                                                 IniciarClick="TerapiaControlos_IniciarClick"
-                                                 PararClick="TerapiaControlos_PararClick"/>
-            </StackPanel>
-        </ScrollViewer>
     </Grid>
 </UserControl>

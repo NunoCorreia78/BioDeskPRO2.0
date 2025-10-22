@@ -25,6 +25,12 @@ public partial class TerapiaLocalViewModel : ObservableObject, IDisposable
     private int _currentStepElapsedSeconds = 0;
     private int _totalElapsedSeconds = 0;
 
+    /// <summary>
+    /// Modo Informacional: aplicar terapia SEM equipamento físico
+    /// True = apenas intenção (radiônico), False = com TiePie HS3
+    /// </summary>
+    [ObservableProperty] private bool _modoInformacional = false;
+
     [ObservableProperty] private double _voltagemV = 5.0; // Default 5V
 
     [ObservableProperty] private double _correnteMaxMa = 50.0;
@@ -98,6 +104,7 @@ public partial class TerapiaLocalViewModel : ObservableObject, IDisposable
                 {
                     DataHoraInicio = DateTime.Now,
                     TipoTerapia = TipoTerapia.Local,
+                    ModoAplicacao = ModoInformacional ? TipoModoAplicacao.Informacional : TipoModoAplicacao.Fisico,
                     FrequenciasHzJson = JsonSerializer.Serialize(frequenciasJson),
                     DuracaoMinutos = (int)(Frequencias.Sum(f => f.DuracaoSegundos) / 60.0),
                     VoltagemV = VoltagemV,
@@ -117,8 +124,20 @@ public partial class TerapiaLocalViewModel : ObservableObject, IDisposable
         _timer.Tick += Timer_Tick;
         _timer.Start();
 
-        // TODO: Integrar com ITiePieHardwareService para emitir sinal real
-        // await _tiepieService.StartEmissionAsync(firstStep.Hz, firstStep.DutyPercent, VoltagemV);
+        // 🎯 Modo Informacional vs Modo Físico
+        if (ModoInformacional)
+        {
+            // ✅ MODO INFORMACIONAL - Apenas simulação (sem hardware)
+            // Timer irá progredir normalmente, mas sem enviar sinais ao TiePie
+            Console.WriteLine($"📡 Modo Informacional: Iniciando sessão radiônica com {Frequencias.Count} frequências");
+        }
+        else
+        {
+            // ✅ MODO FÍSICO - Integrar com hardware TiePie HS3
+            // TODO: Implementar integração real quando ITiePieHardwareService estiver pronto
+            // await _tiepieService.StartEmissionAsync(firstStep.Hz, firstStep.DutyPercent, VoltagemV);
+            Console.WriteLine($"⚡ Modo Físico: Iniciando emissão com TiePie HS3 - {firstStep.Hz:F1} Hz @ {VoltagemV}V");
+        }
     }
 
     private void Timer_Tick(object? sender, EventArgs e)
@@ -145,8 +164,17 @@ public partial class TerapiaLocalViewModel : ObservableObject, IDisposable
                 var nextStep = Frequencias[_currentStepIndex];
                 HzAtual = $"{nextStep.Hz:F1} Hz";
 
-                // TODO: Atualizar hardware para nova frequência
-                // await _tiepieService.StartEmissionAsync(nextStep.Hz, nextStep.DutyPercent, VoltagemV);
+                // 🎯 Atualizar hardware APENAS em modo físico
+                if (!ModoInformacional)
+                {
+                    // TODO: Atualizar hardware TiePie para nova frequência
+                    // await _tiepieService.StartEmissionAsync(nextStep.Hz, nextStep.DutyPercent, VoltagemV);
+                    Console.WriteLine($"⚡ Modo Físico: Mudando para {nextStep.Hz:F1} Hz");
+                }
+                else
+                {
+                    Console.WriteLine($"📡 Modo Informacional: Progredindo para {nextStep.Hz:F1} Hz");
+                }
             }
             else
             {
@@ -185,8 +213,17 @@ public partial class TerapiaLocalViewModel : ObservableObject, IDisposable
         TempoDecorrido = "00:00";
         TempoRestante = "00:00";
 
-        // TODO: Parar emissão hardware
-        // await _tiepieService.StopEmissionAsync();
+        // 🎯 Parar hardware APENAS em modo físico
+        if (!ModoInformacional)
+        {
+            // TODO: Parar emissão TiePie HS3
+            // await _tiepieService.StopEmissionAsync();
+            Console.WriteLine("⚡ Modo Físico: Parando emissão TiePie HS3");
+        }
+        else
+        {
+            Console.WriteLine("📡 Modo Informacional: Sessão radiônica terminada");
+        }
     }
 
     partial void OnVoltagemVChanged(double value)

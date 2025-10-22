@@ -55,6 +55,26 @@
                     HorizontalAlignment="Center"
                     Margin="0,20,0,10">
 
+            <!-- ✅ NOVO: Seleção de Olho ANTES da captura -->
+            <TextBlock Text="👁️ Olho:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,10,0"
+                       FontWeight="SemiBold"
+                       Foreground="#3F4A3D"/>
+            <RadioButton x:Name="RadioOlhoDireito"
+                         Content="Direito"
+                         GroupName="Olho"
+                         IsChecked="True"
+                         VerticalAlignment="Center"
+                         Foreground="#3F4A3D"
+                         Margin="0,0,15,0"/>
+            <RadioButton x:Name="RadioOlhoEsquerdo"
+                         Content="Esquerdo"
+                         GroupName="Olho"
+                         VerticalAlignment="Center"
+                         Foreground="#3F4A3D"
+                         Margin="0,0,25,0"/>
+
             <!-- Seletor de Câmara -->
             <TextBlock Text="📹 Câmara:"
                        VerticalAlignment="Center"

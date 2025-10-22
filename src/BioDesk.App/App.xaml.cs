@@ -230,11 +230,22 @@ Inner Exceptions:
             _host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                    // ÔÜí Carregar appsettings.json primeiro
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                    // 🔴 PROTEGIDO - VER REGRAS_CRITICAS_EMAIL.md ANTES DE ALTERAR!
+                    // ⚠️ CRITICAL: Definir base path para garantir que appsettings.json seja encontrado
+                    // Bug histórico: WPF não define CurrentDirectory=BaseDirectory automaticamente
+                    // Sintoma sem este código: Email:Sender aparece VAZIO nos logs
+                    // Data da correção: 22/10/2025 (17h de debug)
+                    config.SetBasePath(AppContext.BaseDirectory);
 
-                    // ÔÜí CRITICAL: Garantir carregamento de User Secrets em WPF
-                    config.AddUserSecrets<App>();
+                    // ⚠️ Carregar appsettings.json primeiro (optional: false = fail-fast se missing)
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+                    // ⚠️ CRITICAL: Garantir carregamento de User Secrets em WPF
+                    config.AddUserSecrets<App>(optional: true);
+
+                    Console.WriteLine($"­ƒôé [CONFIG] Base Path: {AppContext.BaseDirectory}");
+                    Console.WriteLine($"­ƒôé [CONFIG] appsettings.json path: {System.IO.Path.Combine(AppContext.BaseDirectory, "appsettings.json")}");
+                    Console.WriteLine($"­ƒôé [CONFIG] appsettings.json EXISTS: {System.IO.File.Exists(System.IO.Path.Combine(AppContext.BaseDirectory, "appsettings.json"))}");
                 })
                 .ConfigureServices(ConfigureServices)
                 .ConfigureLogging(logging =>
@@ -482,10 +493,14 @@ Inner Exceptions:
         // === CAMERA SERVICE (captura REAL de ├¡ris via USB com AForge.NET) ===
         services.AddSingleton<ICameraService, RealCameraService>();
 
-        // === IRIDOLOGY SERVICE (mapa iridol├│gico + JSON loader) ===
+        // === IRIDOLOGY SERVICE (mapa iridológico + JSON loader) ===
         services.AddSingleton<IIridologyService, IridologyService>();
 
-        // === TIEPIE HS3 SERVICE (emissão de frequências via hs3.dll) ===
+        // === TIEPIE HS3 SERVICE (emissão de frequências via protocolo USB direto) ===
+        // Camada de protocolo USB (discovery + communication)
+        services.AddSingleton<BioDesk.Services.Hardware.TiePie.Protocol.HS3DeviceDiscovery>();
+        services.AddSingleton<BioDesk.Services.Hardware.TiePie.Protocol.HS3DeviceProtocol>();
+        // Serviço principal (usa discovery + protocol)
         services.AddSingleton<BioDesk.Services.Hardware.TiePie.ITiePieHS3Service, BioDesk.Services.Hardware.TiePie.TiePieHS3Service>();
 
         // === DEBUG SERVICES ===

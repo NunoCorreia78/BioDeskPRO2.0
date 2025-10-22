@@ -1,0 +1,43 @@
+﻿================================================================================
+ RELATORIO DE ANALISE - Inergetix CoRe vs TiePie HS3
+ Data: 19/10/2025 22:05:08
+================================================================================
+
+--------------------------------------------------------------------------------
+[ANALISE 1] REGISTRY USB - Procurando VID:PID
+--------------------------------------------------------------------------------
+
+COM Equipamento: Nenhum acesso USB registry detectado
+
+SEM Equipamento: Nenhum acesso USB registry
+
+--------------------------------------------------------------------------------
+[ANALISE 2] OPERACOES DE DISPOSITIVO
+--------------------------------------------------------------------------------
+
+Nenhuma operacao de dispositivo exclusiva
+
+--------------------------------------------------------------------------------
+[ANALISE 3] DLLs CARREGADAS
+--------------------------------------------------------------------------------
+
+Mesmas DLLs carregadas em ambos os cenarios
+
+--------------------------------------------------------------------------------
+[ANALISE 4] SUCCESS vs FAILURE
+--------------------------------------------------------------------------------
+
+Nenhuma diferenca significativa em resultados
+
+================================================================================
+CONCLUSOES E RECOMENDACOES
+================================================================================
+
+ATENCAO: Nenhuma diferenca critica identificada
+  - Capturar mais eventos
+  - Verificar se CoRe realmente detecta hardware
+  - Considerar usar API Monitor para funcoes DLL
+
+================================================================================
+FIM DO RELATORIO
+================================================================================

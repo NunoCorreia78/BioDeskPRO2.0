@@ -193,9 +193,11 @@ public partial class IrisdiagnosticoUserControl : UserControl
 
             if (captureWindow.ShowDialog() == true && !string.IsNullOrEmpty(captureWindow.CapturedImagePath))
             {
-                // Imagem capturada com sucesso! Adicionar à galeria
+                // ✅ CORREÇÃO CRÍTICA 6: Definir olho selecionado ANTES de carregar imagem
+                // Previne problema de não conseguir selecionar olho após captura
                 if (DataContext is IrisdiagnosticoViewModel viewModel)
                 {
+                    viewModel.OlhoSelecionado = captureWindow.OlhoSelecionado;
                     await viewModel.CarregarImagemCapturadaAsync(captureWindow.CapturedImagePath);
                 }
             }
@@ -415,17 +417,17 @@ public partial class IrisdiagnosticoUserControl : UserControl
         double deltaX = current.X - _ultimaPosicaoMapa.X;
         double deltaY = current.Y - _ultimaPosicaoMapa.Y;
 
-        // ✅ CORRIGIDO: Inverter deltaY porque o mapa tem ScaleY=-1 (flip vertical)
-        // Mouse para cima (deltaY negativo) deve mover mapa para cima (TranslateY negativo)
-        // Mas devido ao flip, precisamos inverter o sinal
+        // 🔄 ROTAÇÃO -90°: Compensar transformação do canvas para manter movimento natural
+        // Canvas rotado -90° (anti-horário) → aplicar rotação inversa (+90°) aos deltas do rato
+        // Fórmula +90°: x' = -y, y' = x
+        double deltaXRotacionado = -deltaY;
+        double deltaYRotacionado = deltaX;
+
         double scaleY = 1.0;
         if (MapaOverlayCanvas?.RenderTransform is Transform renderTransform)
         {
             var matrix = renderTransform.Value;
-            scaleY = matrix.M22; // ScaleY component
-
-            // ScaleY é -1 devido ao flip, então NÃO invertemos (mantemos movimento natural)
-            // O flip já inverte visualmente, queremos que o movimento siga o mouse
+            scaleY = matrix.M22; // componente normalmente associada ao ScaleY
         }
 
         // Determinar tipo de calibração ativa
@@ -440,6 +442,8 @@ public partial class IrisdiagnosticoUserControl : UserControl
         metricsPre["mouseY"] = current.Y;
         metricsPre["deltaX"] = deltaX;
         metricsPre["deltaY"] = deltaY;
+        metricsPre["deltaXRotacionado"] = deltaXRotacionado;
+        metricsPre["deltaYRotacionado"] = deltaYRotacionado;
         metricsPre["scaleY"] = scaleY;
 
         TrackDragEvent(
@@ -448,14 +452,16 @@ public partial class IrisdiagnosticoUserControl : UserControl
             metricsPre,
             BuildContext(viewModel, tipo));
 
-        // Transladar calibração
-        viewModel.TransladarCalibracao(tipo, deltaX, deltaY);
+        // Transladar calibração com deltas compensados pela rotação
+        viewModel.TransladarCalibracao(tipo, deltaXRotacionado, deltaYRotacionado);
 
         var metricsPost = BuildCentroMetrics(viewModel);
         metricsPost["mouseX"] = current.X;
         metricsPost["mouseY"] = current.Y;
         metricsPost["deltaX"] = deltaX;
         metricsPost["deltaY"] = deltaY;
+        metricsPost["deltaXRotacionado"] = deltaXRotacionado;
+        metricsPost["deltaYRotacionado"] = deltaYRotacionado;
 
         TrackDragEvent(
             DragDebugEventType.DragMovePostTransform,

@@ -17,6 +17,7 @@ public class TemplatesPdfService : ITemplatesPdfService
 {
     private readonly ILogger<TemplatesPdfService> _logger;
     private readonly string _templatesPdfPath;
+    private readonly string _templatesRootPath;
 
     public TemplatesPdfService(ILogger<TemplatesPdfService> logger)
     {
@@ -24,6 +25,7 @@ public class TemplatesPdfService : ITemplatesPdfService
 
         // Usar PathService para obter caminho dos templates (funciona em Debug e Release)
         _templatesPdfPath = Path.Combine(PathService.TemplatesPath, "PDFs");
+        _templatesRootPath = PathService.TemplatesPath;
 
         _logger.LogInformation("📋 TemplatesPdfService inicializado. Pasta: {Path}", _templatesPdfPath);
 
@@ -48,6 +50,14 @@ public class TemplatesPdfService : ITemplatesPdfService
             }
 
             var pdfFiles = Directory.GetFiles(_templatesPdfPath, "*.pdf", SearchOption.TopDirectoryOnly);
+
+            // Compatibilidade: também procurar PDFs diretamente em Templates/ (versões antigas)
+            if (Directory.Exists(_templatesRootPath))
+            {
+                var legacy = Directory.GetFiles(_templatesRootPath, "*.pdf", SearchOption.TopDirectoryOnly)
+                    .Where(f => !f.StartsWith(_templatesPdfPath, StringComparison.OrdinalIgnoreCase));
+                pdfFiles = pdfFiles.Concat(legacy).Distinct().ToArray();
+            }
 
             foreach (var filePath in pdfFiles)
             {
@@ -132,6 +142,10 @@ public class TemplatesPdfService : ITemplatesPdfService
     {
         try
         {
+            if (!Directory.Exists(_templatesRootPath))
+            {
+                Directory.CreateDirectory(_templatesRootPath);
+            }
             if (!Directory.Exists(_templatesPdfPath))
             {
                 Directory.CreateDirectory(_templatesPdfPath);

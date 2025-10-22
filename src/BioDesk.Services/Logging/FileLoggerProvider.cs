@@ -77,13 +77,23 @@ public sealed class FileLoggerProvider : ILoggerProvider
 
             lock (_syncRoot)
             {
-                var directory = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(directory))
+                try
                 {
-                    Directory.CreateDirectory(directory);
-                }
+                    var directory = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
 
-                File.AppendAllText(path, payload, Encoding.UTF8);
+                    // Usar FileStream com FileShare.ReadWrite para evitar conflitos
+                    using var stream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                    using var writer = new StreamWriter(stream, Encoding.UTF8);
+                    writer.Write(payload);
+                }
+                catch
+                {
+                    // Silenciar erros de logging para não crashar a aplicação
+                }
             }
         }
     }

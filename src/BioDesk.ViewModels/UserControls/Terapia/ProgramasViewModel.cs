@@ -60,6 +60,12 @@ public partial class ProgramasViewModel : ObservableObject, IDisposable
     [ObservableProperty] private int _totalFrequencias = 0;
     [ObservableProperty] private double _progressoPercentual = 0;
 
+    // Propriedades para TerapiaProgressoUserControl (REDESIGN 20OUT2025)
+    [ObservableProperty] private double _frequenciaAtualHz = 0;
+    [ObservableProperty] private double _frequenciaOriginalHz = 0;
+    [ObservableProperty] private double _ajusteAplicadoHz = 0;
+    [ObservableProperty] private string _tempoRestanteFormatado = "";
+
     /// <summary>
     /// Evento disparado quando user pede para iniciar terapia local.
     /// View (XAML.cs) escuta este evento e abre TerapiaLocalWindow.
@@ -212,7 +218,13 @@ public partial class ProgramasViewModel : ObservableObject, IDisposable
 
                     FrequenciaAtualIndex++;
                     ProgramaAtual = $"[Ciclo {cicloAtual}] {programa}";
-                    FrequenciaAtual = $"{freq.Hz:F2} Hz (Duty: {freq.DutyPercent}%)";
+
+                    // ✅ PROPRIEDADES REDESIGN: Frequência com variação
+                    FrequenciaOriginalHz = freq.Hz;
+                    AjusteAplicadoHz = parametros.AjusteHz;
+                    FrequenciaAtualHz = freq.Hz + parametros.AjusteHz; // Frequência real emitida
+                    FrequenciaAtual = $"{FrequenciaAtualHz:F2} Hz (Duty: {freq.DutyPercent}%)";
+
                     TempoRestanteSegundos = parametros.TempoFrequenciaSegundos > 0
                         ? parametros.TempoFrequenciaSegundos
                         : freq.DuracaoSegundos;
@@ -242,6 +254,14 @@ public partial class ProgramasViewModel : ObservableObject, IDisposable
                         {
                             await Task.Delay(1000, _terapiaCts.Token);
                             TempoRestanteSegundos--;
+
+                            // ✅ REDESIGN: Formatar tempo restante (18min 45s)
+                            int minutos = TempoRestanteSegundos / 60;
+                            int segundos = TempoRestanteSegundos % 60;
+                            TempoRestanteFormatado = minutos > 0
+                                ? $"{minutos}min {segundos}s"
+                                : $"{segundos}s";
+
                             ProgressoPercentual = ((FrequenciaAtualIndex - 1) * 100.0 / TotalFrequencias) +
                                                  ((duracaoTotal - TempoRestanteSegundos) * 100.0 / (TotalFrequencias * duracaoTotal));
                         }

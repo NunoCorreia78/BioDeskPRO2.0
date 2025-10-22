@@ -1,0 +1,258 @@
+<!--
+    MOCKUP: Painel de Configurações Avançadas para Terapias
+    Localização futura: TerapiasBioenergeticasUserControl.xaml
+    (dentro de cada sub-aba: Programas, Ressonantes, Biofeedback)
+-->
+
+<Border Background="{DynamicResource Cartao}"
+        BorderBrush="{DynamicResource BordaBrush}"
+        BorderThickness="2"
+        CornerRadius="8"
+        Padding="20"
+        Margin="0,0,0,20">
+
+  <StackPanel>
+    <!-- Título Secção -->
+    <TextBlock Text="⚙️ Configurações de Emissão"
+               FontSize="16"
+               FontWeight="SemiBold"
+               Foreground="{DynamicResource TextoPrincipal}"
+               Margin="0,0,0,15"/>
+
+    <!-- Grid 2 colunas para layout compacto -->
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="20"/>
+        <!-- Espaçamento -->
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <!-- Forma Onda + Voltagem -->
+        <RowDefinition Height="15"/>
+        <!-- Espaço -->
+        <RowDefinition Height="Auto"/>
+        <!-- Amplitude + Duração Total -->
+        <RowDefinition Height="15"/>
+        <RowDefinition Height="Auto"/>
+        <!-- Tempo por Frequência -->
+      </Grid.RowDefinitions>
+
+      <!-- ========== COLUNA ESQUERDA ========== -->
+
+      <!-- Forma de Onda -->
+      <StackPanel Grid.Row="0"
+          Grid.Column="0">
+        <TextBlock Text="Forma de Onda"
+                   FontSize="13"
+                   FontWeight="Medium"
+                   Foreground="{DynamicResource TextoPrincipal}"
+                   Margin="0,0,0,6"/>
+        <ComboBox SelectedIndex="0"
+            Height="35">
+          <ComboBoxItem Content="🌊 Seno (Suave)"/>
+          <ComboBoxItem Content="⬜ Quadrada (Pulsada)"/>
+          <ComboBoxItem Content="📐 Triangular (Linear)"/>
+          <ComboBoxItem Content="⚡ Pulso (Intenso)"/>
+        </ComboBox>
+        <TextBlock Text="Padrão de modulação do sinal elétrico"
+                   FontSize="10"
+                   Foreground="{DynamicResource TextoSecundario}"
+                   Margin="0,4,0,0"/>
+      </StackPanel>
+
+      <!-- Amplitude (%) -->
+      <StackPanel Grid.Row="2"
+          Grid.Column="0">
+        <Grid>
+          <TextBlock Text="Amplitude (%)"
+                     FontSize="13"
+                     FontWeight="Medium"
+                     Foreground="{DynamicResource TextoPrincipal}"
+                     HorizontalAlignment="Left"/>
+          <TextBlock Text="85%"
+                     FontSize="13"
+                     FontWeight="Bold"
+                     Foreground="#9CAF97"
+                     HorizontalAlignment="Right"/>
+        </Grid>
+        <Slider Minimum="10"
+            Maximum="100"
+            Value="85"
+                TickFrequency="10"
+                TickPlacement="BottomRight"
+                Height="35"
+                Margin="0,8,0,0"/>
+        <TextBlock Text="Percentagem da intensidade máxima"
+                   FontSize="10"
+                   Foreground="{DynamicResource TextoSecundario}"
+                   Margin="0,4,0,0"/>
+      </StackPanel>
+
+      <!-- ========== COLUNA DIREITA ========== -->
+
+      <!-- Voltagem -->
+      <StackPanel Grid.Row="0"
+          Grid.Column="2">
+        <Grid>
+          <TextBlock Text="Voltagem"
+                     FontSize="13"
+                     FontWeight="Medium"
+                     Foreground="{DynamicResource TextoPrincipal}"
+                     HorizontalAlignment="Left"/>
+          <TextBlock Text="5.0 V"
+                     FontSize="13"
+                     FontWeight="Bold"
+                     Foreground="#9CAF97"
+                     HorizontalAlignment="Right"/>
+        </Grid>
+        <Slider Minimum="0"
+            Maximum="12"
+            Value="5"
+                TickFrequency="1"
+                TickPlacement="BottomRight"
+                Height="35"
+                Margin="0,8,0,0"/>
+        <TextBlock Text="Tensão elétrica aplicada (0-12V)"
+                   FontSize="10"
+                   Foreground="{DynamicResource TextoSecundario}"
+                   Margin="0,4,0,0"/>
+      </StackPanel>
+
+      <!-- Duração Total da Sessão -->
+      <StackPanel Grid.Row="2"
+          Grid.Column="2">
+        <TextBlock Text="Duração Total da Sessão"
+                   FontSize="13"
+                   FontWeight="Medium"
+                   Foreground="{DynamicResource TextoPrincipal}"
+                   Margin="0,0,0,6"/>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="60"/>
+          </Grid.ColumnDefinitions>
+          <TextBox Grid.Column="0"
+                   Text="30"
+                   Height="35"
+                   VerticalContentAlignment="Center"
+                   FontSize="14"/>
+          <TextBlock Grid.Column="2"
+                     Text="minutos"
+                     VerticalAlignment="Center"
+                     FontSize="12"
+                     Foreground="{DynamicResource TextoSecundario}"/>
+        </Grid>
+        <TextBlock Text="Tempo máximo de aplicação automática"
+                   FontSize="10"
+                   Foreground="{DynamicResource TextoSecundario}"
+                   Margin="0,4,0,0"/>
+      </StackPanel>
+
+      <!-- ========== TEMPO POR FREQUÊNCIA (span 3 colunas) ========== -->
+      <StackPanel Grid.Row="4"
+          Grid.Column="0"
+          Grid.ColumnSpan="3">
+        <Separator Margin="0,0,0,12"
+            Background="{DynamicResource Borda}"/>
+
+        <TextBlock Text="⏱️ Tempo de Emissão por Frequência"
+                   FontSize="13"
+                   FontWeight="Medium"
+                   Foreground="{DynamicResource TextoPrincipal}"
+                   Margin="0,0,0,10"/>
+
+        <StackPanel Orientation="Horizontal">
+          <RadioButton Content="5 segundos"
+                       IsChecked="True"
+                       GroupName="TempoPorFreq"
+                       Margin="0,0,25,0"
+                       VerticalAlignment="Center"/>
+          <RadioButton Content="10 segundos"
+                       GroupName="TempoPorFreq"
+                       Margin="0,0,25,0"
+                       VerticalAlignment="Center"/>
+          <RadioButton Content="15 segundos"
+                       GroupName="TempoPorFreq"
+                       Margin="0,0,25,0"
+                       VerticalAlignment="Center"/>
+          <RadioButton Content="⚙️ Personalizado"
+                       GroupName="TempoPorFreq"
+                       VerticalAlignment="Center"/>
+          <TextBox Text="8"
+                   Width="50"
+                   Height="28"
+                   Margin="10,0,0,0"
+                   VerticalContentAlignment="Center"
+                   HorizontalAlignment="Center"/>
+          <TextBlock Text="seg"
+                     Margin="5,0,0,0"
+                     VerticalAlignment="Center"
+                     FontSize="11"
+                     Foreground="{DynamicResource TextoSecundario}"/>
+        </StackPanel>
+
+        <TextBlock Text="Define quanto tempo cada Hz será emitida antes de passar para a próxima"
+                   FontSize="10"
+                   Foreground="{DynamicResource TextoSecundario}"
+                   Margin="0,8,0,0"
+                   TextWrapping="Wrap"/>
+      </StackPanel>
+    </Grid>
+
+    <!-- Separador -->
+    <Separator Margin="0,15,0,15"
+        Background="{DynamicResource Borda}"/>
+
+    <!-- Botões Ação -->
+    <StackPanel Orientation="Horizontal"
+        HorizontalAlignment="Right">
+      <Button Content="💾 Guardar como Padrão"
+              Width="160"
+              Height="36"
+              Background="#9CAF97"
+              Foreground="White"
+              FontSize="12"
+              FontWeight="SemiBold"
+              Margin="0,0,10,0"
+              ToolTip="Guardar estas configurações como padrão para este tipo de terapia"/>
+
+      <Button Content="🔄 Restaurar Padrão"
+              Width="140"
+              Height="36"
+              Background="{DynamicResource Borda}"
+              Foreground="{DynamicResource TextoPrincipal}"
+              FontSize="12"
+              ToolTip="Voltar às configurações padrão guardadas"/>
+    </StackPanel>
+
+    <!-- Info Box -->
+    <Border Background="#E8F5E9"
+            BorderBrush="#9CAF97"
+            BorderThickness="1"
+            CornerRadius="5"
+            Padding="12"
+            Margin="0,15,0,0">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="💡"
+                   FontSize="16"
+                   VerticalAlignment="Top"
+                   Margin="0,0,10,0"/>
+        <TextBlock TextWrapping="Wrap">
+                    <Run Text="Estas configurações aplicam-se a "
+                         FontSize="11"
+                         Foreground="#2E7D32"/>
+                    <Run Text="TODOS os protocolos"
+                         FontWeight="Bold"
+                         FontSize="11"
+                         Foreground="#2E7D32"/>
+                    <Run Text=" desta aba (Programas/Ressonantes/Biofeedback). Podes ter configurações diferentes para cada tipo de terapia."
+                         FontSize="11"
+                         Foreground="#2E7D32"/>
+        </TextBlock>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</Border>

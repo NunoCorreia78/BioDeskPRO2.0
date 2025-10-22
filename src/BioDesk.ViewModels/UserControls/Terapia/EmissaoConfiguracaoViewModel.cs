@@ -209,7 +209,7 @@ public partial class EmissaoConfiguracaoViewModel : ViewModelBase
 
                 Hs3Status = $"[HS3] Conectado (SN: {_hs3Service.SerialNumber})";
 
-                _logger.LogInformation("[HS3] Dispositivo disponivel");
+                _logger.LogInformation("[HS3] Dispositivo disponivel para emissao");
 
             }
 
@@ -219,7 +219,7 @@ public partial class EmissaoConfiguracaoViewModel : ViewModelBase
 
                 Hs3Disponivel = false;
 
-                Hs3Status = "[HS3] Nao detectado (verifique USB/driver)";
+                Hs3Status = "[HS3] Nao detectado";
 
                 _logger.LogWarning("[HS3] Dispositivo nao foi detectado");
 

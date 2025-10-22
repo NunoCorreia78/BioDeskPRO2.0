@@ -1,42 +1,39 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-18 13:10:03 ===
-PacienteId: 4
-NomePaciente: Nuno Filipe Correia
-NomeNormalizado: nunofilipecorreia
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-22 12:03:01 ===
+PacienteId: 9
+NomePaciente: Helena Catarina Monteiro da Mata
+NomeNormalizado: helenacatarinamonteirodamata
 BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes
 Pasta existe? True
 
-Total de pastas em Pacientes/: 6
+Total de pastas em Pacientes/: 8
+  - Helena Catarina Monteiro da Mata
   - Jorge Maria Barreto Rosado Pereira
   - Luís Manuel Pinguelo Vilhalva
+  - Maria Amélia Rabaça
   - Maria João Moacho Boquinhas
   - Maria Luzia da Silva Batista
   - Nuno Filipe Correia
   - Susana Daniela Silva Freita
 
-NomeComUnderscores: nuno_filipe_correia
-Buscando pastas que contenham: 'nunofilipecorreia' OU 'nuno_filipe_correia'
+NomeComUnderscores: helena_catarina_monteiro_da_mata
+Buscando pastas que contenham: 'helenacatarinamonteirodamata' OU 'helena_catarina_monteiro_da_mata'
+  Pasta 'Helena Catarina Monteiro da Mata' (normalizado: 'helenacatarinamonteirodamata') → match: True
   Pasta 'Jorge Maria Barreto Rosado Pereira' (normalizado: 'jorgemariabarretorosadopereira') → match: False
   Pasta 'Luís Manuel Pinguelo Vilhalva' (normalizado: 'luísmanuelpinguelovilhalva') → match: False
+  Pasta 'Maria Amélia Rabaça' (normalizado: 'mariaaméliarabaça') → match: False
   Pasta 'Maria João Moacho Boquinhas' (normalizado: 'mariajoãomoachoboquinhas') → match: False
   Pasta 'Maria Luzia da Silva Batista' (normalizado: 'marialuziadasilvabatista') → match: False
-  Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: True
+  Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: False
   Pasta 'Susana Daniela Silva Freita' (normalizado: 'susanadanielasilvafreita') → match: False
 
 Pastas encontradas para o paciente: 1
 
-📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Nuno Filipe Correia
-  Subpastas: 3
-    - Consentimentos
-    - DeclaracoesSaude
+📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Helena Catarina Monteiro da Mata
+  Subpastas: 1
     - Prescricoes
-  PDFs encontrados: 6
-    ✅ Consentimentos\Consentimento_🌿 Naturopatia - Consulta Geral_Nuno Filipe Correia_20251016_102451.pdf
-    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251016_105325.pdf
-    ✅ Prescricoes\Prescricao_20251008_173501.pdf
-    ✅ Prescricoes\Prescricao_20251009_112634.pdf
-    ✅ Prescricoes\Prescricao_20251009_122522.pdf
-    ✅ Prescricoes\Prescricao_20251016_110917.pdf
+  PDFs encontrados: 1
+    ✅ Prescricoes\Prescricao_20251022_120252.pdf
 
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 6
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 1

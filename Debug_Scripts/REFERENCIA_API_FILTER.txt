@@ -1,0 +1,102 @@
+=====================================
+ MAPA DO API FILTER - API MONITOR
+=====================================
+
+Esta é a ORDEM das categorias no painel API Filter (esquerdo).
+Você precisa fazer SCROLL UP/DOWN para encontrar todas!
+
+█████████████████████████████████████
+█ TOPO DA LISTA (SCROLL UP)         █
+█████████████████████████████████████
+
+[+] Additional Resources
+[+] Application Installation and Servicing
+[+] Audio and Video
+[+] Component Object Model (COM)
+[+] Data Access and Storage
+[+] Delta Compression
+[+] Devices  ← ✅ MARCAR ESTA! (você viu na imagem)
+[+] Diagnostics
+[+] Documents and Printing
+
+📁 [+] File Management  ← ✅ ✅ ✅ MARCAR ESTA! (precisa SCROLL UP para ver)
+    [x] CreateFile
+    [x] ReadFile
+    [x] WriteFile
+    [x] CloseHandle
+
+[+] Graphics and Gaming
+[+] Internet
+[+] Microsoft .NET
+[+] NT Native
+[+] Netscape Portable Runtime
+[+] Network Security Services (NSS)
+[+] Networking
+[+] Office Development
+[+] Scripting Runtime Library
+[+] Security and Identity
+[+] System Administration
+[+] System Services
+[+] Undocumented (UnDoc'd)
+
+█████████████████████████████████████
+█ MEIO/BAIXO DA LISTA (SCROLL DOWN) █
+█████████████████████████████████████
+
+[+] Visual C++ Run-Time Library
+
+📚 [+] Library Management  ← ✅ ✅ ✅ MARCAR ESTA! (precisa SCROLL DOWN)
+    [x] LoadLibrary
+    [x] LoadLibraryEx
+    [x] GetProcAddress
+    [x] FreeLibrary
+
+[+] Web Development
+[+] Windows Application UI Development
+[+] Windows Data Types
+[+] Windows Driver Kit
+[+] Windows Environment Development
+[+] Wireless Networking
+
+█████████████████████████████████████
+█ FIM DA LISTA                      █
+█████████████████████████████████████
+
+=====================================
+ RESUMO - 3 CATEGORIAS A MARCAR
+=====================================
+
+1. 📁 File Management (TOPO - precisa SCROLL UP)
+2. 🔌 Devices (MEIO - você já viu na imagem!)
+3. 📚 Library Management (BAIXO - precisa SCROLL DOWN)
+
+=====================================
+ PASSOS EXATOS
+=====================================
+
+1. API Monitor aberto (apimonitor-x86.exe)
+2. Painel esquerdo "API Filter"
+3. Ctrl+A (selecionar tudo)
+4. Clicar em qualquer [x] para DESMARCAR TUDO
+5. SCROLL UP (rolar para cima) até ver "File Management"
+6. Marcar [x] File Management
+7. SCROLL para ver "Devices" (você já viu na imagem)
+8. Marcar [x] Devices
+9. SCROLL DOWN (rolar para baixo) passar Internet, Microsoft .NET, etc.
+10. Marcar [x] Library Management (depois de Visual C++)
+11. Pronto! Só 3 categorias marcadas!
+
+=====================================
+
+SE NÃO ENCONTRAR "File Management":
+- Está NO TOPO da lista
+- Precisa fazer SCROLL UP (rolar para cima)
+- Está ANTES de "Graphics and Gaming"
+
+SE NÃO ENCONTRAR "Library Management":
+- Está NO BAIXO da lista
+- Precisa fazer SCROLL DOWN (rolar para baixo)
+- Está DEPOIS de "Visual C++ Run-Time Library"
+- Está ANTES de "Web Development"
+
+=====================================
