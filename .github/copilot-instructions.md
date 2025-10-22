@@ -6,6 +6,7 @@ Este cabeçalho contém as instruções mínimas e accionáveis para um agente d
 - Estrutura: solução multi-projeto em `src/` (App, ViewModels, Domain, Data, Services, Tests). Ex.: `src/BioDesk.App` contém o WPF entrypoint e `App.xaml.cs` registra DI.
 
 Regras essenciais (curtas):
+- **ANTES DE QUALQUER ALTERAÇÃO**: explicar o plano ao utilizador, apontar ficheiros a tocar e aguardar confirmação explícita antes de editar ou executar comandos que modifiquem o repositório.
 - Sempre usar `PathService` para obter paths (projeto depende fortemente disto; ver regras críticas em `REGRAS_CRITICAS_BD.md`).
 - 🔴 **NUNCA ALTERAR sistema de EMAIL** sem ler `REGRAS_CRITICAS_EMAIL.md` primeiro (17h de debug, sistema 100% funcional).
 - Antes de navegar para a ficha do paciente: chamar `SetPacienteAtivo(paciente)` e só depois `NavigateTo("FichaPaciente")`.

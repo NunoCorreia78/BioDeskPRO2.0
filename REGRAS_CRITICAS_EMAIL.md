@@ -7,6 +7,8 @@
 
 ## 🔒 CÓDIGO PROTEGIDO - NÃO ALTERAR SEM PEDIDO EXPLÍCITO
 
+> **Regra Zero**: Assistentes IA e developers só podem modificar qualquer ficheiro desta lista depois de explicar ao utilizador o plano completo e receber autorização explícita. Se a autorização não acontecer, a alteração deve ser cancelada imediatamente.
+
 ### 🚫 NUNCA NUNCA NUNCA Alterar
 
 #### 1. **App.xaml.cs - ConfigureAppConfiguration (Linhas 228-245)**
