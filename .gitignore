@@ -28,6 +28,14 @@ biodesk.db
 *.db-shm
 *.db-wal
 
+# User Secrets (desenvolvimento - já são ignorados por padrão pelo .NET, mas garantir)
+secrets.json
+**/secrets.json
+
+# Configurações locais com credenciais (backup de segurança)
+appsettings.local.json
+appsettings.*.local.json
+
 # Logs
 *.log
 LOGS_DEBUG.txt
