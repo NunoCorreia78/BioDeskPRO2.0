@@ -1,13 +1,14 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-22 12:03:01 ===
-PacienteId: 9
-NomePaciente: Helena Catarina Monteiro da Mata
-NomeNormalizado: helenacatarinamonteirodamata
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-23 15:46:03 ===
+PacienteId: 17
+NomePaciente: Jorge Maria Barreto Rosado Pereira
+NomeNormalizado: jorgemariabarretorosadopereira
 BaseDirectory: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
 
 PastaPacienteRaiz: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes
 Pasta existe? True
 
-Total de pastas em Pacientes/: 8
+Total de pastas em Pacientes/: 10
+  - Diana Cristina Silvestre Ferreira
   - Helena Catarina Monteiro da Mata
   - Jorge Maria Barreto Rosado Pereira
   - Luís Manuel Pinguelo Vilhalva
@@ -16,24 +17,27 @@ Total de pastas em Pacientes/: 8
   - Maria Luzia da Silva Batista
   - Nuno Filipe Correia
   - Susana Daniela Silva Freita
+  - Vera Maria Ferreira Casau Trindade
 
-NomeComUnderscores: helena_catarina_monteiro_da_mata
-Buscando pastas que contenham: 'helenacatarinamonteirodamata' OU 'helena_catarina_monteiro_da_mata'
-  Pasta 'Helena Catarina Monteiro da Mata' (normalizado: 'helenacatarinamonteirodamata') → match: True
-  Pasta 'Jorge Maria Barreto Rosado Pereira' (normalizado: 'jorgemariabarretorosadopereira') → match: False
+NomeComUnderscores: jorge_maria_barreto_rosado_pereira
+Buscando pastas que contenham: 'jorgemariabarretorosadopereira' OU 'jorge_maria_barreto_rosado_pereira'
+  Pasta 'Diana Cristina Silvestre Ferreira' (normalizado: 'dianacristinasilvestreferreira') → match: False
+  Pasta 'Helena Catarina Monteiro da Mata' (normalizado: 'helenacatarinamonteirodamata') → match: False
+  Pasta 'Jorge Maria Barreto Rosado Pereira' (normalizado: 'jorgemariabarretorosadopereira') → match: True
   Pasta 'Luís Manuel Pinguelo Vilhalva' (normalizado: 'luísmanuelpinguelovilhalva') → match: False
   Pasta 'Maria Amélia Rabaça' (normalizado: 'mariaaméliarabaça') → match: False
   Pasta 'Maria João Moacho Boquinhas' (normalizado: 'mariajoãomoachoboquinhas') → match: False
   Pasta 'Maria Luzia da Silva Batista' (normalizado: 'marialuziadasilvabatista') → match: False
   Pasta 'Nuno Filipe Correia' (normalizado: 'nunofilipecorreia') → match: False
   Pasta 'Susana Daniela Silva Freita' (normalizado: 'susanadanielasilvafreita') → match: False
+  Pasta 'Vera Maria Ferreira Casau Trindade' (normalizado: 'veramariaferreiracasautrindade') → match: False
 
 Pastas encontradas para o paciente: 1
 
-📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Helena Catarina Monteiro da Mata
+📂 Buscando em: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos\Pacientes\Jorge Maria Barreto Rosado Pereira
   Subpastas: 1
     - Prescricoes
   PDFs encontrados: 1
-    ✅ Prescricoes\Prescricao_20251022_120252.pdf
+    ✅ Prescricoes\Prescricao_20251009_164403.pdf
 
 📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 1

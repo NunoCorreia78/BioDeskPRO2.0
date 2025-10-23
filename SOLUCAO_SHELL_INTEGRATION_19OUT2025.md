@@ -18,7 +18,7 @@ O GitHub Copilot não conseguia "ver" o output dos comandos executados no termin
 **VS Code Shell Integration não estava ativa** devido a:
 
 ### 1. **Perfil PowerShell inexistente**
-- Caminho: `C:\Users\nfjpc\OneDrive\Documentos\WindowsPowerShell\Microsoft.VSCode_profile.ps1`
+- Caminho: `$env:USERPROFILE\\Documents\\WindowsPowerShell\\Microsoft.VSCode_profile.ps1` (substitua conforme o seu ambiente)
 - Estado inicial: **NÃO EXISTIA** (`Test-Path $PROFILE` retornava `False`)
 - Consequência: VS Code não carregava integração automaticamente
 
@@ -44,7 +44,7 @@ Get-Command __vsc_* | Select-Object Name  # Retorna vazio!
 
 ### 1. **Criado Perfil PowerShell Otimizado**
 
-**Ficheiro:** `C:\Users\nfjpc\OneDrive\Documentos\WindowsPowerShell\Microsoft.VSCode_profile.ps1`
+**Ficheiro:** `$env:USERPROFILE\\Documents\\WindowsPowerShell\\Microsoft.VSCode_profile.ps1` (ou local equivalente)
 
 ```powershell
 # ========================================

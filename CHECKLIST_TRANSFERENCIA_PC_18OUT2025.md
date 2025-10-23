@@ -11,7 +11,14 @@
 
 #### 1.1 Verificar Estado Git
 ```powershell
-cd C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
+- ```powershell
+# Antes de executar os comandos abaixo, defina a variável `$ProjectPath` para o caminho onde o projeto está localizado no seu PC.
+# Exemplo:
+#   $ProjectPath = "D:\\BioDeskPro2"             # se copiou para disco externo
+#   $ProjectPath = "C:\\Users\\<USERNAME>\\OneDrive\\Documentos\\BioDeskPro2"  # se usa OneDrive
+# Depois use `$ProjectPath` em vez de caminhos hardcoded.
+
+cd $ProjectPath
 git status
 ```
 
@@ -70,8 +77,9 @@ git push origin copilot/vscode1760742399628
 
 #### 2.1 Verificar Localização da BD
 ```powershell
-# Se em modo Debug (VS Code)
-Get-ChildItem "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db" -ErrorAction SilentlyContinue
+# Usar a variável $ProjectPath (defina-a antes de usar os comandos)
+# Se trabalhar em modo Debug (VS Code)
+Get-ChildItem "$ProjectPath\biodesk.db" -ErrorAction SilentlyContinue
 
 # Se em modo Release (instalado)
 Get-ChildItem "C:\ProgramData\BioDeskPro2\biodesk.db" -ErrorAction SilentlyContinue
@@ -82,8 +90,8 @@ Get-ChildItem "C:\ProgramData\BioDeskPro2\biodesk.db" -ErrorAction SilentlyConti
 # Criar pasta de backup BD
 New-Item -Path "C:\Backups\BioDeskPro2\BD_Manual" -ItemType Directory -Force
 
-# Copiar BD (ajustar caminho conforme localização)
-Copy-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db" `
+# Copiar BD (ajustar caminho conforme localização) - usa $ProjectPath
+Copy-Item "$ProjectPath\biodesk.db" `
           "C:\Backups\BioDeskPro2\BD_Manual\biodesk_PRE_TRANSFERENCIA_18OUT2025.db"
 
 # Verificar tamanho (deve ter >700KB se tiver dados)
@@ -94,12 +102,12 @@ Copy-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db" `
 
 #### 2.3 Backup Documentos de Pacientes
 ```powershell
-# Copiar pastas documentais (se existirem)
+# Copiar pastas documentais (se existirem) - use $ProjectPath para os caminhos de projeto
 $PastasDocumentais = @(
-    "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Pacientes",
-    "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Documentos",
-    "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Prescricoes",
-    "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Consentimentos",
+    "$ProjectPath\Pacientes",
+    "$ProjectPath\Documentos",
+    "$ProjectPath\Prescricoes",
+    "$ProjectPath\Consentimentos",
     "C:\ProgramData\BioDeskPro2\Pacientes",
     "C:\ProgramData\BioDeskPro2\Documentos"
 )
@@ -120,22 +128,25 @@ foreach ($Pasta in $PastasDocumentais) {
 #### 3.1 Copiar Pasta Completa para Dispositivo Externo
 ```powershell
 # Opção 1: Copiar para pendrive (ex: E:\)
-$Destino = "E:\BioDeskPro2_Transferencia_18OUT2025"
-Copy-Item -Path "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2" `
+$Destino = "E:\\BioDeskPro2_Transferencia_18OUT2025"
+# Use $ProjectPath definido no topo do ficheiro. Por exemplo:
+#   $ProjectPath = "D:\\BioDeskPro2"  # disco externo
+#   $ProjectPath = "C:\\Users\\<USERNAME>\\OneDrive\\Documentos\\BioDeskPro2"  # OneDrive
+Copy-Item -Path $ProjectPath `
           -Destination $Destino -Recurse -Force
 
-# Opção 2: Copiar para rede/OneDrive (já deve estar sincronizado se OneDrive ativo)
-# Verificar: C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
+# Opção 2: Copiar para rede/serviço de nuvem (ex.: OneDrive) — defina $ProjectPath conforme necessário
+# Verificar: $ProjectPath (ou o caminho onde a pasta do projeto foi copiada)
 ```
 
 #### 3.2 Verificar Cópia
 ```powershell
 # Contar ficheiros na origem e destino
-(Get-ChildItem "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2" -Recurse -File).Count
+(Get-ChildItem $ProjectPath -Recurse -File).Count
 (Get-ChildItem $Destino -Recurse -File).Count
 
 # Verificar tamanho total
-(Get-ChildItem "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2" -Recurse | Measure-Object -Property Length -Sum).Sum / 1GB
+(Get-ChildItem $ProjectPath -Recurse | Measure-Object -Property Length -Sum).Sum / 1GB
 (Get-ChildItem $Destino -Recurse | Measure-Object -Property Length -Sum).Sum / 1GB
 ```
 
@@ -160,7 +171,9 @@ dotnet --version
 #### 4.3 Clonar Repositório (MÉTODO 1 - Recomendado)
 ```powershell
 # Navegar para pasta de trabalho
-cd C:\Users\[NOVO_USERNAME]\OneDrive\Documentos
+# Defina $ProjectPath antes de usar. Exemplo:
+#   $ProjectPath = "C:\\Users\\[NOVO_USERNAME]\\Documents\\BioDeskPro2"
+cd $ProjectPath
 
 # Clonar repositório
 git clone https://github.com/NunoCorreia78/BioDeskPRO2.0.git BioDeskPro2
@@ -174,10 +187,11 @@ git pull origin copilot/vscode1760742399628
 #### 4.4 OU Copiar Pasta (MÉTODO 2 - Se Clonar falhar)
 ```powershell
 # Copiar do dispositivo externo
+# Se copiar do dispositivo externo, use $ProjectPath como destino
 Copy-Item -Path "E:\BioDeskPro2_Transferencia_18OUT2025" `
-          -Destination "C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2" -Recurse
+          -Destination $ProjectPath -Recurse
 
-cd C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2
+cd $ProjectPath
 
 # Verificar estado Git
 git status
@@ -192,15 +206,15 @@ git pull origin copilot/vscode1760742399628
 ```powershell
 # Se for trabalhar em modo Debug (VS Code)
 Copy-Item "C:\Backups\BioDeskPro2\BD_Manual\biodesk_PRE_TRANSFERENCIA_18OUT2025.db" `
-          "C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2\biodesk.db"
+          "$ProjectPath\biodesk.db"
 
 # Verificar tamanho
-(Get-Item "C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2\biodesk.db").Length / 1KB
+(Get-Item "$ProjectPath\biodesk.db").Length / 1KB
 ```
 
 #### 5.2 Restaurar Pastas Documentais
 ```powershell
-$PastasProjeto = "C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2"
+$PastasProjeto = $ProjectPath
 
 Copy-Item "C:\Backups\BioDeskPro2\BD_Manual\Pacientes" "$PastasProjeto\Pacientes" -Recurse -Force
 Copy-Item "C:\Backups\BioDeskPro2\BD_Manual\Documentos" "$PastasProjeto\Documentos" -Recurse -Force
@@ -214,7 +228,7 @@ Copy-Item "C:\Backups\BioDeskPro2\BD_Manual\Consentimentos" "$PastasProjeto\Cons
 
 #### 6.1 Restaurar Dependências
 ```powershell
-cd C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2
+cd $ProjectPath
 
 dotnet clean
 dotnet restore
@@ -250,7 +264,7 @@ dotnet run --project src/BioDesk.App
 
 #### 7.1 Abrir Projeto
 ```powershell
-code C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2
+code $ProjectPath
 ```
 
 #### 7.2 Instalar Extensões Recomendadas
@@ -278,7 +292,7 @@ code C:\Users\[NOVO_USERNAME]\OneDrive\Documentos\BioDeskPro2
 - [ ] Backup automático criado (`backup.ps1`)
 - [ ] BD copiada manualmente para `C:\Backups\BioDeskPro2\BD_Manual`
 - [ ] Pastas documentais copiadas
-- [ ] Pasta projeto copiada para dispositivo externo/OneDrive
+- [ ] Pasta projeto copiada para dispositivo externo (ou serviço de nuvem) e $ProjectPath atualizado
 
 ### PC NOVO
 - [ ] .NET 8 SDK instalado
@@ -345,7 +359,7 @@ dotnet build --no-incremental
 **Solução**:
 ```powershell
 # Verificar se BD foi copiada
-Get-Item "C:\Users\[USERNAME]\OneDrive\Documentos\BioDeskPro2\biodesk.db"
+Get-Item "$ProjectPath\biodesk.db"
 
 # Verificar tamanho (deve ser >700KB)
 (Get-Item "biodesk.db").Length / 1KB

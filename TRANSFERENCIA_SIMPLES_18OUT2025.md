@@ -24,7 +24,7 @@
 
 ```powershell
 # Ir para pasta do projeto
-cd C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
+cd $ProjectPath
 
 # Pull remoto
 git pull origin copilot/vscode1760742399628
@@ -47,10 +47,11 @@ git push origin copilot/vscode1760742399628
 
 ```powershell
 # Ver se BD existe
-Get-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db"
+# Usar $ProjectPath para localizar a BD
+Get-Item "$ProjectPath\biodesk.db"
 
 # Ver tamanho (deve ser >700KB se tiver dados)
-(Get-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db").Length / 1KB
+(Get-Item "$ProjectPath\biodesk.db").Length / 1KB
 
 # Copiar BD para backup (se ainda não fez)
 Copy-Item "biodesk.db" "C:\Backups\BioDeskPro2\BD_Manual\biodesk_18OUT2025.db"
@@ -81,7 +82,7 @@ Se a pasta está em **OneDrive**, deixar sincronizar automaticamente.
 
 ```powershell
 # Ir para pasta de trabalho
-cd C:\Users\[SEU_USERNAME]\OneDrive\Documentos
+cd C:\Users\[SEU_USERNAME]\Documents  # ou use $ProjectPath se copiou localmente
 
 # Clonar (OPÇÃO 1 - Recomendado)
 git clone https://github.com/NunoCorreia78/BioDeskPRO2.0.git BioDeskPro2
@@ -101,7 +102,7 @@ git pull origin copilot/vscode1760742399628
 ```powershell
 # Copiar BD do backup para pasta projeto
 Copy-Item "C:\Backups\BioDeskPro2\BD_Manual\biodesk_18OUT2025.db" `
-          "C:\Users\[SEU_USERNAME]\OneDrive\Documentos\BioDeskPro2\biodesk.db"
+          "$ProjectPath\biodesk.db"
 
 # Verificar tamanho
 (Get-Item "biodesk.db").Length / 1KB

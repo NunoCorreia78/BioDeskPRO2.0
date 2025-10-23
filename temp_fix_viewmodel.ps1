@@ -1,4 +1,7 @@
-$filePath = "c:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.ViewModels\Abas\ComunicacaoViewModel.cs"
+$ProjectPath = $env:PROJECT_PATH
+# If $ProjectPath not set, fallback to repository root
+if (-not $ProjectPath) { $ProjectPath = "D:\\BioDeskPro2" }
+$filePath = Join-Path $ProjectPath "src\BioDesk.ViewModels\Abas\ComunicacaoViewModel.cs"
 $content = Get-Content $filePath -Raw -Encoding UTF8
 
 # Encontrar e substituir o bloco crítico

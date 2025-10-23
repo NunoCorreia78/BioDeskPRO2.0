@@ -1,4 +1,7 @@
-$filePath = "c:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.Services\Email\EmailService.cs"
+$ProjectPath = $env:PROJECT_PATH
+# If $ProjectPath not set, fallback to repository root
+if (-not $ProjectPath) { $ProjectPath = "D:\\BioDeskPro2" }
+$filePath = Join-Path $ProjectPath "src\BioDesk.Services\Email\EmailService.cs"
 $content = Get-Content $filePath -Raw -Encoding UTF8
 
 # Substituir método EnviarViaSMTPAsync

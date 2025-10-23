@@ -208,7 +208,7 @@ dotnet run --project src/BioDesk.App
 ### 3. Importar Excel Manual
 1. Colar caminho no TextBox `ExcelPath`:
    ```
-   C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Templates\Terapias\FrequencyList.xls
+        $ProjectPath\Templates\Terapias\FrequencyList.xls  # ou usar PathService.TemplatesPath em runtime
    ```
 2. Clicar botão **"Importar Excel"**
 3. Aguardar importação (pode demorar 10-30s para ficheiros grandes)

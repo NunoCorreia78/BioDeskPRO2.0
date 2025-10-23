@@ -19,7 +19,8 @@ Ficheiros untracked: 1 (Debug_Scripts/ListarExports_HS3.ps1)
 #### Ações Necessárias:
 ```powershell
 # 1.1 - Pull dos commits remotos
-cd C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2
+# Defina $ProjectPath para o caminho do projeto antes de executar (ex: $ProjectPath = 'D:\\BioDeskPro2')
+cd $ProjectPath
 git pull
 
 # 1.2 - Adicionar ficheiro untracked
@@ -51,9 +52,9 @@ nothing to commit, working tree clean
 
 **Localização da BD (Modo Debug)**:
 ```
-C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db
-C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db-shm
-C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db-wal
+$ProjectPath\biodesk.db
+$ProjectPath\biodesk.db-shm
+$ProjectPath\biodesk.db-wal
 ```
 
 **Localização da BD (Modo Release - se instalado)**:
@@ -211,8 +212,10 @@ dotnet run --project src/BioDesk.App
 #### Criar ZIP da Pasta Completa:
 ```powershell
 # 5.1 - Comprimir pasta do projeto (EXCLUINDO bin/obj)
-$origem = "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2"
-$destino = "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2_TRANSFERENCIA_$(Get-Date -Format 'yyyyMMdd_HHmmss').zip"
+## Definir variável de projeto
+# Antes de executar, defina $ProjectPath para o local do seu projeto (ex: D:\\BioDeskPro2)
+$origem = $ProjectPath
+$destino = "$ProjectPath`_TRANSFERENCIA_$(Get-Date -Format 'yyyyMMdd_HHmmss').zip"
 
 # Excluir pastas pesadas desnecessárias
 $excludePatterns = @('bin', 'obj', '.vs', 'Logs', 'Pacientes', 'Documentos', 'Prescricoes', 'Consentimentos')
@@ -233,7 +236,7 @@ Write-Host "📊 Tamanho: $([math]::Round((Get-Item $destino).Length/1MB,2)) MB"
 ```powershell
 # 5.2 - Copiar para disco externo (exemplo: D:\)
 $destino = "D:\BioDeskPro2_Backup_$(Get-Date -Format 'yyyyMMdd')"
-robocopy "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2" $destino /E /XD bin obj .vs Logs Pacientes Documentos Prescricoes Consentimentos /XF *.db *.db-shm *.db-wal
+robocopy $origem $destino /E /XD bin obj .vs Logs Pacientes Documentos Prescricoes Consentimentos /XF *.db *.db-shm *.db-wal
 
 Write-Host "✅ Pasta copiada para: $destino"
 ```

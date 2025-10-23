@@ -37,7 +37,10 @@ services.AddDbContext<BioDeskDbContext>(options =>
 
 ### **Modo Debug (Desenvolvimento no VS Code):**
 ```
-C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db
+# Exemplo: defina $ProjectPath para o local do projecto. Por exemplo:
+#   $ProjectPath = "D:\\BioDeskPro2"  # disco externo
+#   $ProjectPath = "C:\\Users\\<USERNAME>\\OneDrive\\Documentos\\BioDeskPro2"  # OneDrive
+$ProjectPath\biodesk.db
 ```
 
 ### **Modo Release (Aplicação Instalada):**
@@ -57,14 +60,15 @@ C:\ProgramData\BioDeskPro2\biodesk.db
 ### **ANTES de alterar QUALQUER código:**
 
 1. ✅ **Fazer backup manual:**
-   ```powershell
-   Copy-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db" `
-             "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Backups\MANUAL_$(Get-Date -Format 'yyyyMMdd_HHmmss').db"
-   ```
+    ```powershell
+    # Defina $ProjectPath para o local do projecto antes de executar
+    Copy-Item "$ProjectPath\biodesk.db" `
+                 "$ProjectPath\Backups\MANUAL_$(Get-Date -Format 'yyyyMMdd_HHmmss').db"
+    ```
 
 2. ✅ **Verificar tamanho da BD:**
    ```powershell
-   Get-Item "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\biodesk.db" |
+   Get-Item "$ProjectPath\biodesk.db" |
        Select-Object @{Name='Size(KB)';Expression={[math]::Round($_.Length/1KB,2)}}
    ```
 
@@ -75,10 +79,10 @@ C:\ProgramData\BioDeskPro2\biodesk.db
 ## 🛡️ **SISTEMA DE BACKUP AUTOMÁTICO**
 
 ### **Backup ao fechar aplicação:**
-- ✅ **Funciona automaticamente** em `App.xaml.cs` → `OnExit()`
-- ✅ **Localização:** `C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Backups\`
-- ✅ **Formato:** `BioDeskBackup_YYYYMMDD_HHmmss.zip`
-- ✅ **Mantém últimos 10 backups** automaticamente
+### ✅ **Funciona automaticamente** em `App.xaml.cs` → `OnExit()`
+### ✅ **Localização:** `$ProjectPath\Backups\` (ou `C:\ProgramData\BioDeskPro2\Backups` em Release)
+### ✅ **Formato:** `BioDeskBackup_YYYYMMDD_HHmmss.zip`
+### ✅ **Mantém últimos 10 backups** automaticamente
 
 ### **Restore de Backup (pela App):**
 1. ✅ Menu Configurações → Backup/Restore
@@ -109,14 +113,14 @@ Antes de qualquer commit de código:
 2. ✅ **Usar Restore da App** imediatamente
 3. ✅ **Procurar backup mais recente:**
    ```powershell
-   Get-ChildItem "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Backups" |
+   Get-ChildItem "$ProjectPath\Backups" |
        Sort-Object LastWriteTime -Descending |
        Select-Object -First 5 Name, LastWriteTime
    ```
 4. ✅ **Extrair backup e copiar BD:**
    ```powershell
-   Expand-Archive "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\Backups\[BACKUP].zip" -DestinationPath "TEMP"
-   Copy-Item "TEMP\biodesk.db" "C:\ProgramData\BioDeskPro2\biodesk.db" -Force
+    Expand-Archive "$ProjectPath\Backups\[BACKUP].zip" -DestinationPath "TEMP"
+    Copy-Item "TEMP\biodesk.db" "C:\ProgramData\BioDeskPro2\biodesk.db" -Force
    ```
 
 ---

@@ -14,7 +14,7 @@
 ### Erro Observado
 ```
 Missing file:
-C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.App\bin\Debug\net8.0-windows\hs3f12.hex
+$ProjectPath\src\BioDesk.App\bin\Debug\net8.0-windows\hs3f12.hex
 ```
 
 ### Contexto
@@ -68,7 +68,7 @@ C:\Program Files (x86)\Inergetix\Inergetix-CoRe 5.0\
 ```powershell
 # Comando executado
 Copy-Item "C:\Program Files (x86)\Inergetix\Inergetix-CoRe 5.0\hs3*.hex" `
-          -Destination "C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.App\" `
+          -Destination "$ProjectPath\src\BioDesk.App\" `
           -Force
 ```
 
@@ -111,7 +111,7 @@ dotnet build
 
 ### Ficheiros no Output
 ```powershell
-Get-ChildItem "bin\Debug\net8.0-windows\" -Filter "hs3*"
+Get-ChildItem "bin\Debug\net8.0-windows\" -Filter "hs3*"  # Execute a partir de $ProjectPath\src\BioDesk.App
 # Resultado:
 # hs3_256K.hex ✅
 # hs3_512K.hex ✅
