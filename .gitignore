@@ -70,3 +70,6 @@ Templates/*.pdf
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Local third-party binaries
+Ficheiroscore/
