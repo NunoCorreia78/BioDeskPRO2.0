@@ -285,6 +285,7 @@ public partial class DeclaracaoSaudeUserControl : UserControl
             var dadosDeclaracao = new BioDesk.Services.Pdf.DadosDeclaracaoSaude
             {
                 NomePaciente = viewModel?.NomePaciente ?? "Paciente",
+                NomeTerapeuta = "Nuno Correia", // ✅ ADICIONADO: Nome do terapeuta
                 DataDeclaracao = DateTime.Now,
                 AssinaturaPacienteBase64 = assinaturaPacienteBase64,
                 AssinaturaTerapeutaPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "assinatura_terapeuta.png"),
@@ -292,39 +293,104 @@ public partial class DeclaracaoSaudeUserControl : UserControl
                 // ✅ CORRIGIDO: Secções com dados REAIS do questionário
                 MotivoConsulta = viewModel != null
                     ? $"Consulta de saúde integrativa. Paciente: {viewModel.NomePaciente}"
-                    : "Consulta registada",
+                    : string.Empty,
 
                 HistoriaClinica = viewModel != null
-                    ? $"**DOENÇAS CRÓNICAS:**\n" +
-                      $"Diabetes: {(viewModel.TemDiabetes ? "Sim" : "Não")}, " +
-                      $"Hipertensão: {(viewModel.TemHipertensao ? "Sim" : "Não")}, " +
-                      $"Cardiopatias: {(viewModel.TemCardiopatias ? "Sim" : "Não")}\n" +
-                      (viewModel.TemOutrasDoencas ? $"Outras: {viewModel.EspecificacaoOutrasDoencas}\n" : "") +
-                      $"\n**CIRURGIAS:** {viewModel.Cirurgias.Count} registada(s)" +
-                      $"\n**HOSPITALIZAÇÕES:** {viewModel.Hospitalizacoes.Count} registada(s)"
-                    : "Ver sistema",
+                    ? $"Doenças Crónicas:\n" +
+                      $"• Diabetes: {(viewModel.TemDiabetes ? "Sim" : "Não")}\n" +
+                      $"• Hipertensão: {(viewModel.TemHipertensao ? "Sim" : "Não")}\n" +
+                      $"• Cardiopatias: {(viewModel.TemCardiopatias ? "Sim" : "Não")}" +
+                      (viewModel.TemOutrasDoencas ? $"\n• Outras: {viewModel.EspecificacaoOutrasDoencas}" : "")
+                    : string.Empty,
 
                 MedicacaoAtual = viewModel != null && viewModel.MedicamentosAtuais.Any()
-                    ? "**MEDICAMENTOS ATUAIS:**\n" + string.Join("\n• ", viewModel.MedicamentosAtuais.Select(m => $"{m.Nome} - {m.Dosagem} ({m.Frequencia})"))
-                    : "Sem medicação registada",
+                    ? "• " + string.Join("\n• ", viewModel.MedicamentosAtuais.Select(m => $"{m.Nome} ({m.Dosagem}) - {m.Frequencia}"))
+                    : string.Empty,
 
                 Alergias = viewModel != null && viewModel.AlergiasMedicamentosas.Any()
-                    ? "**ALERGIAS MEDICAMENTOSAS:**\n" + string.Join("\n• ", viewModel.AlergiasMedicamentosas.Select(a => $"{a.Medicamento} - Severidade: {a.Severidade} - Reação: {a.Reacao}"))
-                    : "Sem alergias registadas",
+                    ? "• " + string.Join("\n• ", viewModel.AlergiasMedicamentosas.Select(a => $"{a.Medicamento} (Severidade: {a.Severidade})"))
+                    : string.Empty,
 
                 EstiloVida = viewModel != null
-                    ? $"**ESTILO DE VIDA:**\n" +
-                      $"• Sono: {viewModel.HorasSono} horas/noite ({viewModel.QualidadeSono ?? "Não especificado"})\n" +
-                      $"• Suplementos: {viewModel.SuplementosAlimentares ?? "Não especificado"}\n" +
-                      $"• Medicamentos Naturais: {viewModel.MedicamentosNaturais ?? "Não especificado"}"
-                    : "Ver sistema",
+                    ? $"• Tabagismo: {viewModel.Tabagismo}\n" +
+                      $"• Consumo de Álcool: {viewModel.ConsumoAlcool}\n" +
+                      $"• Exercício Físico: {viewModel.ExercicioFisico}\n" +
+                      $"• Horas de Sono: {viewModel.HorasSono}h/noite ({viewModel.QualidadeSono})\n" +
+                      $"• Tipo de Dieta: {viewModel.TipoDieta}"
+                    : string.Empty,
 
                 HistoriaFamiliar = viewModel != null && viewModel.HistoriaFamiliar.Any()
-                    ? "**HISTÓRIA FAMILIAR:**\n" + string.Join("\n• ", viewModel.HistoriaFamiliar.Select(h => $"{h.GrauParentesco}: {h.CondicaoDoenca} (Idade diagnóstico: {h.IdadeDiagnostico}, Status: {h.Status})"))
-                    : "Sem histórico familiar registado",
+                    ? "• " + string.Join("\n• ", viewModel.HistoriaFamiliar.Select(h =>
+                        $"{h.GrauParentesco}: {h.CondicaoDoenca}" +
+                        (h.IdadeDiagnostico.HasValue ? $" (Idade diagnóstico: {h.IdadeDiagnostico})" : "")))
+                    : string.Empty,
 
-                ObservacoesClinicas = "Declaração de saúde preenchida e assinada digitalmente pelo paciente. " +
-                                      "Todos os dados foram fornecidos de forma voluntária e consciente."
+                // ✅ DADOS ADICIONAIS - FILTRAR registos vazios E usar formato flexível de data
+                DadosCirurgias = viewModel != null && viewModel.Cirurgias.Any(c => c.Data.Year > 1)
+                    ? string.Join("\n", viewModel.Cirurgias
+                        .Where(c => c.Data.Year > 1)
+                        .Select(c =>
+                        {
+                            // Formatar data de forma flexível
+                            string dataFormatada;
+                            if (c.Data.Day == 1 && c.Data.Month == 1)
+                                dataFormatada = c.Data.ToString("yyyy");
+                            else if (c.Data.Day == 1)
+                                dataFormatada = c.Data.ToString("MM/yyyy");
+                            else
+                                dataFormatada = c.Data.ToString("dd/MM/yyyy");
+
+                            return $"• {c.TipoCirurgia} ({dataFormatada})" +
+                                   (!string.IsNullOrEmpty(c.Observacoes) ? $" - {c.Observacoes}" : "");
+                        }))
+                    : string.Empty,
+
+                DadosHospitalizacoes = viewModel != null && viewModel.Hospitalizacoes.Any(h => h.Data.Year > 1)
+                    ? string.Join("\n", viewModel.Hospitalizacoes
+                        .Where(h => h.Data.Year > 1)
+                        .Select(h =>
+                        {
+                            // Formatar data de forma flexível
+                            string dataFormatada;
+                            if (h.Data.Day == 1 && h.Data.Month == 1)
+                                dataFormatada = h.Data.ToString("yyyy");
+                            else if (h.Data.Day == 1)
+                                dataFormatada = h.Data.ToString("MM/yyyy");
+                            else
+                                dataFormatada = h.Data.ToString("dd/MM/yyyy");
+
+                            return $"• {h.Motivo} ({dataFormatada})" +
+                                   (h.DuracaoDias > 0 ? $" - {h.DuracaoDias} dias" : "");
+                        }))
+                    : string.Empty,
+
+                DadosMedicamentosAtuais = viewModel != null && viewModel.MedicamentosAtuais.Any(m => m.DesdeQuando.Year > 1)
+                    ? "• " + string.Join("\n• ", viewModel.MedicamentosAtuais
+                        .Where(m => m.DesdeQuando.Year > 1) // ✅ Filtrar registos com data padrão
+                        .Select(m =>
+                            $"{m.Nome} ({m.Dosagem}) - {m.Frequencia} (desde {m.DesdeQuando:dd/MM/yyyy})"))
+                    : string.Empty,
+
+                DadosAlergiasDetalhadas = viewModel != null && viewModel.AlergiasMedicamentosas.Any()
+                    ? "• " + string.Join("\n• ", viewModel.AlergiasMedicamentosas.Select(a =>
+                        $"{a.Medicamento}: {a.Severidade}" +
+                        (!string.IsNullOrEmpty(a.Reacao) ? $" - Reação: {a.Reacao}" : "")))
+                    : string.Empty,
+
+                DadosIntoleranciaAlimentar = viewModel != null && viewModel.IntoleranciasAlimentares.Any()
+                    ? "• " + string.Join("\n• ", viewModel.IntoleranciasAlimentares.Select(i =>
+                        $"{i.Alimento}" +
+                        (!string.IsNullOrEmpty(i.Sintomas) ? $" - {i.Sintomas}" : "")))
+                    : string.Empty,
+
+                DadosDoencasCronicas = viewModel != null
+                    ? $"• Diabetes: {(viewModel.TemDiabetes ? "Sim" : "Não")}\n" +
+                      $"• Hipertensão: {(viewModel.TemHipertensao ? "Sim" : "Não")}\n" +
+                      $"• Cardiopatias: {(viewModel.TemCardiopatias ? "Sim" : "Não")}" +
+                      (viewModel.TemOutrasDoencas ? $"\n• Outras: {viewModel.EspecificacaoOutrasDoencas}" : "")
+                    : string.Empty,
+
+                ObservacoesAdicionais = viewModel?.ObservacoesAdicionais ?? string.Empty
             };
 
             // 📄 Gerar PDF

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -13,9 +14,9 @@ public partial class CameraCaptureWindow : Window
     private byte[]? _capturedFrameBytes;
     private int _selectedCameraIndex = 0;
     private bool _isPreviewRunning = false;
-
+    private readonly SemaphoreSlim _disposeLock = new(1, 1);
     public string? CapturedImagePath { get; private set; }
-    
+
     /// <summary>
     /// ✅ NOVO: Olho selecionado pelo utilizador (Direito/Esquerdo)
     /// </summary>
@@ -47,7 +48,7 @@ public partial class CameraCaptureWindow : Window
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                 bitmapImage.StreamSource = ms;
                 bitmapImage.EndInit();
-                
+
                 // ✅ CORREÇÃO CRÍTICA 2: SEMPRE chamar .Freeze() para uso cross-thread
                 // Sem Freeze(), WPF não permite acesso de outras threads → "object in use"
                 bitmapImage.Freeze();
@@ -169,27 +170,37 @@ public partial class CameraCaptureWindow : Window
     {
         _cameraService.FrameAvailable -= OnFrameAvailable;
 
-        // ✅ CORREÇÃO CRÍTICA 4: Garantir que preview seja parado E recursos dispostos
-        if (_isPreviewRunning)
+        // ✅ CORREÇÃO RACE CONDITION: SemaphoreSlim previne dispose concorrente
+        await _disposeLock.WaitAsync();
+        try
         {
-            try
+            // ✅ CORREÇÃO CRÍTICA 4: Garantir que preview seja parado E recursos dispostos
+            if (_isPreviewRunning)
             {
-                // StopPreview deve ser chamado ANTES do Close nos botões
-                // Aqui é fallback de segurança para casos de X ou ESC
-                await _cameraService.StopPreviewAsync();
+                try
+                {
+                    // StopPreview deve ser chamado ANTES do Close nos botões
+                    // Aqui é fallback de segurança para casos de X ou ESC
+                    await _cameraService.StopPreviewAsync();
+                }
+                catch { /* Ignora erros em cleanup final */ }
+                finally
+                {
+                    _isPreviewRunning = false;
+                }
             }
-            catch { /* Ignora erros em cleanup final */ }
-            finally
+
+            // ✅ CORREÇÃO CRÍTICA 5: Forçar Dispose do service se implementar IDisposable
+            // Garante que AForge VideoCaptureDevice seja completamente libertado
+            if (_cameraService is IDisposable disposable)
             {
-                _isPreviewRunning = false;
+                disposable.Dispose();
             }
         }
-
-        // ✅ CORREÇÃO CRÍTICA 5: Forçar Dispose do service se implementar IDisposable
-        // Garante que AForge VideoCaptureDevice seja completamente libertado
-        if (_cameraService is IDisposable disposable)
+        finally
         {
-            disposable.Dispose();
+            _disposeLock.Release();
+            _disposeLock.Dispose(); // Cleanup do próprio semáforo
         }
 
         base.OnClosed(e);

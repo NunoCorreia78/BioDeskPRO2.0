@@ -73,7 +73,16 @@ public static class HS3Protocol
     /// <summary>
     /// Device Interface GUID para TiePie HS3
     /// Usado para discovery via SetupDiGetClassDevs
-    /// Formato: {f58af81e-4cdc-4d3f-b11e-0a89e4683972}
+    /// 
+    /// ⚠️ ATENÇÃO: AMBOS GUIDs TESTADOS FALHAM (23/10/2025)
+    /// - {f58af81e-4cdc-4d3f-b11e-0a89e4683972} → Error 2 (FILE_NOT_FOUND)
+    /// - {AF43275C-FB24-4371-BAF8-2BA656FB33E6} → Error 2 (FILE_NOT_FOUND)
+    /// 
+    /// CAUSA: Driver HS3r.sys (kernel-mode) não expõe device interface.
+    ///        CreateFile requer symbolic link (e.g., \\.\HS3) ainda não descoberto.
+    /// 
+    /// STATUS: BLOQUEADO - Ver BLOCKER_HS3_DEVICE_PATH_23OUT2025.md
+    /// PRÓXIMO: Aguardar SDK TiePie Engineering
     /// </summary>
     public static readonly Guid DEVICE_INTERFACE_GUID =
         new Guid("{f58af81e-4cdc-4d3f-b11e-0a89e4683972}");

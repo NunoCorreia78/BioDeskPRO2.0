@@ -300,6 +300,6 @@ Test-Path "C:\Backups\BioDeskPro2\backup_20251021_101245"
 **✅ Backup e Repositório Atualizados com Sucesso!**
 
 O sistema BioDeskPro2 está agora 100% funcional e pronto para produção.
-Todos os dados estão seguros em múltiplas localizações (Git Remote, Backup Local e, opcionalmente, sincronização em nuvem como OneDrive/Dropbox). 
+Todos os dados estão seguros em múltiplas localizações (Git Remote, Backup Local e, opcionalmente, sincronização em nuvem como OneDrive/Dropbox).
 
 Próximo passo: Conectar hardware TiePie HS3 para validar protocolo USB em ambiente real.

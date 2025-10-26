@@ -9,6 +9,8 @@
     <UserSecretsId>biodesk-app-secrets-2025</UserSecretsId>
     <!-- Forçar x86 (32-bit) para compatibilidade com hs3.dll -->
     <PlatformTarget>x86</PlatformTarget>
+    <!-- ✅ Suprimir warnings AForge (transitivo via Services/ViewModels) -->
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

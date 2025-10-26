@@ -4,686 +4,939 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:converters="clr-namespace:BioDesk.App.Converters"
-             d:DesignHeight="800" d:DesignWidth="1000"
+             d:DesignHeight="800"
+             d:DesignWidth="1000"
              mc:Ignorable="d"
              Background="{StaticResource FundoPrincipal}">
 
-    <UserControl.Resources>
-        <!-- Converters -->
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
-        <converters:StringToVisibilityConverter x:Key="StringToVisibility"/>
+  <UserControl.Resources>
+    <!-- Converters -->
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    <converters:StringToVisibilityConverter x:Key="StringToVisibility"/>
 
-        <!-- Estilo para botão secundário baseado no NavigationButtonStyle global -->
-        <Style x:Key="SecondaryButtonLocalStyle" TargetType="Button" BasedOn="{StaticResource NavigationButtonStyle}">
-            <Setter Property="Background" Value="#E8F2E5"/>
-            <Setter Property="Foreground" Value="{StaticResource BotaoPrincipal}"/>
-        </Style>
+    <!-- Estilo para botão secundário baseado no NavigationButtonStyle global -->
+    <Style x:Key="SecondaryButtonLocalStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource NavigationButtonStyle}">
+      <Setter Property="Background"
+              Value="#E8F2E5"/>
+      <Setter Property="Foreground"
+              Value="{StaticResource BotaoPrincipal}"/>
+    </Style>
 
-        <!-- Estilos específicos para esta aba -->
-        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="18"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#3F4A3D"/>
-            <Setter Property="Margin" Value="0,0,0,16"/>
-        </Style>
+    <!-- Estilos específicos para esta aba -->
+    <Style x:Key="SectionHeaderStyle"
+           TargetType="TextBlock">
+      <Setter Property="FontSize"
+              Value="18"/>
+      <Setter Property="FontWeight"
+              Value="SemiBold"/>
+      <Setter Property="Foreground"
+              Value="#3F4A3D"/>
+      <Setter Property="Margin"
+              Value="0,0,0,16"/>
+    </Style>
 
-        <Style x:Key="SubHeaderStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Foreground" Value="#5A6558"/>
-            <Setter Property="Margin" Value="0,12,0,8"/>
-        </Style>
+    <Style x:Key="SubHeaderStyle"
+           TargetType="TextBlock">
+      <Setter Property="FontSize"
+              Value="14"/>
+      <Setter Property="FontWeight"
+              Value="Medium"/>
+      <Setter Property="Foreground"
+              Value="#5A6558"/>
+      <Setter Property="Margin"
+              Value="0,12,0,8"/>
+    </Style>
 
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#9CAF97"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-        </Style>
+    <Style x:Key="ActionButtonStyle"
+           TargetType="Button">
+      <Setter Property="Background"
+              Value="#9CAF97"/>
+      <Setter Property="Foreground"
+              Value="White"/>
+      <Setter Property="BorderThickness"
+              Value="0"/>
+      <Setter Property="Padding"
+              Value="12,6"/>
+      <Setter Property="Margin"
+              Value="4"/>
+      <Setter Property="FontWeight"
+              Value="Medium"/>
+    </Style>
 
-        <Style x:Key="RemoveButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#E74C3C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="Content" Value="❌"/>
-        </Style>
-    </UserControl.Resources>
+    <Style x:Key="RemoveButtonStyle"
+           TargetType="Button">
+      <Setter Property="Background"
+              Value="#E74C3C"/>
+      <Setter Property="Foreground"
+              Value="White"/>
+      <Setter Property="BorderThickness"
+              Value="0"/>
+      <Setter Property="Padding"
+              Value="8,4"/>
+      <Setter Property="Margin"
+              Value="4"/>
+      <Setter Property="Content"
+              Value="❌"/>
+    </Style>
+  </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
-        <Grid Margin="10">
-        <StackPanel>
+  <ScrollViewer VerticalScrollBarVisibility="Auto"
+                Padding="20">
+    <Grid Margin="10">
+      <StackPanel>
 
-            <!-- === CABEÇALHO === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="📋 Declaração de Saúde" FontSize="24" FontWeight="Bold"
-                               Foreground="#3F4A3D" Margin="0,0,0,8"/>
-                    <TextBlock Text="Segunda etapa - Historial médico e estado de saúde atual"
-                               FontSize="14" Foreground="#5A6558"/>
+        <!-- === CABEÇALHO === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="📋 Declaração de Saúde"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#3F4A3D"
+                       Margin="0,0,0,8"/>
+            <TextBlock Text="Segunda etapa - Historial médico e estado de saúde atual"
+                       FontSize="14"
+                       Foreground="#5A6558"/>
+          </StackPanel>
+        </Border>
+
+        <!-- === ANTECEDENTES PESSOAIS === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="🏥 Antecedentes Pessoais"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Doenças Crónicas -->
+            <TextBlock Text="Doenças Crónicas"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <UniformGrid Columns="3"
+                         Margin="0,0,0,15">
+              <CheckBox Content="Diabetes"
+                        IsChecked="{Binding TemDiabetes, Mode=TwoWay}"
+                        Margin="0,0,0,8"/>
+              <CheckBox Content="Hipertensão"
+                        IsChecked="{Binding TemHipertensao, Mode=TwoWay}"
+                        Margin="0,0,0,8"/>
+              <CheckBox Content="Cardiopatias"
+                        IsChecked="{Binding TemCardiopatias, Mode=TwoWay}"
+                        Margin="0,0,0,8"/>
+              <CheckBox Content="Alergias"
+                        IsChecked="{Binding TemAlergias, Mode=TwoWay}"
+                        Margin="0,0,0,8"/>
+              <CheckBox Content="Outras"
+                        IsChecked="{Binding TemOutrasDoencas, Mode=TwoWay}"
+                        Margin="0,0,0,8"/>
+            </UniformGrid>
+
+            <!-- Campo "Especificar Outras" - Visível apenas quando "Outras" selecionado -->
+            <StackPanel Visibility="{Binding MostraEspecificacaoOutras, Converter={StaticResource BoolToVisibility}}"
+                        Margin="0,0,0,15">
+              <TextBlock Text="Especifique as outras doenças crónicas"
+                         Style="{StaticResource FieldLabelStyle}"/>
+              <TextBox Text="{Binding EspecificacaoOutrasDoencas, UpdateSourceTrigger=PropertyChanged}"
+                       Style="{StaticResource FieldTextBoxStyle}"
+                       MinHeight="60"
+                       TextWrapping="Wrap"
+                       AcceptsReturn="True"
+                       VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+
+            <!-- Cirurgias Anteriores -->
+            <TextBlock Text="Cirurgias Anteriores"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <StackPanel Margin="0,0,0,15">
+              <Button Content="➕ Adicionar Cirurgia"
+                      Command="{Binding AdicionarCirurgiaCommand}"
+                      Style="{StaticResource ActionButtonStyle}"
+                      HorizontalAlignment="Left"/>
+
+              <DataGrid ItemsSource="{Binding Cirurgias}"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        Margin="0,8,0,0"
+                        Background="White"
+                        GridLinesVisibility="Horizontal"
+                        HeadersVisibility="Column">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Data"
+                                      Width="120">
+                    <DataGridTextColumn.Binding>
+                      <Binding Path="Data"
+                               Converter="{StaticResource FlexibleDateConverter}"
+                               UpdateSourceTrigger="LostFocus"/>
+                    </DataGridTextColumn.Binding>
+                  </DataGridTextColumn>
+                  <DataGridTextColumn Header="Tipo de Cirurgia"
+                                      Binding="{Binding TipoCirurgia}"
+                                      Width="*"/>
+                  <DataGridTextColumn Header="Observações"
+                                      Binding="{Binding Observacoes}"
+                                      Width="2*"/>
+                  <DataGridTemplateColumn Header="Ações"
+                                          Width="70">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Command="{Binding DataContext.RemoverCirurgiaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource RemoveButtonStyle}"/>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+
+            <!-- Hospitalizações -->
+            <TextBlock Text="Hospitalizações"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <StackPanel Margin="0,0,0,15">
+              <Button Content="➕ Adicionar Hospitalização"
+                      Command="{Binding AdicionarHospitalizacaoCommand}"
+                      Style="{StaticResource ActionButtonStyle}"
+                      HorizontalAlignment="Left"/>
+
+              <DataGrid ItemsSource="{Binding Hospitalizacoes}"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        Margin="0,8,0,0"
+                        Background="White"
+                        GridLinesVisibility="Horizontal"
+                        HeadersVisibility="Column">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Data"
+                                      Width="120">
+                    <DataGridTextColumn.Binding>
+                      <Binding Path="Data"
+                               Converter="{StaticResource FlexibleDateConverter}"
+                               UpdateSourceTrigger="LostFocus"/>
+                    </DataGridTextColumn.Binding>
+                  </DataGridTextColumn>
+                  <DataGridTextColumn Header="Motivo"
+                                      Binding="{Binding Motivo}"
+                                      Width="*"/>
+                  <DataGridTextColumn Header="Duração (dias)"
+                                      Binding="{Binding DuracaoDias}"
+                                      Width="120"/>
+                  <DataGridTemplateColumn Header="Ações"
+                                          Width="70">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Command="{Binding DataContext.RemoverHospitalizacaoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource RemoveButtonStyle}"/>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- === MEDICAÇÃO ATUAL === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="💊 Medicação Atual"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Tabela de Medicamentos -->
+            <TextBlock Text="Medicamentos Atuais"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <StackPanel Margin="0,0,0,15">
+              <Button Content="➕ Adicionar Medicamento"
+                      Command="{Binding AdicionarMedicamentoCommand}"
+                      Style="{StaticResource ActionButtonStyle}"
+                      HorizontalAlignment="Left"/>
+
+              <DataGrid ItemsSource="{Binding MedicamentosAtuais}"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        Margin="0,8,0,0"
+                        Background="White"
+                        GridLinesVisibility="Horizontal"
+                        HeadersVisibility="Column">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Nome"
+                                      Binding="{Binding Nome}"
+                                      Width="2*"/>
+                  <DataGridTextColumn Header="Dosagem"
+                                      Binding="{Binding Dosagem}"
+                                      Width="*"/>
+                  <DataGridTextColumn Header="Frequência"
+                                      Binding="{Binding Frequencia}"
+                                      Width="*"/>
+                  <DataGridTextColumn Header="Desde Quando"
+                                      Width="120">
+                    <DataGridTextColumn.Binding>
+                      <Binding Path="DesdeQuando"
+                               Converter="{StaticResource FlexibleDateConverter}"
+                               UpdateSourceTrigger="LostFocus"/>
+                    </DataGridTextColumn.Binding>
+                  </DataGridTextColumn>
+                  <DataGridTemplateColumn Header=""
+                                          Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Command="{Binding DataContext.RemoverMedicamentoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Content="❌"
+                                FontSize="10"
+                                Padding="2"/>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+
+            <!-- Suplementos e Naturais -->
+            <UniformGrid Columns="2"
+                         Margin="0,0,0,0">
+              <StackPanel Margin="0,0,15,0">
+                <TextBlock Text="Suplementos Alimentares"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <TextBox Text="{Binding SuplementosAlimentares, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="60"/>
+              </StackPanel>
+              <StackPanel Margin="15,0,0,0">
+                <TextBlock Text="Medicamentos Naturais"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <TextBox Text="{Binding MedicamentosNaturais, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="60"/>
+              </StackPanel>
+            </UniformGrid>
+          </StackPanel>
+        </Border>
+
+        <!-- === ALERGIAS E INTOLERÂNCIAS === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="⚠️ Alergias e Intolerâncias"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Alergias Medicamentosas -->
+            <TextBlock Text="Alergias Medicamentosas"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <StackPanel Margin="0,0,0,15">
+              <Button Content="➕ Adicionar Alergia Medicamentosa"
+                      Command="{Binding AdicionarAlergiaMedicamentosaCommand}"
+                      Style="{StaticResource ActionButtonStyle}"
+                      HorizontalAlignment="Left"/>
+
+              <DataGrid ItemsSource="{Binding AlergiasMedicamentosas}"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        Margin="0,8,0,0"
+                        Background="White">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Medicamento"
+                                      Binding="{Binding Medicamento}"
+                                      Width="2*"/>
+                  <DataGridComboBoxColumn Header="Severidade"
+                                          SelectedItemBinding="{Binding Severidade, UpdateSourceTrigger=PropertyChanged}"
+                                          Width="*">
+                    <DataGridComboBoxColumn.ElementStyle>
+                      <Style TargetType="ComboBox">
+                        <Setter Property="ItemsSource"
+                                Value="{Binding DataContext.OpcoesSeveridade, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        <Setter Property="IsReadOnly"
+                                Value="True"/>
+                      </Style>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                      <Style TargetType="ComboBox">
+                        <Setter Property="ItemsSource"
+                                Value="{Binding DataContext.OpcoesSeveridade, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                      </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                  </DataGridComboBoxColumn>
+                  <DataGridTextColumn Header="Reação"
+                                      Binding="{Binding Reacao}"
+                                      Width="2*"/>
+                  <DataGridTemplateColumn Header="Ações"
+                                          Width="70">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Command="{Binding DataContext.RemoverAlergiaMedicamentosaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource RemoveButtonStyle}"/>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+
+            <!-- Alergias Alimentares e Ambientais em colunas -->
+            <UniformGrid Columns="2">
+              <!-- Alergias Alimentares -->
+              <StackPanel Margin="0,0,15,0">
+                <TextBlock Text="Alergias Alimentares"
+                           Style="{StaticResource SubHeaderStyle}"/>
+                <Button Content="➕ Adicionar"
+                        Command="{Binding AdicionarAlergiaAlimentarCommand}"
+                        Style="{StaticResource ActionButtonStyle}"
+                        HorizontalAlignment="Left"/>
+
+                <DataGrid ItemsSource="{Binding AlergiasAlimentares}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          Margin="0,8,0,0"
+                          Background="White">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Alimento"
+                                        Binding="{Binding Alimento}"
+                                        Width="2*"/>
+                    <DataGridTextColumn Header="Reação"
+                                        Binding="{Binding ReacaoConhecida}"
+                                        Width="3*"/>
+                    <DataGridTemplateColumn Header=""
+                                            Width="40">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <Button Command="{Binding DataContext.RemoverAlergiaAlimentarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                  CommandParameter="{Binding}"
+                                  Content="❌"
+                                  FontSize="10"
+                                  Padding="2"/>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </DataGrid.Columns>
+                </DataGrid>
+              </StackPanel>
+
+              <!-- Alergias Ambientais -->
+              <StackPanel Margin="15,0,0,0">
+                <TextBlock Text="Alergias Ambientais"
+                           Style="{StaticResource SubHeaderStyle}"/>
+                <Button Content="➕ Adicionar"
+                        Command="{Binding AdicionarAlergiaAmbientalCommand}"
+                        Style="{StaticResource ActionButtonStyle}"
+                        HorizontalAlignment="Left"/>
+
+                <DataGrid ItemsSource="{Binding AlergiasAmbientais}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          Margin="0,8,0,0"
+                          Background="White">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Alergénio"
+                                        Binding="{Binding Alergenio}"
+                                        Width="2*"/>
+                    <DataGridTextColumn Header="Sintomas"
+                                        Binding="{Binding Sintomas}"
+                                        Width="3*"/>
+                    <DataGridTemplateColumn Header=""
+                                            Width="30">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <Button Command="{Binding DataContext.RemoverAlergiaAmbientalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                  CommandParameter="{Binding}"
+                                  Content="❌"
+                                  FontSize="10"
+                                  Padding="2"/>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </DataGrid.Columns>
+                </DataGrid>
+              </StackPanel>
+            </UniformGrid>
+
+            <!-- Intolerâncias Alimentares -->
+            <TextBlock Text="Intolerâncias Alimentares"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <StackPanel>
+              <Button Content="➕ Adicionar Intolerância"
+                      Command="{Binding AdicionarIntoleranciaAlimentarCommand}"
+                      Style="{StaticResource ActionButtonStyle}"
+                      HorizontalAlignment="Left"/>
+
+              <DataGrid ItemsSource="{Binding IntoleranciasAlimentares}"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        Margin="0,8,0,0"
+                        Background="White">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Alimento"
+                                      Binding="{Binding Alimento}"
+                                      Width="2*"/>
+                  <DataGridTextColumn Header="Sintomas"
+                                      Binding="{Binding Sintomas}"
+                                      Width="3*"/>
+                  <DataGridTemplateColumn Header=""
+                                          Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Command="{Binding DataContext.RemoverIntoleranciaAlimentarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Content="❌"
+                                FontSize="10"
+                                Padding="2"/>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <!-- === ANTECEDENTES FAMILIARES === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="👨‍👩‍👧‍👦 Antecedentes Familiares"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- História Familiar -->
+            <TextBlock Text="História Familiar Relevante"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <StackPanel Margin="0,0,0,15">
+              <Button Content="➕ Adicionar História Familiar"
+                      Command="{Binding AdicionarHistoriaFamiliarCommand}"
+                      Style="{StaticResource ActionButtonStyle}"
+                      HorizontalAlignment="Left"/>
+
+              <DataGrid ItemsSource="{Binding HistoriaFamiliar}"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        Margin="0,8,0,0"
+                        Background="White">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Parentesco"
+                                      Binding="{Binding GrauParentesco}"
+                                      Width="*"/>
+                  <DataGridTextColumn Header="Condição/Doença"
+                                      Binding="{Binding CondicaoDoenca}"
+                                      Width="2*"/>
+                  <DataGridTextColumn Header="Idade Diagnóstico"
+                                      Binding="{Binding IdadeDiagnostico}"
+                                      Width="*"/>
+                  <DataGridComboBoxColumn Header="Status"
+                                          SelectedItemBinding="{Binding Status, UpdateSourceTrigger=PropertyChanged}"
+                                          Width="*">
+                    <DataGridComboBoxColumn.ElementStyle>
+                      <Style TargetType="ComboBox">
+                        <Setter Property="ItemsSource"
+                                Value="{Binding DataContext.OpcoesStatusFamiliar, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        <Setter Property="IsReadOnly"
+                                Value="True"/>
+                      </Style>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                      <Style TargetType="ComboBox">
+                        <Setter Property="ItemsSource"
+                                Value="{Binding DataContext.OpcoesStatusFamiliar, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                      </Style>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                  </DataGridComboBoxColumn>
+                  <DataGridTemplateColumn Header=""
+                                          Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Command="{Binding DataContext.RemoverHistoriaFamiliarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Content="❌"
+                                FontSize="10"
+                                Padding="2"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"/>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+
+            <!-- Campos adicionais familiares -->
+            <UniformGrid Columns="2">
+              <StackPanel Margin="0,0,15,0">
+                <TextBlock Text="Doenças Hereditárias Conhecidas"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <TextBox Text="{Binding DoencasHereditarias, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="60"/>
+              </StackPanel>
+              <StackPanel Margin="15,0,0,0">
+                <TextBlock Text="Observações Familiares"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <TextBox Text="{Binding ObservacoesFamiliares, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="60"/>
+              </StackPanel>
+            </UniformGrid>
+          </StackPanel>
+        </Border>
+
+        <!-- === ESTILO DE VIDA === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="🌱 Estilo de Vida Atual"
+                       Style="{StaticResource SectionHeaderStyle}"/>
+
+            <!-- Hábitos em grid -->
+            <TextBlock Text="Hábitos"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <UniformGrid Columns="2"
+                         Margin="0,0,0,15">
+              <!-- Coluna 1 -->
+              <StackPanel Margin="0,0,15,0">
+                <!-- Tabagismo -->
+                <TextBlock Text="Tabagismo"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <ComboBox ItemsSource="{Binding OpcoesTabagismo}"
+                          SelectedItem="{Binding Tabagismo}"
+                          Style="{StaticResource FieldComboBoxStyle}"
+                          Margin="0,0,0,8"/>
+                <TextBox Text="{Binding DetalheTabagismo, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"
+                         Visibility="{Binding MostraDetalheTabagismo, Converter={StaticResource BoolToVisibility}}"
+                         Margin="0,0,0,12">
+                  <TextBox.Tag>
+                    <TextBlock Text="Detalhes (ex: cigarros/dia, desde quando...)"
+                               Opacity="0.6"/>
+                  </TextBox.Tag>
+                </TextBox>
+
+                <!-- Exercício Físico -->
+                <TextBlock Text="Exercício Físico"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <ComboBox ItemsSource="{Binding OpcoesExercicio}"
+                          SelectedItem="{Binding ExercicioFisico}"
+                          Style="{StaticResource FieldComboBoxStyle}"
+                          Margin="0,0,0,8"/>
+                <TextBox Text="{Binding DetalheExercicio, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"
+                         Visibility="{Binding MostraDetalheExercicio, Converter={StaticResource BoolToVisibility}}"
+                         Margin="0,0,0,0">
+                  <TextBox.Tag>
+                    <TextBlock Text="Tipo e frequência do exercício..."
+                               Opacity="0.6"/>
+                  </TextBox.Tag>
+                </TextBox>
+              </StackPanel>
+
+              <!-- Coluna 2 -->
+              <StackPanel Margin="15,0,0,0">
+                <!-- Consumo de Álcool -->
+                <TextBlock Text="Consumo de Álcool"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <ComboBox ItemsSource="{Binding OpcoesAlcool}"
+                          SelectedItem="{Binding ConsumoAlcool}"
+                          Style="{StaticResource FieldComboBoxStyle}"
+                          Margin="0,0,0,8"/>
+                <TextBox Text="{Binding DetalheAlcool, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"
+                         Visibility="{Binding MostraDetalheAlcool, Converter={StaticResource BoolToVisibility}}"
+                         Margin="0,0,0,12">
+                  <TextBox.Tag>
+                    <TextBlock Text="Quantidades e frequência..."
+                               Opacity="0.6"/>
+                  </TextBox.Tag>
+                </TextBox>
+
+                <!-- Padrão de Sono -->
+                <TextBlock Text="Padrão de Sono"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,0,0,8">
+                  <Slider Value="{Binding HorasSono}"
+                          Minimum="4"
+                          Maximum="12"
+                          Width="120"
+                          VerticalAlignment="Center"
+                          TickFrequency="1"
+                          IsSnapToTickEnabled="True"/>
+                  <TextBlock Text="{Binding HorasSono}"
+                             Margin="8,0,0,0"
+                             VerticalAlignment="Center"/>
+                  <TextBlock Text="horas/noite"
+                             Margin="4,0,0,0"
+                             VerticalAlignment="Center"
+                             Opacity="0.7"/>
                 </StackPanel>
-            </Border>
+                <!-- ✅ CORRIGIDO: Mudado de TextBox para ComboBox -->
+                <TextBlock Text="Qualidade do Sono"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <ComboBox ItemsSource="{Binding OpcoesQualidadeSono}"
+                          SelectedItem="{Binding QualidadeSono}"
+                          Style="{StaticResource FieldComboBoxStyle}"/>
+              </StackPanel>
+            </UniformGrid>
 
-            <!-- === ANTECEDENTES PESSOAIS === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="🏥 Antecedentes Pessoais" Style="{StaticResource SectionHeaderStyle}"/>
+            <!-- Alimentação -->
+            <TextBlock Text="Alimentação"
+                       Style="{StaticResource SubHeaderStyle}"/>
+            <UniformGrid Columns="3"
+                         Margin="0,0,0,0">
+              <!-- Tipo de Dieta -->
+              <StackPanel Margin="0,0,15,0">
+                <TextBlock Text="Tipo de Dieta"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <ComboBox ItemsSource="{Binding OpcoesDieta}"
+                          SelectedItem="{Binding TipoDieta}"
+                          Style="{StaticResource FieldComboBoxStyle}"/>
+              </StackPanel>
 
-                    <!-- Doenças Crónicas -->
-                    <TextBlock Text="Doenças Crónicas" Style="{StaticResource SubHeaderStyle}"/>
-                    <UniformGrid Columns="3" Margin="0,0,0,15">
-                        <CheckBox Content="Diabetes" IsChecked="{Binding TemDiabetes, Mode=TwoWay}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Hipertensão" IsChecked="{Binding TemHipertensao, Mode=TwoWay}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Cardiopatias" IsChecked="{Binding TemCardiopatias, Mode=TwoWay}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Alergias" IsChecked="{Binding TemAlergias, Mode=TwoWay}" Margin="0,0,0,8"/>
-                        <CheckBox Content="Outras" IsChecked="{Binding TemOutrasDoencas, Mode=TwoWay}" Margin="0,0,0,8"/>
-                    </UniformGrid>
-
-                    <!-- Campo "Especificar Outras" - Visível apenas quando "Outras" selecionado -->
-                    <StackPanel Visibility="{Binding MostraEspecificacaoOutras, Converter={StaticResource BoolToVisibility}}"
-                                Margin="0,0,0,15">
-                        <TextBlock Text="Especifique as outras doenças crónicas" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox Text="{Binding EspecificacaoOutrasDoencas, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource FieldTextBoxStyle}"
-                                 MinHeight="60"
-                                 TextWrapping="Wrap"
-                                 AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto"/>
-                    </StackPanel>
-
-                    <!-- Cirurgias Anteriores -->
-                    <TextBlock Text="Cirurgias Anteriores" Style="{StaticResource SubHeaderStyle}"/>
-                    <StackPanel Margin="0,0,0,15">
-                        <Button Content="➕ Adicionar Cirurgia"
-                                Command="{Binding AdicionarCirurgiaCommand}"
-                                Style="{StaticResource ActionButtonStyle}"
-                                HorizontalAlignment="Left"/>
-
-                        <DataGrid ItemsSource="{Binding Cirurgias}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  Margin="0,8,0,0"
-                                  Background="White"
-                                  GridLinesVisibility="Horizontal"
-                                  HeadersVisibility="Column">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" Width="100"/>
-                                <DataGridTextColumn Header="Tipo de Cirurgia" Binding="{Binding TipoCirurgia}" Width="200"/>
-                                <DataGridTextColumn Header="Hospital" Binding="{Binding Hospital}" Width="150"/>
-                                <DataGridTextColumn Header="Observações" Binding="{Binding Observacoes}" Width="200"/>
-                                <DataGridTemplateColumn Header="Ações" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.RemoverCirurgiaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource RemoveButtonStyle}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
-
-                    <!-- Hospitalizações -->
-                    <TextBlock Text="Hospitalizações" Style="{StaticResource SubHeaderStyle}"/>
-                    <StackPanel Margin="0,0,0,15">
-                        <Button Content="➕ Adicionar Hospitalização"
-                                Command="{Binding AdicionarHospitalizacaoCommand}"
-                                Style="{StaticResource ActionButtonStyle}"
-                                HorizontalAlignment="Left"/>
-
-                        <DataGrid ItemsSource="{Binding Hospitalizacoes}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  Margin="0,8,0,0"
-                                  Background="White"
-                                  GridLinesVisibility="Horizontal"
-                                  HeadersVisibility="Column">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Data" Binding="{Binding Data, StringFormat=dd/MM/yyyy}" Width="100"/>
-                                <DataGridTextColumn Header="Motivo" Binding="{Binding Motivo}" Width="200"/>
-                                <DataGridTextColumn Header="Duração (dias)" Binding="{Binding DuracaoDias}" Width="120"/>
-                                <DataGridTextColumn Header="Hospital" Binding="{Binding Hospital}" Width="150"/>
-                                <DataGridTemplateColumn Header="Ações" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.RemoverHospitalizacaoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource RemoveButtonStyle}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
+              <!-- Consumo de Água -->
+              <StackPanel Margin="15,0,15,0">
+                <TextBlock Text="Consumo de Água Diário"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <StackPanel Orientation="Horizontal">
+                  <Slider Value="{Binding ConsumoAguaDiario}"
+                          Minimum="0.5"
+                          Maximum="4.0"
+                          Width="100"
+                          VerticalAlignment="Center"
+                          TickFrequency="0.5"
+                          IsSnapToTickEnabled="True"/>
+                  <TextBlock Text="{Binding ConsumoAguaDiario, StringFormat='{}{0:F1}L'}"
+                             Margin="8,0,0,0"
+                             VerticalAlignment="Center"/>
                 </StackPanel>
-            </Border>
+              </StackPanel>
 
-            <!-- === MEDICAÇÃO ATUAL === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="💊 Medicação Atual" Style="{StaticResource SectionHeaderStyle}"/>
+              <!-- Restrições -->
+              <StackPanel Margin="15,0,0,0">
+                <TextBlock Text="Restrições Alimentares"
+                           Style="{StaticResource FieldLabelStyle}"/>
+                <TextBox Text="{Binding RestricaoesAlimentares, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource FieldTextBoxStyle}"/>
+              </StackPanel>
+            </UniformGrid>
+          </StackPanel>
+        </Border>
 
-                    <!-- Tabela de Medicamentos -->
-                    <TextBlock Text="Medicamentos Atuais" Style="{StaticResource SubHeaderStyle}"/>
-                    <StackPanel Margin="0,0,0,15">
-                        <Button Content="➕ Adicionar Medicamento"
-                                Command="{Binding AdicionarMedicamentoCommand}"
-                                Style="{StaticResource ActionButtonStyle}"
-                                HorizontalAlignment="Left"/>
+        <!-- === DECLARAÇÃO LEGAL === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="⚖️ Declaração Legal"
+                       Style="{StaticResource SectionHeaderStyle}"/>
 
-                        <DataGrid ItemsSource="{Binding MedicamentosAtuais}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  Margin="0,8,0,0"
-                                  Background="White"
-                                  GridLinesVisibility="Horizontal"
-                                  HeadersVisibility="Column">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="200"/>
-                                <DataGridTextColumn Header="Dosagem" Binding="{Binding Dosagem}" Width="120"/>
-                                <DataGridTextColumn Header="Frequência" Binding="{Binding Frequencia}" Width="120"/>
-                                <DataGridTextColumn Header="Desde Quando" Binding="{Binding DesdeQuando, StringFormat=dd/MM/yyyy}" Width="120"/>
-                                <DataGridTemplateColumn Header="Ações" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.RemoverMedicamentoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource RemoveButtonStyle}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
+            <TextBlock Text="Termos de Responsabilidade"
+                       Style="{StaticResource SubHeaderStyle}"/>
 
-                    <!-- Suplementos e Naturais -->
-                    <UniformGrid Columns="2" Margin="0,0,0,0">
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Suplementos Alimentares" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding SuplementosAlimentares, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
-                        </StackPanel>
-                        <StackPanel Margin="15,0,0,0">
-                            <TextBlock Text="Medicamentos Naturais" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding MedicamentosNaturais, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
-                        </StackPanel>
-                    </UniformGrid>
-                </StackPanel>
-            </Border>
+            <StackPanel Margin="0,0,0,15">
+              <CheckBox Content="Confirmo a veracidade de todas as informações fornecidas"
+                        IsChecked="{Binding ConfirmoVeracidade, Mode=TwoWay}"
+                        FontWeight="Medium"
+                        Margin="0,0,0,8"/>
+              <CheckBox Content="Compreendo a importância de fornecer informação completa e precisa"
+                        IsChecked="{Binding CompreendoImportancia, Mode=TwoWay}"
+                        FontWeight="Medium"
+                        Margin="0,0,0,8"/>
+              <CheckBox Content="Comprometo-me a informar sobre quaisquer alterações futuras"
+                        IsChecked="{Binding ComprometoInformarAlteracoes, Mode=TwoWay}"
+                        FontWeight="Medium"
+                        Margin="0,0,0,12"/>
+            </StackPanel>
 
-            <!-- === ALERGIAS E INTOLERÂNCIAS === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="⚠️ Alergias e Intolerâncias" Style="{StaticResource SectionHeaderStyle}"/>
+            <TextBlock Text="Observações Adicionais (Opcional)"
+                       Style="{StaticResource FieldLabelStyle}"/>
+            <TextBox Text="{Binding ObservacoesAdicionais, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource FieldTextBoxStyle}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     MinHeight="80"
+                     Margin="0,0,0,20">
+              <TextBox.Tag>
+                <TextBlock Text="Qualquer informação adicional relevante..."
+                           Opacity="0.6"/>
+              </TextBox.Tag>
+            </TextBox>
+          </StackPanel>
+        </Border>
 
-                    <!-- Alergias Medicamentosas -->
-                    <TextBlock Text="Alergias Medicamentosas" Style="{StaticResource SubHeaderStyle}"/>
-                    <StackPanel Margin="0,0,0,15">
-                        <Button Content="➕ Adicionar Alergia Medicamentosa"
-                                Command="{Binding AdicionarAlergiaMedicamentosaCommand}"
-                                Style="{StaticResource ActionButtonStyle}"
-                                HorizontalAlignment="Left"/>
+        <!-- === ASSINATURA DIGITAL === -->
+        <Border Background="White"
+                BorderBrush="#E3E9DE"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="25"
+                Margin="0,0,0,20">
+          <StackPanel>
+            <TextBlock Text="✍️ Assinatura Digital do Paciente"
+                       Style="{StaticResource SectionHeaderStyle}"/>
 
-                        <DataGrid ItemsSource="{Binding AlergiasMedicamentosas}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  Margin="0,8,0,0"
-                                  Background="White">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Medicamento" Binding="{Binding Medicamento}" Width="200"/>
-                                <DataGridComboBoxColumn Header="Severidade"
-                                                        SelectedItemBinding="{Binding Severidade, UpdateSourceTrigger=PropertyChanged}"
-                                                        Width="120">
-                                    <DataGridComboBoxColumn.ElementStyle>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesSeveridade, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                            <Setter Property="IsReadOnly" Value="True"/>
-                                        </Style>
-                                    </DataGridComboBoxColumn.ElementStyle>
-                                    <DataGridComboBoxColumn.EditingElementStyle>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesSeveridade, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                        </Style>
-                                    </DataGridComboBoxColumn.EditingElementStyle>
-                                </DataGridComboBoxColumn>
-                                <DataGridTextColumn Header="Reação" Binding="{Binding Reacao}" Width="200"/>
-                                <DataGridTemplateColumn Header="Ações" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.RemoverAlergiaMedicamentosaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource RemoveButtonStyle}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
+            <TextBlock Text="⚠️ Assinatura Obrigatória para Validade Legal"
+                       FontSize="12"
+                       Foreground="#E67E22"
+                       FontWeight="Medium"
+                       Margin="0,0,0,15"/>
 
-                    <!-- Alergias Alimentares e Ambientais em colunas -->
-                    <UniformGrid Columns="2">
-                        <!-- Alergias Alimentares -->
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Alergias Alimentares" Style="{StaticResource SubHeaderStyle}"/>
-                            <Button Content="➕ Adicionar"
-                                    Command="{Binding AdicionarAlergiaAlimentarCommand}"
-                                    Style="{StaticResource ActionButtonStyle}"
-                                    HorizontalAlignment="Left"/>
+            <!-- Nome do Paciente -->
+            <StackPanel Margin="0,0,0,15">
+              <TextBlock Text="Nome Completo"
+                         Style="{StaticResource FieldLabelStyle}"/>
+              <TextBox x:Name="TxtNomePacienteDeclaracao"
+                       Text="{Binding NomePaciente, UpdateSourceTrigger=PropertyChanged}"
+                       Style="{StaticResource FieldTextBoxStyle}"/>
+            </StackPanel>
 
-                            <DataGrid ItemsSource="{Binding AlergiasAlimentares}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      Margin="0,8,0,0"
-                                      Background="White">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Alimento" Binding="{Binding Alimento}" Width="120"/>
-                                    <DataGridTextColumn Header="Reação" Binding="{Binding ReacaoConhecida}" Width="150"/>
-                                    <DataGridTemplateColumn Header="" Width="30">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Command="{Binding DataContext.RemoverAlergiaAlimentarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        Content="❌" FontSize="10" Padding="2"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
+            <!-- Data da Declaração -->
+            <StackPanel Margin="0,0,0,20">
+              <TextBlock Text="Data da Declaração"
+                         Style="{StaticResource FieldLabelStyle}"/>
+              <TextBox x:Name="TxtDataDeclaracao"
+                       Text="{Binding Source={x:Static sys:DateTime.Today}, Converter={StaticResource FlexibleDateConverter}, Mode=OneTime}"
+                       Width="200"
+                       HorizontalAlignment="Left"
+                       Padding="12,10"
+                       FontSize="14"
+                       Background="White"
+                       BorderBrush="#E3E9DE"
+                       BorderThickness="1"
+                       ToolTip="Formatos aceitos: dd/MM/yyyy, dd-MM-yyyy, yyyy-MM-dd, etc."
+                       xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
+            </StackPanel>
 
-                        <!-- Alergias Ambientais -->
-                        <StackPanel Margin="15,0,0,0">
-                            <TextBlock Text="Alergias Ambientais" Style="{StaticResource SubHeaderStyle}"/>
-                            <Button Content="➕ Adicionar"
-                                    Command="{Binding AdicionarAlergiaAmbientalCommand}"
-                                    Style="{StaticResource ActionButtonStyle}"
-                                    HorizontalAlignment="Left"/>
+            <!-- Canvas de Assinatura -->
+            <StackPanel>
+              <TextBlock Text="Assinatura Digital"
+                         Style="{StaticResource FieldLabelStyle}"/>
+              <TextBlock Text="Desenhe a sua assinatura no campo abaixo (compatível com tablet Wacom)"
+                         FontSize="12"
+                         Foreground="#5A6558"
+                         Margin="0,0,0,10"/>
 
-                            <DataGrid ItemsSource="{Binding AlergiasAmbientais}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      Margin="0,8,0,0"
-                                      Background="White">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Alergénio" Binding="{Binding Alergenio}" Width="120"/>
-                                    <DataGridTextColumn Header="Sintomas" Binding="{Binding Sintomas}" Width="150"/>
-                                    <DataGridTemplateColumn Header="" Width="30">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Command="{Binding DataContext.RemoverAlergiaAmbientalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        Content="❌" FontSize="10" Padding="2"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                    </UniformGrid>
+              <Border BorderBrush="#9CAF97"
+                      BorderThickness="2"
+                      CornerRadius="8"
+                      Background="White"
+                      Margin="0,0,0,10"
+                      HorizontalAlignment="Left">
+                <Grid Width="600"
+                      Height="150">
+                  <Canvas x:Name="AssinaturaCanvasDeclaracao"
+                          Width="600"
+                          Height="150"
+                          Background="White"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Stylus.IsFlicksEnabled="False"
+                          Stylus.IsTapFeedbackEnabled="False"
+                          Stylus.IsPressAndHoldEnabled="False"
+                          MouseDown="AssinaturaCanvas_MouseDown"
+                          MouseMove="AssinaturaCanvas_MouseMove"
+                          MouseUp="AssinaturaCanvas_MouseUp"
+                          MouseLeave="AssinaturaCanvas_MouseLeave"
+                          StylusDown="AssinaturaCanvas_StylusDown"
+                          StylusMove="AssinaturaCanvas_StylusMove"
+                          StylusUp="AssinaturaCanvas_StylusUp"/>
 
-                    <!-- Intolerâncias Alimentares -->
-                    <TextBlock Text="Intolerâncias Alimentares" Style="{StaticResource SubHeaderStyle}"/>
-                    <StackPanel>
-                        <Button Content="➕ Adicionar Intolerância"
-                                Command="{Binding AdicionarIntoleranciaAlimentarCommand}"
-                                Style="{StaticResource ActionButtonStyle}"
-                                HorizontalAlignment="Left"/>
+                  <!-- ⭐ LINHA GUIA CENTRAL: Marca o MEIO da assinatura (centralizar aqui) -->
+                  <Line X1="300"
+                        Y1="0"
+                        X2="300"
+                        Y2="150"
+                        Stroke="#9CAF97"
+                        StrokeThickness="2"
+                        StrokeDashArray="5 3"
+                        IsHitTestVisible="False"
+                        Opacity="0.8"/>
 
-                        <DataGrid ItemsSource="{Binding IntoleranciasAlimentares}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  Margin="0,8,0,0"
-                                  Background="White">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Alimento" Binding="{Binding Alimento}" Width="200"/>
-                                <DataGridTextColumn Header="Sintomas" Binding="{Binding Sintomas}" Width="300"/>
-                                <DataGridTemplateColumn Header="Ações" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.RemoverIntoleranciaAlimentarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource RemoveButtonStyle}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
+                  <!-- Label explicativo da linha guia -->
+                  <TextBlock Text="← Centro da Assinatura →"
+                             Canvas.Left="220"
+                             Canvas.Top="5"
+                             FontSize="9"
+                             FontStyle="Italic"
+                             Foreground="#9CAF97"
+                             IsHitTestVisible="False"
+                             Opacity="0.7"/>
 
-            <!-- === ANTECEDENTES FAMILIARES === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="👨‍👩‍👧‍👦 Antecedentes Familiares" Style="{StaticResource SectionHeaderStyle}"/>
+                  <TextBlock x:Name="AssinaturaInstrucoesDeclaracao"
+                             Text="Clique e arraste para assinar"
+                             FontSize="14"
+                             Foreground="#95A5A6"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             IsHitTestVisible="False"/>
+                </Grid>
+              </Border>
 
-                    <!-- História Familiar -->
-                    <TextBlock Text="História Familiar Relevante" Style="{StaticResource SubHeaderStyle}"/>
-                    <StackPanel Margin="0,0,0,15">
-                        <Button Content="➕ Adicionar História Familiar"
-                                Command="{Binding AdicionarHistoriaFamiliarCommand}"
-                                Style="{StaticResource ActionButtonStyle}"
-                                HorizontalAlignment="Left"/>
+              <!-- Botões de Ação -->
+              <StackPanel Orientation="Horizontal"
+                          Margin="0,10,0,0">
+                <Button x:Name="BtnLimparAssinaturaDeclaracao"
+                        Content="🗑️ Limpar Assinatura"
+                        Style="{StaticResource SecondaryButtonLocalStyle}"
+                        Click="BtnLimparAssinatura_Click"
+                        Padding="12,8"
+                        Margin="0,0,10,0"/>
 
-                        <DataGrid ItemsSource="{Binding HistoriaFamiliar}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  Margin="0,8,0,0"
-                                  Background="White">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Parentesco" Binding="{Binding GrauParentesco}" Width="120"/>
-                                <DataGridTextColumn Header="Condição/Doença" Binding="{Binding CondicaoDoenca}" Width="180"/>
-                                <DataGridTextColumn Header="Idade Diagnóstico" Binding="{Binding IdadeDiagnostico}" Width="120"/>
-                                <DataGridComboBoxColumn Header="Status"
-                                                        SelectedItemBinding="{Binding Status, UpdateSourceTrigger=PropertyChanged}"
-                                                        Width="100">
-                                    <DataGridComboBoxColumn.ElementStyle>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesStatusFamiliar, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                            <Setter Property="IsReadOnly" Value="True"/>
-                                        </Style>
-                                    </DataGridComboBoxColumn.ElementStyle>
-                                    <DataGridComboBoxColumn.EditingElementStyle>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="ItemsSource" Value="{Binding DataContext.OpcoesStatusFamiliar, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-                                        </Style>
-                                    </DataGridComboBoxColumn.EditingElementStyle>
-                                </DataGridComboBoxColumn>
-                                <DataGridTemplateColumn Header="Ações" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding DataContext.RemoverHistoriaFamiliarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                    CommandParameter="{Binding}"
-                                                    Style="{StaticResource RemoveButtonStyle}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
+                <Button x:Name="BtnConfirmarDeclaracao"
+                        Content="✅ Confirmar Declaração"
+                        Style="{StaticResource NavigationButtonStyle}"
+                        Click="BtnConfirmarDeclaracao_Click"
+                        Padding="15,8"
+                        Margin="0,0,10,0"/>
 
-                    <!-- Campos adicionais familiares -->
-                    <UniformGrid Columns="2">
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Doenças Hereditárias Conhecidas" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding DoencasHereditarias, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
-                        </StackPanel>
-                        <StackPanel Margin="15,0,0,0">
-                            <TextBlock Text="Observações Familiares" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding ObservacoesFamiliares, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"/>
-                        </StackPanel>
-                    </UniformGrid>
-                </StackPanel>
-            </Border>
+                <Button x:Name="BtnGerarPdfDeclaracao"
+                        Content="📄 Gerar PDF"
+                        Style="{StaticResource NavigationButtonStyle}"
+                        Click="BtnGerarPdfDeclaracao_Click"
+                        Padding="15,8"/>
+              </StackPanel>
 
-            <!-- === ESTILO DE VIDA === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="🌱 Estilo de Vida Atual" Style="{StaticResource SectionHeaderStyle}"/>
+              <TextBlock x:Name="TxtMensagemAssinatura"
+                         FontSize="12"
+                         Foreground="#27AE60"
+                         Margin="0,10,0,0"
+                         Visibility="Collapsed"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
 
-                    <!-- Hábitos em grid -->
-                    <TextBlock Text="Hábitos" Style="{StaticResource SubHeaderStyle}"/>
-                    <UniformGrid Columns="2" Margin="0,0,0,15">
-                        <!-- Coluna 1 -->
-                        <StackPanel Margin="0,0,15,0">
-                            <!-- Tabagismo -->
-                            <TextBlock Text="Tabagismo" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox ItemsSource="{Binding OpcoesTabagismo}"
-                                      SelectedItem="{Binding Tabagismo}"
-                                      Style="{StaticResource FieldComboBoxStyle}" Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding DetalheTabagismo, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     Visibility="{Binding MostraDetalheTabagismo, Converter={StaticResource BoolToVisibility}}"
-                                     Margin="0,0,0,12">
-                                <TextBox.Tag>
-                                    <TextBlock Text="Detalhes (ex: cigarros/dia, desde quando...)" Opacity="0.6"/>
-                                </TextBox.Tag>
-                            </TextBox>
-
-                            <!-- Exercício Físico -->
-                            <TextBlock Text="Exercício Físico" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox ItemsSource="{Binding OpcoesExercicio}"
-                                      SelectedItem="{Binding ExercicioFisico}"
-                                      Style="{StaticResource FieldComboBoxStyle}" Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding DetalheExercicio, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     Visibility="{Binding MostraDetalheExercicio, Converter={StaticResource BoolToVisibility}}"
-                                     Margin="0,0,0,0">
-                                <TextBox.Tag>
-                                    <TextBlock Text="Tipo e frequência do exercício..." Opacity="0.6"/>
-                                </TextBox.Tag>
-                            </TextBox>
-                        </StackPanel>
-
-                        <!-- Coluna 2 -->
-                        <StackPanel Margin="15,0,0,0">
-                            <!-- Consumo de Álcool -->
-                            <TextBlock Text="Consumo de Álcool" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox ItemsSource="{Binding OpcoesAlcool}"
-                                      SelectedItem="{Binding ConsumoAlcool}"
-                                      Style="{StaticResource FieldComboBoxStyle}" Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding DetalheAlcool, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"
-                                     Visibility="{Binding MostraDetalheAlcool, Converter={StaticResource BoolToVisibility}}"
-                                     Margin="0,0,0,12">
-                                <TextBox.Tag>
-                                    <TextBlock Text="Quantidades e frequência..." Opacity="0.6"/>
-                                </TextBox.Tag>
-                            </TextBox>
-
-                            <!-- Padrão de Sono -->
-                            <TextBlock Text="Padrão de Sono" Style="{StaticResource FieldLabelStyle}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <Slider Value="{Binding HorasSono}" Minimum="4" Maximum="12"
-                                        Width="120" VerticalAlignment="Center"
-                                        TickFrequency="1" IsSnapToTickEnabled="True"/>
-                                <TextBlock Text="{Binding HorasSono}" Margin="8,0,0,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="horas/noite" Margin="4,0,0,0" VerticalAlignment="Center" Opacity="0.7"/>
-                            </StackPanel>
-                            <!-- ✅ CORRIGIDO: Mudado de TextBox para ComboBox -->
-                            <TextBlock Text="Qualidade do Sono" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox ItemsSource="{Binding OpcoesQualidadeSono}"
-                                      SelectedItem="{Binding QualidadeSono}"
-                                      Style="{StaticResource FieldComboBoxStyle}"/>
-                        </StackPanel>
-                    </UniformGrid>
-
-                    <!-- Alimentação -->
-                    <TextBlock Text="Alimentação" Style="{StaticResource SubHeaderStyle}"/>
-                    <UniformGrid Columns="3" Margin="0,0,0,0">
-                        <!-- Tipo de Dieta -->
-                        <StackPanel Margin="0,0,15,0">
-                            <TextBlock Text="Tipo de Dieta" Style="{StaticResource FieldLabelStyle}"/>
-                            <ComboBox ItemsSource="{Binding OpcoesDieta}"
-                                      SelectedItem="{Binding TipoDieta}"
-                                      Style="{StaticResource FieldComboBoxStyle}"/>
-                        </StackPanel>
-
-                        <!-- Consumo de Água -->
-                        <StackPanel Margin="15,0,15,0">
-                            <TextBlock Text="Consumo de Água Diário" Style="{StaticResource FieldLabelStyle}"/>
-                            <StackPanel Orientation="Horizontal">
-                                <Slider Value="{Binding ConsumoAguaDiario}" Minimum="0.5" Maximum="4.0"
-                                        Width="100" VerticalAlignment="Center"
-                                        TickFrequency="0.5" IsSnapToTickEnabled="True"/>
-                                <TextBlock Text="{Binding ConsumoAguaDiario, StringFormat='{}{0:F1}L'}"
-                                           Margin="8,0,0,0" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </StackPanel>
-
-                        <!-- Restrições -->
-                        <StackPanel Margin="15,0,0,0">
-                            <TextBlock Text="Restrições Alimentares" Style="{StaticResource FieldLabelStyle}"/>
-                            <TextBox Text="{Binding RestricaoesAlimentares, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource FieldTextBoxStyle}"/>
-                        </StackPanel>
-                    </UniformGrid>
-                </StackPanel>
-            </Border>
-
-            <!-- === DECLARAÇÃO LEGAL === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="⚖️ Declaração Legal" Style="{StaticResource SectionHeaderStyle}"/>
-
-                    <TextBlock Text="Termos de Responsabilidade" Style="{StaticResource SubHeaderStyle}"/>
-
-                    <StackPanel Margin="0,0,0,15">
-                        <CheckBox Content="Confirmo a veracidade de todas as informações fornecidas"
-                                  IsChecked="{Binding ConfirmoVeracidade, Mode=TwoWay}"
-                                  FontWeight="Medium" Margin="0,0,0,8"/>
-                        <CheckBox Content="Compreendo a importância de fornecer informação completa e precisa"
-                                  IsChecked="{Binding CompreendoImportancia, Mode=TwoWay}"
-                                  FontWeight="Medium" Margin="0,0,0,8"/>
-                        <CheckBox Content="Comprometo-me a informar sobre quaisquer alterações futuras"
-                                  IsChecked="{Binding ComprometoInformarAlteracoes, Mode=TwoWay}"
-                                  FontWeight="Medium" Margin="0,0,0,12"/>
-                    </StackPanel>
-
-                    <TextBlock Text="Observações Adicionais (Opcional)" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox Text="{Binding ObservacoesAdicionais, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource FieldTextBoxStyle}"
-                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="80"
-                             Margin="0,0,0,20">
-                        <TextBox.Tag>
-                            <TextBlock Text="Qualquer informação adicional relevante..." Opacity="0.6"/>
-                        </TextBox.Tag>
-                    </TextBox>
-                </StackPanel>
-            </Border>
-
-            <!-- === ASSINATURA DIGITAL === -->
-            <Border Background="White" BorderBrush="#E3E9DE" BorderThickness="1"
-                    CornerRadius="12" Padding="25" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBlock Text="✍️ Assinatura Digital do Paciente" Style="{StaticResource SectionHeaderStyle}"/>
-
-                    <TextBlock Text="⚠️ Assinatura Obrigatória para Validade Legal"
-                               FontSize="12" Foreground="#E67E22" FontWeight="Medium"
-                               Margin="0,0,0,15"/>
-
-                    <!-- Nome do Paciente -->
-                    <StackPanel Margin="0,0,0,15">
-                        <TextBlock Text="Nome Completo" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox x:Name="TxtNomePacienteDeclaracao"
-                                 Text="{Binding NomePaciente, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource FieldTextBoxStyle}"/>
-                    </StackPanel>
-
-                    <!-- Data da Declaração -->
-                    <StackPanel Margin="0,0,0,20">
-                        <TextBlock Text="Data da Declaração" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBox x:Name="TxtDataDeclaracao"
-                                 Text="{Binding Source={x:Static sys:DateTime.Today}, Converter={StaticResource FlexibleDateConverter}, Mode=OneTime}"
-                                 Width="200" HorizontalAlignment="Left"
-                                 Padding="12,10"
-                                 FontSize="14"
-                                 Background="White"
-                                 BorderBrush="#E3E9DE"
-                                 BorderThickness="1"
-                                 ToolTip="Formatos aceitos: dd/MM/yyyy, dd-MM-yyyy, yyyy-MM-dd, etc."
-                                 xmlns:sys="clr-namespace:System;assembly=mscorlib"/>
-                    </StackPanel>
-
-                    <!-- Canvas de Assinatura -->
-                    <StackPanel>
-                        <TextBlock Text="Assinatura Digital" Style="{StaticResource FieldLabelStyle}"/>
-                        <TextBlock Text="Desenhe a sua assinatura no campo abaixo (compatível com tablet Wacom)"
-                                   FontSize="12" Foreground="#5A6558" Margin="0,0,0,10"/>
-
-                        <Border BorderBrush="#9CAF97" BorderThickness="2" CornerRadius="8"
-                                Background="White" Margin="0,0,0,10"
-                                HorizontalAlignment="Left">
-                            <Grid Width="600" Height="150">
-                                <Canvas x:Name="AssinaturaCanvasDeclaracao"
-                                        Width="600" Height="150"
-                                        Background="White"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        Stylus.IsFlicksEnabled="False"
-                                        Stylus.IsTapFeedbackEnabled="False"
-                                        Stylus.IsPressAndHoldEnabled="False"
-                                        MouseDown="AssinaturaCanvas_MouseDown"
-                                        MouseMove="AssinaturaCanvas_MouseMove"
-                                        MouseUp="AssinaturaCanvas_MouseUp"
-                                        MouseLeave="AssinaturaCanvas_MouseLeave"
-                                        StylusDown="AssinaturaCanvas_StylusDown"
-                                        StylusMove="AssinaturaCanvas_StylusMove"
-                                        StylusUp="AssinaturaCanvas_StylusUp"/>
-
-                                <!-- ⭐ LINHA GUIA CENTRAL: Marca o MEIO da assinatura (centralizar aqui) -->
-                                <Line X1="300" Y1="0" X2="300" Y2="150"
-                                      Stroke="#9CAF97"
-                                      StrokeThickness="2"
-                                      StrokeDashArray="5 3"
-                                      IsHitTestVisible="False"
-                                      Opacity="0.8"/>
-
-                                <!-- Label explicativo da linha guia -->
-                                <TextBlock Text="← Centro da Assinatura →"
-                                           Canvas.Left="220"
-                                           Canvas.Top="5"
-                                           FontSize="9"
-                                           FontStyle="Italic"
-                                           Foreground="#9CAF97"
-                                           IsHitTestVisible="False"
-                                           Opacity="0.7"/>
-
-                                <TextBlock x:Name="AssinaturaInstrucoesDeclaracao"
-                                           Text="Clique e arraste para assinar"
-                                           FontSize="14" Foreground="#95A5A6"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           IsHitTestVisible="False"/>
-                            </Grid>
-                        </Border>
-
-                        <!-- Botões de Ação -->
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <Button x:Name="BtnLimparAssinaturaDeclaracao"
-                                    Content="🗑️ Limpar Assinatura"
-                                    Style="{StaticResource SecondaryButtonLocalStyle}"
-                                    Click="BtnLimparAssinatura_Click"
-                                    Padding="12,8" Margin="0,0,10,0"/>
-
-                            <Button x:Name="BtnConfirmarDeclaracao"
-                                    Content="✅ Confirmar Declaração"
-                                    Style="{StaticResource NavigationButtonStyle}"
-                                    Click="BtnConfirmarDeclaracao_Click"
-                                    Padding="15,8" Margin="0,0,10,0"/>
-
-                            <Button x:Name="BtnGerarPdfDeclaracao"
-                                    Content="📄 Gerar PDF"
-                                    Style="{StaticResource NavigationButtonStyle}"
-                                    Click="BtnGerarPdfDeclaracao_Click"
-                                    Padding="15,8"/>
-                        </StackPanel>
-
-                        <TextBlock x:Name="TxtMensagemAssinatura"
-                                   FontSize="12" Foreground="#27AE60"
-                                   Margin="0,10,0,0" Visibility="Collapsed"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-
-        </StackPanel>
-        </Grid>
-    </ScrollViewer>
+      </StackPanel>
+    </Grid>
+  </ScrollViewer>
 </UserControl>

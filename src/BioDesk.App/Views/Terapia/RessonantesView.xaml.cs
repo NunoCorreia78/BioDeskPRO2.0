@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using BioDesk.Core.Application.Terapia;
 using BioDesk.ViewModels.UserControls.Terapia;
 using BioDesk.ViewModels.Windows;
 using BioDesk.App.Windows;

@@ -93,50 +93,50 @@ public static class ConsentimentoTemplates
         ["Fitoterapia"] = new ConsentimentoTemplate
         {
             TipoTratamento = "Fitoterapia",
-            DescricaoTratamento = "Tratamento através de plantas medicinais e extratos naturais para promover o bem-estar e saúde.",
-            NaturezaProcedimento = "Utilização de preparações à base de plantas medicinais, incluindo chás, tinturas, extratos e suplementos naturais.",
-            BeneficiosEsperados = "• Fortalecimento do sistema imunitário\n• Melhoria do bem-estar geral\n• Redução de sintomas específicos\n• Abordagem natural e holística",
-            RiscosEfeitosSecundarios = "• Possíveis reações alérgicas\n• Interações com medicamentos convencionais\n• Efeitos secundários leves (náuseas, dores de cabeça)\n• Variabilidade na resposta individual",
-            AlternativasDisponiveis = "• Medicina convencional\n• Homeopatia\n• Acupunctura\n• Outras terapias complementares",
-            Contraindicacoes = "• Alergias conhecidas às plantas utilizadas\n• Gravidez ou amamentação (conforme caso)\n• Interações medicamentosas graves\n• Patologias específicas contraindicadas",
+            DescricaoTratamento = "Tratamento abrangente através de plantas medicinais e extratos naturais de alta qualidade para promover o bem-estar e restaurar saúde integral.",
+            NaturezaProcedimento = "Utilização profissional de preparações à base de plantas medicinais de qualidade clínica, incluindo chás, tinturas concentradas, extratos padronizados e suplementos naturais específicos. Em situações de emergência médica ou patologias agudas graves, o paciente deve procurar atendimento médico convencional imediatamente.",
+            BeneficiosEsperados = "• Fortalecimento eficaz do sistema imunitário\n• Melhoria significativa do bem-estar geral\n• Redução de sintomas crónicos persistentes\n• Abordagem natural e holística comprovada\n• Harmonização de funções biológicas\n• Restauração de energia e vitalidade\n• Prevenção de doenças crónicas",
+            RiscosEfeitosSecundarios = "• Possíveis reações alérgicas a plantas (raras, quando há predisposição)\n• Interações com medicamentos convencionais (informar SEMPRE medicação completa)\n• Efeitos secundários leves e transientes (náuseas, dores de cabeça)\n• Variabilidade na resposta individual conforme constituição\n• Possível desintoxicação inicial (resposta terapêutica positiva)\n• Tempo de resposta gradual (3-12 semanas)",
+            AlternativasDisponiveis = "• Medicina convencional farmacológica\n• Homeopatia\n• Acupunctura\n• Osteopatia e técnicas manuais\n• Outras terapias complementares integradas",
+            Contraindicacoes = "• Alergias conhecidas às plantas utilizadas\n• Gravidez e amamentação (alguns produtos específicos)\n• Interações medicamentosas graves documentadas\n• Patologias graves em fase aguda (avaliar caso a caso)\n• Pacientes com dificuldade em adherência terapêutica",
             FrequenciaSessoes = "Semanal",
-            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos tardios sujeitos a taxa de 50%."
+            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos com menos de 24h sujeitos a taxa de 50%."
         },
         ["Homeopatia"] = new ConsentimentoTemplate
         {
             TipoTratamento = "Homeopatia",
-            DescricaoTratamento = "Sistema terapêutico baseado no princípio da similitude, utilizando substâncias altamente diluídas.",
-            NaturezaProcedimento = "Administração de medicamentos homeopáticos personalizados, preparados segundo os princípios da farmacopeia homeopática.",
-            BeneficiosEsperados = "• Estimulação da capacidade de autorregulação\n• Tratamento individualizado\n• Abordagem holística\n• Sem efeitos secundários significativos",
-            RiscosEfeitosSecundarios = "• Agravação temporária inicial (healing crisis)\n• Possível retardamento de tratamento convencional urgente\n• Resposta individual variável\n• Necessidade de acompanhamento prolongado",
-            AlternativasDisponiveis = "• Medicina convencional\n• Fitoterapia\n• Acupunctura\n• Outras medicinas complementares",
-            Contraindicacoes = "• Situações de urgência médica\n• Patologias que requerem tratamento convencional imediato\n• Doentes que não compreendem os princípios homeopáticos",
+            DescricaoTratamento = "Sistema terapêutico complementar bem estabelecido baseado no princípio da similitude, utilizando substâncias naturais altamente diluídas para estimular a capacidade inata de cura do organismo.",
+            NaturezaProcedimento = "Administração profissional de medicamentos homeopáticos personalizados, preparados de acordo com os princípios rigorosos da farmacopeia homeopática, selecionados conforme as características individuais. Em situações de emergência médica, o paciente deve procurar atendimento médico convencional imediatamente.",
+            BeneficiosEsperados = "• Estimulação eficaz da capacidade natural de autorregulação\n• Tratamento altamente individualizado e preciso\n• Abordagem holística profunda\n• Ausência de efeitos secundários significativos\n• Harmonização do sistema imunitário\n• Melhoria de sintomas funcionais\n• Recuperação de equilíbrio energético",
+            RiscosEfeitosSecundarios = "• Possível agravação temporária inicial (healing crisis) - resposta terapêutica esperada\n• Pequeno risco de retardamento de tratamento convencional urgente (se não orientado)\n• Resposta individual altamente variável\n• Necessidade de acompanhamento prolongado e consistente\n• Possível libertação de emoções durante processo\n• Sensações transitórias de desintoxicação",
+            AlternativasDisponiveis = "• Medicina convencional farmacológica\n• Fitoterapia\n• Acupunctura\n• Osteopatia e técnicas manuais\n• Outras medicinas complementares",
+            Contraindicacoes = "• Situações de emergência médica aguda\n• Patologias que requerem tratamento convencional imediato (cirurgias, medicações críticas)\n• Pacientes que não conseguem compreender ou aceitar princípios homeopáticos\n• Incapacidade de manutenção de acompanhamento regular",
             FrequenciaSessoes = "Quinzenal",
-            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos tardios sujeitos a taxa de 50%."
+            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos com menos de 24h sujeitos a taxa de 50%."
         },
         ["Acupunctura"] = new ConsentimentoTemplate
         {
             TipoTratamento = "Acupunctura",
-            DescricaoTratamento = "Técnica terapêutica que utiliza agulhas muito finas inseridas em pontos específicos do corpo.",
-            NaturezaProcedimento = "Inserção de agulhas esterilizadas descartáveis em pontos de acupunctura específicos, com possível estimulação manual ou elétrica.",
-            BeneficiosEsperados = "• Alívio da dor\n• Redução do stress e ansiedade\n• Melhoria do sono\n• Equilíbrio energético\n• Redução de inflamação",
-            RiscosEfeitosSecundarios = "• Dor ligeira no local da inserção\n• Pequenos hematomas\n• Risco mínimo de infeção\n• Tontura ocasional\n• Fadiga pós-tratamento",
-            AlternativasDisponiveis = "• Medicina convencional\n• Fisioterapia\n• Massagem terapêutica\n• Outras terapias complementares",
-            Contraindicacoes = "• Distúrbios de coagulação\n• Infeções locais na pele\n• Gravidez (certos pontos)\n• Pacientes com medo extremo de agulhas",
+            DescricaoTratamento = "Técnica terapêutica milenar muitobem documentada que utiliza agulhas muito finas e estéreis inseridas em pontos específicos do corpo para equilibrar energia vital.",
+            NaturezaProcedimento = "Inserção cuidadosa de agulhas esterilizadas descartáveis de calibre fino em pontos de acupunctura específicos, com possível estimulação manual ou elétrica complementar. Em situações de urgência médica, o paciente deve procurar atendimento médico imediatamente.",
+            BeneficiosEsperados = "• Alívio eficaz e duradouro da dor\n• Redução significativa de stress e ansiedade\n• Melhoria substancial da qualidade do sono\n• Equilíbrio e regulação de funções orgânicas\n• Redução de inflamação e edema\n• Fortalecimento do sistema imunitário\n• Melhoria geral de energia e bem-estar",
+            RiscosEfeitosSecundarios = "• Dor ligeira ou muito leve na inserção das agulhas (normal)\n• Pequenos hematomas nos pontos (raros e resolvem naturalmente)\n• Risco mínimo de infeção (agulhas são estéreis descartáveis)\n• Muito raro: pneumotórax em punção torácica (técnico experiente evita)\n• Possível sonolência pós-tratamento (sinal de resposta positiva)\n• Possível relaxamento profundo ou reações emocionais (seguro)",
+            AlternativasDisponiveis = "• Medicina convencional farmacológica\n• Fisioterapia\n• Massagem terapêutica\n• Osteopatia\n• Outras terapias complementares",
+            Contraindicacoes = "• Distúrbios graves de coagulação\n• Infeções locais ativas na pele\n• Gravidez (alguns pontos evitados, outros seguros)\n• Pacientes com fobia extrema de agulhas\n• Uso de anticoagulantes agressivos (consultar médico)",
             FrequenciaSessoes = "Semanal",
-            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos tardios sujeitos a taxa de 50%."
+            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos com menos de 24h sujeitos a taxa de 50%."
         },
         ["Massagem"] = new ConsentimentoTemplate
         {
             TipoTratamento = "Massagem Terapêutica",
-            DescricaoTratamento = "Manipulação manual dos tecidos moles para fins terapêuticos e de bem-estar.",
-            NaturezaProcedimento = "Aplicação de técnicas de massagem através de pressão, fricção e movimentos específicos nos tecidos moles.",
-            BeneficiosEsperados = "• Relaxamento muscular\n• Melhoria da circulação\n• Redução do stress\n• Alívio de tensões\n• Melhoria da flexibilidade",
-            RiscosEfeitosSecundarios = "• Dor muscular temporária\n• Possível agravamento de lesões existentes\n• Reações alérgicas a óleos\n• Desconforto em áreas sensíveis",
-            AlternativasDisponiveis = "• Fisioterapia\n• Acupunctura\n• Exercício terapêutico\n• Outras técnicas de relaxamento",
-            Contraindicacoes = "• Infeções ou feridas na pele\n• Trombose venosa profunda\n• Fraturas recentes\n• Certas condições cardíacas",
+            DescricaoTratamento = "Manipulação profissional e terapêutica dos tecidos moles para fins terapêuticos eficazes, bem-estar integral e recuperação funcional.",
+            NaturezaProcedimento = "Aplicação profissional de técnicas de massagem através de pressão controlada, fricção específica e movimentos direcionados em tecidos moles corporais. Em caso de lesão aguda, suspeita de fratura ou emergência médica, o paciente deve procurar avaliação médica.",
+            BeneficiosEsperados = "• Relaxamento muscular profundo e duradouro\n• Melhoria significativa da circulação sanguínea e linfática\n• Redução markada do stress e tensão\n• Alívio eficaz de dores musculares\n• Melhoria da flexibilidade e amplitude de movimento\n• Melhoria significativa da qualidade do sono\n• Aumento geral de bem-estar e vitalidade",
+            RiscosEfeitosSecundarios = "• Dor muscular leve durante ou após a massagem (resposta terapêutica normal)\n• Possível agravamento temporário de lesões pré-existentes (raro)\n• Reações alérgicas a óleos ou cremes (raras, informar sensibilidade)\n• Desconforto em áreas muito sensíveis (comunicar ao terapeuta)\n• Possível fadiga ligeira pós-sessão (sinal de libertação de tensão)",
+            AlternativasDisponiveis = "• Fisioterapia convencional\n• Acupunctura\n• Exercício terapêutico\n• Osteopatia e técnicas manuais\n• Outras técnicas de relaxamento",
+            Contraindicacoes = "• Infeções ou feridas abertas na pele\n• Trombose venosa profunda diagnosticada\n• Fraturas recentes (menos de 6 semanas)\n• Certas condições cardíacas graves\n• Cirurgias recentes (menos de 4 semanas)",
             FrequenciaSessoes = "Semanal ou quinzenal",
-            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos tardios sujeitos a taxa de 50%."
+            PoliticaCancelamento = "Cancelamento com 24h de antecedência. Cancelamentos com menos de 24h sujeitos a taxa de 50%."
         }
     };
 }

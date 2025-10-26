@@ -228,7 +228,7 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
     {
         var novaCirurgia = new Cirurgia
         {
-            Data = DateTime.Today,
+            Data = default(DateTime), // ✅ CORRIGIDO: Campo vazio por padrão (01/01/0001)
             TipoCirurgia = "",
             Hospital = "",
             Observacoes = ""
@@ -252,9 +252,9 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
     {
         var novaHospitalizacao = new Hospitalizacao
         {
-            Data = DateTime.Today,
+            Data = default(DateTime), // ✅ CORRIGIDO: Campo vazio por padrão (01/01/0001)
             Motivo = "",
-            DuracaoDias = 1,
+            DuracaoDias = 0, // ✅ CORRIGIDO: 0 dias por padrão
             Hospital = ""
         };
         Hospitalizacoes.Add(novaHospitalizacao);
@@ -279,7 +279,7 @@ public partial class DeclaracaoSaudeViewModel : ObservableValidator
             Nome = "",
             Dosagem = "",
             Frequencia = "",
-            DesdeQuando = DateTime.Today
+            DesdeQuando = default(DateTime) // ✅ CORRIGIDO: Campo vazio por padrão (01/01/0001)
         };
         MedicamentosAtuais.Add(novoMedicamento);
         _logger.LogInformation("Novo medicamento adicionado");

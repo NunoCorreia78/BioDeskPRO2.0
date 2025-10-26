@@ -4,6 +4,8 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <!-- ✅ Suprimir warnings AForge (biblioteca .NET Framework 4.x funcional em .NET 8) -->
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

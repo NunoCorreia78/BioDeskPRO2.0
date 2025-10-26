@@ -91,15 +91,33 @@ public class ConsentimentoPdfService
                     // Conteúdo Principal
                     page.Content().Element(container => CriarConteudo(container, dados));
 
-                    // Rodapé
-                    page.Footer().AlignCenter().Text(text =>
+                    // Rodapé - Contactos e Redes Sociais
+                    page.Footer().AlignCenter().Column(col =>
                     {
-                        text.Span("Gerado em: ");
-                        text.Span($"{DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9).Italic();
+                        col.Item().Text(text =>
+                        {
+                            text.Span("📧 nunocorreiaterapiasnaturais@gmail.com  |  ")
+                                .FontSize(8)
+                                .FontColor(Colors.Grey.Darken2);
+                            text.Span("☎ 964 860 387")
+                                .FontSize(8)
+                                .FontColor(Colors.Grey.Darken2);
+                        });
 
-                        // Usar nome da clínica se disponível
-                        var nomeClinica = config?.NomeClinica ?? "Nuno Correia - Terapias Naturais";
-                        text.Span($" | {nomeClinica}").FontSize(8).FontColor(Colors.Grey.Medium);
+                        col.Item().PaddingTop(3).Text(text =>
+                        {
+                            text.Span("Instagram: @nunocorreia.naturopata  |  ")
+                                .FontSize(7)
+                                .FontColor(Colors.Grey.Medium);
+                            text.Span("Facebook: facebook.com/nunocorreia.naturopata")
+                                .FontSize(7)
+                                .FontColor(Colors.Grey.Medium);
+                        });
+
+                        col.Item().PaddingTop(3).Text("Gerado em: " + $"{DateTime.Now:dd/MM/yyyy HH:mm}")
+                            .FontSize(7)
+                            .FontColor(Colors.Grey.Medium)
+                            .Italic();
                     });
                 });
             })
@@ -143,74 +161,37 @@ public class ConsentimentoPdfService
 
     private void CriarCabecalho(IContainer container, ConfiguracaoClinica? config, string? logoPath)
     {
-        // ✅ CRITICAL: Envolver tudo num Column único para evitar erro "multiple child elements"
         container.Column(mainColumn =>
         {
-            mainColumn.Item().Row(row =>
+            // ✅ LOGO CENTRADO - AUMENTADO PARA 150px (solicitado pelo utilizador)
+            if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
             {
-                // Logo/Título à esquerda
-                row.RelativeItem().Column(column =>
-                {
-                    // LOGO (se disponível)
-                    if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
-                    {
-                        column.Item().MaxHeight(60).Image(logoPath);
-                    }
+                mainColumn.Item().AlignCenter().MaxHeight(150).Image(logoPath);
+            }
 
-                    // Nome da Clínica
-                    var nomeClinica = config?.NomeClinica ?? "🌿 Nuno Correia - Terapias Naturais";
-                    column.Item().Text(nomeClinica)
-                        .FontSize(20)
-                        .Bold()
-                        .FontColor(Colors.Grey.Darken3);
-
-                    column.Item().Text("Sistema de Gestão Médica Integrativa")
-                        .FontSize(10)
-                        .Italic()
-                        .FontColor(Colors.Grey.Darken2);
-
-                    // Morada (se disponível)
-                    if (!string.IsNullOrWhiteSpace(config?.Morada))
-                    {
-                        column.Item().Text(config.Morada)
-                            .FontSize(9)
-                            .FontColor(Colors.Grey.Medium);
-                    }
-
-                    // Telefone + Email (se disponíveis)
-                    if (!string.IsNullOrWhiteSpace(config?.Telefone) || !string.IsNullOrWhiteSpace(config?.Email))
-                    {
-                        column.Item().Row(r =>
-                        {
-                            if (!string.IsNullOrWhiteSpace(config.Telefone))
-                            {
-                                r.AutoItem().Text($"☎ {config.Telefone}  ")
-                                    .FontSize(9)
-                                    .FontColor(Colors.Grey.Medium);
-                            }
-
-                            if (!string.IsNullOrWhiteSpace(config.Email))
-                            {
-                                r.AutoItem().Text($"✉ {config.Email}")
-                                    .FontSize(9)
-                                    .FontColor(Colors.Grey.Medium);
-                            }
-                        });
-                    }
-                });
-
-                // Data à direita
-                row.ConstantItem(150).AlignRight().Column(column =>
-                {
-                    column.Item().Text($"Data: {DateTime.Now:dd/MM/yyyy}")
-                        .FontSize(10)
-                        .FontColor(Colors.Grey.Darken3);
-
-                    column.Item().Text($"Hora: {DateTime.Now:HH:mm}")
-                        .FontSize(9)
-                        .FontColor(Colors.Grey.Medium);
-                });
+            // ✅ CONTACTOS CENTRADOS POR BAIXO DO LOGO (conforme solicitado)
+            mainColumn.Item().AlignCenter().PaddingTop(10).Text(text =>
+            {
+                text.Span("☎ 964 860 387  |  ")
+                    .FontSize(10)
+                    .FontColor(Colors.Grey.Darken2);
+                text.Span("✉ nunocorreiaterapiasnaturais@gmail.com")
+                    .FontSize(10)
+                    .FontColor(Colors.Grey.Darken2);
             });
+
+            // Morada centrada (se disponível)
+            if (!string.IsNullOrWhiteSpace(config?.Morada))
+            {
+                mainColumn.Item().AlignCenter().PaddingTop(3).Text(config.Morada)
+                    .FontSize(9)
+                    .FontColor(Colors.Grey.Medium);
+            }
+
+            // Data centrada
+            mainColumn.Item().AlignCenter().PaddingTop(8).Text($"Data: {DateTime.Now:dd/MM/yyyy} | Hora: {DateTime.Now:HH:mm}")
+                .FontSize(9)
+                .FontColor(Colors.Grey.Medium);
 
             // Linha separadora
             mainColumn.Item().PaddingTop(10).BorderBottom(2).BorderColor(Colors.Green.Medium);
@@ -273,7 +254,7 @@ public class ConsentimentoPdfService
             // === DURAÇÃO E CUSTOS ===
             if (dados.NumeroSessoes.HasValue || dados.CustoPorSessao.HasValue)
             {
-                column.Item().PaddingTop(15).Background(Colors.Green.Lighten3).Padding(12).Row(row =>
+                column.Item().PaddingTop(15).Padding(12).Row(row =>
                 {
                     if (dados.NumeroSessoes.HasValue)
                     {

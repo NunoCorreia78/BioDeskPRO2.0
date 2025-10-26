@@ -2,9 +2,9 @@
 
 ## 📋 Sumário Executivo
 
-**Problema:** Aplicação crashava ao iniciar com erro "Missing file: hs3f12.hex"  
-**Causa Raiz:** hs3.dll (Inergetix CoRe wrapper) requer ficheiros de firmware (.hex) na mesma pasta  
-**Solução:** Copiar 7 ficheiros .hex da instalação Inergetix + configurar .csproj  
+**Problema:** Aplicação crashava ao iniciar com erro "Missing file: hs3f12.hex"
+**Causa Raiz:** hs3.dll (Inergetix CoRe wrapper) requer ficheiros de firmware (.hex) na mesma pasta
+**Solução:** Copiar 7 ficheiros .hex da instalação Inergetix + configurar .csproj
 **Status:** ✅ **RESOLVIDO** - Aplicação inicia sem erros, HS3 detectado no dropdown
 
 ---
@@ -260,10 +260,10 @@ src/BioDesk.App/Views/Terapia/
 
 ## 🔐 Backup Realizado
 
-**Timestamp:** 18/10/2025 13:12:15  
-**Localização:** `C:\Backups\BioDeskPro2\backup_20251018_131215.zip`  
-**Tamanho:** 149.48 MB (comprimido) | 345.02 MB (original)  
-**Ficheiros:** 1390  
+**Timestamp:** 18/10/2025 13:12:15
+**Localização:** `C:\Backups\BioDeskPro2\backup_20251018_131215.zip`
+**Tamanho:** 149.48 MB (comprimido) | 345.02 MB (original)
+**Ficheiros:** 1390
 **Conteúdo:**
 - ✅ Código-fonte completo (`src/`)
 - ✅ Configurações VS Code (`.vscode/`)
@@ -275,8 +275,8 @@ src/BioDesk.App/Views/Terapia/
 
 ## 📝 Commit Details
 
-**Branch:** `copilot/vscode1760742399628`  
-**Commit:** `ea6f438`  
+**Branch:** `copilot/vscode1760742399628`
+**Commit:** `ea6f438`
 **Mensagem:** `🔧 Fix: Correção crítica HS3 - Adicionar ficheiros de firmware .hex obrigatórios`
 
 **Estatísticas:**
@@ -323,18 +323,18 @@ src/BioDesk.App/Views/Terapia/
 ## 🎓 Lições Aprendidas
 
 ### 1. DLLs Proprietárias ≠ SDKs Oficiais
-**Erro:** Assumir que hs3.dll era libtiepie.dll (TiePie SDK)  
-**Realidade:** Wrapper Inergetix com API completamente diferente  
+**Erro:** Assumir que hs3.dll era libtiepie.dll (TiePie SDK)
+**Realidade:** Wrapper Inergetix com API completamente diferente
 **Solução:** Sempre usar `pefile` ou `dumpbin` para verificar exports reais
 
 ### 2. Dependências Externas em Runtime
-**Erro:** Assumir que DLL é self-contained  
-**Realidade:** hs3.dll requer ficheiros .hex externos (firmware)  
+**Erro:** Assumir que DLL é self-contained
+**Realidade:** hs3.dll requer ficheiros .hex externos (firmware)
 **Solução:** Investigar instalação oficial para descobrir dependências
 
 ### 3. Wildcard Patterns em .csproj
-**Antes:** Copiar ficheiros individualmente  
-**Depois:** `<Content Include="hs3*.hex">` cobre todos os casos  
+**Antes:** Copiar ficheiros individualmente
+**Depois:** `<Content Include="hs3*.hex">` cobre todos os casos
 **Benefício:** Manutenção futura simplificada
 
 ### 4. Validação Incremental
@@ -356,14 +356,14 @@ src/BioDesk.App/Views/Terapia/
 ```
 [HS3] EntryPointNotFoundException: Unable to find an entry point named 'InitInstrument'
 ```
-**Causa:** Assinatura P/Invoke incorreta (CallingConvention ou parâmetros)  
+**Causa:** Assinatura P/Invoke incorreta (CallingConvention ou parâmetros)
 **Solução:** Testar `StdCall` vs `Cdecl`, verificar tipos de parâmetros
 
 #### Cenário 2: Handle <= 0
 ```
 [HS3] InitInstrument() returned -1
 ```
-**Causa:** Dispositivo não conectado, driver ausente, ou USB com problema  
+**Causa:** Dispositivo não conectado, driver ausente, ou USB com problema
 **Diagnóstico:**
 1. Device Manager → Procurar "TiePie" ou "Unknown Device"
 2. Testar com software Inergetix CoRe 5.0
@@ -373,7 +373,7 @@ src/BioDesk.App/Views/Terapia/
 ```
 [HS3] ✅ Emission started but no physical sensation
 ```
-**Causa:** Amplitude muito baixa (5V padrão)  
+**Causa:** Amplitude muito baixa (5V padrão)
 **Solução:**
 ```csharp
 // Em TiePieHS3Service.EmitFrequencyAsync
@@ -406,7 +406,7 @@ signalType = WaveformType.Square; // Mudar para onda quadrada (mais percetível)
 
 ---
 
-**Documentado por:** GitHub Copilot  
-**Data:** 18 de Outubro de 2025  
-**Sessão:** Correção Firmware HS3  
+**Documentado por:** GitHub Copilot
+**Data:** 18 de Outubro de 2025
+**Sessão:** Correção Firmware HS3
 **Status:** ✅ **COMPLETO - AGUARDA TESTE FÍSICO**

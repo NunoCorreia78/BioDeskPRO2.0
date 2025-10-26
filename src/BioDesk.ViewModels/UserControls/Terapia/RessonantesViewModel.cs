@@ -15,15 +15,9 @@ using Microsoft.Extensions.Logging;
 namespace BioDesk.ViewModels.UserControls.Terapia;
 
 /// <summary>
-/// Parâmetros de terapia vindos do TerapiaControlosUserControl.
+/// ViewModel para terapias ressonantes (scan + emissão).
+/// TerapiaParametros foi movido para BioDesk.Core.Application.Terapia.
 /// </summary>
-public record TerapiaParametros(
-    double VoltagemV,
-    int DuracaoTotalMinutos,
-    int TempoFrequenciaSegundos,
-    int AjusteHz
-);
-
 public partial class RessonantesViewModel : ObservableObject, IDisposable
 {
     private readonly IResonantFrequencyFinder _finder;

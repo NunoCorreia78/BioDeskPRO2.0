@@ -97,7 +97,6 @@ public class PrescricaoPdfService
                     {
                         text.Span("Gerado em: ");
                         text.Span($"{DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9).Italic();
-                        text.Span(" | Nuno Correia - Terapias Naturais - Prescrição").FontSize(8).FontColor(Colors.Grey.Medium);
                     });
                 });
             })
@@ -149,20 +148,13 @@ public class PrescricaoPdfService
                 // Logo/Título à esquerda
                 row.RelativeItem().Column(column =>
                 {
-                    // LOGO (se disponível)
+                    // LOGO AUMENTADO PARA 120px (solicitado pelo utilizador)
                     if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
                     {
-                        column.Item().MaxHeight(60).Image(logoPath);
+                        column.Item().MaxHeight(120).Image(logoPath);
                     }
 
-                    // Nome da Clínica
-                    var nomeClinica = config?.NomeClinica ?? "🌿 Nuno Correia - Terapias Naturais";
-                    column.Item().Text(nomeClinica)
-                        .FontSize(20)
-                        .Bold()
-                        .FontColor(Colors.Grey.Darken3);
-
-                    column.Item().Text("Prescrição de Medicina Complementar")
+                    column.Item().PaddingTop(5).Text("Prescrição de Medicina Complementar")
                         .FontSize(10)
                         .Italic()
                         .FontColor(Colors.Grey.Darken2);
@@ -339,9 +331,6 @@ public class PrescricaoPdfService
                     col.Item().PaddingTop(5).AlignCenter().Text("Profissional Responsável")
                         .FontSize(9)
                         .Italic();
-                    col.Item().AlignCenter().Text("Nuno Correia - Terapias Naturais")
-                        .FontSize(8)
-                        .FontColor(Colors.Grey.Darken1);
                 });
             });
 

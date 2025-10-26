@@ -46,17 +46,30 @@ public class DeclaracaoSaudePdfService
             try
             {
                 config = _unitOfWork.ConfiguracaoClinica.GetByIdAsync(1).Result;
-                if (config?.LogoPath != null)
+
+                // ✅ LOGO FIXO: Usar sempre o logo da pasta Assets
+                var assetsLogoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Images", "Logo.png");
+
+                if (File.Exists(assetsLogoPath))
                 {
-                    logoPath = Path.Combine(PathService.AppDataPath, config.LogoPath);
-                    if (!File.Exists(logoPath))
+                    logoPath = assetsLogoPath;
+                    _logger.LogInformation("✅ Logo carregado de Assets: {LogoPath}", logoPath);
+                }
+                else
+                {
+                    // Fallback: tentar logo da configuração
+                    if (config?.LogoPath != null)
                     {
-                        _logger.LogWarning("⚠️ Logo configurado mas ficheiro não existe: {LogoPath}", logoPath);
-                        logoPath = null;
-                    }
-                    else
-                    {
-                        _logger.LogInformation("✅ Logo da clínica carregado: {LogoPath}", logoPath);
+                        logoPath = Path.Combine(PathService.AppDataPath, config.LogoPath);
+                        if (!File.Exists(logoPath))
+                        {
+                            _logger.LogWarning("⚠️ Logo não encontrado em Assets nem configuração: {LogoPath}", logoPath);
+                            logoPath = null;
+                        }
+                        else
+                        {
+                            _logger.LogInformation("✅ Logo da clínica carregado (fallback): {LogoPath}", logoPath);
+                        }
                     }
                 }
             }
@@ -91,13 +104,33 @@ public class DeclaracaoSaudePdfService
                     // Conteúdo Principal
                     page.Content().Element(container => CriarConteudo(container, dados));
 
-                    // Rodapé
-                    page.Footer().AlignCenter().Text(text =>
+                    // Rodapé - Contactos e Redes Sociais
+                    page.Footer().AlignCenter().Column(col =>
                     {
-                        text.Span("Gerado em: ");
-                        text.Span($"{DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9).Italic();
-                        var nomeClinica = config?.NomeClinica ?? "Nuno Correia - Terapias Naturais";
-                        text.Span($" | {nomeClinica}").FontSize(8).FontColor(Colors.Grey.Medium);
+                        col.Item().Text(text =>
+                        {
+                            text.Span("📧 nunocorreiaterapiasnaturais@gmail.com  |  ")
+                                .FontSize(8)
+                                .FontColor(Colors.Grey.Darken2);
+                            text.Span("☎ 964 860 387")
+                                .FontSize(8)
+                                .FontColor(Colors.Grey.Darken2);
+                        });
+
+                        col.Item().PaddingTop(3).Text(text =>
+                        {
+                            text.Span("Instagram: @nunocorreia.naturopata  |  ")
+                                .FontSize(7)
+                                .FontColor(Colors.Grey.Medium);
+                            text.Span("Facebook: facebook.com/nunocorreia.naturopata")
+                                .FontSize(7)
+                                .FontColor(Colors.Grey.Medium);
+                        });
+
+                        col.Item().PaddingTop(3).Text("Gerado em: " + $"{DateTime.Now:dd/MM/yyyy HH:mm}")
+                            .FontSize(7)
+                            .FontColor(Colors.Grey.Medium)
+                            .Italic();
                     });
                 });
             })
@@ -143,67 +176,35 @@ public class DeclaracaoSaudePdfService
     {
         container.Column(mainColumn =>
         {
-            mainColumn.Item().Row(row =>
+            // ✅ LOGO CENTRADO - AUMENTADO PARA 150px (solicitado pelo utilizador)
+            if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
             {
-                // Logo/Título à esquerda
-                row.RelativeItem().Column(column =>
-                {
-                    // LOGO (se disponível)
-                    if (!string.IsNullOrEmpty(logoPath) && File.Exists(logoPath))
-                    {
-                        column.Item().MaxHeight(60).Image(logoPath);
-                    }
+                mainColumn.Item().AlignCenter().MaxHeight(150).Image(logoPath);
+            }
 
-                    // Nome da Clínica
-                    var nomeClinica = config?.NomeClinica ?? "🌿 Nuno Correia - Terapias Naturais";
-                    column.Item().Text(nomeClinica)
-                        .FontSize(20)
-                        .Bold()
-                        .FontColor(Colors.Grey.Darken3);
-
-                    column.Item().Text("Sistema de Gestão Médica Integrativa")
-                        .FontSize(10)
-                        .Italic()
-                        .FontColor(Colors.Grey.Darken2);
-
-                    // Morada (se disponível)
-                    if (!string.IsNullOrWhiteSpace(config?.Morada))
-                    {
-                        column.Item().Text(config.Morada)
-                            .FontSize(9)
-                            .FontColor(Colors.Grey.Medium);
-                    }
-
-                    // Telefone + Email (se disponíveis)
-                    if (!string.IsNullOrWhiteSpace(config?.Telefone) || !string.IsNullOrWhiteSpace(config?.Email))
-                    {
-                        column.Item().Row(r =>
-                        {
-                            if (!string.IsNullOrWhiteSpace(config.Telefone))
-                            {
-                                r.AutoItem().Text($"☎ {config.Telefone}  ")
-                                    .FontSize(9)
-                                    .FontColor(Colors.Grey.Medium);
-                            }
-
-                            if (!string.IsNullOrWhiteSpace(config.Email))
-                            {
-                                r.AutoItem().Text($"✉ {config.Email}")
-                                    .FontSize(9)
-                                    .FontColor(Colors.Grey.Medium);
-                            }
-                        });
-                    }
-                });
-
-                // Data à direita
-                row.ConstantItem(150).AlignRight().Column(column =>
-                {
-                    column.Item().Text($"Data: {DateTime.Now:dd/MM/yyyy}")
-                        .FontSize(10)
-                        .FontColor(Colors.Grey.Darken3);
-                });
+            // ✅ CONTACTOS CENTRADOS POR BAIXO DO LOGO (conforme solicitado)
+            mainColumn.Item().AlignCenter().PaddingTop(10).Text(text =>
+            {
+                text.Span("☎ 964 860 387  |  ")
+                    .FontSize(10)
+                    .FontColor(Colors.Grey.Darken2);
+                text.Span("✉ nunocorreiaterapiasnaturais@gmail.com")
+                    .FontSize(10)
+                    .FontColor(Colors.Grey.Darken2);
             });
+
+            // Morada centrada (se disponível)
+            if (!string.IsNullOrWhiteSpace(config?.Morada))
+            {
+                mainColumn.Item().AlignCenter().PaddingTop(3).Text(config.Morada)
+                    .FontSize(9)
+                    .FontColor(Colors.Grey.Medium);
+            }
+
+            // Data centrada
+            mainColumn.Item().AlignCenter().PaddingTop(8).Text($"Data: {DateTime.Now:dd/MM/yyyy} | Hora: {DateTime.Now:HH:mm}")
+                .FontSize(9)
+                .FontColor(Colors.Grey.Medium);
 
             // Linha separadora
             mainColumn.Item().PaddingTop(10).BorderBottom(2).BorderColor(Colors.Green.Medium);
@@ -217,15 +218,10 @@ public class DeclaracaoSaudePdfService
             column.Spacing(15);
 
             // === TÍTULO DO DOCUMENTO ===
-            column.Item().PaddingTop(20).AlignCenter().Text("DECLARAÇÃO DE SAÚDE")
+            column.Item().AlignCenter().Text("DECLARAÇÃO DE SAÚDE")
                 .FontSize(18)
                 .Bold()
                 .FontColor(Colors.Grey.Darken3);
-
-            column.Item().AlignCenter().Text("AVALIAÇÃO CLÍNICA INICIAL")
-                .FontSize(14)
-                .SemiBold()
-                .FontColor(Colors.Green.Darken2);
 
             column.Item().PaddingBottom(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
 
@@ -248,74 +244,142 @@ public class DeclaracaoSaudePdfService
                 });
             });
 
+            // ✅ HELPER: Mostrar "Não respondido" se vazio
+            Func<string?, string> FormatarCampo = (valor) =>
+                string.IsNullOrWhiteSpace(valor) ? "Não respondido" : valor;
+
             // === MOTIVOS DA CONSULTA ===
-            if (!string.IsNullOrEmpty(dados.MotivoConsulta))
+            column.Item().PaddingTop(12).Column(col =>
             {
-                column.Item().PaddingTop(10).Text("1. MOTIVOS DA CONSULTA").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-                column.Item().PaddingTop(5).Text(dados.MotivoConsulta)
-                    .FontSize(10)
-                    .LineHeight(1.5f);
-            }
+                col.Item().Text("1. MOTIVOS DA CONSULTA").FontSize(11).Bold().FontColor(Colors.Grey.Darken3);
+                col.Item().PaddingTop(6).Text(FormatarCampo(dados.MotivoConsulta))
+                    .FontSize(9).LineHeight(1.4f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.MotivoConsulta) ? Colors.Grey.Medium : Colors.Black);
+            });
 
             // === HISTÓRIA CLÍNICA PASSADA ===
-            if (!string.IsNullOrEmpty(dados.HistoriaClinica))
+            column.Item().PaddingTop(12).Column(col =>
             {
-                column.Item().PaddingTop(10).Text("2. HISTÓRIA CLÍNICA PASSADA").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-                column.Item().PaddingTop(5).Text(dados.HistoriaClinica)
-                    .FontSize(10)
-                    .LineHeight(1.5f);
-            }
+                col.Item().Text("2. HISTÓRIA CLÍNICA PASSADA").FontSize(11).Bold().FontColor(Colors.Grey.Darken3);
+                col.Item().PaddingTop(6).Text(FormatarCampo(dados.HistoriaClinica))
+                    .FontSize(9).LineHeight(1.4f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.HistoriaClinica) ? Colors.Grey.Medium : Colors.Black);
+            });
 
             // === MEDICAÇÃO ATUAL ===
-            if (!string.IsNullOrEmpty(dados.MedicacaoAtual))
+            column.Item().PaddingTop(12).Column(col =>
             {
-                column.Item().PaddingTop(10).Text("3. MEDICAÇÃO/SUPLEMENTAÇÃO ATUAL").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-                column.Item().PaddingTop(5).Text(dados.MedicacaoAtual)
-                    .FontSize(10)
-                    .LineHeight(1.5f);
-            }
+                col.Item().Text("3. MEDICAÇÃO/SUPLEMENTAÇÃO ATUAL").FontSize(11).Bold().FontColor(Colors.Grey.Darken3);
+                col.Item().PaddingTop(6).Text(FormatarCampo(dados.MedicacaoAtual))
+                    .FontSize(9).LineHeight(1.4f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.MedicacaoAtual) ? Colors.Grey.Medium : Colors.Black);
+            });
 
             // === ALERGIAS E REAÇÕES ADVERSAS ===
-            if (!string.IsNullOrEmpty(dados.Alergias))
+            column.Item().PaddingTop(12).Background(Colors.Yellow.Lighten4).Padding(8).Column(col =>
             {
-                column.Item().PaddingTop(10).Background(Colors.Red.Lighten4).Padding(10).Column(col =>
-                {
-                    col.Item().Text("⚠️ 4. ALERGIAS E REAÇÕES ADVERSAS").FontSize(12).Bold().FontColor(Colors.Red.Darken2);
-                    col.Item().PaddingTop(5).Text(dados.Alergias)
-                        .FontSize(10)
-                        .LineHeight(1.5f);
-                });
-            }
+                col.Item().Text("⚠️ 4. ALERGIAS E REAÇÕES ADVERSAS").FontSize(11).Bold().FontColor(Colors.Grey.Darken3);
+                col.Item().PaddingTop(6).Text(FormatarCampo(dados.Alergias))
+                    .FontSize(9).LineHeight(1.4f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.Alergias) ? Colors.Grey.Medium : Colors.Black);
+            });
 
             // === ESTILO DE VIDA ===
-            if (!string.IsNullOrEmpty(dados.EstiloVida))
+            column.Item().PaddingTop(12).Column(col =>
             {
-                column.Item().PaddingTop(10).Text("5. ESTILO DE VIDA").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-                column.Item().PaddingTop(5).Text(dados.EstiloVida)
-                    .FontSize(10)
-                    .LineHeight(1.5f);
-            }
+                col.Item().Text("5. ESTILO DE VIDA").FontSize(11).Bold().FontColor(Colors.Grey.Darken3);
+                col.Item().PaddingTop(6).Text(FormatarCampo(dados.EstiloVida))
+                    .FontSize(9).LineHeight(1.4f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.EstiloVida) ? Colors.Grey.Medium : Colors.Black);
+            });
 
             // === HISTÓRIA FAMILIAR ===
-            if (!string.IsNullOrEmpty(dados.HistoriaFamiliar))
+            column.Item().PaddingTop(12).Column(col =>
             {
-                column.Item().PaddingTop(10).Text("6. HISTÓRIA FAMILIAR").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
-                column.Item().PaddingTop(5).Text(dados.HistoriaFamiliar)
-                    .FontSize(10)
-                    .LineHeight(1.5f);
-            }
+                col.Item().Text("6. HISTÓRIA FAMILIAR").FontSize(11).Bold().FontColor(Colors.Grey.Darken3);
+                col.Item().PaddingTop(6).Text(FormatarCampo(dados.HistoriaFamiliar))
+                    .FontSize(9).LineHeight(1.4f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.HistoriaFamiliar) ? Colors.Grey.Medium : Colors.Black);
+            });
 
             // === OBSERVAÇÕES CLÍNICAS ===
-            if (!string.IsNullOrEmpty(dados.ObservacoesClinicas))
+            column.Item().PaddingTop(12).Background(Colors.Blue.Lighten4).Padding(10).Column(col =>
             {
-                column.Item().PaddingTop(15).Background(Colors.Blue.Lighten4).Padding(12).Column(col =>
-                {
-                    col.Item().Text("💡 OBSERVAÇÕES CLÍNICAS DO TERAPEUTA").FontSize(11).Bold().FontColor(Colors.Blue.Darken2);
-                    col.Item().PaddingTop(8).Text(dados.ObservacoesClinicas)
-                        .FontSize(10)
-                        .LineHeight(1.5f);
-                });
-            }
+                col.Item().Text("💡 OBSERVAÇÕES CLÍNICAS DO TERAPEUTA")
+                    .FontSize(10).Bold().FontColor(Colors.Blue.Darken2);
+                col.Item().PaddingTop(5).Text(FormatarCampo(dados.ObservacoesClinicas))
+                    .FontSize(9).LineHeight(1.4f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.ObservacoesClinicas) ? Colors.Grey.Medium : Colors.Black);
+            });
+
+            // === DADOS ADICIONAIS ===
+            column.Item().PaddingTop(20).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+            column.Item().PaddingTop(12).Text("INFORMAÇÕES COMPLEMENTARES")
+                .FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
+
+            // Cirurgias
+            column.Item().PaddingTop(8).Column(col =>
+            {
+                col.Item().Text("Cirurgias Anteriores").FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+                col.Item().PaddingTop(3).Text(FormatarCampo(dados.DadosCirurgias))
+                    .FontSize(9).LineHeight(1.3f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.DadosCirurgias) ? Colors.Grey.Medium : Colors.Black);
+            });
+
+            // Hospitalizações
+            column.Item().PaddingTop(8).Column(col =>
+            {
+                col.Item().Text("Hospitalizações").FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+                col.Item().PaddingTop(3).Text(FormatarCampo(dados.DadosHospitalizacoes))
+                    .FontSize(9).LineHeight(1.3f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.DadosHospitalizacoes) ? Colors.Grey.Medium : Colors.Black);
+            });
+
+            // Medicamentos Atuais
+            column.Item().PaddingTop(8).Column(col =>
+            {
+                col.Item().Text("Medicamentos Atuais (Detalhado)").FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+                col.Item().PaddingTop(3).Text(FormatarCampo(dados.DadosMedicamentosAtuais))
+                    .FontSize(9).LineHeight(1.3f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.DadosMedicamentosAtuais) ? Colors.Grey.Medium : Colors.Black);
+            });
+
+            // Alergias Detalhadas
+            column.Item().PaddingTop(8).Column(col =>
+            {
+                col.Item().Text("Alergias Detalhadas").FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+                col.Item().PaddingTop(3).Text(FormatarCampo(dados.DadosAlergiasDetalhadas))
+                    .FontSize(9).LineHeight(1.3f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.DadosAlergiasDetalhadas) ? Colors.Grey.Medium : Colors.Black);
+            });
+
+            // Intolerâncias
+            column.Item().PaddingTop(8).Column(col =>
+            {
+                col.Item().Text("Intolerâncias Alimentares").FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+                col.Item().PaddingTop(3).Text(FormatarCampo(dados.DadosIntoleranciaAlimentar))
+                    .FontSize(9).LineHeight(1.3f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.DadosIntoleranciaAlimentar) ? Colors.Grey.Medium : Colors.Black);
+            });
+
+            // Doenças Crónicas
+            // Doenças Crónicas
+            column.Item().PaddingTop(8).Column(col =>
+            {
+                col.Item().Text("Doenças Crónicas (Detalhado)").FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+                col.Item().PaddingTop(3).Text(FormatarCampo(dados.DadosDoencasCronicas))
+                    .FontSize(9).LineHeight(1.3f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.DadosDoencasCronicas) ? Colors.Grey.Medium : Colors.Black);
+            });
+
+            // Observações Adicionais
+            column.Item().PaddingTop(8).Column(col =>
+            {
+                col.Item().Text("Observações Adicionais").FontSize(10).SemiBold().FontColor(Colors.Grey.Darken2);
+                col.Item().PaddingTop(3).Text(FormatarCampo(dados.ObservacoesAdicionais))
+                    .FontSize(9).LineHeight(1.3f)
+                    .FontColor(string.IsNullOrWhiteSpace(dados.ObservacoesAdicionais) ? Colors.Grey.Medium : Colors.Black);
+            });
 
             // === DECLARAÇÃO ===
             column.Item().PaddingTop(15).Text("DECLARAÇÃO").FontSize(12).Bold().FontColor(Colors.Grey.Darken3);
@@ -467,6 +531,15 @@ public class DadosDeclaracaoSaude
     public string? EstiloVida { get; set; }
     public string? HistoriaFamiliar { get; set; }
     public string? ObservacoesClinicas { get; set; }
+
+    // === DADOS ADICIONAIS ESPERADOS NA UI ===
+    public string? DadosCirurgias { get; set; }
+    public string? DadosHospitalizacoes { get; set; }
+    public string? DadosMedicamentosAtuais { get; set; }
+    public string? DadosAlergiasDetalhadas { get; set; }
+    public string? DadosIntoleranciaAlimentar { get; set; }
+    public string? DadosDoencasCronicas { get; set; }
+    public string? ObservacoesAdicionais { get; set; }
 
     // === ASSINATURAS ===
     /// <summary>

@@ -81,155 +81,252 @@ namespace BioDesk.App.Views.Abas
             {
                 Titulo = "🌿 CONSENTIMENTO INFORMADO - NATUROPATIA",
                 Texto = @"NATUREZA DO TRATAMENTO:
-A Naturopatia é uma medicina natural que visa estimular os mecanismos de autocura do organismo através de métodos naturais, incluindo fitoterapia, nutrição, hidroterapia e outras terapias complementares.
+A Naturopatia é uma abordagem terapêutica complementar reconhecida que trabalha em harmonia com os mecanismos naturais de autocura do organismo, através de métodos como fitoterapia, nutrição funcional, hidroterapia e técnicas de equilibração energética. Em situações agudas graves ou emergências médicas, o paciente deve procurar tratamento médico convencional imediatamente.
 
 BENEFÍCIOS ESPERADOS:
-• Melhoria do bem-estar geral
+• Melhoria do bem-estar geral e qualidade de vida
 • Fortalecimento do sistema imunitário
-• Redução de sintomas crónicos
-• Melhoria da qualidade de vida
-• Equilíbrio energético do organismo
+• Redução de sintomas crónicos e incapacidade
+• Equilíbrio energético e homeostase do organismo
+• Prevenção de doenças através de abordagem holística
+• Aumento de vitalidade e resistência
 
-RISCOS E LIMITAÇÕES:
-• Reações alérgicas a produtos naturais (raras)
-• Interações com medicamentos convencionais
-• Tempo de resposta variável entre indivíduos
-• Não substitui tratamento médico convencional em situações agudas
+RISCOS E EFEITOS POSSÍVEIS:
+• Reações alérgicas a produtos naturais (raras, quando há predisposição)
+• Interações com medicamentos convencionais (informar SEMPRE todos os medicamentos)
+• Tempo de resposta variável (3-12 semanas conforme o organismo)
+• Possível agravação temporária antes da melhoria (resposta terapêutica natural)
+• Fadiga temporária durante processo de desintoxicação
+• Efeitos individuais variam conforme predisposição constitucional
 
-CONTRAINDICAÇÕES:
-• Gravidez e amamentação (alguns produtos)
-• Alergias conhecidas a plantas específicas
-• Doenças graves em fase aguda
-• Uso concomitante de anticoagulantes (alguns produtos)
+CONTRAINDICAÇÕES E PRECAUÇÕES:
+• Gravidez e amamentação (alguns produtos específicos)
+• Alergias conhecidas a plantas ou substâncias naturais
+• Doenças graves em fase aguda (avaliar caso a caso)
+• Distúrbios graves de coagulação ou uso de anticoagulantes (alguns produtos)
+• Condições psiquiátricas graves sem supervisão médica
+• Pacientes que não conseguem manter seguimento médico regular
 
-RESPONSABILIDADES DO PACIENTE:
-• Informar sobre medicação atual
-• Comunicar alergias conhecidas
-• Seguir as recomendações do naturopata
-• Informar sobre gravidez ou suspeita
-• Manter seguimento médico convencional se necessário"
+RESPONSABILIDADES DO PACIENTE - INFORMAÇÕES CRÍTICAS:
+• Informar COMPLETAMENTE sobre toda medicação atual (prescrição e sem receita)
+• Comunicar todas as alergias conhecidas - plantas, alimentos, substâncias
+• Informar imediatamente sobre gravidez confirmada ou suspeita
+• Reportar qualquer interação ou reação adversa ao terapeuta
+• Manter seguimento médico convencional se necessário para confirmar diagnósticos
+• Procurar imediatamente médico em caso de sintomas agudos ou emergência
+• Seguir integralmente as recomendações e posologia indicadas
+• Não interromper medicação prescrita sem orientação médica
+• Comunicar mudanças no estado de saúde ou novos sintomas
+
+DURAÇÃO E FREQUÊNCIA:
+• Tratamentos variam de 3 semanas a 6 meses conforme condição
+• Resultados podem ser graduais e requerem consistência
+• Reavaliação recomendada a cada 4 semanas"
             });
 
             _templates.Add("osteopatia", new ConsentimentoTemplate
             {
                 Titulo = "🦴 CONSENTIMENTO INFORMADO - OSTEOPATIA",
                 Texto = @"NATUREZA DO TRATAMENTO:
-A Osteopatia é uma terapia manual que visa restabelecer o equilíbrio do corpo através de técnicas específicas de mobilização, manipulação articular e tecidos moles.
+A Osteopatia é uma terapia manual complementar de grande valor que utiliza técnicas específicas de mobilização, manipulação articular e mobilização de tecidos moles para restabelecer o equilíbrio estrutural e funcional do corpo. Em casos de trauma agudo, suspeita de fratura ou emergência médica, o paciente deve procurar primeiro avaliação médica.
 
 BENEFÍCIOS ESPERADOS:
-• Alívio de dores musculoesqueléticas
-• Melhoria da mobilidade articular
-• Redução de tensões musculares
-• Melhoria da postura
-• Alívio de cefaleias tensionais
+• Alívio eficaz de dores musculoesqueléticas
+• Melhoria significativa da mobilidade articular
+• Redução de tensões musculares e enrijecimentos
+• Melhoria da postura e alinhamento corporal
+• Alívio de cefaleias tensionais e de origem cervical
+• Melhoria geral da qualidade de vida funcional
+• Prevenção de lesões através de reequilíbrio
 
-RISCOS POTENCIAIS:
-• Dor temporária após o tratamento (normal)
-• Rigidez temporária (24-48h)
-• Raramente: agravamento temporário dos sintomas
-• Muito raramente: lesão vascular ou nervosa
+RISCOS E EFEITOS POTENCIAIS:
+• Dor musculoesquelética temporária após o tratamento (normal e esperado)
+• Rigidez temporária (24-48h) antes de melhoria duradoura
+• Possível agravação temporária de sintomas existentes (resposta terapêutica)
+• Raramente: irritação de raízes nervosas
+• Muito raramente: complicações vasculares (em pacientes com patologias vasculares)
 
-CONTRAINDICAÇÕES ABSOLUTAS:
-• Fraturas recentes
-• Infeções agudas
-• Tumores na área a tratar
-• Osteoporose severa
-• Artrite reumatoide em fase aguda
+CONTRAINDICAÇÕES E PRECAUÇÕES:
+• Fraturas recentes (menos de 6 semanas)
+• Infeções agudas na área a tratar
+• Tumores malignos na área (avaliação médica prévia necessária)
+• Osteoporose severa diagnosticada
+• Artrite reumatoide em fase aguda inflamatória
+• Trombose venosa profunda ou embolia
+• Tratamento anticoagulante agressivo
+• Síndrome da cauda equina
 
-RESPONSABILIDADES DO PACIENTE:
-• Informar sobre medicação e condições médicas
-• Comunicar dor ou desconforto durante o tratamento
-• Seguir exercícios recomendados
-• Informar sobre gravidez
-• Comunicar qualquer reação adversa"
+RESPONSABILIDADES DO PACIENTE - INFORMAÇÕES CRÍTICAS:
+• Informar COMPLETAMENTE sobre toda medicação atual
+• Comunicar todas as condições médicas, mesmo que aparentemente não relacionadas
+• Avisar imediatamente sobre gravidez
+• Reportar qualquer dor anormal ou desconforto durante o tratamento
+• Comunicar se tem hematomas fáceis ou distúrbios de coagulação
+• Seguir rigorosamente os exercícios e recomendações post-tratamento
+• Informar sobre qualquer reação adversa inesperada
+• Procurar médico em caso de trauma ou agravamento súbito
+
+DURAÇÃO E FREQUÊNCIA:
+• Tratamentos iniciais geralmente 4-6 sessões
+• Espaçamento de 7-14 dias entre sessões conforme resposta
+• Reavaliação após 3 sessões
+• Manutenção pode variar de mensal a trimestral"
             });
 
             _templates.Add("acupunctura", new ConsentimentoTemplate
             {
                 Titulo = "🪡 CONSENTIMENTO INFORMADO - ACUPUNCTURA",
                 Texto = @"NATUREZA DO TRATAMENTO:
-A Acupunctura é uma técnica da Medicina Tradicional Chinesa que utiliza agulhas estéreis inseridas em pontos específicos do corpo para equilibrar a energia vital (Qi).
+A Acupunctura é uma técnica terapêutica milenar da Medicina Tradicional Chinesa com eficácia cientificamente comprovada, que utiliza agulhas estéreis muito finas inseridas em pontos específicos do corpo para equilibrar a energia vital (Qi) e restaurar a saúde. Em situações de urgência médica ou emergência, o paciente deve procurar atendimento médico imediatamente.
 
 BENEFÍCIOS ESPERADOS:
-• Alívio da dor crónica
-• Redução de stress e ansiedade
-• Melhoria da qualidade do sono
-• Regulação de funções orgânicas
-• Fortalecimento do sistema imunitário
+• Alívio eficaz da dor crónica de múltiplas origens
+• Redução significativa de stress e ansiedade
+• Melhoria substancial da qualidade do sono
+• Regulação de funções orgânicas e homeostase
+• Fortalecimento do sistema imunitário e resistência
+• Melhoria do bem-estar emocional e mental
+• Aumento de energia e vitalidade
 
-RISCOS E EFEITOS SECUNDÁRIOS:
-• Dor ligeira na inserção das agulhas
-• Pequenos hematomas nos pontos de inserção
-• Raramente: infeção local
-• Muito raramente: pneumotórax (punção torácica)
-• Possível sonolência após a sessão
+RISCOS E EFEITOS POTENCIAIS:
+• Dor ligeira ou leve no local de inserção das agulhas (normal)
+• Pequenos hematomas nos pontos de inserção (raros e resolvem naturalmente)
+• Raramente: infeção local (agulhas são estéreis descartáveis)
+• Muito raramente: pneumotórax em punção torácica (técnico experiente evita)
+• Possível sonolência pós-tratamento (indicador de resposta terapêutica positiva)
+• Possível relaxamento profundo ou ligeiras emoções liberadas
 
-CONTRAINDICAÇÕES:
-• Distúrbios de coagulação
-• Uso de anticoagulantes
-• Gravidez (alguns pontos)
-• Infeções cutâneas na área a tratar
-• Estados febris agudos
+CONTRAINDICAÇÕES E PRECAUÇÕES:
+• Distúrbios graves de coagulação diagnosticados
+• Uso de anticoagulantes agressivos (marcar com médico)
+• Gravidez (alguns pontos evitados, outros seguros)
+• Infeções cutâneas agudas na área a tratar
+• Estados febris agudos ativos
+• Pacientes com fobia extrema de agulhas (conversa prévia recomendada)
+• Implantes metálicos na área (geralmente sem problema)
 
-RESPONSABILIDADES DO PACIENTE:
-• Informar sobre medicação anticoagulante
-• Comunicar gravidez ou suspeita
-• Avisar sobre medo de agulhas
-• Informar sobre alergias ao álcool/iodo
-• Comunicar qualquer reação adversa"
+RESPONSABILIDADES DO PACIENTE - INFORMAÇÕES CRÍTICAS:
+• Informar IMEDIATAMENTE sobre qualquer medicação anticoagulante
+• Comunicar gravidez confirmada ou suspeita
+• Avisar sobre medo extremo de agulhas
+• Informar sobre alergias ao álcool ou iodo (desinfetante)
+• Comunicar qualquer reação adversa inesperada
+• Relaxar e respirar profundamente durante o tratamento
+• Evitar refeições pesadas 1-2h antes da sessão
+• Manter hidratação adequada pós-tratamento
+
+DURAÇÃO E FREQUÊNCIA:
+• Sessões variam de 20-45 minutos conforme protocolo
+• Tratamentos agudos: 1-3 vezes/semana
+• Tratamentos crónicos: 1-2 vezes/semana por 4-12 semanas
+• Reavaliação recomendada a cada 5-6 sessões
+• Manutenção: mensal a trimestral conforme caso"
             });
 
             _templates.Add("massagem", new ConsentimentoTemplate
             {
                 Titulo = "💆 CONSENTIMENTO INFORMADO - MASSAGEM TERAPÊUTICA",
                 Texto = @"NATUREZA DO TRATAMENTO:
-A Massagem Terapêutica utiliza técnicas manuais específicas para tratar tensões musculares, melhorar a circulação e promover o relaxamento.
+A Massagem Terapêutica é uma técnica manual eficaz que utiliza técnicas específicas de manipulação de tecidos moles para tratar tensões musculares, melhorar a circulação sanguínea e promover relaxamento profundo e bem-estar geral. Em caso de lesão aguda, suspeita de fratura ou emergência médica, o paciente deve procurar avaliação médica primeiro.
 
 BENEFÍCIOS ESPERADOS:
-• Alívio de tensões musculares
-• Melhoria da circulação sanguínea
-• Redução do stress
-• Relaxamento geral
-• Melhoria da qualidade do sono
+• Alívio eficaz de tensões musculares e enrijecimentos
+• Melhoria significativa da circulação sanguínea e linfática
+• Redução profunda do stress e ansiedade
+• Relaxamento muscular e mental completo
+• Melhoria substancial da qualidade do sono
+• Aumento de flexibilidade e amplitude de movimento
+• Melhoria geral do bem-estar e vitalidade
 
-RISCOS MÍNIMOS:
-• Dor ligeira durante ou após a massagem
-• Hematomas ligeiros (raros)
-• Reações cutâneas a óleos (raras)
-• Tonturas ligeiras após a sessão
+RISCOS E EFEITOS POTENCIAIS:
+• Dor ligeira durante ou após a massagem (resposta terapêutica normal)
+• Hematomas ligeiros (raros, indicam libertação de toxinas)
+• Reações cutâneas leves a óleos específicos (informar de alergias)
+• Tonturas ligeiras após a sessão (normaliza-se rapidamente)
+• Possível liberação emocional ou reações emocionais (natural e seguro)
+• Fadiga ligeira pós-sessão (sinal de desintoxicação)
 
-RESPONSABILIDADES DO PACIENTE:
-• Informar sobre condições médicas
-• Comunicar alergias a produtos
-• Avisar sobre gravidez
-• Indicar áreas sensíveis ou dolorosas
-• Comunicar desconforto durante o tratamento"
+CONTRAINDICAÇÕES E PRECAUÇÕES:
+• Infeções ou feridas abertas na pele da área
+• Trombose venosa profunda diagnosticada
+• Fraturas recentes (menos de 6 semanas)
+• Certas condições cardíacas graves (consultar médico)
+• Cirurgias recentes (menos de 4 semanas)
+• Varicoses severas (aplicar cuidados especiais)
+• Hematomas recentes ou grandes
+
+RESPONSABILIDADES DO PACIENTE - INFORMAÇÕES CRÍTICAS:
+• Informar COMPLETAMENTE sobre todas as condições médicas
+• Comunicar todas as alergias a produtos, plantas ou substâncias
+• Avisar imediatamente sobre gravidez
+• Indicar claramente áreas sensíveis, dolorosas ou com lesões
+• Comunicar desconforto ou dor durante o tratamento
+• Informar sobre medicação atual e problemas de coagulação
+• Relatar qualquer reação adversa inesperada
+• Manter comunicação constante com o terapeuta
+
+DURAÇÃO E FREQUÊNCIA:
+• Sessões variam de 30-90 minutos conforme tipo
+• Tratamentos agudos: 2-3 vezes/semana
+• Tratamentos crónicos: 1-2 vezes/semana
+• Manutenção: mensal a quinzenal
+• Reavaliação recomendada a cada 3-4 sessões"
             });
 
             _templates.Add("bioenergetica", new ConsentimentoTemplate
             {
                 Titulo = "🧘 CONSENTIMENTO INFORMADO - TERAPIA BIOENERGÉTICA",
                 Texto = @"NATUREZA DO TRATAMENTO:
-A Terapia Bioenergética trabalha com o campo energético do organismo através de técnicas de harmonização e equilíbrio da energia vital.
+A Terapia Bioenergética é uma abordagem complementar que trabalha com o campo energético do organismo através de técnicas de harmonização e equilíbrio da energia vital, promovendo reequilíbrio profundo e bem-estar holístico. Em situações de urgência médica ou crise emocional grave, o paciente deve procurar atendimento profissional apropriado imediatamente.
 
 BENEFÍCIOS ESPERADOS:
-• Equilíbrio energético geral
-• Redução do stress
-• Melhoria do bem-estar emocional
-• Harmonização de chakras
-• Aumento da vitalidade
+• Equilíbrio energético geral profundo
+• Redução significativa de stress e tensão
+• Melhoria substancial do bem-estar emocional
+• Harmonização dos centros energéticos (chakras)
+• Aumento de vitalidade, energia e resistência
+• Melhoria do desempenho e clareza mental
+• Alívio de bloqueios energéticos e emocionais
 
-LIMITAÇÕES:
-• Resultados variam entre indivíduos
-• Não é diagnóstico médico
-• Não substitui medicação prescrita
-• Abordagem complementar
+LIMITAÇÕES E ESCLARECIMENTOS IMPORTANTES:
+• Resultados variam significativamente entre indivíduos
+• NÃO é diagnóstico médico - é complementar
+• NÃO substitui medicação prescrita ou tratamento convencional
+• Abordagem holística, requer abertura e participação ativa
+• Não há cura mágica - requer compreensão e consistência
+• Pode revelar padrões emocionais profundos (reação natural)
 
-RESPONSABILIDADES DO PACIENTE:
-• Manter tratamento médico convencional
-• Comunicar condições psiquiátricas
-• Ter expectativas realistas
-• Comunicar qualquer desconforto emocional"
+POSSÍVEIS REAÇÕES E EFEITOS:
+• Sensação de profundo relaxamento ou cansaço (normal)
+• Possível liberação emocional (choro, riso) - seguro e recomendado
+• Sensações corporais intensas (formigueiro, calor) - normais
+• Sonhos vívidos nos dias seguintes (processamento energético)
+• Possível aumento temporário de consciência sobre problemas
+• Rara: desconforto físico durante o processo
+
+CONTRAINDICAÇÕES E PRECAUÇÕES:
+• Situações de crise psicológica aguda grave
+• Transtornos psiquiátricos severos sem supervisão médica
+• Estados delirantes ou alucinações ativas
+• Pacientes em abuso de substâncias ou alcoolismo
+• Resistência extrema à abordagem (necessária abertura)
+
+RESPONSABILIDADES DO PACIENTE - INFORMAÇÕES CRÍTICAS:
+• Informar sobre todas as condições psicológicas ou psiquiátricas
+• Comunicar medicação psiquiátrica ou psicoativa em uso
+• Ser completamente honesto sobre estado emocional
+• Participar ativamente no processo de cura
+• Manter comunicação aberta durante as sessões
+• Não interromper medicação prescrita sem conselho médico
+• Reportar qualquer desconforto emocional significativo
+• Estar aberto a mudanças pessoais e transformação
+
+DURAÇÃO E FREQUÊNCIA:
+• Sessões variam de 45-90 minutos conforme sessão
+• Tratamentos iniciais: semanal por 4-6 semanas
+• Manutenção: quinzenal a mensal
+• Reavaliação recomendada a cada 4-6 sessões
+• Repouso adequado recomendado após sessões"
             });
 
             // ===== NOVAS TÉCNICAS ESPECIALIZADAS =====
@@ -238,73 +335,115 @@ RESPONSABILIDADES DO PACIENTE:
             {
                 Titulo = "👁️ CONSENTIMENTO INFORMADO - IRIDOLOGIA",
                 Texto = @"NATUREZA DO EXAME:
-A Iridologia é uma técnica de análise da íris ocular para avaliação da condição geral de saúde e identificação de predisposições constitucionais.
+A Iridologia é uma técnica complementar de análise da íris ocular que avalia a constituição individual e identifica predisposições constitucionais, complementando avaliações convencionais de saúde. É fundamental compreender que iridologia não é diagnóstico médico, mas uma ferramenta de orientação preventiva. Qualquer suspeita de doença deve ser confirmada por profissional médico.
 
 PROCEDIMENTO:
-• Observação detalhada da íris com lupa especializada
-• Possível fotografia da íris (com consentimento)
-• Análise de padrões, cores e marcas
-• Correlação com mapa iridológico
-• Elaboração de relatório informativo
+• Observação detalhada e cuidadosa da íris ocular
+• Possivelmente fotografia profissional da íris (com consentimento explícito)
+• Análise de padrões, cores, marcas e estruturas
+• Correlação com mapa iridológico internacional
+• Elaboração de relatório informativo e recomendações
 
-LIMITAÇÕES IMPORTANTES:
-• NÃO é diagnóstico médico
-• NÃO substitui exames clínicos
-• Indica tendências constitucionais
-• Ferramenta de avaliação complementar
-• Não detecta doenças específicas
+INFORMAÇÕES IMPORTANTES SOBRE LIMITAÇÕES:
+• NÃO é um diagnóstico médico - é análise constitucional
+• NÃO substitui exames clínicos ou imagiológicos convencionais
+• Indica tendências constitucionais e predisposições
+• Ferramenta de avaliação complementar e preventiva
+• Não detecta doenças específicas ou laboratoriais
+• Não substitui opinião médica em patologias agudas
 
-RESPONSABILIDADES DO PACIENTE:
-• Manter seguimento médico regular
+BENEFÍCIOS ESPERADOS:
+• Compreensão da constituição individual profunda
+• Identificação de predisposições de saúde
+• Orientação para medidas preventivas personalizadas
+• Integração com outras abordagens complementares
+• Melhor compreensão de padrões de saúde pessoais
+• Base para recomendações nutricionais e estilo de vida
+
+RESPONSABILIDADES DO PACIENTE - INFORMAÇÕES CRÍTICAS:
+• Manter seguimento médico regular obrigatório
 • Não interromper medicação prescrita
-• Usar informações como orientação preventiva
-• Procurar médico para sintomas específicos
+• Usar informações como orientação preventiva apenas
+• Procurar imediatamente médico para sintomas específicos
+• Entender que recomendações são complementares
+• Comunicar qualquer mudança significativa de saúde ao médico
+• Não adiar consultas médicas baseado em análise iridológica
 
-PROTEÇÃO DE DADOS:
-• Imagens armazenadas com segurança
-• Uso exclusivo para análise iridológica
-• Não partilha com terceiros"
+PROTEÇÃO DE DADOS E PRIVACIDADE:
+• Imagens armazenadas com máxima segurança
+• Uso exclusivo para análise iridológica pessoal
+• Não partilha com terceiros sem autorização explícita
+• Arquivo mantido conforme regulamentação RGPD
+• Direito a acesso, retificação e apagamento de imagens
+• Destruição de imagens possível a qualquer momento
+
+DURAÇÃO E FREQUÊNCIA:
+• Sessão inicial: 45-60 minutos
+• Reavaliações: 30-45 minutos
+• Recomendado: reavaliação anual ou conforme mudanças
+• Melhor em conjunto com outras abordagens
+• Integrar com historial médico e laboratorial disponível"
             });
 
             _templates.Add("mesoterapia", new ConsentimentoTemplate
             {
                 Titulo = "💉 CONSENTIMENTO INFORMADO - MESOTERAPIA HOMEOPÁTICA",
                 Texto = @"NATUREZA DO TRATAMENTO:
-A Mesoterapia Homeopática consiste na aplicação de medicamentos homeopáticos através de micro-injeções dérmicas superficiais em pontos específicos.
+A Mesoterapia Homeopática é uma técnica especializada que combina princípios homeopáticos com aplicação localizada através de micro-injeções dérmicas superficiais em pontos específicos, maximizando eficácia local com mínimos efeitos sistémicos. Em caso de reação adversa inesperada ou deterioração significativa, o paciente deve contactar o terapeuta ou procurar atendimento médico.
 
-PROCEDIMENTO:
-• Preparação e desinfeção da área
-• Aplicação de agulhas muito finas (4-6mm)
-• Injeção de preparados homeopáticos
-• Possível aplicação de compressas locais
-• Observação pós-aplicação
+PROCEDIMENTO DETALHADO:
+• Avaliação e marcação dos pontos específicos
+• Preparação e desinfeção rigorosa da área
+• Aplicação de agulhas muito finas (4-6mm) e descartáveis
+• Injeção precisa de preparados homeopáticos
+• Possível aplicação de compressas ou técnicas complementares
+• Observação pós-aplicação imediata
 
 BENEFÍCIOS ESPERADOS:
-• Ação localizada do medicamento
-• Estimulação de pontos específicos
-• Melhoria da circulação local
-• Redução de inflamação
-• Harmonização energética local
+• Ação localizada eficaz do medicamento
+• Estimulação precisa de pontos específicos
+• Melhoria da circulação local e drenagem
+• Redução efetiva de inflamação localizada
+• Harmonização energética local profunda
+• Redução de volume e adiposidade (em aplicações cosméticas)
+• Melhoria da qualidade da pele
 
-RISCOS POTENCIAIS:
-• Dor leve no local da aplicação
-• Pequenos hematomas temporários
-• Vermelhidão local (24-48h)
-• Raramente: reação alérgica local
-• Risco mínimo de infeção (material estéril)
+RISCOS E EFEITOS POTENCIAIS:
+• Dor leve no local de aplicação (normal e esperado)
+• Pequenos hematomas temporários (resolvem naturalmente)
+• Vermelhidão local passageira (24-48h)
+• Raramente: reação alérgica local leve
+• Risco mínimo de infeção (material 100% estéril e descartável)
+• Possível sensação de formigueiro (resposta terapêutica)
+• Ligeiro inchaço local (desaparece em horas)
 
-CONTRAINDICAÇÕES:
-• Alergia conhecida aos componentes
-• Infeções locais ativas
-• Distúrbios de coagulação graves
-• Tratamento anticoagulante (consultar médico)
-• Gravidez (primeiro trimestre)
+CONTRAINDICAÇÕES E PRECAUÇÕES:
+• Alergia conhecida aos componentes específicos
+• Infeções locais ativas ou feridas abertas
+• Distúrbios graves de coagulação diagnosticados
+• Tratamento anticoagulante agressivo (informar médico)
+• Gravidez - especialmente primeiro trimestre (consultar)
+• Cicatrizes queloides ou problemas cicatriciais graves
+• Sensibilidade extrema da pele ou reações dermatológicas
 
-RESPONSABILIDADES DO PACIENTE:
-• Informar alergias e medicação
-• Comunicar distúrbios de coagulação
-• Manter higiene local pós-tratamento
-• Evitar manipular área tratada nas primeiras 6h"
+RESPONSABILIDADES DO PACIENTE - INFORMAÇÕES CRÍTICAS:
+• Informar COMPLETAMENTE sobre todas as alergias
+• Comunicar medicação atual, especialmente anticoagulantes
+• Avisar imediatamente sobre gravidez
+• Informar sobre distúrbios de coagulação
+• Manter higiene local adequada pós-tratamento
+• Evitar manipular ou tocar na área por 6-8 horas
+• Não aplicar cremes ou produtos sem indicação
+• Evitar exposição solar intensa (48h após)
+• Reportar qualquer reação adversa inesperada
+
+DURAÇÃO E FREQUÊNCIA:
+• Sessão: 15-30 minutos (rápida e eficaz)
+• Tratamentos: 1-2 vezes por semana
+• Duração total: 4-10 sessões conforme protocolo
+• Reavaliação: após 5 sessões
+• Manutenção: mensal conforme necessidade
+• Resultados: visíveis após 3-5 sessões"
             });
 
 
