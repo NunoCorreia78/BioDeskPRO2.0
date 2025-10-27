@@ -190,4 +190,68 @@ public static class IridologyTransform
         while (angle >= 360.0) angle -= 360.0;
         return angle;
     }
+
+    /// <summary>
+    /// Creates a CalibrationEllipse from a collection of handler points.
+    /// Uses a simplified algorithm: center as average, radii as max/min distances.
+    /// For production, consider using least-squares ellipse fitting.
+    /// </summary>
+    /// <param name="handlers">Collection of points representing handler positions</param>
+    /// <returns>Calculated ellipse</returns>
+    public static CalibrationEllipse FromHandlers(IEnumerable<Point> handlers)
+    {
+        var pontos = handlers.ToList();
+        
+        // Fallback to default if insufficient points
+        if (pontos.Count < 3)
+        {
+            return new CalibrationEllipse(new Point(800, 800), 400, 400, 0);
+        }
+
+        // 1. Calculate center (average of all points)
+        var centroX = pontos.Average(p => p.X);
+        var centroY = pontos.Average(p => p.Y);
+        var centro = new Point(centroX, centroY);
+
+        // 2. Calculate distances from center to each point
+        var distancias = pontos.Select(p =>
+            Math.Sqrt(Math.Pow(p.X - centroX, 2) + Math.Pow(p.Y - centroY, 2))
+        ).ToList();
+
+        // 3. Use average distance as primary radius (more stable than max/min for circles)
+        var raioMedio = distancias.Average();
+        var raioMaior = raioMedio;
+        var raioMenor = raioMedio;
+
+        // 4. For ellipses: check if there's significant variation in distances
+        var maxDist = distancias.Max();
+        var minDist = distancias.Min();
+        var variacao = (maxDist - minDist) / raioMedio;
+
+        // If variation > 15%, treat as ellipse instead of circle
+        if (variacao > 0.15 && pontos.Count >= 8)
+        {
+            // Find the direction of maximum variation
+            var angulosComDistancia = pontos.Select(p =>
+            {
+                var dx = p.X - centroX;
+                var dy = p.Y - centroY;
+                var angulo = Math.Atan2(dy, dx);
+                var distancia = Math.Sqrt(dx * dx + dy * dy);
+                return (angulo, distancia);
+            }).ToList();
+
+            // Simple heuristic: major axis is towards farthest point
+            var pontoMaisDistante = pontos[distancias.IndexOf(maxDist)];
+            var rotacao = Math.Atan2(pontoMaisDistante.Y - centroY, pontoMaisDistante.X - centroX) * 180 / Math.PI;
+
+            raioMaior = maxDist;
+            raioMenor = minDist;
+
+            return new CalibrationEllipse(centro, raioMaior, raioMenor, rotacao);
+        }
+
+        // Default: circular shape with average radius
+        return new CalibrationEllipse(centro, raioMedio, raioMedio, 0);
+    }
 }
