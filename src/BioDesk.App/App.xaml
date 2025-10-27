@@ -26,6 +26,9 @@
             <converters:FlexibleDateConverter x:Key="FlexibleDateConverter"/>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
             <converters:StringContainsConverter x:Key="StringContainsConverter"/>
+            <converters:PercentToOpacityConverter x:Key="PercentToOpacityConverter"/>
+            <converters:SimplePointCollectionConverter x:Key="SimplePointCollectionConverter"/>
+            <converters:ZoomToSizeConverter x:Key="ZoomToSize"/>
 
             <!-- Alias para compatibilidade -->
             <converters:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>

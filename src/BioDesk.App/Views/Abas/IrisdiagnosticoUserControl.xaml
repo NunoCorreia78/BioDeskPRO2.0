@@ -736,8 +736,8 @@
       </Border>
 
       <!-- COLUNA 2: ESQUERDO - Preview (era Grid.Column="1", agora é "2") -->
-      <Border Grid.Column="2"
-              Background="#F7F9F6"
+      <Grid Grid.Column="2">
+      <Border Background="#F7F9F6"
               CornerRadius="8"
               Padding="16">
         <Grid>
@@ -1541,9 +1541,9 @@
                         <Run Text="• Arraste para ajustar posição"/>
             </TextBlock>
           </StackPanel>
+        </Grid>
         </Border>
       </Grid>
-      </Border>
     </Grid>
   </ScrollViewer>
 </UserControl>
