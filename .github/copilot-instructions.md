@@ -1,27 +1,27 @@
-# BioDeskPro2 - Guia rápido para agentes de codificação (IA)
+﻿# BioDeskPro2 - Guia rÃ¡pido para agentes de codificaÃ§Ã£o (IA)
 
-Este cabeçalho contém as instruções mínimas e accionáveis para um agente de codificação ser produtivo rapidamente neste repositório.
+Este cabeÃ§alho contÃ©m as instruÃ§Ãµes mÃ­nimas e accionÃ¡veis para um agente de codificaÃ§Ã£o ser produtivo rapidamente neste repositÃ³rio.
 
 - SDK: .NET 8 LTS fixado em `global.json` (8.0.403). Sempre respeitar este SDK quando construir ou executar.
-- Estrutura: solução multi-projeto em `src/` (App, ViewModels, Domain, Data, Services, Tests). Ex.: `src/BioDesk.App` contém o WPF entrypoint e `App.xaml.cs` registra DI.
+- Estrutura: soluÃ§Ã£o multi-projeto em `src/` (App, ViewModels, Domain, Data, Services, Tests). Ex.: `src/BioDesk.App` contÃ©m o WPF entrypoint e `App.xaml.cs` registra DI.
 
 Regras essenciais (curtas):
-- **ANTES DE QUALQUER ALTERAÇÃO**: explicar o plano ao utilizador, apontar ficheiros a tocar e aguardar confirmação explícita antes de editar ou executar comandos que modifiquem o repositório.
-- Sempre usar `PathService` para obter paths (projeto depende fortemente disto; ver regras críticas em `REGRAS_CRITICAS_BD.md`).
-- 🔴 **NUNCA ALTERAR sistema de EMAIL** sem ler `REGRAS_CRITICAS_EMAIL.md` primeiro (17h de debug, sistema 100% funcional).
-- Antes de navegar para a ficha do paciente: chamar `SetPacienteAtivo(paciente)` e só depois `NavigateTo("FichaPaciente")`.
-- Operações async em ViewModels devem usar `ExecuteWithErrorHandlingAsync(...)` (padrão obrigatório).
-- UI: quando múltiplos UserControls no mesmo Grid, definir `Panel.ZIndex` e `Background="Transparent"` para evitar sobreposição.
+- **ANTES DE QUALQUER ALTERAÃ‡ÃƒO**: explicar o plano ao utilizador, apontar ficheiros a tocar e aguardar confirmaÃ§Ã£o explÃ­cita antes de editar ou executar comandos que modifiquem o repositÃ³rio.
+- Sempre usar `PathService` para obter paths (projeto depende fortemente disto; ver regras crÃ­ticas em `REGRAS_CRITICAS_BD.md`).
+- ðŸ”´ **NUNCA ALTERAR sistema de EMAIL** sem ler `REGRAS_CRITICAS_EMAIL.md` primeiro (17h de debug, sistema 100% funcional).
+- Antes de navegar para a ficha do paciente: chamar `SetPacienteAtivo(paciente)` e sÃ³ depois `NavigateTo("FichaPaciente")`.
+- OperaÃ§Ãµes async em ViewModels devem usar `ExecuteWithErrorHandlingAsync(...)` (padrÃ£o obrigatÃ³rio).
+- UI: quando mÃºltiplos UserControls no mesmo Grid, definir `Panel.ZIndex` e `Background="Transparent"` para evitar sobreposiÃ§Ã£o.
 
-Ficheiros/locais chave a usar como referência:
-- `src/BioDesk.App/App.xaml.cs` — bootstrap de DI e registo de serviços (ex.: AddSingleton/Scoped/AddTransient). **🔴 LINHAS 228-245 PROTEGIDAS** (ConfigureAppConfiguration).
-- `src/BioDesk.Services/Email/EmailService.cs` — **🔴 LINHAS 17-55 E 80-150 PROTEGIDAS** (validação credenciais + retry logic).
-- `src/BioDesk.ViewModels/Abas/ComunicacaoViewModel.cs` — **🔴 LINHAS ~445-520 PROTEGIDAS** (early return anti-duplicação).
-- `src/**/PathService` (classe PathService) — GERENCIAMENTO de caminhos; NUNCA modificar sem backups.
-- `src/BioDesk.Tests/Services/PacienteServiceTests.cs` — exemplos de contratos de comportamento que não podem ser quebrados.
-- `.vscode/settings.json` e `omnisharp.json` — mostram que o projeto usa OmniSharp/Roslyn analyzers e formatação automática.
+Ficheiros/locais chave a usar como referÃªncia:
+- `src/BioDesk.App/App.xaml.cs` â€” bootstrap de DI e registo de serviÃ§os (ex.: AddSingleton/Scoped/AddTransient). **ðŸ”´ LINHAS 228-245 PROTEGIDAS** (ConfigureAppConfiguration).
+- `src/BioDesk.Services/Email/EmailService.cs` â€” **ðŸ”´ LINHAS 17-55 E 80-150 PROTEGIDAS** (validaÃ§Ã£o credenciais + retry logic).
+- `src/BioDesk.ViewModels/Abas/ComunicacaoViewModel.cs` â€” **ðŸ”´ LINHAS ~445-520 PROTEGIDAS** (early return anti-duplicaÃ§Ã£o).
+- `src/**/PathService` (classe PathService) â€” GERENCIAMENTO de caminhos; NUNCA modificar sem backups.
+- `src/BioDesk.Tests/Services/PacienteServiceTests.cs` â€” exemplos de contratos de comportamento que nÃ£o podem ser quebrados.
+- `.vscode/settings.json` e `omnisharp.json` â€” mostram que o projeto usa OmniSharp/Roslyn analyzers e formataÃ§Ã£o automÃ¡tica.
 
-Comandos essenciais (invocados por tarefas VS Code já existentes):
+Comandos essenciais (invocados por tarefas VS Code jÃ¡ existentes):
 ```powershell
 dotnet restore
 dotnet build
@@ -29,32 +29,32 @@ dotnet run --project src/BioDesk.App
 dotnet test src/BioDesk.Tests
 ```
 
-Extensões recomendadas (mínimo detectável):
-- C# Dev Kit (recomendado no `README.md`) e a extensão C# (ms-dotnettools.csharp) — Omnisharp/formatador.
+ExtensÃµes recomendadas (mÃ­nimo detectÃ¡vel):
+- C# Dev Kit (recomendado no `README.md`) e a extensÃ£o C# (ms-dotnettools.csharp) â€” Omnisharp/formatador.
 - PowerShell (para executar os scripts `.ps1` e tasks locais).
 
-Notas de segurança e estabilidade rápidas:
-- NUNCA alterar `PathService.cs`, `DatabasePath` ou a linha do DbContext em `App.xaml.cs` sem entender o impacto (há regras críticas no repo).
-- 🔴 **NUNCA ALTERAR código marcado como PROTEGIDO** (ver `REGRAS_CRITICAS_EMAIL.md` e `REGRAS_CRITICAS_BD.md`).
-- 🔴 **Sistema de EMAIL está 100% funcional** (testado 22/10/2025) - Não "melhorar" ou "refatorar" sem pedido explícito.
-- Antes de afirmar que um problema está resolvido, executar: `dotnet build` + `dotnet test`.
+Notas de seguranÃ§a e estabilidade rÃ¡pidas:
+- NUNCA alterar `PathService.cs`, `DatabasePath` ou a linha do DbContext em `App.xaml.cs` sem entender o impacto (hÃ¡ regras crÃ­ticas no repo).
+- ðŸ”´ **NUNCA ALTERAR cÃ³digo marcado como PROTEGIDO** (ver `REGRAS_CRITICAS_EMAIL.md` e `REGRAS_CRITICAS_BD.md`).
+- ðŸ”´ **Sistema de EMAIL estÃ¡ 100% funcional** (testado 22/10/2025) - NÃ£o "melhorar" ou "refatorar" sem pedido explÃ­cito.
+- Antes de afirmar que um problema estÃ¡ resolvido, executar: `dotnet build` + `dotnet test`.
 
--- Fim da secção para agentes. O ficheiro continua com documentação humana detalhada abaixo.
-# BioDeskPro2 - Sistema de Gestão Médica
+-- Fim da secÃ§Ã£o para agentes. O ficheiro continua com documentaÃ§Ã£o humana detalhada abaixo.
+# BioDeskPro2 - Sistema de GestÃ£o MÃ©dica
 
-Sistema WPF para gestão clínica com Naturopatia, Osteopatia e Irisdiagnóstico, desenvolvido em C# .NET 8.
+Sistema WPF para gestÃ£o clÃ­nica com Naturopatia, Osteopatia e IrisdiagnÃ³stico, desenvolvido em C# .NET 8.
 
-## 🏗️ Arquitetura
+## ðŸ—ï¸ Arquitetura
 
 ### Estrutura de Projetos (6 camadas)
 ```
 src/
-├── BioDesk.App/          # WPF Views + XAML + Dependency Injection bootstrap
-├── BioDesk.ViewModels/   # ViewModels MVVM (CommunityToolkit.Mvvm)
-├── BioDesk.Domain/       # Entidades (Paciente, Consulta, IrisAnalise)
-├── BioDesk.Data/         # EF Core DbContext + Repositories + SQLite
-├── BioDesk.Services/     # Business logic (Navigation, Email, PDF, Camera)
-└── BioDesk.Tests/        # xUnit tests (testes âncora)
+â”œâ”€â”€ BioDesk.App/          # WPF Views + XAML + Dependency Injection bootstrap
+â”œâ”€â”€ BioDesk.ViewModels/   # ViewModels MVVM (CommunityToolkit.Mvvm)
+â”œâ”€â”€ BioDesk.Domain/       # Entidades (Paciente, Consulta, IrisAnalise)
+â”œâ”€â”€ BioDesk.Data/         # EF Core DbContext + Repositories + SQLite
+â”œâ”€â”€ BioDesk.Services/     # Business logic (Navigation, Email, PDF, Camera)
+â””â”€â”€ BioDesk.Tests/        # xUnit tests (testes Ã¢ncora)
 ```
 
 ### Tecnologias-Chave
@@ -62,10 +62,10 @@ src/
 - **WPF** com TargetFramework `net8.0-windows`, Nullable enabled
 - **CommunityToolkit.Mvvm** para `[ObservableProperty]` e `[RelayCommand]`
 - **Entity Framework Core** com SQLite (arquivo: `biodesk.db`)
-- **FluentValidation** para regras de negócio
-- **QuestPDF** para geração de PDFs (prescrições/consentimentos)
+- **FluentValidation** para regras de negÃ³cio
+- **QuestPDF** para geraÃ§Ã£o de PDFs (prescriÃ§Ãµes/consentimentos)
 
-## 🎯 Padrões MVVM Obrigatórios
+## ðŸŽ¯ PadrÃµes MVVM ObrigatÃ³rios
 
 ### ViewModels Base Classes
 ```csharp
@@ -75,7 +75,7 @@ public abstract partial class ViewModelBase : ObservableObject
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string _errorMessage = string.Empty;
 
-    // SEMPRE usar este método para operações async
+    // SEMPRE usar este mÃ©todo para operaÃ§Ãµes async
     protected async Task ExecuteWithErrorHandlingAsync(Func<Task> operation,
         string errorContext = "", ILogger? logger = null) { }
 }
@@ -87,16 +87,16 @@ public abstract class NavigationViewModelBase : ViewModelBase
 }
 ```
 
-### Padrão de Propriedades e Comandos
+### PadrÃ£o de Propriedades e Comandos
 ```csharp
-// ✅ CORRETO - CommunityToolkit.Mvvm
+// âœ… CORRETO - CommunityToolkit.Mvvm
 [ObservableProperty]
 private string _pesquisarTexto = string.Empty;
 
 [RelayCommand]
 private async Task PesquisarAsync() { }
 
-// ❌ ERRADO - INotifyPropertyChanged manual
+// âŒ ERRADO - INotifyPropertyChanged manual
 private string _texto;
 public string Texto {
     get => _texto;
@@ -104,36 +104,36 @@ public string Texto {
 }
 ```
 
-## 🧭 Sistema de Navegação
+## ðŸ§­ Sistema de NavegaÃ§Ã£o
 
-### Navegação Consistente (Caminho de Ouro)
+### NavegaÃ§Ã£o Consistente (Caminho de Ouro)
 ```csharp
-// SEMPRE seguir esta sequência ao navegar para ficha de paciente:
-_pacienteService.SetPacienteAtivo(paciente);  // 1º: Definir contexto
-_navigationService.NavigateTo("FichaPaciente"); // 2º: Navegar
+// SEMPRE seguir esta sequÃªncia ao navegar para ficha de paciente:
+_pacienteService.SetPacienteAtivo(paciente);  // 1Âº: Definir contexto
+_navigationService.NavigateTo("FichaPaciente"); // 2Âº: Navegar
 
 // Views registadas no INavigationService:
 // - "Dashboard", "NovoPaciente", "FichaPaciente", "ListaPacientes", "Configuracoes"
 ```
 
-### Fluxos de Navegação Padrão
+### Fluxos de NavegaÃ§Ã£o PadrÃ£o
 ```
-Dashboard → Pesquisa (1 resultado) → SetPacienteAtivo → FichaPaciente
-Dashboard → Pesquisa (múltiplos) → ListaPacientes → Selecionar → SetPacienteAtivo → FichaPaciente
-Dashboard → NovoPaciente → Validação → Gravar → SetPacienteAtivo → FichaPaciente
+Dashboard â†’ Pesquisa (1 resultado) â†’ SetPacienteAtivo â†’ FichaPaciente
+Dashboard â†’ Pesquisa (mÃºltiplos) â†’ ListaPacientes â†’ Selecionar â†’ SetPacienteAtivo â†’ FichaPaciente
+Dashboard â†’ NovoPaciente â†’ ValidaÃ§Ã£o â†’ Gravar â†’ SetPacienteAtivo â†’ FichaPaciente
 ```
 
-## 📂 PathService - Gestão de Ficheiros
+## ðŸ“‚ PathService - GestÃ£o de Ficheiros
 
 **SEMPRE** usar `PathService` para caminhos de ficheiros. **NUNCA** hardcoded paths.
 
 ```csharp
-// ✅ CORRETO
+// âœ… CORRETO
 var dbPath = PathService.DatabasePath;
 var templatesPath = PathService.TemplatesPath;
 var consentimentoPath = PathService.GetConsentimentoPath(tipo, nome, data);
 
-// ❌ ERRADO
+// âŒ ERRADO
 var path = @"C:\Documentos\Templates";
 var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates");
 ```
@@ -144,11 +144,11 @@ var path = Path.Combine(Directory.GetCurrentDirectory(), "Templates");
 
 Pastas geridas: `Documentos/`, `Templates/`, `Backups/`, `Logs/`, `Pacientes/`, `Prescricoes/`, `Consentimentos/`
 
-## 🎨 UI/XAML - Regras Críticas
+## ðŸŽ¨ UI/XAML - Regras CrÃ­ticas
 
-### Sobreposição UserControls (Bug Comum)
+### SobreposiÃ§Ã£o UserControls (Bug Comum)
 ```xaml
-<!-- ✅ CORRETO - Panel.ZIndex explícito + Background transparent -->
+<!-- âœ… CORRETO - Panel.ZIndex explÃ­cito + Background transparent -->
 <Grid>
     <local:DadosBiograficosUserControl
         Panel.ZIndex="100"
@@ -160,14 +160,14 @@ Pastas geridas: `Documentos/`, `Templates/`, `Backups/`, `Logs/`, `Pacientes/`, 
         Visibility="{Binding AbaAtiva, Converter={StaticResource TabVisibilityConverter}, ConverterParameter=Consentimentos}"/>
 </Grid>
 
-<!-- ❌ ERRADO - Sem Z-Index causa sobreposição visual -->
+<!-- âŒ ERRADO - Sem Z-Index causa sobreposiÃ§Ã£o visual -->
 <Grid>
     <local:UserControl1 Visibility="..."/>
     <local:UserControl2 Visibility="..."/>  <!-- Sempre fica por cima! -->
 </Grid>
 ```
 
-**Regra de Ouro**: Quando múltiplos UserControls no mesmo Grid, **SEMPRE** definir `Panel.ZIndex` e `Background="Transparent"`.
+**Regra de Ouro**: Quando mÃºltiplos UserControls no mesmo Grid, **SEMPRE** definir `Panel.ZIndex` e `Background="Transparent"`.
 
 ### Design-Time DataContext
 ```xaml
@@ -178,41 +178,41 @@ Pastas geridas: `Documentos/`, `Templates/`, `Backups/`, `Logs/`, `Pacientes/`, 
 
 ### Paleta de Cores (Terroso Pastel)
 ```xml
-<Color x:Key="FundoPrincipal">#FCFDFB</Color>      <!-- Gradiente → #F2F5F0 -->
-<Color x:Key="Cartao">#F7F9F6</Color>
-<Color x:Key="Borda">#E3E9DE</Color>
-<Color x:Key="TextoPrincipal">#3F4A3D</Color>
-<Color x:Key="TextoSecundario">#5A6558</Color>
-<Color x:Key="BotaoPrimario">#9CAF97</Color>       <!-- Hover: #879B83 -->
+<Color x:Key="FundoPrincipal">0xFCFDFB</Color>      <!-- Gradiente â†’ 0xF2F5F0 -->
+<Color x:Key="Cartao">0xF7F9F6</Color>
+<Color x:Key="Borda">0xE3E9DE</Color>
+<Color x:Key="TextoPrincipal">0x3F4A3D</Color>
+<Color x:Key="TextoSecundario">0x5A6558</Color>
+<Color x:Key="BotaoPrimario">0x9CAF97</Color>       <!-- Hover: 0x879B83 -->
 ```
 
-## 🛠️ Comandos de Desenvolvimento
+## ðŸ› ï¸ Comandos de Desenvolvimento
 
-### Build e Execução
+### Build e ExecuÃ§Ã£o
 ```bash
-# Restore + Build + Run (sequência completa)
+# Restore + Build + Run (sequÃªncia completa)
 dotnet clean && dotnet restore && dotnet build && dotnet run --project src/BioDesk.App
 
-# Build incremental rápido
+# Build incremental rÃ¡pido
 dotnet build
 
 # Executar testes
 dotnet test src/BioDesk.Tests
 
-# Build com análise completa (detectar CA warnings)
+# Build com anÃ¡lise completa (detectar CA warnings)
 dotnet build --verbosity normal --no-incremental
 ```
 
-### Tasks VS Code Disponíveis
-- **Build BioDeskPro2**: Compilação rápida
-- **Run BioDeskPro2**: Executa aplicação (dependsOn Build)
+### Tasks VS Code DisponÃ­veis
+- **Build BioDeskPro2**: CompilaÃ§Ã£o rÃ¡pida
+- **Run BioDeskPro2**: Executa aplicaÃ§Ã£o (dependsOn Build)
 - **Test BioDeskPro2**: Executa testes xUnit
 - **Analyze Code - Full Solution**: Build verboso com CA analyzers
-- **Restore + Clean + Build**: Sequência completa com logging
+- **Restore + Clean + Build**: SequÃªncia completa com logging
 
-## 🧪 Testes Âncora (Contratos)
+## ðŸ§ª Testes Ã‚ncora (Contratos)
 
-Testes definem contratos críticos - **NUNCA** alterar testes para esconder erros:
+Testes definem contratos crÃ­ticos - **NUNCA** alterar testes para esconder erros:
 
 ```csharp
 // BioDesk.Tests/Services/PacienteServiceTests.cs
@@ -222,11 +222,11 @@ Testes definem contratos críticos - **NUNCA** alterar testes para esconder erro
 [Fact] public void SetPacienteAtivo_DisparaEvento() { }
 ```
 
-## 📋 Error Handling Patterns
+## ðŸ“‹ Error Handling Patterns
 
-### ExecuteWithErrorHandlingAsync (Obrigatório)
+### ExecuteWithErrorHandlingAsync (ObrigatÃ³rio)
 ```csharp
-// ✅ CORRETO - Em ViewModels
+// âœ… CORRETO - Em ViewModels
 [RelayCommand]
 private async Task PesquisarAsync()
 {
@@ -236,7 +236,7 @@ private async Task PesquisarAsync()
         if (string.IsNullOrWhiteSpace(PesquisarTexto))
             return;
 
-        // 2. Operação business logic
+        // 2. OperaÃ§Ã£o business logic
         var resultados = await _pacienteService.SearchAsync(PesquisarTexto);
 
         // 3. Atualizar UI
@@ -246,11 +246,11 @@ private async Task PesquisarAsync()
     logger: _logger);
 }
 
-// ❌ ERRADO - Try-catch simples sem logging
+// âŒ ERRADO - Try-catch simples sem logging
 try {
     var result = await _service.DoSomething();
 }
-catch { /* silêncio */ }
+catch { /* silÃªncio */ }
 ```
 
 ### Dispose Pattern (CA1063 Compliant)
@@ -277,33 +277,33 @@ public class MeuServico : IDisposable
 }
 ```
 
-## 🚨 Regras de Verificação Obrigatórias
+## ðŸš¨ Regras de VerificaÃ§Ã£o ObrigatÃ³rias
 
 ### NUNCA Fazer
 1. **NUNCA** dizer "problema resolvido" sem executar `dotnet build` + `dotnet test`
 2. **NUNCA** adaptar testes para esconder erros
 3. **NUNCA** ignorar squiggles vermelhos no VS Code
 4. **NUNCA** usar try-catch para silenciar problemas
-5. **NUNCA** alterar código funcional sem razão explícita ("Se funciona, não mexe")
+5. **NUNCA** alterar cÃ³digo funcional sem razÃ£o explÃ­cita ("Se funciona, nÃ£o mexe")
 6. **NUNCA** usar hardcoded paths - sempre `PathService`
-7. **NUNCA** colocar múltiplos UserControls sem `Panel.ZIndex`
-8. **🔴 NUNCA NUNCA NUNCA ALTERAR PathService.cs** - Causa perda de dados (ver REGRAS_CRITICAS_BD.md)
-9. **🔴 NUNCA ALTERAR DatabasePath** - BD fica inacessível
-10. **🔴 NUNCA ALTERAR App.xaml.cs linha DbContext** - Cria BD nova vazia
+7. **NUNCA** colocar mÃºltiplos UserControls sem `Panel.ZIndex`
+8. **ðŸ”´ NUNCA NUNCA NUNCA ALTERAR PathService.cs** - Causa perda de dados (ver REGRAS_CRITICAS_BD.md)
+9. **ðŸ”´ NUNCA ALTERAR DatabasePath** - BD fica inacessÃ­vel
+10. **ðŸ”´ NUNCA ALTERAR App.xaml.cs linha DbContext** - Cria BD nova vazia
 
 ### SEMPRE Fazer
 1. **SEMPRE** verificar build antes e depois: `dotnet clean && dotnet build`
-2. **SEMPRE** usar `ExecuteWithErrorHandlingAsync` para operações async
+2. **SEMPRE** usar `ExecuteWithErrorHandlingAsync` para operaÃ§Ãµes async
 3. **SEMPRE** validar com FluentValidation antes de gravar
 4. **SEMPRE** usar `SetPacienteAtivo` antes de `NavigateTo("FichaPaciente")`
 5. **SEMPRE** implementar Dispose pattern completo (CA1063)
-6. **SEMPRE** testar navegação entre TODAS as abas após mudanças XAML
+6. **SEMPRE** testar navegaÃ§Ã£o entre TODAS as abas apÃ³s mudanÃ§as XAML
 7. **SEMPRE** usar `PathService` para caminhos de ficheiros
 8. **SEMPRE** definir `d:DataContext` em UserControls para IntelliSense
-9. **🔴 SEMPRE fazer backup manual antes de alterações críticas** (ver REGRAS_CRITICAS_BD.md)
-10. **🔴 SEMPRE verificar tamanho da BD após alterações** (deve manter >700KB se tinha dados)
+9. **ðŸ”´ SEMPRE fazer backup manual antes de alteraÃ§Ãµes crÃ­ticas** (ver REGRAS_CRITICAS_BD.md)
+10. **ðŸ”´ SEMPRE verificar tamanho da BD apÃ³s alteraÃ§Ãµes** (deve manter >700KB se tinha dados)
 
-### Checklist Pré-Commit
+### Checklist PrÃ©-Commit
 ```bash
 # 1. Build limpo
 dotnet clean && dotnet restore && dotnet build
@@ -316,52 +316,52 @@ dotnet test
 # 3. VS Code limpo
 # Verificar: Sem squiggles vermelhos no Problems Panel
 
-# 4. Executar aplicação
+# 4. Executar aplicaÃ§Ã£o
 dotnet run --project src/BioDesk.App
-# Verificar: Dashboard abre, navegação funciona
+# Verificar: Dashboard abre, navegaÃ§Ã£o funciona
 ```
 
-## 📊 Configuração IntelliSense (NÃO ALTERAR)
+## ðŸ“Š ConfiguraÃ§Ã£o IntelliSense (NÃƒO ALTERAR)
 
-Ficheiros já configurados e funcionais:
+Ficheiros jÃ¡ configurados e funcionais:
 - **`.vscode/settings.json`**: Problems Panel em tree view, analyzers habilitados
 - **`omnisharp.json`**: Roslyn analyzers, inlay hints, import completion
 - **`.editorconfig`**: 88 regras CA configuradas
 
-**⚠️ ATENÇÃO**: Não alterar estas configurações sem motivo crítico - estão otimizadas.
+**âš ï¸ ATENÃ‡ÃƒO**: NÃ£o alterar estas configuraÃ§Ãµes sem motivo crÃ­tico - estÃ£o otimizadas.
 
-## 🎯 Status do Projeto (Atualizado: 12/10/2025)
+## ðŸŽ¯ Status do Projeto (Atualizado: 12/10/2025)
 
-### Build Status ✅
+### Build Status âœ…
 - **0 Errors**, 24 Warnings (apenas AForge camera compatibility)
-- Aplicação WPF executa perfeitamente
+- AplicaÃ§Ã£o WPF executa perfeitamente
 - Todos os testes (xUnit) compilam e passam
 
-### Funcionalidades Implementadas ✅
-- **Dashboard**: Pesquisa global, pacientes recentes, cards navegação
-- **Navegação**: Dashboard ↔ NovoPaciente ↔ FichaPaciente ↔ ListaPacientes
-- **Ficha Paciente**: 6 abas (Dados Biográficos, Declaração Saúde, Consentimentos, Registo Consultas, Irisdiagnóstico, Comunicação)
-- **PathService**: Gestão Debug/Release de caminhos (`biodesk.db`, templates, PDFs)
-- **Irisdiagnóstico**: Canvas interativo com zoom, marcas em 2 zonas, menu contextual
+### Funcionalidades Implementadas âœ…
+- **Dashboard**: Pesquisa global, pacientes recentes, cards navegaÃ§Ã£o
+- **NavegaÃ§Ã£o**: Dashboard â†” NovoPaciente â†” FichaPaciente â†” ListaPacientes
+- **Ficha Paciente**: 6 abas (Dados BiogrÃ¡ficos, DeclaraÃ§Ã£o SaÃºde, Consentimentos, Registo Consultas, IrisdiagnÃ³stico, ComunicaÃ§Ã£o)
+- **PathService**: GestÃ£o Debug/Release de caminhos (`biodesk.db`, templates, PDFs)
+- **IrisdiagnÃ³stico**: Canvas interativo com zoom, marcas em 2 zonas, menu contextual
 - **Consentimentos**: Templates Naturopatia/Osteopatia com assinatura digital
-- **Prescrições**: Templates globais com QuestPDF (pop-up de seleção)
+- **PrescriÃ§Ãµes**: Templates globais com QuestPDF (pop-up de seleÃ§Ã£o)
 - **Auto-save**: Terapia salva automaticamente (debounce 1.5s)
 - **Email**: Queue processor com EmailService + templates
 
 ### Sprint 2 Completado (6/6 tarefas)
-1. ✅ Campo Observações Consentimentos
-2. ✅ Menu Contextual Marcas Íris (editar/cor/remover)
-3. ✅ Auto-save Terapia verificado
-4. ✅ Documentação REGRAS_CONSULTAS.md
-5. ✅ Pop-up Templates Prescrições (SelecionarTemplatesWindow)
-6. ✅ Persistência Estado Abas (ConfiguracaoClinicaViewModel)
+1. âœ… Campo ObservaÃ§Ãµes Consentimentos
+2. âœ… Menu Contextual Marcas Ãris (editar/cor/remover)
+3. âœ… Auto-save Terapia verificado
+4. âœ… DocumentaÃ§Ã£o REGRAS_CONSULTAS.md
+5. âœ… Pop-up Templates PrescriÃ§Ãµes (SelecionarTemplatesWindow)
+6. âœ… PersistÃªncia Estado Abas (ConfiguracaoClinicaViewModel)
 
 ### TODO's Eliminados
-- **Início (03/10)**: 40 TODO's
+- **InÃ­cio (03/10)**: 40 TODO's
 - **Fim (12/10)**: 13 TODO's
-- **Redução**: 67%
+- **ReduÃ§Ã£o**: 67%
 
-## 🔗 Dependency Injection (App.xaml.cs)
+## ðŸ”— Dependency Injection (App.xaml.cs)
 
 ```csharp
 // Services (Singleton)
@@ -384,18 +384,19 @@ services.AddTransient<ListaPacientesViewModel>();
 services.AddTransient<ConfiguracoesViewModel>();
 ```
 
-## 📖 Documentação Adicional
+## ðŸ“– DocumentaÃ§Ã£o Adicional
 
 Para contexto mais profundo, consultar:
-- **RELATORIO_SPRINT2_COMPLETO_12OUT2025.md**: Últimas implementações
-- **CHECKLIST_ANTI_ERRO_UI.md**: Regras críticas XAML/binding
+- **RELATORIO_SPRINT2_COMPLETO_12OUT2025.md**: Ãšltimas implementaÃ§Ãµes
+- **CHECKLIST_ANTI_ERRO_UI.md**: Regras crÃ­ticas XAML/binding
 - **GUIA_TESTE_DEBUG_PATHSERVICE.md**: Debug PathService em desenvolvimento
-- **REGRAS_CONSULTAS.md**: Por que consultas não podem ser editadas
+- **REGRAS_CONSULTAS.md**: Por que consultas nÃ£o podem ser editadas
 - **SISTEMA_CONFIGURACOES.md**: Sistema ConfiguracaoClinicaViewModel
 - **PLANO_DESENVOLVIMENTO_RESTANTE.md**: Roadmap funcionalidades futuras
 
 ---
 
-**Princípio Fundamental**: "Se funciona e os testes passam, NÃO ALTERES!"
-Estabilidade > Elegância | Funcionalidade > Refactoring desnecessário
+**PrincÃ­pio Fundamental**: "Se funciona e os testes passam, NÃƒO ALTERES!"
+Estabilidade > ElegÃ¢ncia | Funcionalidade > Refactoring desnecessÃ¡rio
+
 

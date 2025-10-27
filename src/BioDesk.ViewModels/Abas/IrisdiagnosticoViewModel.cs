@@ -255,16 +255,16 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     private ObservableCollection<CalibrationHandler> _handlersIris = new();
 
     /// <summary>
-    /// Quantidade de handlers para a íris (mínimo 8 para estabilidade)
+    /// Quantidade de handlers para a íris (8 posições fixas: 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°)
     /// </summary>
     [ObservableProperty]
-    private int _quantidadeHandlersIris = 12;
+    private int _quantidadeHandlersIris = 8;
 
     /// <summary>
-    /// Quantidade de handlers para a pupila (mínimo 8 por padrão)
+    /// Quantidade de handlers para a pupila (8 posições fixas: 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°)
     /// </summary>
     [ObservableProperty]
-    private int _quantidadeHandlersPupila = 12;
+    private int _quantidadeHandlersPupila = 8;
 
     private bool _atualizandoContagemHandlers;
     private bool _suspendHandlerUpdates;
@@ -1451,8 +1451,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
         try
         {
-            var totalIris = Math.Max(6, quantidadeIris ?? QuantidadeHandlersIris);
-            var totalPupila = Math.Max(6, quantidadePupila ?? QuantidadeHandlersPupila);
+            var totalIris = Math.Max(8, quantidadeIris ?? QuantidadeHandlersIris);
+            var totalPupila = Math.Max(8, quantidadePupila ?? QuantidadeHandlersPupila);
 
             LimparHandlers(HandlersPupila);
             LimparHandlers(HandlersIris);
@@ -1514,7 +1514,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var clamped = Math.Max(6, value);
+        var clamped = Math.Max(8, value);
         if (clamped != value)
         {
             _atualizandoContagemHandlers = true;
@@ -1541,7 +1541,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var clamped = Math.Max(6, value);
+        var clamped = Math.Max(8, value);
         if (clamped != value)
         {
             _atualizandoContagemHandlers = true;

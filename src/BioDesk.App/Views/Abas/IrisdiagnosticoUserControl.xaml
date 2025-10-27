@@ -736,8 +736,8 @@
       </Border>
 
       <!-- COLUNA 2: ESQUERDO - Preview (era Grid.Column="1", agora é "2") -->
-      <Border Grid.Column="2"
-              Background="#F7F9F6"
+      <Grid Grid.Column="2">
+      <Border Background="#F7F9F6"
               CornerRadius="8"
               Padding="16">
         <Grid>
@@ -1398,7 +1398,7 @@
                     <TextBlock Text="Permite ajustar centro e raio da pupila independentemente da íris"
                                TextWrapping="Wrap"
                                Margin="0,4,0,0"/>
-                    <TextBlock Text="5 handlers: centro + 4 cardeais"
+                    <TextBlock Text="8 handlers em posições fixas (0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°)"
                                FontStyle="Italic"
                                Foreground="#5B7C99"
                                TextWrapping="Wrap"
@@ -1423,7 +1423,7 @@
                     <TextBlock Text="Permite ajustar centro e raio da íris independentemente da pupila"
                                TextWrapping="Wrap"
                                Margin="0,4,0,0"/>
-                    <TextBlock Text="5 handlers: centro + 4 cardeais"
+                    <TextBlock Text="8 handlers em posições fixas (0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°)"
                                FontStyle="Italic"
                                Foreground="#6B8E63"
                                TextWrapping="Wrap"
@@ -1534,16 +1534,16 @@
                        Margin="0,8,0,0">
                         <Run Text="💡 Calibração Separada:"/>
                         <LineBreak/>
-                        <Run Text="• Pupila: 5 handlers azuis"/>
+                        <Run Text="• Pupila: 8 handlers azuis"/>
                         <LineBreak/>
-                        <Run Text="• Íris: 5 handlers verdes"/>
+                        <Run Text="• Íris: 8 handlers verdes"/>
                         <LineBreak/>
                         <Run Text="• Arraste para ajustar posição"/>
             </TextBlock>
           </StackPanel>
+        </Grid>
         </Border>
       </Grid>
-      </Border>
     </Grid>
   </ScrollViewer>
 </UserControl>
