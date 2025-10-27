@@ -8,7 +8,7 @@ using BioDesk.Services;
 
 namespace BioDesk.App.Dialogs;
 
-public partial class CameraCaptureWindow : Window
+public partial class CameraCaptureWindow : Window, IDisposable
 {
     private readonly ICameraService _cameraService;
     private byte[]? _capturedFrameBytes;
@@ -204,5 +204,24 @@ public partial class CameraCaptureWindow : Window
         }
 
         base.OnClosed(e);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _disposeLock?.Dispose();
+        }
+    }
+
+    ~CameraCaptureWindow()
+    {
+        Dispose(false);
     }
 }

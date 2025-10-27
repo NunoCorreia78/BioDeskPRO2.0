@@ -12,6 +12,7 @@ using BioDesk.App.Dialogs;
 using BioDesk.Services;
 using BioDesk.Services.Debug;
 using Microsoft.Extensions.DependencyInjection;
+using static BioDesk.ViewModels.Abas.IrisdiagnosticoViewModel;
 
 namespace BioDesk.App.Views.Abas;
 
@@ -212,7 +213,140 @@ public partial class IrisdiagnosticoUserControl : UserControl
         }
     }
 
-    // === HANDLERS DE CALIBRAÇÃO ===
+    // === ✅ NOVOS HANDLERS SIMPLIFICADOS ===
+
+    private bool _isDraggingSimpleHandler = false;
+    private SimpleHandler? _currentSimpleHandler = null;
+
+    /// <summary>
+    /// ✅ NOVO: Inicia arrasto do handler simplificado
+    /// </summary>
+    private void HandlerSimples_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement element) return;
+        if (element.Tag is not SimpleHandler handler) return;
+
+        _isDraggingSimpleHandler = true;
+        _currentSimpleHandler = handler;
+
+        element.CaptureMouse();
+        e.Handled = true;
+
+#if DEBUG
+        System.Diagnostics.Debug.WriteLine($"🎯 Handler Simples Down: {handler.Estrutura} - {handler.Tipo}");
+#endif
+    }
+
+    /// <summary>
+    /// ✅ NOVO: Arrasta handler simplificado (lógica simplificada)
+    /// </summary>
+    private void HandlerSimples_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isDraggingSimpleHandler || _currentSimpleHandler == null) return;
+        if (sender is not FrameworkElement element) return;
+        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
+
+        var position = e.GetPosition(HandlersCanvas);
+
+#if DEBUG
+        System.Diagnostics.Debug.WriteLine($"📍 Handler Simples Move: {_currentSimpleHandler.Estrutura} - {_currentSimpleHandler.Tipo} → ({position.X:F1}, {position.Y:F1})");
+#endif
+
+        // Atualizar posição do handler (centralizar)
+        _currentSimpleHandler.X = position.X - 11;
+        _currentSimpleHandler.Y = position.Y - 11;
+
+        // Atualizar calibração baseada no tipo de handler
+        AtualizarCalibracaoSimples(_currentSimpleHandler, position, viewModel);
+
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// ✅ NOVO: Finaliza arrasto do handler simplificado
+    /// </summary>
+    private void HandlerSimples_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isDraggingSimpleHandler) return;
+        if (sender is not FrameworkElement element) return;
+
+        _isDraggingSimpleHandler = false;
+        _currentSimpleHandler = null;
+        element.ReleaseMouseCapture();
+
+#if DEBUG
+        System.Diagnostics.Debug.WriteLine("🎯 Handler Simples Up: Finalizado");
+#endif
+
+        // Renderizar polígonos com nova calibração
+        if (DataContext is IrisdiagnosticoViewModel viewModel &&
+            viewModel.MostrarMapaIridologico &&
+            viewModel.MapaAtual != null)
+        {
+            viewModel.RenderizarPoligonosSimplificados();
+        }
+
+        e.Handled = true;
+    }
+
+    /// <summary>
+    /// ✅ NOVO: Atualiza calibração baseada na movimentação do handler
+    /// </summary>
+    private void AtualizarCalibracaoSimples(SimpleHandler handler, Point position, IrisdiagnosticoViewModel viewModel)
+    {
+        // Atualizar calibração baseada na estrutura
+        if (handler.Estrutura == "Pupila")
+        {
+            var calibracao = viewModel.CalibracaoPupila;
+            AtualizarCalibracao(calibracao, handler.Tipo, position);
+        }
+        else // Íris
+        {
+            var calibracao = viewModel.CalibracaoIris;
+            AtualizarCalibracao(calibracao, handler.Tipo, position);
+        }
+
+        // Atualizar handlers simples
+        viewModel.AtualizarHandlersSimples();
+    }
+
+    private void AtualizarCalibracao(dynamic calibracao, string tipo, Point position)
+    {
+        switch (tipo)
+        {
+            case "Centro":
+                // Mover centro da estrutura
+                calibracao.CentroX = position.X;
+                calibracao.CentroY = position.Y;
+                break;
+
+            case "Norte":
+                // Ajustar raio baseado na distância ao centro
+                var distanciaNorte = Math.Abs(position.Y - calibracao.CentroY);
+                calibracao.RaioY = distanciaNorte;
+                break;
+
+            case "Sul":
+                // Ajustar raio baseado na distância ao centro
+                var distanciaSul = Math.Abs(position.Y - calibracao.CentroY);
+                calibracao.RaioY = distanciaSul;
+                break;
+
+            case "Este":
+                // Ajustar raio baseado na distância ao centro
+                var distanciaEste = Math.Abs(position.X - calibracao.CentroX);
+                calibracao.RaioX = distanciaEste;
+                break;
+
+            case "Oeste":
+                // Ajustar raio baseado na distância ao centro
+                var distanciaOeste = Math.Abs(position.X - calibracao.CentroX);
+                calibracao.RaioX = distanciaOeste;
+                break;
+        }
+    }
+
+    // === HANDLERS DE CALIBRAÇÃO (LEGACY) ===
 
     private bool _isDraggingHandler = false;
     private object? _currentHandler = null;
@@ -417,11 +551,10 @@ public partial class IrisdiagnosticoUserControl : UserControl
         double deltaX = current.X - _ultimaPosicaoMapa.X;
         double deltaY = current.Y - _ultimaPosicaoMapa.Y;
 
-        // 🔄 ROTAÇÃO -90°: Compensar transformação do canvas para manter movimento natural
-        // Canvas rotado -90° (anti-horário) → aplicar rotação inversa (+90°) aos deltas do rato
-        // Fórmula +90°: x' = -y, y' = x
-        double deltaXRotacionado = -deltaY;
-        double deltaYRotacionado = deltaX;
+        // ✅ SIMPLIFICADO: Movimento direto sem compensação de rotação
+        // O canvas já não tem rotação -90°, movimento deve ser natural
+        double deltaXRotacionado = deltaX;
+        double deltaYRotacionado = deltaY;
 
         double scaleY = 1.0;
         if (MapaOverlayCanvas?.RenderTransform is Transform renderTransform)

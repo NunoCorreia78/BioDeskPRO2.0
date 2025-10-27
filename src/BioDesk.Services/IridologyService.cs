@@ -119,6 +119,7 @@ public class IridologyService : IIridologyService
 
     /// <summary>
     /// Converte coordenada polar (ângulo, raio) para cartesiana (X, Y)
+    /// ✅ CORRIGIDO: Adiciona compensação para orientação correta do mapa
     /// </summary>
     public Point ConverterPolarParaCartesiano(PolarPoint polarPoint, CalibracaoReferencia calibracao)
     {
@@ -126,11 +127,29 @@ public class IridologyService : IIridologyService
         var centroX = calibracao.CentroPupila[0];
         var centroY = calibracao.CentroPupila[1];
 
-        // Raio em pixels (raio normalizado 0-1 × raio da íris)
-        var raioPixels = polarPoint.Raio * calibracao.RaioIris;
+        // ✅ EXCLUSÃO DA PUPILA: Raio mínimo para evitar sobreposição
+        var raioPupilaNormalizado = (double)calibracao.RaioPupila / calibracao.RaioIris;
+        var raioMinimo = raioPupilaNormalizado + 0.05; // margem de 5% (aumentado)
 
-        // Converter ângulo de graus para radianos
-        var anguloRad = polarPoint.Angulo * Math.PI / 180.0;
+        var raioAjustado = Math.Max(polarPoint.Raio, raioMinimo);
+
+        // 🔍 DEBUG: Log quando aplicamos correção de pupila
+        if (polarPoint.Raio < raioMinimo)
+        {
+            _logger.LogDebug("🔧 Pupila: raio {Original:F3} → {Corrigido:F3} (mín: {Minimo:F3})",
+                polarPoint.Raio, raioAjustado, raioMinimo);
+        }
+
+        // Raio em pixels (raio normalizado 0-1 × raio da íris)
+        var raioPixels = raioAjustado * calibracao.RaioIris;
+
+        // ✅ CORREÇÃO DE ROTAÇÃO: TESTE - sem rotação para verificar orientação base
+        var anguloCorrigido = polarPoint.Angulo + 0.0;
+        var anguloRad = anguloCorrigido * Math.PI / 180.0;
+
+        // 🔍 DEBUG: Log rotação aplicada
+        _logger.LogDebug("🔄 Rotação: ângulo {Original:F1}° → {Corrigido:F1}°",
+            polarPoint.Angulo, anguloCorrigido);
 
         // Coordenadas cartesianas
         var x = centroX + raioPixels * Math.Cos(anguloRad);

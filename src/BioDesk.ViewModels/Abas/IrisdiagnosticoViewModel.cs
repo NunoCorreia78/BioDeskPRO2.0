@@ -108,10 +108,85 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         public string CorPreenchimento { get; set; } = "#6B8E63"; // Verde musgo terroso
     }
 
+    /// <summary>
+    /// ✅ NOVA: Calibração simplificada da pupila (independente)
+    /// </summary>
+    public class ConfigCalibracaoPupila
+    {
+        public double CentroX { get; set; } = 400;
+        public double CentroY { get; set; } = 400;
+        public double RaioX { get; set; } = 54;
+        public double RaioY { get; set; } = 54;
+        public double Rotacao { get; set; } = 0; // Graus
+    }
+
+    /// <summary>
+    /// ✅ NOVA: Calibração simplificada da íris (independente)
+    /// </summary>
+    public class ConfigCalibracaoIris
+    {
+        public double CentroX { get; set; } = 400;
+        public double CentroY { get; set; } = 400;
+        public double RaioX { get; set; } = 270;
+        public double RaioY { get; set; } = 270;
+        public double Rotacao { get; set; } = 0; // Graus
+    }
+
+    /// <summary>
+    /// ✅ NOVA: Handler simplificado para calibração
+    /// </summary>
+    public partial class SimpleHandler : ObservableObject
+    {
+        [ObservableProperty]
+        private double _x;
+
+        [ObservableProperty]
+        private double _y;
+
+        [ObservableProperty]
+        private string _tipo = "Centro"; // "Centro", "Norte", "Sul", "Este", "Oeste"
+
+        [ObservableProperty]
+        private string _estrutura = "Pupila"; // "Pupila" ou "Iris"
+
+        [ObservableProperty]
+        private string _cor = "#5B7C99"; // Cor do handler
+    }
+
     [ObservableProperty]
     private ObservableCollection<ZonaPoligono> _poligonosZonas = new();
 
-    // === FASE 5: CALIBRAÇÃO AVANÇADA ===
+    // === ✅ NOVA CALIBRAÇÃO SIMPLIFICADA ===
+
+    /// <summary>
+    /// Calibração da pupila (independente)
+    /// </summary>
+    public ConfigCalibracaoPupila CalibracaoPupila { get; } = new();
+
+    /// <summary>
+    /// Calibração da íris (independente)
+    /// </summary>
+    public ConfigCalibracaoIris CalibracaoIris { get; } = new();
+
+    /// <summary>
+    /// Modo calibração da pupila ativo
+    /// </summary>
+    [ObservableProperty]
+    private bool _modoCalibraPupila = false;
+
+    /// <summary>
+    /// Modo calibração da íris ativo
+    /// </summary>
+    [ObservableProperty]
+    private bool _modoCalibraIris = false;
+
+    /// <summary>
+    /// Handlers simplificados para calibração
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<SimpleHandler> _handlersSimples = new();
+
+    // === FASE 5: CALIBRAÇÃO AVANÇADA (LEGACY - SERÁ REMOVIDO) ===
 
     /// <summary>
     /// Opacidade do mapa (0-100%)
@@ -308,10 +383,134 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         HandlersIris.CollectionChanged += OnHandlersCollectionChanged;
         HandlersPupila.CollectionChanged += OnHandlersCollectionChanged;
 
+        // ✅ NOVA: Inicializar calibração simplificada
+        InicializarCalibracaoSimplificada();
+
         if (DebugArrastoAtivo)
         {
             _dragDebugService.RecordEvent(DragDebugEventType.DragStart, "IrisdiagnosticoViewModel inicializado");
             RegistarEstadoAtual("VM inicializada");
+        }
+    }
+
+    /// <summary>
+    /// ✅ NOVA: Inicializa sistema de calibração simplificada
+    /// </summary>
+    private void InicializarCalibracaoSimplificada()
+    {
+        // Limpar handlers existentes
+        HandlersSimples.Clear();
+
+        // Configurar posições padrão (centro da imagem 800x800)
+        CalibracaoPupila.CentroX = 400;
+        CalibracaoPupila.CentroY = 400;
+        CalibracaoPupila.RaioX = 54;
+        CalibracaoPupila.RaioY = 54;
+
+        CalibracaoIris.CentroX = 400;
+        CalibracaoIris.CentroY = 400;
+        CalibracaoIris.RaioX = 270;
+        CalibracaoIris.RaioY = 270;
+
+        // Criar handlers para pupila (5 handlers)
+        CriarHandlersSimples("Pupila", CalibracaoPupila.CentroX, CalibracaoPupila.CentroY, CalibracaoPupila.RaioX, "#5B7C99");
+
+        // Criar handlers para íris (5 handlers)
+        CriarHandlersSimples("Iris", CalibracaoIris.CentroX, CalibracaoIris.CentroY, CalibracaoIris.RaioX, "#6B8E63");
+
+        _logger.LogInformation("✅ Calibração simplificada inicializada: 10 handlers total");
+    }
+
+    /// <summary>
+    /// ✅ NOVA: Cria 5 handlers para uma estrutura (centro + 4 cardeais)
+    /// </summary>
+    private void CriarHandlersSimples(string estrutura, double centroX, double centroY, double raio, string cor)
+    {
+        // Handler central
+        HandlersSimples.Add(new SimpleHandler
+        {
+            X = centroX - 8,
+            Y = centroY - 8,
+            Tipo = "Centro",
+            Estrutura = estrutura,
+            Cor = cor
+        });
+
+        // Handler Norte
+        HandlersSimples.Add(new SimpleHandler
+        {
+            X = centroX - 8,
+            Y = centroY - raio - 8,
+            Tipo = "Norte",
+            Estrutura = estrutura,
+            Cor = cor
+        });
+
+        // Handler Sul
+        HandlersSimples.Add(new SimpleHandler
+        {
+            X = centroX - 8,
+            Y = centroY + raio - 8,
+            Tipo = "Sul",
+            Estrutura = estrutura,
+            Cor = cor
+        });
+
+        // Handler Este
+        HandlersSimples.Add(new SimpleHandler
+        {
+            X = centroX + raio - 8,
+            Y = centroY - 8,
+            Tipo = "Este",
+            Estrutura = estrutura,
+            Cor = cor
+        });
+
+        // Handler Oeste
+        HandlersSimples.Add(new SimpleHandler
+        {
+            X = centroX - raio - 8,
+            Y = centroY - 8,
+            Tipo = "Oeste",
+            Estrutura = estrutura,
+            Cor = cor
+        });
+    }
+
+    /// <summary>
+    /// ✅ NOVA: Atualiza posição dos handlers quando calibração muda
+    /// </summary>
+    public void AtualizarHandlersSimples()
+    {
+        foreach (var handler in HandlersSimples)
+        {
+            var calibracao = handler.Estrutura == "Pupila" ?
+                (CalibracaoPupila.CentroX, CalibracaoPupila.CentroY, CalibracaoPupila.RaioX) :
+                (CalibracaoIris.CentroX, CalibracaoIris.CentroY, CalibracaoIris.RaioX);
+
+            switch (handler.Tipo)
+            {
+                case "Centro":
+                    handler.X = calibracao.Item1 - 8;
+                    handler.Y = calibracao.Item2 - 8;
+                    break;
+                case "Norte":
+                    handler.X = calibracao.Item1 - 8;
+                    handler.Y = calibracao.Item2 - calibracao.Item3 - 8;
+                    break;
+                case "Sul":
+                    handler.X = calibracao.Item1 - 8;
+                    handler.Y = calibracao.Item2 + calibracao.Item3 - 8;
+                    break;
+                case "Este":
+                    handler.X = calibracao.Item1 + calibracao.Item3 - 8;
+                    handler.Y = calibracao.Item2 - 8;
+                    break;
+                case "Oeste":
+                    handler.X = calibracao.Item1 - calibracao.Item3 - 8;
+                    handler.Y = calibracao.Item2 - 8;
+                    break;
+            }
         }
     }
 
@@ -1638,6 +1837,23 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void ResetCalibracao()
     {
+        // ✅ NOVA: Reset da calibração simplificada
+        CalibracaoPupila.CentroX = 400;
+        CalibracaoPupila.CentroY = 400;
+        CalibracaoPupila.RaioX = 54;
+        CalibracaoPupila.RaioY = 54;
+        CalibracaoPupila.Rotacao = 0;
+
+        CalibracaoIris.CentroX = 400;
+        CalibracaoIris.CentroY = 400;
+        CalibracaoIris.RaioX = 270;
+        CalibracaoIris.RaioY = 270;
+        CalibracaoIris.Rotacao = 0;
+
+        // Atualizar handlers
+        AtualizarHandlersSimples();
+
+        // Reset valores legados (manter compatibilidade)
         CentroPupilaX = 300;
         CentroPupilaY = 300;
         RaioPupila = 54;
@@ -1660,10 +1876,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
         InicializarHandlers();
 
-        // Recalcular polígonos
+        // Recalcular polígonos com nova calibração
         if (MostrarMapaIridologico && MapaAtual != null)
         {
-            RenderizarPoligonos();
+            RenderizarPoligonosSimplificados();
         }
 
         _logger.LogInformation("🔄 Calibração resetada para valores padrão");
@@ -1673,6 +1889,87 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             "ResetCalibracao",
             ConstruirMetricasCentros(),
             ConstruirContextoPadrao());
+    }
+
+    /// <summary>
+    /// ✅ NOVA: Renderiza polígonos usando calibração simplificada
+    /// </summary>
+    public void RenderizarPoligonosSimplificados()
+    {
+        if (MapaAtual == null) return;
+
+        PoligonosZonas.Clear();
+
+        var cores = new[] { "#6B8E63", "#9CAF97", "#5B7C99", "#D4A849" };
+        var corIndex = 0;
+
+        foreach (var zona in MapaAtual.Zonas)
+        {
+            var poligonosSimples = ConverterZonaComCalibracaoSimplificada(zona);
+
+            foreach (var pontos in poligonosSimples)
+            {
+                PoligonosZonas.Add(new ZonaPoligono
+                {
+                    Nome = zona.Nome,
+                    Descricao = zona.Descricao,
+                    Pontos = pontos,
+                    CorPreenchimento = cores[corIndex % cores.Length]
+                });
+            }
+
+            corIndex++;
+        }
+
+        _logger.LogInformation("🎨 Renderizados {Count} polígonos com calibração simplificada", PoligonosZonas.Count);
+    }
+
+    /// <summary>
+    /// ✅ NOVA: Converte zona usando calibração simplificada (pupila + íris independentes)
+    /// </summary>
+    private List<System.Windows.Media.PointCollection> ConverterZonaComCalibracaoSimplificada(IridologyZone zona)
+    {
+        var result = new List<System.Windows.Media.PointCollection>();
+
+        foreach (var parte in zona.Partes)
+        {
+            var pontos = new System.Windows.Media.PointCollection();
+
+            foreach (var coordenada in parte)
+            {
+                double normalizedRadius = Math.Clamp(coordenada.Raio, 0.0, 1.0);
+                double anguloRad = coordenada.Angulo * Math.PI / 180.0;
+
+                // Determinar se ponto está na região da pupila ou íris
+                const double THRESHOLD_PUPILA = 0.2; // 20% = pupila, >20% = íris
+
+                double x, y;
+
+                if (normalizedRadius <= THRESHOLD_PUPILA)
+                {
+                    // Usar calibração da pupila
+                    var raioReal = normalizedRadius * 5 * CalibracaoPupila.RaioX; // Escala para pupila
+                    x = CalibracaoPupila.CentroX + raioReal * Math.Cos(anguloRad);
+                    y = CalibracaoPupila.CentroY + raioReal * Math.Sin(anguloRad);
+                }
+                else
+                {
+                    // Usar calibração da íris
+                    var raioReal = normalizedRadius * CalibracaoIris.RaioX;
+                    x = CalibracaoIris.CentroX + raioReal * Math.Cos(anguloRad);
+                    y = CalibracaoIris.CentroY + raioReal * Math.Sin(anguloRad);
+                }
+
+                pontos.Add(new System.Windows.Point(x, y));
+            }
+
+            if (pontos.Count > 0)
+            {
+                result.Add(pontos);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -1980,8 +2277,15 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
             foreach (var coordenada in parte)
             {
-                double normalizedRadius = Math.Clamp(coordenada.Raio, 0.0, 1.0);
-                double angulo = (coordenada.Angulo + 270.0) * Math.PI / 180.0;
+                // ✅ EXCLUSÃO DA PUPILA: Aplicar raio mínimo igual ao IridologyService
+                double raioOriginal = coordenada.Raio;
+                double raioPupilaNormalizado = RAIO_NOMINAL_PUPILA / RAIO_NOMINAL_IRIS; // ~0.194
+                double raioMinimo = raioPupilaNormalizado + 0.05; // margem de 5%
+                double normalizedRadius = Math.Max(raioOriginal, raioMinimo);
+                normalizedRadius = Math.Clamp(normalizedRadius, 0.0, 1.0);
+
+                // ✅ CORREÇÃO DE ROTAÇÃO: TESTE - sem rotação para verificar orientação base
+                double angulo = (coordenada.Angulo + 0.0) * Math.PI / 180.0;
                 angulo = NormalizeAngleRadians(angulo);
 
                 var (pesoPupila, pesoIris) = CalcularPesosRadiais(normalizedRadius);

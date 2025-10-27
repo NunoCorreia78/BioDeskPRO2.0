@@ -1,4 +1,4 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-24 16:40:56 ===
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-27 08:22:43 ===
 PacienteId: 4
 NomePaciente: Nuno Filipe Correia
 NomeNormalizado: nunofilipecorreia
@@ -41,7 +41,7 @@ Pastas encontradas para o paciente: 1
     - Consentimentos
     - DeclaracoesSaude
     - Prescricoes
-  PDFs encontrados: 12
+  PDFs encontrados: 13
     ✅ Consentimentos\Consentimento_🌿 Naturopatia - Consulta Geral_Nuno Filipe Correia_20251016_102451.pdf
     ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251016_105325.pdf
     ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251024_105610.pdf
@@ -50,9 +50,10 @@ Pastas encontradas para o paciente: 1
     ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251024_162518.pdf
     ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251024_162923.pdf
     ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251024_163343.pdf
+    ✅ DeclaracoesSaude\DeclaracaoSaude_Nuno Filipe Correia_20251024_164151.pdf
     ✅ Prescricoes\Prescricao_20251008_173501.pdf
     ✅ Prescricoes\Prescricao_20251009_112634.pdf
     ✅ Prescricoes\Prescricao_20251009_122522.pdf
     ✅ Prescricoes\Prescricao_20251016_110917.pdf
 
-📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 12
+📄 TOTAL DE DOCUMENTOS ENCONTRADOS: 13
