@@ -1,37 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="AForge.Video" Version="2.2.5" />
-    <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
-    <PackageReference Include="EPPlus" Version="7.5.0" />
-    <PackageReference Include="ExcelDataReader" Version="3.7.0" />
-    <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
-    <PackageReference Include="FluentValidation" Version="11.9.2" />
-    <PackageReference Include="FuzzySharp" Version="2.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
-    <PackageReference Include="OxyPlot.Core" Version="2.2.0" />
-    <PackageReference Include="QuestPDF" Version="2025.7.2" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
-    <PackageReference Include="System.Reactive" Version="6.0.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageReference Include="AForge.Video" Version="2.2.5"/>
+    <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5"/>
+    <PackageReference Include="Emgu.CV" Version="4.9.0.5494"/>
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494"/>
+    <PackageReference Include="EPPlus" Version="7.5.0"/>
+    <PackageReference Include="ExcelDataReader" Version="3.7.0"/>
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0"/>
+    <PackageReference Include="FluentValidation" Version="11.9.2"/>
+    <PackageReference Include="FuzzySharp" Version="2.0.2"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.9"/>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8"/>
+    <PackageReference Include="NAudio" Version="2.2.1"/>
+    <PackageReference Include="NAudio.Wasapi" Version="2.2.1"/>
+    <PackageReference Include="OxyPlot.Core" Version="2.2.0"/>
+    <PackageReference Include="QuestPDF" Version="2025.7.2"/>
+    <PackageReference Include="System.Drawing.Common" Version="8.0.10"/>
+    <PackageReference Include="System.Reactive" Version="6.0.0"/>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0"/>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\BioDesk.Domain\BioDesk.Domain.csproj" />
-    <ProjectReference Include="..\BioDesk.Data\BioDesk.Data.csproj" />
-    <ProjectReference Include="..\BioDesk.Core\BioDesk.Core.csproj" />
+    <ProjectReference Include="..\BioDesk.Domain\BioDesk.Domain.csproj"/>
+    <ProjectReference Include="..\BioDesk.Data\BioDesk.Data.csproj"/>
+    <ProjectReference Include="..\BioDesk.Core\BioDesk.Core.csproj"/>
   </ItemGroup>
-
 </Project>

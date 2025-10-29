@@ -20,7 +20,7 @@ using BioDesk.ViewModels.Validators;
 namespace BioDesk.ViewModels;
 
 /// <summary>
-/// ConfiguracaoClinicaViewModel - ViewModel para configuraÃ§Ã£o da clÃ­nica
+/// ConfiguracaoClinicaViewModel - ViewModel para configuração da clínica
 /// Permite editar: Nome, Morada, Telefone, Email, NIPC, Logo
 /// Singleton pattern: sempre carrega/salva ConfiguracaoClinica com Id=1
 /// </summary>
@@ -36,7 +36,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     #region === PROPRIEDADES - DADOS DA CLÃNICA ===
 
     [ObservableProperty]
-    private string _nomeClinica = "Minha ClÃ­nica";
+    private string _nomeClinica = "Minha Clínica";
 
     [ObservableProperty]
     private string? _morada;
@@ -99,7 +99,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     #region === EVENTOS ===
 
     /// <summary>
-    /// Evento disparado quando a configuraÃ§Ã£o Ã© salva com sucesso
+    /// Evento disparado quando a configuração é salva com sucesso
     /// </summary>
     public event EventHandler? ConfiguracaoSalvaComSucesso;
 
@@ -120,10 +120,10 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
 
         _logger.LogInformation("ðŸ“‹ ConfiguracaoClinicaViewModel inicializado");
 
-        // Carregar configuraÃ§Ã£o existente
+        // Carregar configuração existente
         _ = CarregarConfiguracaoAsync();
 
-        // Carregar lista de backups disponÃ­veis
+        // Carregar lista de backups disponíveis
         _ = AtualizarListaBackupsAsync();
         // Carregar lista de templates PDF (se serviço disponível)
         if (_templatesPdfService != null)
@@ -177,20 +177,20 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     #region === MÃ‰TODOS PRIVADOS ===
 
     /// <summary>
-    /// Carrega a configuraÃ§Ã£o da clÃ­nica (Id=1)
-    /// Se nÃ£o existir, cria com valores padrÃ£o
+    /// Carrega a configuração da clínica (Id=1)
+    /// Se não existir, cria com valores padrão
     /// </summary>
     private async Task CarregarConfiguracaoAsync()
     {
         try
         {
-            _logger.LogInformation("ðŸ“‚ Carregando configuraÃ§Ã£o da clÃ­nica...");
+            _logger.LogInformation("📂 Carregando configuração da clínica...");
 
             var config = await _unitOfWork.ConfiguracaoClinica.GetByIdAsync(1);
 
             if (config == null)
             {
-                _logger.LogWarning("âš ï¸ ConfiguraÃ§Ã£o nÃ£o encontrada, usando valores padrÃ£o");
+                _logger.LogWarning("⚠️ Configuração não encontrada, usando valores padrão");
                 NomeClinica = "Minha ClÃ­nica";
                 Morada = null;
                 Telefone = null;
@@ -218,15 +218,15 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             SmtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
             SmtpPort = int.TryParse(_configuration["Email:SmtpPort"], out var port) ? port : 587;
             SmtpFromEmail = _configuration["Email:FromEmail"];
-            SmtpFromName = _configuration["Email:FromName"] ?? "BioDeskPro - ClÃ­nica";
-            // Nota: Password nÃ£o Ã© carregado por seguranÃ§a (apenas gravado)
+            SmtpFromName = _configuration["Email:FromName"] ?? "BioDeskPro - Clínica";
+            // Nota: Password não é carregado por segurança (apenas gravado)
 
-            _logger.LogInformation("âœ… ConfiguraÃ§Ãµes SMTP carregadas");
+            _logger.LogInformation("✅ Configurações SMTP carregadas");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "âŒ Erro ao carregar configuraÃ§Ã£o");
-            ErrorMessage = $"Erro ao carregar configuraÃ§Ã£o: {ex.Message}";
+            _logger.LogError(ex, "❌ Erro ao carregar configuração");
+            ErrorMessage = $"Erro ao carregar configuração: {ex.Message}";
         }
     }
 
@@ -401,13 +401,13 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Salva as configuraÃ§Ãµes SMTP no appsettings.json
+    /// Salva as configurações SMTP no appsettings.json
     /// </summary>
     private async Task SalvarConfiguracoesSmtpAsync()
     {
         try
         {
-            _logger.LogInformation("ðŸ’¾ Salvando configuraÃ§Ãµes SMTP no appsettings.json...");
+            _logger.LogInformation("💾 Salvando configurações SMTP no appsettings.json...");
 
             var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
 
@@ -454,17 +454,17 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
             // Salvar arquivo
             await File.WriteAllTextAsync(appSettingsPath, updatedJson);
 
-            _logger.LogInformation("âœ… ConfiguraÃ§Ãµes SMTP salvas com sucesso");
+            _logger.LogInformation("✅ Configurações SMTP salvas com sucesso");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "âŒ Erro ao salvar configuraÃ§Ãµes SMTP");
-            ErrorMessage = $"Erro ao salvar configuraÃ§Ãµes de email: {ex.Message}";
+            _logger.LogError(ex, "❌ Erro ao salvar configurações SMTP");
+            ErrorMessage = $"Erro ao salvar configurações de email: {ex.Message}";
         }
     }
 
     /// <summary>
-    /// Testa a conexÃ£o SMTP enviando um email de teste
+    /// Testa a conexão SMTP enviando um email de teste
     /// </summary>
     private async Task TestarConexaoSmtpAsync()
     {
@@ -495,7 +495,7 @@ public partial class ConfiguracaoClinicaViewModel : ViewModelBase
                 return;
             }
 
-            // Salvar temporariamente as configuraÃ§Ãµes para teste
+            // Salvar temporariamente as configurações para teste
             await SalvarConfiguracoesSmtpAsync();
 
             // Tentar enviar email de teste usando System.Net.Mail

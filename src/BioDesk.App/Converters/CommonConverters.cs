@@ -238,3 +238,29 @@ public class NullToBoolConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+/// <summary>
+/// Converter para transformar índice (1-8) em nome do ponto cardeal
+/// </summary>
+public class IndexToCardinalConverter : IValueConverter
+{
+    private static readonly string[] NomesPontosCardeais = 
+    {
+        "Norte (12h)", "Nordeste (1h30)", "Este (3h)", "Sudeste (4h30)",
+        "Sul (6h)", "Sudoeste (7h30)", "Oeste (9h)", "Noroeste (10h30)"
+    };
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is int index && index >= 1 && index <= 8)
+        {
+            return NomesPontosCardeais[index - 1];
+        }
+        return "Ponto não definido";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

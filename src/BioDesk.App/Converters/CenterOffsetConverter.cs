@@ -14,12 +14,15 @@ public class CenterOffsetConverter : IValueConverter
     {
         if (value is double centro)
         {
-            // Offset = Centro - Raio
-            // Raio vem do binding Width/Height / 2
-            // Simplificado: retorna centro (ajuste no binding)
+            // Aplicar offset do ConverterParameter para centrar elemento
+            double offset = 0.0;
+            if (parameter is string paramStr && double.TryParse(paramStr, out offset))
+            {
+                return centro + offset;
+            }
             return centro;
         }
-        return 300.0; // Centro padrão canvas 600x600
+        return 700.0; // Centro padrão canvas 1400x1400
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

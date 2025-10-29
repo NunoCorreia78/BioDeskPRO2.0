@@ -38,6 +38,19 @@ public partial class IrisdiagnosticoUserControl : UserControl
     }
 
     /// <summary>
+    /// ✅ NOVO: Handler para cliques no MapaOverlayCanvas (Sistema Infalível de 3 cliques)
+    /// Processa os 3 cliques necessários para alinhamento do overlay (Centro → Direita → Topo)
+    /// </summary>
+    private void MapaOverlayCanvas_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is IrisdiagnosticoViewModel vm)
+        {
+            var clickPosition = e.GetPosition(MapaOverlayCanvas);
+            vm.ProcessOverlayClick(clickPosition);
+        }
+    }
+
+    /// <summary>
     /// ✅ CORREÇÃO CRÍTICA: Reset completo quando UserControl fica invisível
     /// Previne que Canvas capturado bloqueie cliques em outras abas
     /// </summary>
@@ -46,17 +59,6 @@ public partial class IrisdiagnosticoUserControl : UserControl
         // Quando fica invisível, libertar TODOS os captures
         if (this.Visibility != Visibility.Visible)
         {
-            // Reset estado de drag do mapa
-            if (_isDraggingMapa)
-            {
-                _isDraggingMapa = false;
-                if (MapaOverlayCanvas != null)
-                {
-                    MapaOverlayCanvas.Cursor = Cursors.Arrow;
-                    MapaOverlayCanvas.ReleaseMouseCapture();
-                }
-            }
-
             // Reset estado de desenho
             if (_isDrawing)
             {
@@ -79,6 +81,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
     /// <summary>
     /// Handler para click no Canvas - mostra dialog e adiciona marca com observações
     /// FASE 4: Integra hit-testing para detectar zona iridológica
+    /// FASE 5: Integra sistema de marcação por 8 pontos cardeais
     /// </summary>
     private async void MarkingsCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -239,47 +242,7 @@ public partial class IrisdiagnosticoUserControl : UserControl
     /// </summary>
     private void Handler_MouseMove(object sender, MouseEventArgs e)
     {
-        if (!_isDraggingHandler || _currentHandler == null) return;
-        if (sender is not FrameworkElement element) return;
-        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
-
-        // 🔧 FIX: Usar HandlersCanvas diretamente (nomeado no XAML) em vez de element.Parent
-        // ItemsControl não define Parent corretamente, causava canvas = null
-        var position = e.GetPosition(HandlersCanvas);
-
-        // Atualizar posição do handler
-        if (_currentHandler is IrisdiagnosticoViewModel.CalibrationHandler handler)
-        {
-            handler.X = position.X - 11; // -11 para centralizar ellipse 22x22
-            handler.Y = position.Y - 11;
-
-#if DEBUG
-            System.Diagnostics.Debug.WriteLine($"📍 POSITION UPDATE: X={handler.X:F2}, Y={handler.Y:F2}");
-#endif
-
-            // Recalcular raio baseado na nova posição
-            double centroX = handler.Tipo == "Pupila" ? viewModel.CentroPupilaX : viewModel.CentroIrisX;
-            double centroY = handler.Tipo == "Pupila" ? viewModel.CentroPupilaY : viewModel.CentroIrisY;
-
-            double novoRaio = Math.Sqrt(Math.Pow(position.X - centroX, 2) + Math.Pow(position.Y - centroY, 2));
-
-            if (handler.Tipo == "Pupila")
-            {
-                viewModel.RaioPupila = novoRaio;
-            }
-            else
-            {
-                viewModel.RaioIris = novoRaio;
-            }
-
-            // TODO: Implementar deformação local (apenas na área de influência do handler)
-            // Por agora, atualiza todos os handlers do mesmo círculo uniformemente
-
-            // ⚡ PERFORMANCE: Throttle recalculações durante arrasto de handler
-            viewModel.RecalcularPoligonosComDeformacao(throttle: true);
-        }
-
-        e.Handled = true;
+        // TODO STEP 9: REMOVER função completa - HandlersCanvas removido (Sistema Infalível)
     }
 
     /// <summary>
@@ -360,207 +323,15 @@ public partial class IrisdiagnosticoUserControl : UserControl
         return context;
     }
 
-    // === HANDLERS DE DRAG DO MAPA ===
-
-    private bool _isDraggingMapa = false;
-    private Point _ultimaPosicaoMapa;
+    // === EVENT HANDLERS PARA FERRAMENTA DE DESENHO ===
 
     /// <summary>
-    /// Inicia arrasto do mapa overlay
-    /// </summary>
-    private void MapaOverlayCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (HandlersCanvas == null) return;
-        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
-
-        // ✅ SIMPLIFICADO: Só requer ModoMoverMapa OU ModoCalibracaoAtivo (não ambos)
-        if (!viewModel.ModoMoverMapa && !viewModel.ModoCalibracaoAtivo) return;
-
-        // ⭐ Iniciar sessão de drag (previne renderizações intermédias)
-        viewModel.BeginDrag();
-
-        // ✅ NOVO: Cursor de movimento durante drag
-        if (MapaOverlayCanvas != null)
-        {
-            MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.SizeAll;
-        }
-
-        _isDraggingMapa = true;
-        _ultimaPosicaoMapa = GetMapaPositionRelativeToHandlers(e);
-        var modo = viewModel.ModoMoverMapa ? "MoverMapa" : "Calibracao";
-
-        var metrics = BuildCentroMetrics(viewModel);
-        metrics["mouseX"] = _ultimaPosicaoMapa.X;
-        metrics["mouseY"] = _ultimaPosicaoMapa.Y;
-
-        TrackDragEvent(
-            DragDebugEventType.DragStart,
-            "MouseDown mapa overlay",
-            metrics,
-            BuildContext(viewModel, modo));
-
-        MapaOverlayCanvas?.CaptureMouse();
-        e.Handled = true;
-    }
-
-    /// <summary>
-    /// Arrasta mapa overlay (translada handlers)
-    /// </summary>
-    private void MapaOverlayCanvas_MouseMove(object sender, MouseEventArgs e)
-    {
-        if (!_isDraggingMapa) return;
-        if (HandlersCanvas == null) return;
-        if (DataContext is not IrisdiagnosticoViewModel viewModel) return;
-
-        var current = GetMapaPositionRelativeToHandlers(e);
-
-        double deltaX = current.X - _ultimaPosicaoMapa.X;
-        double deltaY = current.Y - _ultimaPosicaoMapa.Y;
-
-        // 🔄 ROTAÇÃO -90°: Compensar transformação do canvas para manter movimento natural
-        // Canvas rotado -90° (anti-horário) → aplicar rotação inversa (+90°) aos deltas do rato
-        // Fórmula +90°: x' = -y, y' = x
-        double deltaXRotacionado = -deltaY;
-        double deltaYRotacionado = deltaX;
-
-        double scaleY = 1.0;
-        if (MapaOverlayCanvas?.RenderTransform is Transform renderTransform)
-        {
-            var matrix = renderTransform.Value;
-            scaleY = matrix.M22; // componente normalmente associada ao ScaleY
-        }
-
-        // Determinar tipo de calibração ativa
-        var tipo = viewModel.ModoMoverMapa
-            ? "Ambos"
-            : viewModel.TipoCalibracaoAmbos
-                ? "Ambos"
-                : viewModel.TipoCalibracaoIris ? "Iris" : "Pupila";
-
-        var metricsPre = BuildCentroMetrics(viewModel);
-        metricsPre["mouseX"] = current.X;
-        metricsPre["mouseY"] = current.Y;
-        metricsPre["deltaX"] = deltaX;
-        metricsPre["deltaY"] = deltaY;
-        metricsPre["deltaXRotacionado"] = deltaXRotacionado;
-        metricsPre["deltaYRotacionado"] = deltaYRotacionado;
-        metricsPre["scaleY"] = scaleY;
-
-        TrackDragEvent(
-            DragDebugEventType.DragMovePreTransform,
-            "MouseMove (pré-translação)",
-            metricsPre,
-            BuildContext(viewModel, tipo));
-
-        // Transladar calibração com deltas compensados pela rotação
-        viewModel.TransladarCalibracao(tipo, deltaXRotacionado, deltaYRotacionado);
-
-        var metricsPost = BuildCentroMetrics(viewModel);
-        metricsPost["mouseX"] = current.X;
-        metricsPost["mouseY"] = current.Y;
-        metricsPost["deltaX"] = deltaX;
-        metricsPost["deltaY"] = deltaY;
-        metricsPost["deltaXRotacionado"] = deltaXRotacionado;
-        metricsPost["deltaYRotacionado"] = deltaYRotacionado;
-
-        TrackDragEvent(
-            DragDebugEventType.DragMovePostTransform,
-            "MouseMove (pós-translação)",
-            metricsPost,
-            BuildContext(viewModel, tipo));
-
-        // ✅ CORRIGIDO: Recalcular sempre para movimento fluido
-        // O throttle causava "solavancos" no movimento visual
-        if (viewModel.ModoMoverMapa)
-        {
-            viewModel.RecalcularPoligonosComDeformacao(throttle: false);
-        }
-
-        _ultimaPosicaoMapa = current;
-        e.Handled = true;
-    }
-
-    /// <summary>
-    /// Finaliza arrasto do mapa
-    /// </summary>
-    private void MapaOverlayCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        if (!_isDraggingMapa) return;
-
-        if (DataContext is IrisdiagnosticoViewModel viewModel)
-        {
-            TrackDragEvent(
-                DragDebugEventType.DragEnd,
-                "MouseUp mapa overlay",
-                BuildCentroMetrics(viewModel),
-                BuildContext(viewModel));
-
-            // ⭐ Finalizar sessão de drag (força renderização final)
-            viewModel.EndDrag();
-        }
-
-        _isDraggingMapa = false;
-
-        // ✅ NOVO: Restaurar cursor normal
-        if (MapaOverlayCanvas != null)
-        {
-            MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
-        }
-
-        MapaOverlayCanvas?.ReleaseMouseCapture();
-        e.Handled = true;
-    }
-
-    /// <summary>
-    /// Converte posição do mouse de MapaOverlayCanvas para HandlersCanvas
-    /// </summary>
-    private Point GetMapaPositionRelativeToHandlers(MouseEventArgs e)
-    {
-        if (MapaOverlayCanvas == null || HandlersCanvas == null)
-            return new Point(0, 0);
-
-        var canvasPoint = e.GetPosition(MapaOverlayCanvas);
-        var transform = MapaOverlayCanvas.TransformToVisual(HandlersCanvas);
-        var handlerPoint = transform.Transform(canvasPoint);
-
-        Dictionary<string, string>? context = null;
-        if (DataContext is IrisdiagnosticoViewModel viewModel)
-        {
-            context = BuildContext(viewModel);
-        }
-
-        TrackDragEvent(
-            DragDebugEventType.HandlerTranslation,
-            "TransformToVisual (Mapa → Handlers)",
-            new Dictionary<string, double>
-            {
-                ["canvasX"] = canvasPoint.X,
-                ["canvasY"] = canvasPoint.Y,
-                ["handlerX"] = handlerPoint.X,
-                ["handlerY"] = handlerPoint.Y
-            },
-            context);
-
-        return handlerPoint;
-    }
-
-    /// <summary>
-    /// Reset ao soltar mouse fora
+    /// Reset ao soltar mouse fora (deixar apenas para handlers de drag válidos)
     /// </summary>
     private void MapaOverlayCanvas_MouseLeave(object sender, MouseEventArgs e)
     {
-        if (_isDraggingMapa)
-        {
-            _isDraggingMapa = false;
-
-            // ✅ NOVO: Restaurar cursor
-            if (MapaOverlayCanvas != null)
-            {
-                MapaOverlayCanvas.Cursor = System.Windows.Input.Cursors.Arrow;
-            }
-
-            MapaOverlayCanvas?.ReleaseMouseCapture();
-        }
+        // TODO STEP 9: Método pode ser removido - Sistema Infalível não usa drag manual
+        // Mantido temporariamente para evitar erros de binding XAML
     }
 
     // === EVENT HANDLERS PARA FERRAMENTA DE DESENHO ===

@@ -13,6 +13,7 @@ using BioDesk.Domain.Entities;
 using BioDesk.Domain.Models;
 using BioDesk.Services;
 using BioDesk.Services.Debug;
+using BioDesk.Services.Iridology;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -29,6 +30,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     private readonly ILogger<IrisdiagnosticoViewModel> _logger;
     private readonly IIridologyService _iridologyService;
     private readonly IDragDebugService _dragDebugService;
+    private readonly IrisOverlayService _overlayService;
     private readonly SemaphoreSlim _carregarImagensSemaphore = new(1, 1); // ✅ CORREÇÃO CONCORRÊNCIA: 1 operação por vez
 
     [ObservableProperty]
@@ -110,6 +112,26 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     private ObservableCollection<ZonaPoligono> _poligonosZonas = new();
+
+    // === SISTEMA NOVO: OVERLAY INFALÍVEL (3-CLICK + OPENCV) ===
+
+    /// <summary>
+    /// Indica se o sistema de alinhamento está ativo (aguardando 3 cliques)
+    /// </summary>
+    [ObservableProperty]
+    private bool _isAlignmentActive = false;
+
+    /// <summary>
+    /// Texto de instrução contextual para o utilizador durante alinhamento
+    /// </summary>
+    [ObservableProperty]
+    private string _alignmentInstructionText = string.Empty;
+
+    /// <summary>
+    /// Transformação aplicada ao MapaOverlayCanvas (resultado do IrisOverlayService)
+    /// </summary>
+    [ObservableProperty]
+    private System.Windows.Media.Transform _overlayTransform = System.Windows.Media.Transform.Identity;
 
     // === FASE 5: CALIBRAÇÃO AVANÇADA ===
 
@@ -298,12 +320,14 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         IUnitOfWork unitOfWork,
         ILogger<IrisdiagnosticoViewModel> logger,
         IIridologyService iridologyService,
-        IDragDebugService dragDebugService)
+        IDragDebugService dragDebugService,
+        IrisOverlayService overlayService)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _iridologyService = iridologyService ?? throw new ArgumentNullException(nameof(iridologyService));
         _dragDebugService = dragDebugService ?? throw new ArgumentNullException(nameof(dragDebugService));
+        _overlayService = overlayService ?? throw new ArgumentNullException(nameof(overlayService));
 
         HandlersIris.CollectionChanged += OnHandlersCollectionChanged;
         HandlersPupila.CollectionChanged += OnHandlersCollectionChanged;
@@ -1028,6 +1052,146 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         }
     }
 
+    // === COMANDOS OVERLAY INFALÍVEL (3-CLICK + OPENCV) ===
+
+    /// <summary>
+    /// Inicia o processo de alinhamento do overlay (3 cliques: Centro → Direita → Topo)
+    /// </summary>
+    [RelayCommand]
+    private void StartOverlayAlignment()
+    {
+        try
+        {
+            _overlayService.StartAlignment();
+            IsAlignmentActive = true;
+            AlignmentInstructionText = "1️⃣ Clique no CENTRO da pupila";
+            _logger.LogInformation("🎯 Sistema de alinhamento iniciado");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao iniciar alinhamento overlay");
+        }
+    }
+
+    /// <summary>
+    /// Executa detecção automática OpenCV para ajustar o mapa às bordas da íris
+    /// </summary>
+    [RelayCommand]
+    private async Task AutoFitOverlay()
+    {
+        try
+        {
+            if (IrisImagemSelecionada == null)
+            {
+                _logger.LogWarning("⚠️ Auto-Fit sem imagem selecionada");
+                return;
+            }
+
+            // Carregar a imagem como BitmapSource
+            var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(IrisImagemSelecionada.CaminhoImagem, UriKind.Absolute);
+            bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze(); // Thread-safe
+
+            var success = await _overlayService.AutoFitAsync(bitmap);
+
+            if (success)
+            {
+                var transform = _overlayService.GetCurrentTransform();
+                if (transform != null)
+                {
+                    OverlayTransform = transform;
+                    AlignmentInstructionText = "✅ Auto-Fit concluído! Clique em Confirmar para salvar.";
+                    _logger.LogInformation("🤖 Auto-Fit OpenCV executado com sucesso");
+                }
+            }
+            else
+            {
+                AlignmentInstructionText = "⚠️ Auto-Fit falhou. Continue manualmente ou reinicie.";
+                _logger.LogWarning("⚠️ Auto-Fit não conseguiu detectar a íris");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao executar Auto-Fit");
+            AlignmentInstructionText = "❌ Erro no Auto-Fit. Continue manualmente.";
+        }
+    }
+
+    /// <summary>
+    /// Confirma o alinhamento atual e finaliza o processo
+    /// </summary>
+    [RelayCommand]
+    private void ConfirmAlignment()
+    {
+        try
+        {
+            IsAlignmentActive = false;
+            AlignmentInstructionText = string.Empty;
+            _logger.LogInformation("✅ Alinhamento confirmado pelo utilizador");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao confirmar alinhamento");
+        }
+    }
+
+    /// <summary>
+    /// Reinicia o processo de alinhamento (reset completo)
+    /// </summary>
+    [RelayCommand]
+    private void ResetAlignment()
+    {
+        try
+        {
+            _overlayService.ResetAlignment();
+            OverlayTransform = System.Windows.Media.Transform.Identity;
+            IsAlignmentActive = false;
+            AlignmentInstructionText = string.Empty;
+            _logger.LogInformation("↻ Alinhamento reiniciado");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao reiniciar alinhamento");
+        }
+    }
+
+    /// <summary>
+    /// Processa um clique no MapaOverlayCanvas durante o alinhamento (chamado pelo code-behind)
+    /// </summary>
+    public void ProcessOverlayClick(System.Windows.Point clickPosition)
+    {
+        if (!IsAlignmentActive) return;
+
+        try
+        {
+            var allClicksCompleted = _overlayService.ProcessClick(clickPosition);
+
+            // Atualizar texto de instrução baseado na fase atual do serviço
+            AlignmentInstructionText = _overlayService.InstructionText;
+
+            // Se os 3 cliques foram completados, obter a transformação calculada
+            if (allClicksCompleted)
+            {
+                var transform = _overlayService.GetCurrentTransform();
+                if (transform != null)
+                {
+                    OverlayTransform = transform;
+                    _logger.LogInformation("✅ 3 cliques completos - Transformação aplicada");
+                }
+            }
+
+            _logger.LogDebug("🖱️ Clique processado - Estado: {Instruction}", AlignmentInstructionText);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao processar clique no overlay");
+            AlignmentInstructionText = "❌ Erro ao processar clique. Reinicie o alinhamento.";
+        }
+    }
+
     partial void OnDebugArrastoAtivoChanged(bool value)
     {
         if (value)
@@ -1681,70 +1845,6 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     /// <param name="tipo">"Pupila", "Iris" ou "Ambos"</param>
     /// <param name="deltaX">Deslocamento em X</param>
     /// <param name="deltaY">Deslocamento em Y</param>
-    /// <summary>
-    /// Inicia sessão de drag - previne renderizações intermédias
-    /// ✅ NOVO: Em modo "Mover Mapa", mantém polígonos visíveis para feedback visual em tempo real
-    /// </summary>
-    public void BeginDrag()
-    {
-        _isDragging = true;
-        _suspendHandlerUpdates = true;  // Layer 2: Suspender PropertyChanged de handlers
-
-        // ✅ NOVO: Só oculta polígonos em modo calibração (handlers), não em modo "Mover Mapa"
-        if (ModoCalibracaoAtivo && !ModoMoverMapa)
-        {
-            MostrarPoligonosDuranteArrasto = false;  // ⭐ Layer 3: OCULTAR polígonos durante arrasto (apenas calibração)
-#if DEBUG
-            _logger.LogDebug("🖱️ [DRAG] INÍCIO - Modo Calibração (polígonos ocultos)");
-#endif
-        }
-        else if (ModoMoverMapa)
-        {
-            // ✅ Em modo "Mover Mapa", mantém polígonos VISÍVEIS (MostrarPoligonosDuranteArrasto fica true)
-#if DEBUG
-            _logger.LogDebug("🖱️ [DRAG] INÍCIO - Modo Mover Mapa (polígonos VISÍVEIS)");
-#endif
-        }
-    }
-
-    /// <summary>
-    /// Finaliza sessão de drag - força renderização final com valores atualizados
-    /// </summary>
-    public void EndDrag()
-    {
-        _isDragging = false;
-        _suspendHandlerUpdates = false;  // Layer 2: Reativar PropertyChanged de handlers
-
-#if DEBUG
-        _logger.LogDebug("🖱️ [DRAG] FIM - Renderizando posição final...");
-#endif
-
-        // Força renderização ANTES de reativar visibilidade (evita frames intermédios)
-        if (MapaAtual != null && MostrarMapaIridologico)
-        {
-            if (ModoCalibracaoAtivo && !ModoMoverMapa)
-            {
-#if DEBUG
-                _logger.LogDebug("🖱️ [DRAG] → Renderizando COM deformação");
-#endif
-                RenderizarPoligonosComDeformacao();
-            }
-            else
-            {
-#if DEBUG
-                _logger.LogDebug("🖱️ [DRAG] → Renderizando SEM deformação");
-#endif
-                RenderizarPoligonos();
-            }
-        }
-
-        // ⭐ Layer 3: REATIVAR visibilidade APÓS renderização completa
-        MostrarPoligonosDuranteArrasto = true;
-#if DEBUG
-        _logger.LogDebug("🖱️ [DRAG] ✅ Layer 3 reativada - polígonos visíveis");
-#endif
-    }
-
     public void TransladarCalibracao(string? tipo, double deltaX, double deltaY)
     {
         if (Math.Abs(deltaX) < 0.001 && Math.Abs(deltaY) < 0.001)
@@ -1824,68 +1924,6 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             $"Pós-translação ({modo})",
             ConstruirMetricasCentros(),
             contextoPos);
-    }
-
-    private void AjustarMapaZoom(double novoValor)
-    {
-        var clamped = Math.Clamp(novoValor, MAPA_ZOOM_MIN, MAPA_ZOOM_MAX);
-
-        if (Math.Abs(clamped - MapaZoom) < 0.0001)
-        {
-            return;
-        }
-
-        double multiplicador = clamped / MapaZoom;
-        AplicarEscalaMapa(multiplicador);
-        MapaZoom = clamped;
-    }
-
-    private void AplicarEscalaMapa(double multiplicador)
-    {
-        if (Math.Abs(multiplicador - 1.0) < 0.0001)
-        {
-            return;
-        }
-
-        _suspendHandlerUpdates = true;
-        try
-        {
-            if (HandlersPupila.Count > 0)
-            {
-                var centroX = CentroPupilaX;
-                var centroY = CentroPupilaY;
-
-                foreach (var handler in HandlersPupila)
-                {
-                    double offsetX = (handler.X + 11) - centroX;
-                    double offsetY = (handler.Y + 11) - centroY;
-
-                    handler.X = centroX + offsetX * multiplicador - 11;
-                    handler.Y = centroY + offsetY * multiplicador - 11;
-                }
-            }
-
-            if (HandlersIris.Count > 0)
-            {
-                var centroX = CentroIrisX;
-                var centroY = CentroIrisY;
-
-                foreach (var handler in HandlersIris)
-                {
-                    double offsetX = (handler.X + 11) - centroX;
-                    double offsetY = (handler.Y + 11) - centroY;
-
-                    handler.X = centroX + offsetX * multiplicador - 11;
-                    handler.Y = centroY + offsetY * multiplicador - 11;
-                }
-            }
-        }
-        finally
-        {
-            _suspendHandlerUpdates = false;
-        }
-
-        AtualizarTransformacoesGlobais();
     }
 
     /// <summary>

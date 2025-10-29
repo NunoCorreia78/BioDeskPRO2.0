@@ -74,7 +74,7 @@ public partial class ProgramasView : UserControl
         }
     }
 
-    private async void TerapiaControlos_IniciarClick(object sender, RoutedEventArgs e)
+    private void TerapiaControlos_IniciarClick(object sender, RoutedEventArgs e)
     {
         // Validar seleção
         if (ProgramasDataGrid.SelectedItems.Count == 0)

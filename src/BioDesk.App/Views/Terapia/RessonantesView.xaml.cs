@@ -62,7 +62,7 @@ public partial class RessonantesView : UserControl
         }
     }
 
-    private async void TerapiaControlos_IniciarClick(object sender, RoutedEventArgs e)
+    private void TerapiaControlos_IniciarClick(object sender, RoutedEventArgs e)
     {
         System.Diagnostics.Debug.WriteLine("🔵 RessonantesView: TerapiaControlos_IniciarClick DISPARADO");
 

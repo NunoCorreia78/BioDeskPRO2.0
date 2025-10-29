@@ -119,6 +119,7 @@ public class IridologyService : IIridologyService
 
     /// <summary>
     /// Converte coordenada polar (ângulo, raio) para cartesiana (X, Y)
+    /// ⚠️ IMPORTANTE: Adiciona -90° ao ângulo para compensar rotação do canvas no XAML
     /// </summary>
     public Point ConverterPolarParaCartesiano(PolarPoint polarPoint, CalibracaoReferencia calibracao)
     {
@@ -129,8 +130,10 @@ public class IridologyService : IIridologyService
         // Raio em pixels (raio normalizado 0-1 × raio da íris)
         var raioPixels = polarPoint.Raio * calibracao.RaioIris;
 
-        // Converter ângulo de graus para radianos
-        var anguloRad = polarPoint.Angulo * Math.PI / 180.0;
+        // 🔧 CORREÇÃO: Compensar rotação -90° do canvas adicionando 90° ao ângulo
+        // Converter ângulo de graus para radianos (com compensação de rotação)
+        var anguloCompensado = polarPoint.Angulo + 90.0; // Compensar rotação do canvas
+        var anguloRad = anguloCompensado * Math.PI / 180.0;
 
         // Coordenadas cartesianas
         var x = centroX + raioPixels * Math.Cos(anguloRad);
@@ -246,7 +249,8 @@ public class IridologyService : IIridologyService
         }
 
         // 3. Testar cada zona (ray-casting)
-        foreach (var zona in mapa.Zonas)
+        // 🔧 FIX: Usar ZonasAtivas para compatibilidade v3.x e v4.0
+        foreach (var zona in mapa.ZonasAtivas)
         {
             foreach (var parte in zona.Partes)
             {

@@ -4,8 +4,9 @@ Exception Type: NullReferenceException
 Message: Object reference not set to an instance of an object.
 
 Stack Trace:
-   at BioDesk.ViewModels.UserControls.Terapia.BiofeedbackViewModel.IniciarSessaoAsync(TerapiaParametros parametros) in C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.ViewModels\UserControls\Terapia\BiofeedbackViewModel.cs:line 117
-   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand.AwaitAndThrowIfFailed(Task executionTask)
+   at BioDesk.Services.IridologyService.DetectarZonaClique(Double clickX, Double clickY, IridologyMap mapa) in C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.Services\IridologyService.cs:line 252
+   at BioDesk.ViewModels.Abas.IrisdiagnosticoViewModel.DetectarZonaNoClique(Double x, Double y) in C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.ViewModels\Abas\IrisdiagnosticoViewModel.cs:line 1472
+   at BioDesk.App.Views.Abas.IrisdiagnosticoUserControl.MarkingsCanvas_MouseLeftButtonDown(Object sender, MouseButtonEventArgs e) in C:\Users\nfjpc\OneDrive\Documentos\BioDeskPro2\src\BioDesk.App\Views\Abas\IrisdiagnosticoUserControl.xaml.cs:line 106
    at System.Threading.Tasks.Task.<>c.<ThrowAsync>b__128_0(Object state)
    at System.Windows.Threading.ExceptionWrapper.InternalRealCall(Delegate callback, Object args, Int32 numArgs)
    at System.Windows.Threading.ExceptionWrapper.TryCatchWhen(Object source, Delegate callback, Object args, Int32 numArgs, Delegate catchHandler)
@@ -16,5 +17,5 @@ None
 Inner Stack:
 None
 
-Source: BioDesk.ViewModels
-Target Site: MoveNext
+Source: BioDesk.Services
+Target Site: DetectarZonaClique

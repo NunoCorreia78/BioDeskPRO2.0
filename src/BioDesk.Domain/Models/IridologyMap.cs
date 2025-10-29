@@ -5,14 +5,110 @@ namespace BioDesk.Domain.Models;
 
 /// <summary>
 /// Modelo completo do mapa iridológico carregado do JSON
+/// ✨ SUPORTE v4.0: Compatível com mapas bi-dimensionais (corporal + comportamental)
 /// </summary>
 public class IridologyMap
 {
     [JsonPropertyName("metadata")]
     public IridologyMetadata Metadata { get; set; } = new();
 
+    /// <summary>
+    /// Zonas diretas (compatibilidade v3.x e anteriores)
+    /// </summary>
+    [JsonPropertyName("zonas")]
+    public List<IridologyZone>? Zonas { get; set; }
+
+    /// <summary>
+    /// Mapa corporal v4.0 (Jensen/Deck)
+    /// </summary>
+    [JsonPropertyName("mapa_corporal")]
+    public MapaCorporal? MapaCorporal { get; set; }
+
+    /// <summary>
+    /// Mapa comportamental v4.0 (Rayid Model)
+    /// </summary>
+    [JsonPropertyName("mapa_comportamental")]
+    public MapaComportamental? MapaComportamental { get; set; }
+
+    /// <summary>
+    /// Tipos Rayid v4.0
+    /// </summary>
+    [JsonPropertyName("tipos_rayid")]
+    public Dictionary<string, RayidType>? TiposRayid { get; set; }
+
+    /// <summary>
+    /// 🔧 HELPER: Retorna zonas do mapa ativo (corporal por padrão)
+    /// Garante compatibilidade retroativa
+    /// </summary>
+    [JsonIgnore]
+    public List<IridologyZone> ZonasAtivas => 
+        MapaCorporal?.Zonas ?? Zonas ?? new List<IridologyZone>();
+}
+
+/// <summary>
+/// Mapa corporal v4.0 (Jensen/Deck)
+/// </summary>
+public class MapaCorporal
+{
     [JsonPropertyName("zonas")]
     public List<IridologyZone> Zonas { get; set; } = new();
+}
+
+/// <summary>
+/// Mapa comportamental v4.0 (Rayid Model)
+/// </summary>
+public class MapaComportamental
+{
+    [JsonPropertyName("zonas")]
+    public List<ZonaComportamental> Zonas { get; set; } = new();
+}
+
+/// <summary>
+/// Zona comportamental (análise psicoemocional)
+/// </summary>
+public class ZonaComportamental
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("nome")]
+    public string Nome { get; set; } = string.Empty;
+
+    [JsonPropertyName("aspecto")]
+    public string Aspecto { get; set; } = string.Empty;
+
+    [JsonPropertyName("interpretacao_rayid")]
+    public string InterpretacaoRayid { get; set; } = string.Empty;
+
+    [JsonPropertyName("desequilibrio")]
+    public string Desequilibrio { get; set; } = string.Empty;
+
+    [JsonPropertyName("equilibrio")]
+    public string Equilibrio { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Tipo Rayid v4.0
+/// </summary>
+public class RayidType
+{
+    [JsonPropertyName("nome")]
+    public string Nome { get; set; } = string.Empty;
+
+    [JsonPropertyName("tipo_energia")]
+    public string TipoEnergia { get; set; } = string.Empty;
+
+    [JsonPropertyName("arquetipo")]
+    public string Arquetipo { get; set; } = string.Empty;
+
+    [JsonPropertyName("palavras_chave")]
+    public List<string> PalavrasChave { get; set; } = new();
+
+    [JsonPropertyName("fortalezas")]
+    public List<string> Fortalezas { get; set; } = new();
+
+    [JsonPropertyName("desafios")]
+    public List<string> Desafios { get; set; } = new();
 }
 
 /// <summary>
