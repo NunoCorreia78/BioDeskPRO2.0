@@ -1211,6 +1211,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             MapaAtual.Zonas.Count);
     }
 
+    // 🔴 EXPERIMENTAL: EnsureHandlersInitialized (usa HandlersIris/HandlersPupila)
+    /*
     private void EnsureHandlersInitialized()
     {
         if (HandlersIris.Count > 0 && HandlersPupila.Count > 0)
@@ -1225,6 +1227,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
         InicializarHandlers();
     }
+    */
 
     /// <summary>
     /// Detecta zona ao clicar (chamado pelo UserControl)
@@ -1243,6 +1246,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
     // === MÉTODOS DE CALIBRAÇÃO ===
 
+    // 🔴 EXPERIMENTAL: InicializarHandlers (usa propriedades inexistentes)
+    /*
     /// <summary>
     /// Inicializa handlers da pupila e íris usando parâmetros configuráveis
     /// </summary>
@@ -1315,7 +1320,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             _atualizandoContagemHandlers = false;
         }
     }
+    */
 
+    // 🔴 EXPERIMENTAL: Código do branch remoto (incompleto - sem [ObservableProperty])
+    /*
     partial void OnQuantidadeHandlersIrisChanged(int value)
     {
         if (_atualizandoContagemHandlers)
@@ -1342,7 +1350,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
         InicializarHandlers(clamped, null);
     }
+    */
 
+    // 🔴 EXPERIMENTAL: Código do branch remoto (incompleto - sem [ObservableProperty])
+    /*
     partial void OnQuantidadeHandlersPupilaChanged(int value)
     {
         if (_atualizandoContagemHandlers)
@@ -1369,7 +1380,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
         InicializarHandlers(null, clamped);
     }
+    */
 
+    // 🔴 EXPERIMENTAL: Métodos usando CalibrationHandler (tipo inexistente)
+    /*
     /// <summary>
     /// Cria handlers distribuídos de forma uniforme em torno do centro indicado
     /// </summary>
@@ -1405,6 +1419,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             });
         }
     }
+    */
 
     private static double NormalizeAngleDegrees(double angulo)
     {
@@ -1420,6 +1435,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         return angulo;
     }
 
+    // 🔴 EXPERIMENTAL: LimparHandlers (usa CalibrationHandler)
+    /*
     private void LimparHandlers(ObservableCollection<CalibrationHandler> handlers)
     {
         foreach (var handler in handlers)
@@ -1429,7 +1446,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
         handlers.Clear();
     }
+    */
 
+    // 🔴 EXPERIMENTAL: OnHandlersCollectionChanged (usa CalibrationHandler)
+    /*
     private void OnHandlersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (_suspendHandlerUpdates)
@@ -1487,7 +1507,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             AtualizarTransformacoesGlobais();
         }
     }
+    */
 
+    // 🔴 EXPERIMENTAL: AtualizarTransformacoesGlobais (chama métodos comentados)
+    /*
     private void AtualizarTransformacoesGlobais()
     {
         _logger.LogDebug($"🔄 [TRANSFORM GLOBAL] Iniciando atualização...");
@@ -1505,28 +1528,17 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 #endif
                 // Renderização será feita no EndDrag()
             }
-            // ⭐ REGRA 2: Modo "Mover Mapa" SEMPRE usa renderização simples (previne esticamento)
-            // Modo overlay sempre usa polígonos simples (sem deformação manual)
+            else
             {
+                // ⭐ REGRA 2: Modo "Mover Mapa" SEMPRE usa renderização simples (previne esticamento)
 #if DEBUG
-                _logger.LogDebug("🎨 Renderizando polígonos (modo overlay)");
-#endif
-                RenderizarPoligonos();
-            }
                 _logger.LogDebug("🎨 Renderizando polígonos SEM deformação (mover mapa ou modo normal)");
 #endif
                 RenderizarPoligonos();
             }
         }
-
-        _logger.LogDebug($"✅ [TRANSFORM GLOBAL] Concluída");
-
-        RecordDragEvent(
-            DragDebugEventType.ViewModelUpdate,
-            "AtualizarTransformacoesGlobais concluída",
-            ConstruirMetricasCentros(),
-            ConstruirContextoPadrao());
     }
+    */
 
     private void RegistrarCalibracao(string mensagem, params object[] args)
     {
@@ -1546,6 +1558,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         }
     }
 
+    // 🔴 EXPERIMENTAL: AtualizarTransformacaoIris (usa HandlersIris e propriedades inexistentes)
+    /*
     private void AtualizarTransformacaoIris()
     {
         if (HandlersIris.Count == 0)
@@ -1635,7 +1649,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             EscalaPupilaX,
             EscalaPupilaY);
     }
+    */
 
+    // 🔴 EXPERIMENTAL: ResetCalibracao (usa propriedades inexistentes)
+    /*
     /// <summary>
     /// Reset de calibração: restaura posições padrão
     /// </summary>
@@ -1673,7 +1690,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             ConstruirMetricasCentros(),
             ConstruirContextoPadrao());
     }
+    */
 
+    // 🔴 EXPERIMENTAL: TransladarCalibracao (usa HandlersIris/HandlersPupila)
+    /*
     /// <summary>
     /// Translada os handlers (pupila, íris ou ambos) preservando offsets relativos
     /// </summary>
@@ -1760,7 +1780,10 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             ConstruirMetricasCentros(),
             contextoPos);
     }
+    */
 
+    // 🔴 EXPERIMENTAL: RecalcularPoligonosComDeformacao (usa propriedades inexistentes)
+    /*
     /// <summary>
     /// Recalcula polígonos com deformação baseada em handlers
     /// (Implementação simplificada - pode ser expandida)
@@ -1908,6 +1931,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
         return result;
     }
+    */
 
     /// <summary>
     /// ✅ RAIO NOMINAL FIXO (baseline imutável para cálculo de deformação)
@@ -1951,6 +1975,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         return fatorNormalizado * RAIO_NOMINAL_PUPILA;
     }
 
+    // 🔴 EXPERIMENTAL: InterpolateRadiusFromHandlers (usa CalibrationHandler)
+    /*
     /// <summary>
     /// Interpola raio baseado nas posições dos handlers
     /// DEFORMAÇÃO RADIAL: Cada handler afeta zona de ±45° (90° total) com peso gaussiano
@@ -2033,6 +2059,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         // Aplicar deformação ao raio original
         return raioOriginal * fatorDeformacaoFinal;
     }
+    */
 
     /// <summary>
     /// Obtém raio nominal (círculo perfeito) para o tipo de handler
@@ -2055,6 +2082,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     /// <summary>
     /// Observador: quando modo calibração ativa, inicializa handlers
     /// </summary>
+    // 🔴 EXPERIMENTAL: Código do branch remoto (incompleto - sem [ObservableProperty])
+    /*
     partial void OnModoMoverMapaChanged(bool value)
     {
         if (value)
@@ -2062,6 +2091,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             EnsureHandlersInitialized();
         }
     }
+    */
 
     // ✅ DISPOSE PATTERN: Liberar SemaphoreSlim (CA1001 compliant)
     private bool _disposed = false;
