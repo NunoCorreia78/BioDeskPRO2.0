@@ -1079,11 +1079,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     {
         return new Dictionary<string, string>
         {
-            ["modoCalibracaoAtivo"] = ModoCalibracaoAtivo.ToString(),
-            ["tipoCalibracaoPupila"] = TipoCalibracaoPupila.ToString(),
-            ["tipoCalibracaoIris"] = TipoCalibracaoIris.ToString(),
-            ["tipoCalibracaoAmbos"] = TipoCalibracaoAmbos.ToString(),
-            ["modoMoverMapa"] = ModoMoverMapa.ToString(),
+            ["isAlignmentActive"] = IsAlignmentActive.ToString(),
             ["mostrarMapaIridologico"] = MostrarMapaIridologico.ToString()
         };
     }
@@ -1121,7 +1117,6 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             // Limpar polígonos ao ocultar
             PoligonosZonas.Clear();
             ZonaDetectada = null;
-            ModoMoverMapa = false;
         }
     }
 
@@ -1502,17 +1497,13 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
                 // Renderização será feita no EndDrag()
             }
             // ⭐ REGRA 2: Modo "Mover Mapa" SEMPRE usa renderização simples (previne esticamento)
-            // Deformação só deve ser usada quando editando handlers MANUALMENTE em modo calibração
-            else if (ModoCalibracaoAtivo && !ModoMoverMapa)
+            // Modo overlay sempre usa polígonos simples (sem deformação manual)
             {
 #if DEBUG
-                _logger.LogDebug("🎨 Renderizando polígonos COM deformação (calibração manual)");
+                _logger.LogDebug("🎨 Renderizando polígonos (modo overlay)");
 #endif
-                RenderizarPoligonosComDeformacao();
+                RenderizarPoligonos();
             }
-            else
-            {
-#if DEBUG
                 _logger.LogDebug("🎨 Renderizando polígonos SEM deformação (mover mapa ou modo normal)");
 #endif
                 RenderizarPoligonos();
@@ -1657,12 +1648,7 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         EscalaIrisY = 1.0;
         EscalaPupilaX = 1.0;
         EscalaPupilaY = 1.0;
-        MapaZoom = 1.0;
-        ModoMoverMapa = false;
-
         OpacidadeMapa = 50.0;
-
-        InicializarHandlers();
 
         // Recalcular polígonos
         if (MostrarMapaIridologico && MapaAtual != null)
@@ -1797,16 +1783,8 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             _lastRenderTime = DateTime.Now;
         }
 
-        // 🔧 DEFORMAÇÃO COM HANDLERS: Usar posições reais dos handlers para calcular raios deformados
-        if (ModoCalibracaoAtivo && (HandlersPupila.Count > 0 || HandlersIris.Count > 0))
-        {
-            RenderizarPoligonosComDeformacao();
-        }
-        else
-        {
-            // Círculos perfeitos (sem calibração)
-            RenderizarPoligonos();
-        }
+        // Modo overlay sempre usa polígonos simples (sem handlers)
+        RenderizarPoligonos();
 
         _logger.LogInformation("🔄 Polígonos recalculados com nova calibração");
     }
@@ -2073,19 +2051,6 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         if (value)
         {
             EnsureHandlersInitialized();
-        }
-    }
-
-    partial void OnModoCalibracaoAtivoChanged(bool value)
-    {
-        if (value)
-        {
-            InicializarHandlers();
-            _logger.LogInformation("🔧 Modo calibração ATIVADO");
-        }
-        else
-        {
-            _logger.LogInformation("🔧 Modo calibração DESATIVADO");
         }
     }
 
