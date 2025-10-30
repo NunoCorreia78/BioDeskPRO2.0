@@ -288,8 +288,43 @@
             Padding="0"
             Margin="8,0">
       <Grid>
-        <!-- Canvas Central com Imagem + Mapa Sobreposto (sem título para ganhar espaço) -->
-        <Viewbox Stretch="Uniform">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <!-- Painel de Instruções -->
+          <RowDefinition Height="*"/>
+          <!-- Canvas/Viewbox -->
+        </Grid.RowDefinitions>
+
+        <!-- 🎯 NOVO: Painel de Instruções de Calibração -->
+        <Border Grid.Row="0"
+                Background="#FFE4CC"
+                BorderBrush="#FF9800"
+                BorderThickness="0,0,0,2"
+                Padding="16,12"
+                CornerRadius="8,8,0,0">
+          <Border.Style>
+            <Style TargetType="Border">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IsAlignmentActive}" Value="True">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="🎯" FontSize="24" Margin="0,0,12,0" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding AlignmentInstructionText}"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Foreground="#BF5E00"
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Center"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Canvas Central com Imagem + Mapa Sobreposto -->
+        <Viewbox Grid.Row="1" Stretch="Uniform">
           <Canvas Width="1400"
               Height="1400"
               Background="White">
@@ -590,6 +625,85 @@
               </ItemsControl.ItemTemplate>
             </ItemsControl>
 
+            <!-- 🎯 NOVO: LAYER 6: Canvas de Calibração 5-Pontos (ZIndex mais alto) -->
+            <Canvas x:Name="CalibrationCanvas"
+                    Width="1400"
+                    Height="1400"
+                    Panel.ZIndex="600"
+                    Background="Transparent"
+                    MouseLeftButtonDown="CalibrationCanvas_MouseLeftButtonDown"
+                    IsHitTestVisible="True">
+              <Canvas.Style>
+                <Style TargetType="Canvas">
+                  <!-- Visível apenas quando alinhamento está ativo -->
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                  <Setter Property="Cursor" Value="Cross"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsAlignmentActive}" Value="True">
+                      <Setter Property="Visibility" Value="Visible"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Canvas.Style>
+            </Canvas>
+
+            <!-- 🎯 LAYER 6.5: Marcadores Visuais de Calibração (5 pontos) -->
+            <ItemsControl ItemsSource="{Binding CalibrationMarkers}"
+                          Panel.ZIndex="650"
+                          IsHitTestVisible="False">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <Canvas Width="1400" Height="1400"/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemContainerStyle>
+                <Style TargetType="ContentPresenter">
+                  <Setter Property="Canvas.Left">
+                    <Setter.Value>
+                      <Binding Path="X">
+                        <Binding.Converter>
+                          <converters:CenterOffsetConverter/>
+                        </Binding.Converter>
+                        <Binding.ConverterParameter>-16</Binding.ConverterParameter>
+                      </Binding>
+                    </Setter.Value>
+                  </Setter>
+                  <Setter Property="Canvas.Top">
+                    <Setter.Value>
+                      <Binding Path="Y">
+                        <Binding.Converter>
+                          <converters:CenterOffsetConverter/>
+                        </Binding.Converter>
+                        <Binding.ConverterParameter>-16</Binding.ConverterParameter>
+                      </Binding>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </ItemsControl.ItemContainerStyle>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid>
+                    <!-- Círculo numerado colorido -->
+                    <Ellipse Width="32" Height="32"
+                             Fill="{Binding Color}"
+                             Stroke="White"
+                             StrokeThickness="3"
+                             Opacity="0.85">
+                      <Ellipse.Effect>
+                        <DropShadowEffect Color="{Binding Color}" BlurRadius="12" Opacity="0.5"/>
+                      </Ellipse.Effect>
+                    </Ellipse>
+                    <TextBlock Text="{Binding Number}"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontSize="16"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
             <!-- LAYER 5: Marcas de Íris (Círculos Coloridos com ContextMenu) -->
             <ItemsControl ItemsSource="{Binding MarcasImagem}"
                           Panel.ZIndex="4">
@@ -747,15 +861,18 @@
             Background="#F7F9F6"
             CornerRadius="8"
             Padding="16">
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>   <!-- Título -->
-          <RowDefinition Height="Auto"/>   <!-- Sistema 8 Pontos -->
-          <RowDefinition Height="Auto"/>   <!-- Ferramenta Desenho -->
-          <RowDefinition Height="*"/>      <!-- Conteúdo restante -->
-        </Grid.RowDefinitions>
+      <!-- ✅ NOVO: ScrollViewer para permitir scroll vertical -->
+      <ScrollViewer VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- Título -->
+            <RowDefinition Height="Auto"/>   <!-- Sistema 8 Pontos -->
+            <RowDefinition Height="Auto"/>   <!-- Ferramenta Desenho -->
+            <RowDefinition Height="Auto"/>   <!-- Conteúdo restante (mudado de * para Auto) -->
+          </Grid.RowDefinitions>
 
-        <!-- Título -->
+          <!-- Título -->
         <TextBlock Grid.Row="0"
                    Text="🔍 Preview da Íris"
                    FontSize="16"
@@ -1146,14 +1263,14 @@
               </ToggleButton.Style>
             </ToggleButton>
 
-            <!-- Botão Iniciar Alinhamento -->
-            <Button Content="▶️ Iniciar Alinhamento"
-                    Command="{Binding StartOverlayAlignmentCommand}"
+            <!-- 🎯 Botão Iniciar Calibração (5-Pontos) -->
+            <Button Content="🎯 Iniciar Calibração"
+                    Command="{Binding StartAlignmentCommand}"
                     Height="40"
                     Margin="0,0,0,8">
               <Button.ToolTip>
-                <TextBlock Text="Clique para iniciar o processo de alinhamento do mapa (3 cliques simples)"
-                           TextWrapping="Wrap" MaxWidth="200"/>
+                <TextBlock Text="Inicia o processo de calibração manual de 5 pontos (centro/bordas da pupila + bordas da íris)"
+                           TextWrapping="Wrap" MaxWidth="250"/>
               </Button.ToolTip>
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource BotaoPrincipalStyle}">
@@ -1167,56 +1284,15 @@
               </Button.Style>
             </Button>
 
-            <!-- Botão Auto-Fit OpenCV -->
-            <Button Content="🤖 Auto-Fit (Detecção Automática)"
-                    Command="{Binding AutoFitOverlayCommand}"
-                    Height="40"
-                    Margin="0,0,0,8">
-              <Button.ToolTip>
-                <TextBlock Text="Usa OpenCV para detectar automaticamente as bordas da íris e ajustar o mapa"
-                           TextWrapping="Wrap" MaxWidth="200"/>
-              </Button.ToolTip>
-              <Button.Style>
-                <Style TargetType="Button" BasedOn="{StaticResource BotaoPrincipalStyle}">
-                  <Setter Property="Visibility" Value="Collapsed"/>
-                  <Style.Triggers>
-                    <!-- Só aparece DEPOIS dos 3 cliques -->
-                    <DataTrigger Binding="{Binding HasThreeClicks}" Value="True">
-                      <Setter Property="Visibility" Value="Visible"/>
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </Button.Style>
-            </Button>
-
-            <!-- Botão Confirmar Alinhamento -->
-            <Button Content="✓ Confirmar"
-                    Command="{Binding ConfirmAlignmentCommand}"
+            <!-- 🎯 Botão Cancelar (visível durante calibração) -->
+            <Button Content="❌ Cancelar"
+                    Command="{Binding CancelAlignmentCommand}"
                     Height="36"
                     Margin="0,0,0,8">
-              <Button.Style>
-                <Style TargetType="Button" BasedOn="{StaticResource BotaoPrincipalStyle}">
-                  <Setter Property="Visibility" Value="Collapsed"/>
-                  <Style.Triggers>
-                    <!-- Só aparece DEPOIS dos 3 cliques -->
-                    <DataTrigger Binding="{Binding HasThreeClicks}" Value="True">
-                      <Setter Property="Visibility" Value="Visible"/>
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </Button.Style>
-            </Button>
-
-            <!-- Botão Resetar -->
-            <Button Content="↻ Reiniciar"
-                    Command="{Binding ResetAlignmentCommand}"
-                    Height="36"
-                    Margin="0,0,0,16">
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource BotaoSecundarioStyle}">
                   <Setter Property="Visibility" Value="Collapsed"/>
                   <Style.Triggers>
-                    <!-- Aparece quando alinhamento está ativo -->
                     <DataTrigger Binding="{Binding IsAlignmentActive}" Value="True">
                       <Setter Property="Visibility" Value="Visible"/>
                     </DataTrigger>
@@ -1224,6 +1300,96 @@
                 </Style>
               </Button.Style>
             </Button>
+
+            <!-- 🎯 Botão Confirmar (visível após 5 cliques) -->
+            <Button Content="✅ Confirmar Calibração"
+                    Command="{Binding ConfirmAlignmentCommand}"
+                    Height="40"
+                    Margin="0,0,0,8">
+              <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource BotaoPrincipalStyle}">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                  <Style.Triggers>
+                    <!-- Aparece quando fase é ManualAdjust ou Completed -->
+                    <DataTrigger Binding="{Binding IsManualAdjustPhase}" Value="True">
+                      <Setter Property="Visibility" Value="Visible"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
+            </Button>
+
+            <!-- 🎯 NOVO: Painel de Ajuste Fino (visível após 5 cliques) -->
+            <Border Background="White"
+                    BorderBrush="#E3E9DE"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="12"
+                    Margin="0,0,0,16">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsManualAdjustPhase}" Value="True">
+                      <Setter Property="Visibility" Value="Visible"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <StackPanel>
+                <TextBlock Text="🎚️ Ajuste Fino Avançado"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="#3F4A3D"
+                           Margin="0,0,0,12"/>
+
+                <!-- SECÇÃO: Escalas Globais -->
+                <TextBlock Text="📏 Escalas Globais" FontSize="12" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,0,0,8"/>
+                
+                <TextBlock Text="Escala Horizontal" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="0.3" Maximum="3.0" Value="{Binding OverlayService.ScaleX, Mode=TwoWay}"
+                        TickFrequency="0.1" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <TextBlock Text="Escala Vertical" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="0.3" Maximum="3.0" Value="{Binding OverlayService.ScaleY, Mode=TwoWay}"
+                        TickFrequency="0.1" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <!-- SECÇÃO: Posicionamento -->
+                <TextBlock Text="📍 Posicionamento" FontSize="12" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,8,0,8"/>
+                
+                <TextBlock Text="Posição Horizontal" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="-500" Maximum="500" Value="{Binding OverlayService.TranslateX, Mode=TwoWay}"
+                        TickFrequency="10" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <TextBlock Text="Posição Vertical" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="-500" Maximum="500" Value="{Binding OverlayService.TranslateY, Mode=TwoWay}"
+                        TickFrequency="10" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <TextBlock Text="Rotação (graus)" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="-180" Maximum="180" Value="{Binding OverlayService.Rotation, Mode=TwoWay}"
+                        TickFrequency="5" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <!-- SECÇÃO: Escalas por Quadrante (Assimetrias) -->
+                <TextBlock Text="🔧 Escalas por Quadrante (Assimetrias)" FontSize="12" FontWeight="SemiBold" Foreground="#3F4A3D" Margin="0,8,0,8"/>
+                <TextBlock Text="Para íris cortadas ou assimétricas" FontSize="10" FontStyle="Italic" Foreground="#7A8578" Margin="0,0,0,8"/>
+                
+                <TextBlock Text="Quadrante 1 (0-90° - Direita Superior)" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="0.5" Maximum="2.0" Value="{Binding OverlayService.EscalaQuadrante1, Mode=TwoWay}"
+                        TickFrequency="0.05" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <TextBlock Text="Quadrante 2 (90-180° - Esquerda Superior)" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="0.5" Maximum="2.0" Value="{Binding OverlayService.EscalaQuadrante2, Mode=TwoWay}"
+                        TickFrequency="0.05" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <TextBlock Text="Quadrante 3 (180-270° - Esquerda Inferior)" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="0.5" Maximum="2.0" Value="{Binding OverlayService.EscalaQuadrante3, Mode=TwoWay}"
+                        TickFrequency="0.05" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+
+                <TextBlock Text="Quadrante 4 (270-360° - Direita Inferior)" FontSize="11" Foreground="#5A6558" Margin="0,0,0,4"/>
+                <Slider Minimum="0.5" Maximum="2.0" Value="{Binding OverlayService.EscalaQuadrante4, Mode=TwoWay}"
+                        TickFrequency="0.05" IsSnapToTickEnabled="False" Margin="0,0,0,8"/>
+              </StackPanel>
+            </Border>
 
             <!-- Instruções Contextuais -->
             <Border Background="#FFECB3"
@@ -1256,6 +1422,7 @@
           </StackPanel>
         </Border>
       </Grid>
+      </ScrollViewer> <!-- ✅ Fechar ScrollViewer -->
     </Border>
   </Grid>
 </UserControl>

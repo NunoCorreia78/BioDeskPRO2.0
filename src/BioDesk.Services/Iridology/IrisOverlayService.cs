@@ -1,399 +1,424 @@
 using System;
-using System.Drawing;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Emgu.CV;
-using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
-using Emgu.CV.Util;
-using Microsoft.Extensions.Logging;
-using Point = System.Windows.Point;
 
-namespace BioDesk.Services.Iridology;
-
-/// <summary>
-/// Serviço "INFALÍVEL" para sobreposição do mapa iridológico sobre íris real.
-///
-/// FLUXO COMPLETO:
-/// 1. User: 3 cliques (centro, direita, topo) → Sistema cria elipse inicial
-/// 2. Sistema: Detecção automática de bordas (OpenCV Canny + Hough Ellipse)
-/// 3. User: Preview do ajuste → "Aceitar" ou "Ajustar Manualmente"
-/// 4. Opcional: Ajuste manual com 4 pontos cardinais (N, S, E, W)
-///
-/// GARANTIAS:
-/// - SEMPRE funciona (fallback manual se auto-detect falhar)
-/// - User-friendly: 3 cliques + 1 botão = solução em 5 segundos
-/// - Performance: Detecção em thread separada, não trava UI
-/// </summary>
-public class IrisOverlayService : IDisposable
+namespace BioDesk.Services.Iridology
 {
-    private readonly ILogger<IrisOverlayService>? _logger;
-    private bool _disposed;
-
-    // Estado do alinhamento (3-click phase)
-    private int _clickCount;
-    private Point _centerClick;
-    private Point _rightClick;
-    private Point _topClick;
-
-    // Transformação calculada
-    private TransformGroup? _currentTransform;
-
-    public IrisOverlayService(ILogger<IrisOverlayService>? logger = null)
+    public class IrisOverlayService : INotifyPropertyChanged
     {
-        _logger = logger;
-        ResetAlignment();
-    }
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-    /// <summary>
-    /// Fase atual do alinhamento (3-click system)
-    /// </summary>
-    public enum AlignmentPhase
-    {
-        Idle,           // Esperando iniciar
-        ClickCenter,    // 1/3: Clicar no centro
-        ClickRight,     // 2/3: Clicar na borda direita
-        ClickTop,       // 3/3: Clicar na borda superior
-        AutoFitting,    // Executando auto-detect OpenCV
-        ManualAdjust,   // Ajuste manual com pontos cardinais
-        Completed       // Alinhamento confirmado
-    }
-
-    public AlignmentPhase CurrentPhase { get; private set; } = AlignmentPhase.Idle;
-
-    /// <summary>
-    /// Mensagem de instrução contextual para o user
-    /// </summary>
-    public string InstructionText => CurrentPhase switch
-    {
-        AlignmentPhase.ClickCenter => "1/3: Clique no centro da pupila",
-        AlignmentPhase.ClickRight => "2/3: Clique na borda DIREITA da íris",
-        AlignmentPhase.ClickTop => "3/3: Clique na borda SUPERIOR da íris",
-        AlignmentPhase.AutoFitting => "⏳ Detectando bordas automaticamente...",
-        AlignmentPhase.ManualAdjust => "✓ Ajuste concluído! Aceitar ou refinar manualmente?",
-        AlignmentPhase.Completed => "✅ Alinhamento confirmado!",
-        _ => ""
-    };
-
-    /// <summary>
-    /// Inicia novo alinhamento (reseta estado)
-    /// </summary>
-    public void StartAlignment()
-    {
-        ResetAlignment();
-        CurrentPhase = AlignmentPhase.ClickCenter;
-        _logger?.LogInformation("🎯 Alinhamento iniciado - aguardando 3 cliques");
-    }
-
-    /// <summary>
-    /// Processa clique do user durante fase 3-click
-    /// </summary>
-    /// <returns>true se os 3 cliques foram completados</returns>
-    public bool ProcessClick(Point clickPosition)
-    {
-        switch (CurrentPhase)
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            case AlignmentPhase.ClickCenter:
-                _centerClick = clickPosition;
-                _clickCount = 1;
-                CurrentPhase = AlignmentPhase.ClickRight;
-                _logger?.LogDebug($"Centro definido: ({clickPosition.X:F0}, {clickPosition.Y:F0})");
-                return false;
-
-            case AlignmentPhase.ClickRight:
-                _rightClick = clickPosition;
-                _clickCount = 2;
-                CurrentPhase = AlignmentPhase.ClickTop;
-                _logger?.LogDebug($"Borda direita: ({clickPosition.X:F0}, {clickPosition.Y:F0})");
-                return false;
-
-            case AlignmentPhase.ClickTop:
-                _topClick = clickPosition;
-                _clickCount = 3;
-                _logger?.LogDebug($"Borda superior: ({clickPosition.X:F0}, {clickPosition.Y:F0})");
-
-                // Calcular transformação inicial (elipse básica)
-                CalculateInitialTransform();
-                return true; // 3 cliques completados
-
-            default:
-                return false;
-        }
-    }
-
-    /// <summary>
-    /// Calcula transformação inicial baseada nos 3 cliques (elipse)
-    /// </summary>
-    private void CalculateInitialTransform()
-    {
-        // Calcular raios da elipse
-        double radiusX = Math.Abs(_rightClick.X - _centerClick.X);
-        double radiusY = Math.Abs(_topClick.Y - _centerClick.Y);
-
-        // Tamanho original do mapa (assumir canvas 1400x1400, raio nominal ~600)
-        const double originalSize = 1400.0;
-        const double nominalRadius = 600.0;
-
-        // Calcular escalas
-        double scaleX = (radiusX * 2) / nominalRadius;
-        double scaleY = (radiusY * 2) / nominalRadius;
-
-        // Criar TransformGroup: Scale → Translate para centro
-        _currentTransform = new TransformGroup();
-
-        // 1. Escalar ao redor do centro original (700, 700 para canvas 1400x1400)
-        var scaleTransform = new ScaleTransform(scaleX, scaleY, originalSize / 2, originalSize / 2);
-        _currentTransform.Children.Add(scaleTransform);
-
-        // 2. Transladar para o centro clicado
-        double translateX = _centerClick.X - originalSize / 2;
-        double translateY = _centerClick.Y - originalSize / 2;
-        var translateTransform = new TranslateTransform(translateX, translateY);
-        _currentTransform.Children.Add(translateTransform);
-
-        _logger?.LogInformation($"Transformação inicial: Scale({scaleX:F2}, {scaleY:F2}), Translate({translateX:F0}, {translateY:F0})");
-    }
-
-    /// <summary>
-    /// Detecção automática de bordas usando OpenCV (async, CPU-intensive)
-    /// </summary>
-    /// <param name="irisImage">Imagem da íris (BitmapSource WPF)</param>
-    /// <returns>true se detecção bem-sucedida, false se falhar (fallback manual)</returns>
-    public async Task<bool> AutoFitAsync(BitmapSource irisImage)
-    {
-        if (_clickCount < 3)
-        {
-            _logger?.LogWarning("AutoFit chamado antes de completar 3 cliques");
-            return false;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        CurrentPhase = AlignmentPhase.AutoFitting;
-
-        try
+        public enum AlignmentPhase
         {
-            // Executar detecção em thread separada (não bloquear UI)
-            var result = await Task.Run(() => DetectIrisBoundary(irisImage));
+            Idle,
+            ClickCenterPupil,
+            ClickRightPupil,
+            ClickTopPupil,
+            ClickRightIris,
+            ClickTopIris,
+            Calculating,
+            ManualAdjust,
+            Completed
+        }
 
-            if (result.HasValue)
+        private AlignmentPhase _currentPhase = AlignmentPhase.Idle;
+        private Point _centroPupila;
+        private Point _bordaDireitaPupila;
+        private Point _bordaTopoPupila;
+        private Point _bordaDireitaIris;
+        private Point _bordaTopoIris;
+
+        private const double MAPA_ORIGINAL_SIZE = 800;
+
+        private double _scaleX = 1.0;
+        private double _scaleY = 1.0;
+        private double _translateX = 0.0;
+        private double _translateY = 0.0;
+        private double _rotation = 0.0;
+
+        // 🎯 DADOS POLARES CALIBRADOS AVANÇADOS (para uso no rendering)
+        private double _raioPupilaH = 0.0;  // Raio horizontal pupila
+        private double _raioPupilaV = 0.0;  // Raio vertical pupila
+        private double _raioIrisH = 0.0;    // Raio horizontal íris
+        private double _raioIrisV = 0.0;    // Raio vertical íris
+        private Point _centroPupilaCalibrado = new Point(0, 0);
+        private Point _centroIrisCalibrado = new Point(0, 0);
+        private double _rotacaoCalibrada = 0.0;
+
+        // 📐 ESCALAS POR QUADRANTE (para íris assimétricas/cortadas)
+        private double _escalaQuadrante1 = 1.0; // 0-90°
+        private double _escalaQuadrante2 = 1.0; // 90-180°
+        private double _escalaQuadrante3 = 1.0; // 180-270°
+        private double _escalaQuadrante4 = 1.0; // 270-360°
+
+        public event EventHandler<AlignmentPhase>? PhaseChanged;
+        public event EventHandler<TransformGroup>? TransformCalculated;
+        public event EventHandler<string>? StatusMessageChanged;
+
+        public AlignmentPhase CurrentPhase
+        {
+            get => _currentPhase;
+            private set
             {
-                // Aplicar transformação refinada baseada na elipse detectada
-                ApplyDetectedEllipse(result.Value);
-                CurrentPhase = AlignmentPhase.ManualAdjust;
-                _logger?.LogInformation("✓ Auto-fit bem-sucedido");
-                return true;
-            }
-            else
-            {
-                // Fallback: manter transformação inicial dos 3 cliques
-                CurrentPhase = AlignmentPhase.ManualAdjust;
-                _logger?.LogWarning("⚠️ Auto-fit falhou, usando transformação manual");
-                return false;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "Erro durante auto-fit");
-            CurrentPhase = AlignmentPhase.ManualAdjust;
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Detecção de bordas da íris usando OpenCV (Canny + FitEllipse)
-    /// </summary>
-    private RotatedRect? DetectIrisBoundary(BitmapSource bitmapSource)
-    {
-        try
-        {
-            // Converter BitmapSource → Bitmap → OpenCV Mat
-            using var bitmap = BitmapSourceToBitmap(bitmapSource);
-
-            // Converter Bitmap → Mat usando BitmapData
-            var bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                bitmap.PixelFormat);
-
-            using var image = new Image<Bgr, byte>(bitmap.Width, bitmap.Height, bitmapData.Stride, bitmapData.Scan0);
-            bitmap.UnlockBits(bitmapData);
-
-            using var mat = image.Mat;
-            using var gray = new Mat();
-            using var blurred = new Mat();
-            using var edges = new Mat();
-
-            // 1. Converter para escala de cinza
-            CvInvoke.CvtColor(mat, gray, ColorConversion.Bgr2Gray);
-
-            // 2. Gaussian Blur para reduzir ruído
-            CvInvoke.GaussianBlur(gray, blurred, new System.Drawing.Size(5, 5), 1.5);
-
-            // 3. Canny edge detection
-            CvInvoke.Canny(blurred, edges, 50, 150);
-
-            // 4. Definir ROI (Region of Interest) baseada no centro aproximado
-            double roiSize = Math.Max(
-                Math.Abs(_rightClick.X - _centerClick.X),
-                Math.Abs(_topClick.Y - _centerClick.Y)
-            ) * 2.5; // 2.5x para margem
-
-            var roiRect = new Rectangle(
-                (int)Math.Max(0, _centerClick.X - roiSize / 2),
-                (int)Math.Max(0, _centerClick.Y - roiSize / 2),
-                (int)Math.Min(roiSize, mat.Width - (_centerClick.X - roiSize / 2)),
-                (int)Math.Min(roiSize, mat.Height - (_centerClick.Y - roiSize / 2))
-            );
-
-            using var roi = new Mat(edges, roiRect);
-            using var contours = new VectorOfVectorOfPoint();
-
-            // 5. Encontrar contornos
-            CvInvoke.FindContours(roi, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
-
-            // 6. Encontrar maior contorno (assumir que é a íris)
-            double maxArea = 0;
-            int largestContourIndex = -1;
-
-            for (int i = 0; i < contours.Size; i++)
-            {
-                double area = CvInvoke.ContourArea(contours[i]);
-                if (area > maxArea && contours[i].Size >= 5)  // Precisa >=5 pontos para FitEllipse
+                if (_currentPhase != value)
                 {
-                    maxArea = area;
-                    largestContourIndex = i;
+                    _currentPhase = value;
+                    PhaseChanged?.Invoke(this, value);
+                    UpdateStatusMessage();
                 }
             }
+        }
 
-            if (largestContourIndex == -1)
+        public double ScaleX
+        {
+            get => _scaleX;
+            set
             {
-                _logger?.LogWarning("Nenhum contorno válido encontrado");
-                return null;
+                if (_scaleX != value)
+                {
+                    _scaleX = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        public double ScaleY
+        {
+            get => _scaleY;
+            set
+            {
+                if (_scaleY != value)
+                {
+                    _scaleY = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        public double TranslateX
+        {
+            get => _translateX;
+            set
+            {
+                if (_translateX != value)
+                {
+                    _translateX = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        public double TranslateY
+        {
+            get => _translateY;
+            set
+            {
+                if (_translateY != value)
+                {
+                    _translateY = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        public double Rotation
+        {
+            get => _rotation;
+            set
+            {
+                if (_rotation != value)
+                {
+                    _rotation = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        // 🎯 PROPRIEDADES POLARES PÚBLICAS (read-only para rendering)
+        public double RaioPupilaH => _raioPupilaH;
+        public double RaioPupilaV => _raioPupilaV;
+        public double RaioIrisH => _raioIrisH;
+        public double RaioIrisV => _raioIrisV;
+        public Point CentroPupilaCalibrado => _centroPupilaCalibrado;
+        public Point CentroIrisCalibrado => _centroIrisCalibrado;
+        public double RotacaoCalibrada => _rotacaoCalibrada;
+
+        // 📐 PROPRIEDADES DE ESCALA POR QUADRANTE (editáveis via sliders)
+        private double _escalaQuadrante1Ajuste = 1.0;
+        private double _escalaQuadrante2Ajuste = 1.0;
+        private double _escalaQuadrante3Ajuste = 1.0;
+        private double _escalaQuadrante4Ajuste = 1.0;
+
+        public double EscalaQuadrante1
+        {
+            get => _escalaQuadrante1Ajuste;
+            set
+            {
+                if (_escalaQuadrante1Ajuste != value)
+                {
+                    _escalaQuadrante1Ajuste = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        public double EscalaQuadrante2
+        {
+            get => _escalaQuadrante2Ajuste;
+            set
+            {
+                if (_escalaQuadrante2Ajuste != value)
+                {
+                    _escalaQuadrante2Ajuste = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        public double EscalaQuadrante3
+        {
+            get => _escalaQuadrante3Ajuste;
+            set
+            {
+                if (_escalaQuadrante3Ajuste != value)
+                {
+                    _escalaQuadrante3Ajuste = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        public double EscalaQuadrante4
+        {
+            get => _escalaQuadrante4Ajuste;
+            set
+            {
+                if (_escalaQuadrante4Ajuste != value)
+                {
+                    _escalaQuadrante4Ajuste = value;
+                    OnPropertyChanged();
+                    RecalculateTransform();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retorna a escala ajustada para um ângulo específico baseado nos quadrantes
+        /// </summary>
+        public double GetEscalaPorAngulo(double anguloGraus)
+        {
+            // Normalizar ângulo para 0-360
+            while (anguloGraus < 0) anguloGraus += 360;
+            while (anguloGraus >= 360) anguloGraus -= 360;
+
+            if (anguloGraus < 90) return _escalaQuadrante1 * _escalaQuadrante1Ajuste;
+            if (anguloGraus < 180) return _escalaQuadrante2 * _escalaQuadrante2Ajuste;
+            if (anguloGraus < 270) return _escalaQuadrante3 * _escalaQuadrante3Ajuste;
+            return _escalaQuadrante4 * _escalaQuadrante4Ajuste;
+        }
+
+        public void StartAlignment()
+        {
+            ResetAlignment();
+            CurrentPhase = AlignmentPhase.ClickCenterPupil;
+        }
+
+        public bool ProcessClick(Point clickPoint)
+        {
+            switch (CurrentPhase)
+            {
+                case AlignmentPhase.ClickCenterPupil:
+                    _centroPupila = clickPoint;
+                    CurrentPhase = AlignmentPhase.ClickRightPupil;
+                    return false; // Ainda não completou os 5 cliques
+
+                case AlignmentPhase.ClickRightPupil:
+                    _bordaDireitaPupila = clickPoint;
+                    CurrentPhase = AlignmentPhase.ClickTopPupil;
+                    return false; // Ainda não completou os 5 cliques
+
+                case AlignmentPhase.ClickTopPupil:
+                    _bordaTopoPupila = clickPoint;
+                    CurrentPhase = AlignmentPhase.ClickRightIris;
+                    return false; // Ainda não completou os 5 cliques
+
+                case AlignmentPhase.ClickRightIris:
+                    _bordaDireitaIris = clickPoint;
+                    CurrentPhase = AlignmentPhase.ClickTopIris;
+                    return false; // Ainda não completou os 5 cliques
+
+                case AlignmentPhase.ClickTopIris:
+                    _bordaTopoIris = clickPoint;
+                    CurrentPhase = AlignmentPhase.Calculating;
+                    CalculateEllipticalTransform();
+                    CurrentPhase = AlignmentPhase.ManualAdjust;
+                    return true; // ✅ TODOS os 5 cliques completos!
+
+                default:
+                    return false;
+            }
+        }
+
+        private void CalculateEllipticalTransform()
+        {
+            try
+            {
+                double raioPupilaH = Math.Abs(_bordaDireitaPupila.X - _centroPupila.X);
+                double raioPupilaV = Math.Abs(_bordaTopoPupila.Y - _centroPupila.Y);
+                double raioIrisH = Math.Abs(_bordaDireitaIris.X - _centroPupila.X);
+                double raioIrisV = Math.Abs(_bordaTopoIris.Y - _centroPupila.Y);
+
+                if (raioPupilaH < 5 || raioPupilaV < 5 || raioIrisH < 10 || raioIrisV < 10)
+                {
+                    StatusMessageChanged?.Invoke(this, "Erro: Medidas muito pequenas.");
+                    ResetAlignment();
+                    return;
+                }
+
+                if (raioIrisH <= raioPupilaH || raioIrisV <= raioPupilaV)
+                {
+                    StatusMessageChanged?.Invoke(this, "Erro: Iris deve ser maior que pupila.");
+                    ResetAlignment();
+                    return;
+                }
+
+                // 🎯 ARMAZENAR DADOS POLARES INDEPENDENTES (H/V separados!)
+                _raioPupilaH = raioPupilaH;
+                _raioPupilaV = raioPupilaV;
+                _raioIrisH = raioIrisH;
+                _raioIrisV = raioIrisV;
+                _centroPupilaCalibrado = _centroPupila;
+                _centroIrisCalibrado = _centroPupila; // Inicialmente coincidente
+                _rotacaoCalibrada = 0.0;
+
+                // 📐 Resetar escalas por quadrante
+                _escalaQuadrante1 = 1.0;
+                _escalaQuadrante2 = 1.0;
+                _escalaQuadrante3 = 1.0;
+                _escalaQuadrante4 = 1.0;
+
+                // Calcular escala para transformação WPF (compatibilidade com overlay visual)
+                _scaleX = (raioIrisH * 2) / MAPA_ORIGINAL_SIZE;
+                _scaleY = (raioIrisV * 2) / MAPA_ORIGINAL_SIZE;
+                _translateX = _centroPupila.X - (MAPA_ORIGINAL_SIZE / 2 * _scaleX);
+                _translateY = _centroPupila.Y - (MAPA_ORIGINAL_SIZE / 2 * _scaleY);
+                _rotation = 0.0;
+
+                RecalculateTransform();
+                StatusMessageChanged?.Invoke(this, $"Calibracao completa! PupilaH={_raioPupilaH:F0}px, PupilaV={_raioPupilaV:F0}px, IrisH={_raioIrisH:F0}px, IrisV={_raioIrisV:F0}px");
+            }
+            catch (Exception ex)
+            {
+                StatusMessageChanged?.Invoke(this, $"Erro: {ex.Message}");
+                ResetAlignment();
+            }
+        }
+
+        private void RecalculateTransform()
+        {
+            // 🎯 Atualizar rotação calibrada (para uso no rendering polar)
+            _rotacaoCalibrada = _rotation;
+
+            var transformGroup = new TransformGroup();
+            transformGroup.Children.Add(new ScaleTransform(_scaleX, _scaleY));
+
+            if (Math.Abs(_rotation) > 0.01)
+            {
+                transformGroup.Children.Add(new RotateTransform(_rotation, MAPA_ORIGINAL_SIZE / 2, MAPA_ORIGINAL_SIZE / 2));
             }
 
-            // 7. Ajustar elipse ao contorno
-            var ellipse = CvInvoke.FitEllipse(contours[largestContourIndex]);
-
-            // Ajustar coordenadas para espaço completo (compensar ROI offset)
-            ellipse.Center = new PointF(
-                ellipse.Center.X + roiRect.X,
-                ellipse.Center.Y + roiRect.Y
-            );
-
-            _logger?.LogDebug($"Elipse detectada: Centro({ellipse.Center.X:F0}, {ellipse.Center.Y:F0}), Tamanho({ellipse.Size.Width:F0}x{ellipse.Size.Height:F0}), Ângulo({ellipse.Angle:F1}°)");
-
-            return ellipse;
+            transformGroup.Children.Add(new TranslateTransform(_translateX, _translateY));
+            TransformCalculated?.Invoke(this, transformGroup);
         }
-        catch (Exception ex)
+
+        public void AdjustParameter(string parameterName, double value)
         {
-            _logger?.LogError(ex, "Erro na detecção OpenCV");
-            return null;
+            switch (parameterName)
+            {
+                case "ScaleX": ScaleX = value; break;
+                case "ScaleY": ScaleY = value; break;
+                case "TranslateX": TranslateX = value; break;
+                case "TranslateY": TranslateY = value; break;
+                case "Rotation": Rotation = value; break;
+            }
         }
-    }
 
-    /// <summary>
-    /// Aplica transformação refinada baseada na elipse detectada
-    /// </summary>
-    private void ApplyDetectedEllipse(RotatedRect ellipse)
-    {
-        const double originalSize = 1400.0;
-        const double nominalRadius = 600.0;
-
-        // Calcular escalas baseadas na elipse detectada
-        double scaleX = ellipse.Size.Width / nominalRadius;
-        double scaleY = ellipse.Size.Height / nominalRadius;
-
-        // Criar TransformGroup: Scale → Rotate → Translate
-        _currentTransform = new TransformGroup();
-
-        // 1. Escalar
-        var scaleTransform = new ScaleTransform(scaleX, scaleY, originalSize / 2, originalSize / 2);
-        _currentTransform.Children.Add(scaleTransform);
-
-        // 2. Rotacionar (se elipse tiver ângulo significativo)
-        if (Math.Abs(ellipse.Angle) > 2.0)  // Threshold 2° para evitar ruído
+        public void ConfirmAlignment()
         {
-            var rotateTransform = new RotateTransform(ellipse.Angle, originalSize / 2, originalSize / 2);
-            _currentTransform.Children.Add(rotateTransform);
+            if (CurrentPhase == AlignmentPhase.ManualAdjust)
+            {
+                CurrentPhase = AlignmentPhase.Completed;
+                StatusMessageChanged?.Invoke(this, "Alinhamento confirmado!");
+            }
         }
 
-        // 3. Transladar para centro detectado
-        double translateX = ellipse.Center.X - originalSize / 2;
-        double translateY = ellipse.Center.Y - originalSize / 2;
-        var translateTransform = new TranslateTransform(translateX, translateY);
-        _currentTransform.Children.Add(translateTransform);
-
-        _logger?.LogInformation($"Transformação refinada: Scale({scaleX:F2}, {scaleY:F2}), Rotate({ellipse.Angle:F1}°), Translate({translateX:F0}, {translateY:F0})");
-    }
-
-    /// <summary>
-    /// Retorna a transformação atual para aplicar ao Canvas do mapa
-    /// </summary>
-    public Transform? GetCurrentTransform()
-    {
-        return _currentTransform;
-    }
-
-    /// <summary>
-    /// Confirma alinhamento (marca como completo)
-    /// </summary>
-    public void ConfirmAlignment()
-    {
-        if (_currentTransform == null)
+        public void CancelAlignment()
         {
-            _logger?.LogWarning("ConfirmAlignment chamado sem transformação válida");
-            return;
+            ResetAlignment();
+            StatusMessageChanged?.Invoke(this, "Alinhamento cancelado.");
         }
 
-        CurrentPhase = AlignmentPhase.Completed;
-        _logger?.LogInformation("✅ Alinhamento confirmado pelo user");
-    }
-
-    /// <summary>
-    /// Reseta alinhamento (volta ao início)
-    /// </summary>
-    public void ResetAlignment()
-    {
-        CurrentPhase = AlignmentPhase.Idle;
-        _clickCount = 0;
-        _centerClick = new Point();
-        _rightClick = new Point();
-        _topClick = new Point();
-        _currentTransform = null;
-    }
-
-    /// <summary>
-    /// Converte BitmapSource WPF → System.Drawing.Bitmap
-    /// </summary>
-    private static Bitmap BitmapSourceToBitmap(BitmapSource bitmapSource)
-    {
-        var encoder = new BmpBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-
-        using var stream = new System.IO.MemoryStream();
-        encoder.Save(stream);
-        stream.Position = 0;
-
-        return new Bitmap(stream);
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed) return;
-
-        if (disposing)
+        private void ResetAlignment()
         {
-            // Limpar recursos managed
-            _currentTransform = null;
+            _centroPupila = new Point(0, 0);
+            _bordaDireitaPupila = new Point(0, 0);
+            _bordaTopoPupila = new Point(0, 0);
+            _bordaDireitaIris = new Point(0, 0);
+            _bordaTopoIris = new Point(0, 0);
+            _scaleX = 1.0;
+            _scaleY = 1.0;
+            _translateX = 0.0;
+            _translateY = 0.0;
+            _rotation = 0.0;
+            CurrentPhase = AlignmentPhase.Idle;
         }
 
-        _disposed = true;
+        private void UpdateStatusMessage()
+        {
+            string message = CurrentPhase switch
+            {
+                AlignmentPhase.Idle => "Clique em 'Iniciar Alinhamento'.",
+                AlignmentPhase.ClickCenterPupil => "1/5 Clique no CENTRO da pupila",
+                AlignmentPhase.ClickRightPupil => "2/5 Clique na BORDA DIREITA da pupila",
+                AlignmentPhase.ClickTopPupil => "3/5 Clique na BORDA SUPERIOR da pupila",
+                AlignmentPhase.ClickRightIris => "4/5 Clique na BORDA DIREITA da iris",
+                AlignmentPhase.ClickTopIris => "5/5 Clique na BORDA SUPERIOR da iris",
+                AlignmentPhase.Calculating => "Calculando transformacao...",
+                AlignmentPhase.ManualAdjust => "Ajuste fino com sliders. Clique 'Confirmar'.",
+                AlignmentPhase.Completed => "Alinhamento completo!",
+                _ => string.Empty
+            };
+
+            StatusMessageChanged?.Invoke(this, message);
+        }
+
+        public TransformGroup GetCurrentTransform()
+        {
+            var transformGroup = new TransformGroup();
+            transformGroup.Children.Add(new ScaleTransform(_scaleX, _scaleY));
+
+            if (Math.Abs(_rotation) > 0.01)
+            {
+                transformGroup.Children.Add(new RotateTransform(_rotation, MAPA_ORIGINAL_SIZE / 2, MAPA_ORIGINAL_SIZE / 2));
+            }
+
+            transformGroup.Children.Add(new TranslateTransform(_translateX, _translateY));
+            return transformGroup;
+        }
     }
 }

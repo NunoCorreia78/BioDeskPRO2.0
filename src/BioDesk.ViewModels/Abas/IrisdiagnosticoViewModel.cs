@@ -151,6 +151,38 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     /// ✅ RAIOS NOMINAIS FIXOS (usados como referência para renderização)
     /// </summary>
     private const double RAIO_NOMINAL_IRIS = 270.0;
+    private const double RAIO_NOMINAL_PUPILA = 90.0;
+    private const double PUPILA_NORMALIZED_THRESHOLD = 0.5;
+    private const double PUPILA_TRANSITION_WIDTH = 0.1;
+    private const double MAPA_ZOOM_STEP = 0.1;
+
+    // === PROPRIEDADES DE CALIBRAÇÃO ===
+    [ObservableProperty]
+    private double _centroPupilaX = 300.0;
+
+    [ObservableProperty]
+    private double _centroPupilaY = 300.0;
+
+    [ObservableProperty]
+    private double _raioPupila = 90.0;
+
+    [ObservableProperty]
+    private double _centroIrisX = 300.0;
+
+    [ObservableProperty]
+    private double _centroIrisY = 300.0;
+
+    [ObservableProperty]
+    private double _raioIris = 270.0;
+
+    [ObservableProperty]
+    private double _raioPupilaHorizontal = 90.0;
+
+    [ObservableProperty]
+    private double _raioPupilaVertical = 90.0;
+
+    [ObservableProperty]
+    private double _mapaZoom = 1.0;
 
     // === FERRAMENTA DE DESENHO (CANETA) ===
     [ObservableProperty]
@@ -165,6 +197,37 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     private ObservableCollection<StrokeModel> _strokes = new();
 
+    // === 🎯 NOVO: SISTEMA DE CALIBRAÇÃO 5-PONTOS ===
+
+    /// <summary>
+    /// Expõe o IrisOverlayService para binding dos sliders de ajuste fino
+    /// </summary>
+    public IrisOverlayService OverlayService => _overlayService;
+
+    /// <summary>
+    /// Coleção de marcadores visuais para os 5 pontos de calibração
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<CalibrationMarker> _calibrationMarkers = new();
+
+    /// <summary>
+    /// Indica se está na fase de ajuste manual (após 5 cliques)
+    /// </summary>
+    [ObservableProperty]
+    private bool _isManualAdjustPhase = false;
+
+    /// <summary>
+    /// Classe auxiliar para marcadores visuais de calibração
+    /// </summary>
+    public class CalibrationMarker
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public string Color { get; set; } = "#FF0000";
+        public int Number { get; set; }
+        public bool IsVisible { get; set; }
+    }
+
     public IrisdiagnosticoViewModel(
         IUnitOfWork unitOfWork,
         ILogger<IrisdiagnosticoViewModel> logger,
@@ -177,6 +240,18 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         _iridologyService = iridologyService ?? throw new ArgumentNullException(nameof(iridologyService));
         _dragDebugService = dragDebugService ?? throw new ArgumentNullException(nameof(dragDebugService));
         _overlayService = overlayService ?? throw new ArgumentNullException(nameof(overlayService));
+
+        // NOVO: Subscrever evento de mensagens de status do sistema de 5 pontos
+        _overlayService.StatusMessageChanged += (sender, message) =>
+        {
+            AlignmentInstructionText = message;
+        };
+
+        // NOVO: Subscrever evento de transformação calculada
+        _overlayService.TransformCalculated += (sender, transform) =>
+        {
+            OverlayTransform = transform;
+        };
 
         if (DebugArrastoAtivo)
         {
@@ -571,6 +646,125 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         AjustarMapaZoom(1.0);
     }
 
+    /// <summary>
+    /// Ajusta o zoom do mapa iridológico
+    /// </summary>
+    private void AjustarMapaZoom(double novoZoom)
+    {
+        MapaZoom = Math.Clamp(novoZoom, 0.5, 3.0);
+        _logger.LogDebug("🔍 Zoom mapa ajustado: {Zoom}x", MapaZoom);
+    }
+
+    /// <summary>
+    /// Garante que handlers estão inicializados (stub)
+    /// </summary>
+    private void EnsureHandlersInitialized()
+    {
+        // Stub: implementação futura quando sistema de handlers estiver completo
+        _logger.LogDebug("✅ EnsureHandlersInitialized chamado");
+    }
+
+    /// <summary>
+    /// Interpola zona com handlers (stub simplificado)
+    /// </summary>
+    private List<PointCollection> InterpolateZoneWithHandlers(IridologyZone zona, bool aplicarDeformacaoLocal)
+    {
+        var pointCollections = new List<PointCollection>();
+
+        // 🎯 OBTER DADOS DE CALIBRAÇÃO (se disponíveis)
+        double centroPupilaX, centroPupilaY, centroIrisX, centroIrisY;
+        double raioPupilaH, raioPupilaV, raioIrisH, raioIrisV, rotacaoGraus;
+        bool temCalibracao = false;
+
+        if (_overlayService != null && _overlayService.RaioIrisH > 0)
+        {
+            // ✅ Usar calibração real dos 5 pontos
+            var centroPupila = _overlayService.CentroPupilaCalibrado;
+            var centroIris = _overlayService.CentroIrisCalibrado;
+            
+            centroPupilaX = centroPupila.X;
+            centroPupilaY = centroPupila.Y;
+            centroIrisX = centroIris.X;
+            centroIrisY = centroIris.Y;
+            
+            raioPupilaH = _overlayService.RaioPupilaH;
+            raioPupilaV = _overlayService.RaioPupilaV;
+            raioIrisH = _overlayService.RaioIrisH;
+            raioIrisV = _overlayService.RaioIrisV;
+            rotacaoGraus = _overlayService.RotacaoCalibrada;
+            temCalibracao = true;
+
+            _logger.LogDebug("📐 Calibração: CentroPupila=({CPX:F0},{CPY:F0}), RaioPupilaH={RPH:F0}px, RaioPupilaV={RPV:F0}px, RaioIrisH={RIH:F0}px, RaioIrisV={RIV:F0}px",
+                centroPupilaX, centroPupilaY, raioPupilaH, raioPupilaV, raioIrisH, raioIrisV);
+        }
+        else
+        {
+            // ⚠️ Fallback: valores padrão (canvas 600x600)
+            centroPupilaX = centroIrisX = 300;
+            centroPupilaY = centroIrisY = 300;
+            raioPupilaH = raioPupilaV = 60;
+            raioIrisH = raioIrisV = 270;
+            rotacaoGraus = 0.0;
+
+            _logger.LogWarning("⚠️ Calibração não disponível, usando valores padrão");
+        }
+
+        // 🔄 Converter coordenadas polares do JSON para cartesianas
+        foreach (var parte in zona.Partes)
+        {
+            var points = new PointCollection();
+
+            foreach (var ponto in parte)
+            {
+                // 🎯 RAIO NORMALIZADO [0.0 → 1.0] do JSON
+                double raioNormalizado = ponto.Raio;
+                
+                // 🧭 ÂNGULO com rotação aplicada
+                double anguloGraus = ponto.Angulo + rotacaoGraus;
+                double anguloRad = anguloGraus * Math.PI / 180.0;
+
+                // 📐 CALCULAR RAIO REAL com escalas independentes H/V e por quadrante
+                double escalaQuadrante = temCalibracao ? _overlayService!.GetEscalaPorAngulo(anguloGraus) : 1.0;
+                
+                // Interpolar entre pupila e íris considerando elipses
+                double cos = Math.Cos(anguloRad);
+                double sin = Math.Sin(anguloRad);
+                
+                // Raio da pupila neste ângulo (elipse)
+                double raioPupilaAngulo = Math.Sqrt(
+                    (raioPupilaH * raioPupilaH * raioPupilaV * raioPupilaV) /
+                    (raioPupilaV * raioPupilaV * cos * cos + raioPupilaH * raioPupilaH * sin * sin)
+                );
+                
+                // Raio da íris neste ângulo (elipse)
+                double raioIrisAngulo = Math.Sqrt(
+                    (raioIrisH * raioIrisH * raioIrisV * raioIrisV) /
+                    (raioIrisV * raioIrisV * cos * cos + raioIrisH * raioIrisH * sin * sin)
+                ) * escalaQuadrante; // Aplicar escala por quadrante!
+
+                // Interpolar raio entre pupila e íris
+                double raioReal = raioPupilaAngulo + (raioNormalizado * (raioIrisAngulo - raioPupilaAngulo));
+
+                // 📍 Centro interpolado (permite descentramento pupila/íris)
+                double centroX = centroPupilaX + (raioNormalizado * (centroIrisX - centroPupilaX));
+                double centroY = centroPupilaY + (raioNormalizado * (centroIrisY - centroPupilaY));
+
+                // 🌐 Conversão polar → cartesiano com EIXO Y INVERTIDO
+                double x = centroX + raioReal * cos;
+                double y = centroY - raioReal * sin; // ⚠️ MENOS para inverter Y!
+
+                points.Add(new System.Windows.Point(x, y));
+            }
+
+            if (points.Count > 0)
+            {
+                pointCollections.Add(points);
+            }
+        }
+
+        return pointCollections;
+    }
+
     // ========================================
     // FASE 2: COMANDOS DE MARCAÇÕES
     // ========================================
@@ -935,15 +1129,12 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
 
             // Carregar a imagem como BitmapSource
             var bitmap = new System.Windows.Media.Imaging.BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(IrisImagemSelecionada.CaminhoImagem, UriKind.Absolute);
-            bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            bitmap.Freeze(); // Thread-safe
+            // AUTO-FIT REMOVIDO: Novo sistema de 5 pontos é manual
+            AlignmentInstructionText = "⚠️ Auto-Fit removido. Use sistema de 5 pontos manual.";
+            _logger.LogWarning("⚠️ AutoFit não está disponível no sistema de 5 pontos");
 
-            var success = await _overlayService.AutoFitAsync(bitmap);
-
-            if (success)
+            // O novo sistema requer 5 cliques manuais (não há auto-detection)
+            if (false) // Bloco desabilitado (manter estrutura para referência)
             {
                 var transform = _overlayService.GetCurrentTransform();
                 if (transform != null)
@@ -976,8 +1167,24 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         {
             IsAlignmentActive = false;
             HasThreeClicks = false; // ✅ LIMPAR FLAG
+            IsManualAdjustPhase = false; // ✅ LIMPAR FASE MANUAL
             AlignmentInstructionText = string.Empty;
-            _logger.LogInformation("✅ Alinhamento confirmado pelo utilizador");
+
+            // ✅ LIMPAR marcadores visuais de calibração
+            CalibrationMarkers.Clear();
+
+            // ✅ ATIVAR mapa iridológico automaticamente após confirmar
+            MostrarMapaIridologico = true;
+
+            // ✅ GARANTIR que mapa está carregado
+            if (PoligonosZonas.Count == 0)
+            {
+                _logger.LogWarning("⚠️ Polígonos vazios - Carregando mapa...");
+                _ = CarregarMapaIridologicoAsync();
+            }
+
+            _logger.LogInformation("✅ Alinhamento confirmado - MostrarMapa={Mostrar}, Polígonos={Count}", 
+                MostrarMapaIridologico, PoligonosZonas.Count);
         }
         catch (Exception ex)
         {
@@ -993,16 +1200,96 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     {
         try
         {
-            _overlayService.ResetAlignment();
+            _overlayService.CancelAlignment(); // NOVO: CancelAlignment no sistema de 5 pontos
             OverlayTransform = System.Windows.Media.Transform.Identity;
             IsAlignmentActive = false;
             HasThreeClicks = false; // ✅ LIMPAR FLAG
+            IsManualAdjustPhase = false; // ✅ LIMPAR FASE MANUAL
             AlignmentInstructionText = string.Empty;
+            CalibrationMarkers.Clear(); // Limpar marcadores visuais
             _logger.LogInformation("↻ Alinhamento reiniciado");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "❌ Erro ao reiniciar alinhamento");
+        }
+    }
+
+    // === 🎯 NOVO: COMANDOS E MÉTODOS PARA CALIBRAÇÃO 5-PONTOS ===
+
+    /// <summary>
+    /// Alias para StartOverlayAlignment (compatibilidade com XAML)
+    /// </summary>
+    [RelayCommand]
+    private void StartAlignment()
+    {
+        StartOverlayAlignment();
+    }
+
+    /// <summary>
+    /// Cancela o processo de calibração (alias para ResetAlignment)
+    /// </summary>
+    [RelayCommand]
+    private void CancelAlignment()
+    {
+        ResetAlignment();
+    }
+
+    /// <summary>
+    /// Processa clique do CalibrationCanvas (chamado pelo code-behind)
+    /// Atualiza marcadores visuais e envia para IrisOverlayService
+    /// </summary>
+    public void ProcessCalibrationClick(System.Windows.Point clickPosition)
+    {
+        if (!IsAlignmentActive) return;
+
+        try
+        {
+            // Enviar clique para o serviço de overlay
+            var allClicksCompleted = _overlayService.ProcessClick(clickPosition);
+
+            // Adicionar marcador visual na posição do clique
+            var markerNumber = CalibrationMarkers.Count + 1;
+            var markerColor = markerNumber switch
+            {
+                1 => "#FF0000", // Vermelho - Centro Pupila
+                2 => "#0066FF", // Azul - Direita Pupila
+                3 => "#00CC66", // Verde - Topo Pupila
+                4 => "#FFD700", // Amarelo - Direita Íris
+                5 => "#9966FF", // Roxo - Topo Íris
+                _ => "#FFFFFF"
+            };
+
+            CalibrationMarkers.Add(new CalibrationMarker
+            {
+                X = clickPosition.X,
+                Y = clickPosition.Y,
+                Color = markerColor,
+                Number = markerNumber,
+                IsVisible = true
+            });
+
+            // Se os 5 cliques foram completados
+            if (allClicksCompleted)
+            {
+                HasThreeClicks = true; // ✅ HABILITAR Confirmar (mantém nome por compatibilidade)
+                IsManualAdjustPhase = true; // ✅ ATIVAR FASE DE AJUSTE MANUAL
+
+                var transform = _overlayService.GetCurrentTransform();
+                if (transform != null)
+                {
+                    OverlayTransform = transform;
+                    _logger.LogInformation("✅ 5 cliques completos - Transformação elíptica aplicada");
+                }
+            }
+
+            _logger.LogDebug("🖱️ Clique {Number}/5 processado - Posição: ({X}, {Y})",
+                markerNumber, clickPosition.X, clickPosition.Y);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Erro ao processar clique de calibração");
+            AlignmentInstructionText = "❌ Erro ao processar clique. Reinicie o alinhamento.";
         }
     }
 
@@ -1017,13 +1304,13 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
         {
             var allClicksCompleted = _overlayService.ProcessClick(clickPosition);
 
-            // Atualizar texto de instrução baseado na fase atual do serviço
-            AlignmentInstructionText = _overlayService.InstructionText;
+            // Atualizar texto de instrução: NOVO sistema usa evento StatusMessageChanged
+            // (A mensagem é atualizada automaticamente via evento subscrito no construtor)
 
-            // Se os 3 cliques foram completados, obter a transformação calculada
+            // Se os 5 cliques foram completados, obter a transformação calculada
             if (allClicksCompleted)
             {
-                HasThreeClicks = true; // ✅ HABILITAR Auto-Fit/Confirmar
+                HasThreeClicks = true; // ✅ HABILITAR Confirmar (renomear para HasFiveClicks depois)
                 var transform = _overlayService.GetCurrentTransform();
                 if (transform != null)
                 {
@@ -1181,14 +1468,21 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     /// </summary>
     private void RenderizarPoligonos()
     {
-        if (MapaAtual == null) return;
+        // ✅ CORRIGIDO: Usar ZonasAtivas em vez de Zonas (suporta v4.0 com mapa_corporal)
+        if (MapaAtual?.ZonasAtivas == null || MapaAtual.ZonasAtivas.Count == 0)
+        {
+            _logger.LogWarning("⚠️ Nenhuma zona ativa encontrada no mapa");
+            return;
+        }
 
         PoligonosZonas.Clear();
 
         var cores = new[] { "#6B8E63", "#9CAF97", "#5B7C99", "#D4A849" };
         var corIndex = 0;
 
-        foreach (var zona in MapaAtual.Zonas)
+        _logger.LogInformation("🎨 Renderizando {Count} zonas do mapa", MapaAtual.ZonasAtivas.Count);
+
+        foreach (var zona in MapaAtual.ZonasAtivas)
         {
             var poligonos = InterpolateZoneWithHandlers(zona, aplicarDeformacaoLocal: false);
 
@@ -1206,9 +1500,9 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
             corIndex++;
         }
 
-        _logger.LogInformation("🎨 Renderizados {Count} polígonos para {Zonas}",
+        _logger.LogInformation("✅ Renderizados {Count} polígonos para {Zonas} zonas",
             PoligonosZonas.Count,
-            MapaAtual.Zonas.Count);
+            MapaAtual.ZonasAtivas.Count);
     }
 
     // 🔴 EXPERIMENTAL: EnsureHandlersInitialized (usa HandlersIris/HandlersPupila)
@@ -1826,14 +2120,20 @@ public partial class IrisdiagnosticoViewModel : ObservableObject, IDisposable
     /// </summary>
     private void RenderizarPoligonosComDeformacao()
     {
-        if (MapaAtual == null) return;
+        if (MapaAtual?.ZonasAtivas == null || MapaAtual.ZonasAtivas.Count == 0)
+        {
+            _logger.LogWarning("⚠️ RenderizarPoligonosComDeformacao: Nenhuma zona ativa encontrada");
+            return;
+        }
 
         PoligonosZonas.Clear();
 
         var cores = new[] { "#6B8E63", "#9CAF97", "#5B7C99", "#D4A849" };
         var corIndex = 0;
 
-        foreach (var zona in MapaAtual.Zonas)
+        _logger.LogInformation("🎨 Renderizando polígonos com deformação para {Count} zonas", MapaAtual.ZonasAtivas.Count);
+
+        foreach (var zona in MapaAtual.ZonasAtivas)
         {
             // 🎯 NOVA LÓGICA: Interpolar pontos usando handlers
             var poligonosDeformados = InterpolateZoneWithHandlers(zona);
