@@ -56,7 +56,7 @@ Copy-Item $dataPath $backupPath -Force
 Write-Host "✅ Backup criado: $backupPath" -ForegroundColor Green
 ```
 
-**Verificação**: 
+**Verificação**:
 - ✅ Commit criado
 - ✅ Branch backup existe
 - ✅ Ficheiro .db backup existe com tamanho > 700KB
@@ -70,7 +70,7 @@ Write-Host "✅ Backup criado: $backupPath" -ForegroundColor Green
 ```bash
 # Usar grep_search para encontrar:
 - "HandlersPupila"
-- "HandlersIris" 
+- "HandlersIris"
 - "CalibrationHandler"
 - "QuantidadeHandlers"
 - "CriarHandlers"
@@ -462,9 +462,9 @@ public class CalibrationHandler : ObservableObject
     private double _angulo;
 
     public required string Tipo { get; init; }
-    
+
     public string Cor => Tipo == "Pupila" ? "#4A90E2" : "#E24A4A";
-    
+
     public int Index { get; set; }
     public bool IsEditable { get; set; } = true;
 }
@@ -699,7 +699,7 @@ dotnet restore
 dotnet build --no-incremental --verbosity normal
 ```
 
-**Esperado**: 
+**Esperado**:
 - ✅ 0 Errors
 - ⚠️ Warnings apenas AForge (aceitável)
 
@@ -899,7 +899,7 @@ git commit -m "✨ Sistema Infalível COMPLETO: Removido 100% calibração manua
 
 Estatísticas:
 - Linhas removidas: ~1800
-- Linhas adicionadas: ~600  
+- Linhas adicionadas: ~600
 - Redução líquida: ~1200 linhas (-40% complexidade)
 - Ficheiros modificados: 4 (ViewModel, XAML, code-behind, Service)
 
@@ -1102,6 +1102,6 @@ git push origin v2.0.0-sistema-infalivel
 
 ---
 
-*Documento criado em: 29/10/2025 23:45*  
-*Autor: Nuno Correia (com assistência GitHub Copilot)*  
+*Documento criado em: 29/10/2025 23:45*
+*Autor: Nuno Correia (com assistência GitHub Copilot)*
 *Versão: 1.0 FINAL*

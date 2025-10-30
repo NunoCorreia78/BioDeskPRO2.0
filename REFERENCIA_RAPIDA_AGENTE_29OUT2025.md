@@ -186,7 +186,7 @@ Linha 725: AjustarMapaZoom(1.0);  // em ResetMapaCommand
 
 ## ✅ CHECKPOINTS CRÍTICOS
 
-**Fase 3 (15 min)**: 
+**Fase 3 (15 min)**:
 - `dotnet build` deve compilar (0 erros AjustarMapaZoom)
 
 **Fase 7 (30 min)**:
@@ -251,16 +251,16 @@ Copy-Item "biodesk.db" "Backups/biodesk_pre_infalivel_29out2025.db"
 
 ## 🚀 PODE COMEÇAR!
 
-**Autorização**: ✅ CONFIRMADA  
-**Sistema overlay**: ✅ 100% IMPLEMENTADO  
-**Código para remover**: ✅ IDENTIFICADO  
-**Plano**: ✅ DETALHADO  
-**Backups**: ✅ PREPARADOS  
+**Autorização**: ✅ CONFIRMADA
+**Sistema overlay**: ✅ 100% IMPLEMENTADO
+**Código para remover**: ✅ IDENTIFICADO
+**Plano**: ✅ DETALHADO
+**Backups**: ✅ PREPARADOS
 
 **BOA EXECUÇÃO! 💪**
 
 ---
 
-*Documento criado: 29/10/2025 23:58*  
-*Para: GitHub Copilot Coding Agent*  
+*Documento criado: 29/10/2025 23:58*
+*Para: GitHub Copilot Coding Agent*
 *Referência: PR #14, Commit b91778f*

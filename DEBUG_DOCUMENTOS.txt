@@ -1,4 +1,4 @@
-=== DEBUG BUSCA DOCUMENTOS - 2025-10-29 21:28:14 ===
+=== DEBUG BUSCA DOCUMENTOS - 2025-10-30 08:57:37 ===
 PacienteId: 4
 NomePaciente: Nuno Filipe Correia
 NomeNormalizado: nunofilipecorreia
